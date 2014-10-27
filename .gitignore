@@ -1,0 +1,5 @@
+*.pyc
+*.pyo
+*slurm*
+.DS_Store
+._*
