@@ -1,0 +1,15 @@
+#!python
+
+"""Infers site-specific character preferences.
+
+Written by Jesse Bloom."""
+
+
+
+def main():
+    """Main body of script."""
+    pass
+
+
+if __name__ == '__main__':
+    main() # run the script
