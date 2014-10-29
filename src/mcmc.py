@@ -24,6 +24,8 @@ Function documentation
 """
 
 
+import sys
+import tempfile
 import pystan
 
 
@@ -147,7 +149,7 @@ model {
 pir_inference_different_err_sm = None # global variable compiled to StanModel when first needed
 
 
-def InferSitePreferences(characterlist, wtchar, error_model, counts, priors, use_all_cpus=True, seed=1):
+def InferSitePreferences(characterlist, wtchar, error_model, counts, priors, n_jobs=1, seed=1, r_max=1.05, neff_min=200, nchains=4, niter=2000, increasefactor=4, increasetries=2):
     """Infers site-specific preferences by MCMC for a specific site.
 
     Uses MCMC to infer the site-specific preferences :math:`\pi_{r,a}` for some site
@@ -175,6 +177,9 @@ def InferSitePreferences(characterlist, wtchar, error_model, counts, priors, use
 
     where :math:`\\boldsymbol{\mathbf{\delta_r}}` is a vector that is zero except for a one at the element
     corresponding to the wildtype character.
+
+    The MCMC automatically tries to guarantee convergence via the parameters specified
+    by *r_max*, *neff_min*, *nchains*, *niter*, *increasefactor*, and *increasetries*.
 
     Here are the calling variables:    
 
@@ -227,19 +232,44 @@ def InferSitePreferences(characterlist, wtchar, error_model, counts, priors, use
           Any values less than *PRIOR_MIN_VALUE* (a constant specified in this module)
           are automatically set to *PRIOR_MIN_VALUE*.
 
-        * *use_all_cpus* : If *True*, we use all available CPUs. If *False*,
-            just use one CPU.
+        * *n_jobs* : The number of CPUs to use. If -1, use all available CPUs.
 
         * *seed* : integer seed for MCMC.
+
+        * The following parameters specify how the MCMC tries to guarantee convergence.
+          They all have reasonable default values, so you probably don't need to change them.
+          The MCMC is considered to have converged if for all :math:`\pi_{r,a}` values,
+          both the Gelman-Rubin R statistic (http://www.jstor.org/stable/2246093)
+          has a value less than or equal to *r_max* and the effective sample size
+          is greater than or equal to *neff_min*. The MCMC first runs with *nchains*
+          chains and *niter* iterations. If it fails to converge, it then increases
+          the number of iterations by a factor of *increasefactor* and tries again,
+          and repeats this process until it converges or until it has tried *increasetries*
+          times to increase the number of iterations.
+
+    The return values are as follows:
+
+        * If the MCMC **fails** to converge, then the return value is *False*.
+
+        * If the MCMC successfully converges, then the return value is the 2-tuple
+          *(pi_means, pi_95credint)* where
+
+            - *pi_means* is a dictionary keyed by all characters in *characterlist*
+              with the value for each character giving the :math:`\pi_{r,a}` value.
+
+            - *pi_95credint* is a dictionary keyed by all characters in *characterlist*
+              with the value being a 2-tuple giving the lower and upper limits on the
+              median-centered credible interval for :math:`\pi_{r,a}`.
     """
-    niter = 1000
-    nchains = 4
+    # make these global so they only have to be compiled once
+    global pir_inference_no_err_sm
+    global pir_inference_same_err_sm
+    global pir_inference_different_err_sm
+
+    assert nchains >= 2, "nchains must be at least two"
+    assert niter >= 100, "niter must be at least 100"
     assert len(characterlist) == len(set(characterlist)), "characterlist contains a duplicate character:\n%s" % str(characterlist)
     assert wtchar in characterlist, "wtchar %s is not in characterlist %s" % (wtchar, str(characterlist))
-    if use_all_cpus:
-        n_jobs = -1 # pystan code for use all CPUs
-    else:
-        n_jobs = 1 # pystan code for one CPUs
     data = {'Nchar':len(characterlist), 'iwtchar':characterlist.index(wtchar) + 1}
     data['nrpre'] = [counts['nrpre'][char] for char in characterlist]
     data['nrpost'] = [counts['nrpost'][char] for char in characterlist]
@@ -268,9 +298,35 @@ def InferSitePreferences(characterlist, wtchar, error_model, counts, priors, use
         sm = pir_inference_different_err_sm
     else:
         raise ValueError("Invalid error_model of %s" % error_model)
-    fit = sm.sampling(data=data, iter=niter, chains=nchains, seed=seed, n_jobs=n_jobs)
-    print fit.summary()['summary']
-    print fit
-        
-
+    ntry = 0
+    while True: # run until converged or tries exhausted
+        # run MCMC
+        fit = sm.sampling(data=data, iter=niter, chains=nchains, seed=seed, n_jobs=n_jobs, refresh=-1)
+        # extract output
+        fitsummary = fit.summary()
+        rownames = list(fitsummary['summary_rownames'])
+        colnames = list(fitsummary['summary_colnames'])
+        summary = fitsummary['summary']
+        char_row_indices = dict([(char, rownames.index('pir[%d]' % characterlist.index(char))) for char in characterlist]) 
+        rindex = colnames.index('Rhat')
+        neffindex = colnames.index('n_eff')
+        rlist = [summary[char_row_indices[char]][rindex] for char in characterlist]
+        nefflist = [summary[char_row_indices[char]][neffindex] for char in characterlist]
+        if (max(rlist) <= r_max) and (min(nefflist) >= neff_min):
+            # converged
+            #print "Converged with %d iterations, max R = %g and min Neff = %g" % (niter, max(rlist), min(nefflist))
+            meanindex = colnames.index('mean')
+            lower95index = colnames.index('2.5%')
+            upper95index = colnames.index('97.5%')
+            pi_means = dict([(char, summary[char_row_indices[char]][meanindex]) for char in characterlist])
+            pi_95credint = dict([(char, (summary[char_row_indices[char]][lower95index], summary[char_row_indices[char]][upper95index])) for char in characterlist])
+            return (pi_means, pi_95credint)
+        else:
+            # failed to converge
+            #print "Failed to converge with %d iterations, max R = %g and min Neff = %g" % (niter, max(rlist), min(nefflist))
+            if ntry < increasetries:
+                ntry += 1
+                niter = int(niter * increasefactor)
+            else:
+                return False # failed to converge after trying step increases
 
