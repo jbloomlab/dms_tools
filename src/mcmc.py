@@ -26,6 +26,8 @@ Function documentation
 
 import sys
 import tempfile
+import numpy
+import numpy.random
 import pystan
 
 
@@ -149,6 +151,54 @@ model {
 pir_inference_different_err_sm = None # global variable compiled to StanModel when first needed
 
 
+def _InitialValuePreferences(error_model, nchains, iwtchar, nchars):
+    """Gets valid initial values for pir_inference_same_err_sm.
+
+    The values automatically initialized by stypan frequently have invalid *mur_plus_err*
+    or *fr_plus_err* due to negative values from the *mur*, *pir*, *epsilonr*, *rhor*
+    choices. This function will generate random values that are valid
+    for initialization and return a list that can be passed to the *StanModel*
+    as the *init* argument.
+    """
+    assert error_model in ['same', 'different']
+    initializationattempts = 10 # multiple attempts, as might fail for pathological random values
+    nrescales = 10 # rescale non-wildtype values down this many times
+    rescalefactor = 5.0 # rescale non-wildtype values down by this much
+    concentrationparameter = 2.0 # make a bit bigger than one to disfavor very small values which cause problems
+    deltar = numpy.zeros(nchars)
+    deltar[iwtchar] = 1.0
+    init = []
+    if error_model == 'same':
+        posterrname = 'epsilonr'
+    else:
+        posterrname = 'rhor'
+    for chain in range(nchains):
+        for iattempt in range(initializationattempts):
+            chain_init = {\
+                    'pir':numpy.random.dirichlet([concentrationparameter for ichar in range(nchars)]),\
+                    'mur':numpy.random.dirichlet([concentrationparameter for ichar in range(nchars)]),\
+                    'epsilonr':numpy.random.dirichlet([concentrationparameter for ichar in range(nchars)]),\
+                    }
+            if error_model == 'different':
+                chain_init['rhor'] = numpy.random.dirichlet([concentrationparameter for ichar in range(nchars)])
+            irescale = 0
+            while irescale < nrescales and (any(chain_init['pir'] * chain_init['mur'] / numpy.dot(chain_init['pir'], chain_init['mur']) + chain_init[posterrname] - deltar < PRIOR_MIN_VALUE) or any(chain_init['mur'] + chain_init['epsilonr'] - deltar < PRIOR_MIN_VALUE)): 
+                irescale += 1
+                chain_init['epsilonr'] /= rescalefactor
+                chain_init['epsilonr'][iwtchar] = 1.0 - sum([chain_init['epsilonr'][ichar] for ichar in range(nchars) if ichar != iwtchar])
+                if error_model == 'different':
+                    chain_init['rhor'] /= rescalefactor
+                    chain_init['rhor'][iwtchar] = 1.0 - sum([chain_init['rhor'][ichar] for ichar in range(nchars) if ichar != iwtchar])
+            if all(chain_init['pir'] * chain_init['mur'] / numpy.dot(chain_init['pir'], chain_init['mur']) + chain_init[posterrname] - deltar > PRIOR_MIN_VALUE) and all(chain_init['mur'] + chain_init['epsilonr'] - deltar > PRIOR_MIN_VALUE):
+                break
+        else:
+            raise ValueError("Failed to initialize for same even after %d attempts" % initializationattempts)
+        init.append(chain_init)
+    return init
+
+
+
+
 def InferSitePreferences(characterlist, wtchar, error_model, counts, priors, n_jobs=1, seed=1, r_max=1.05, neff_min=200, nchains=4, niter=2000, increasefactor=4, increasetries=2):
     """Infers site-specific preferences by MCMC for a specific site.
 
@@ -261,6 +311,7 @@ def InferSitePreferences(characterlist, wtchar, error_model, counts, priors, n_j
               with the value being a 2-tuple giving the lower and upper limits on the
               median-centered credible interval for :math:`\pi_{r,a}`.
     """
+    numpy.random.seed(seed)
     # make these global so they only have to be compiled once
     global pir_inference_no_err_sm
     global pir_inference_same_err_sm
@@ -280,6 +331,7 @@ def InferSitePreferences(characterlist, wtchar, error_model, counts, priors, n_j
             # compile global StanModel variable if this has not already been done
             pir_inference_no_err_sm = pystan.StanModel(model_code=pir_inference_no_err_code)
         sm = pir_inference_no_err_sm
+        init = 'random' # can just use random initial parameter values
     elif error_model == 'same':
         data['nrerr'] = [counts['nrerr'][char] for char in characterlist]
         data['epsilonr_prior_params'] = [max(PRIOR_MIN_VALUE, priors['epsilonr_prior_params'][char]) for char in characterlist]
@@ -287,6 +339,7 @@ def InferSitePreferences(characterlist, wtchar, error_model, counts, priors, n_j
             # compile global StanModel variable if this has not already been done
             pir_inference_same_err_sm = pystan.StanModel(model_code=pir_inference_same_err_code)
         sm = pir_inference_same_err_sm
+        init = _InitialValuePreferences(error_model, nchains, characterlist.index(wtchar), len(characterlist))
     elif error_model == 'different':
         data['nrerrpre'] = [counts['nrerrpre'][char] for char in characterlist]
         data['nrerrpost'] = [counts['nrerrpost'][char] for char in characterlist]
@@ -296,12 +349,14 @@ def InferSitePreferences(characterlist, wtchar, error_model, counts, priors, n_j
             # compile global StanModel variable if this has not already been done
             pir_inference_different_err_sm = pystan.StanModel(model_code=pir_inference_different_err_code)
         sm = pir_inference_different_err_sm
+        init = _InitialValuePreferences(error_model, nchains, characterlist.index(wtchar), len(characterlist))
     else:
         raise ValueError("Invalid error_model of %s" % error_model)
     ntry = 0
     while True: # run until converged or tries exhausted
         # run MCMC
-        fit = sm.sampling(data=data, iter=niter, chains=nchains, seed=seed, n_jobs=n_jobs, refresh=-1)
+        # this next command unfortunately creates a lot of output that I have not been able to re-direct...
+        fit = sm.sampling(data=data, iter=niter, chains=nchains, seed=seed, n_jobs=n_jobs, refresh=-1, init=init)
         # extract output
         fitsummary = fit.summary()
         rownames = list(fitsummary['summary_rownames'])

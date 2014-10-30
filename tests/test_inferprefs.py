@@ -23,7 +23,8 @@ class TestInferSitePreferences(unittest.TestCase):
 
     def test_InferenceSitePreferences(self):
         """Inference with with correct priors."""
-        seed = 0 # random number seed
+        seed = 1 # random number seed
+        n_jobs = 2 # number of CPUs to use
         random.seed(seed)
         numpy.random.seed(seed)
         mutrate = (0.005, 0.02) # mutation rate drawn uniformly from this range after dividing by nchars
@@ -32,6 +33,7 @@ class TestInferSitePreferences(unittest.TestCase):
         pidist = (1e-5, 0.6) # pi drawn uniformly from this range (after correcting for proportionality)
         for (charactertype, characterlist) in [('DNA', nts), ('amino acid', aminoacids)]:#, ('codon', codons)]:
             sys.stderr.write('\n\nTesting preference inference at the %s level...\n' % charactertype) 
+            sys.stderr.flush()
             wtchar = random.choice(characterlist)
             iwtchar = characterlist.index(wtchar)
             nchars = len(characterlist)
@@ -72,14 +74,14 @@ class TestInferSitePreferences(unittest.TestCase):
                     'nrpre':dict([(char, nrpre[i]) for (i, char) in enumerate(characterlist)]),\
                     'nrpost':dict([(char, nrpost[i]) for (i, char) in enumerate(characterlist)]),\
                     }
-                returntup = dms_tools.mcmc.InferSitePreferences(characterlist, wtchar, 'none', counts, priors)
+                returntup = dms_tools.mcmc.InferSitePreferences(characterlist, wtchar, 'none', counts, priors, n_jobs=n_jobs)
                 self.assertTrue(returntup, 'MCMC inference of preferences failed to converge for no-errors data for %s at depth of %d' % (charactertype, depth))
                 if returntup:
                     (pi_means, pi_95credint) = returntup
                     inferred_pi = [pi_means[char] for char in characterlist]
                     diffsum = sum([abs(x - y) for (x, y) in zip(pir, inferred_pi)])
                     self.assertTrue(diffsum < maxdiffsum, 'MCMC inference of preferences had excessive large summed absolute difference of %g (max allowed is %g) from true values for no-errors data for %s at depth of %d' % (diffsum, maxdiffsum, charactertype, depth))
-                sys.stderr.write('Converged to correct values for no-errors data (diffsum = %g).\n' % diffsum)
+                sys.stderr.write('Converged to correct values for no-errors data (diffsum = %g) at depth %d for character type %s.\n' % (diffsum, depth, charactertype))
                 sys.stderr.flush()
                 # now with same errors pre and post
                 nrpre = numpy.random.multinomial(depth, mur + epsilonr - deltar)
@@ -90,19 +92,39 @@ class TestInferSitePreferences(unittest.TestCase):
                     'nrpost':dict([(char, nrpost[i]) for (i, char) in enumerate(characterlist)]),\
                     'nrerr':dict([(char, nrerr[i]) for (i, char) in enumerate(characterlist)]),\
                     }
-                returntup = dms_tools.mcmc.InferSitePreferences(characterlist, wtchar, 'same', counts, priors)
+                returntup = dms_tools.mcmc.InferSitePreferences(characterlist, wtchar, 'same', counts, priors, n_jobs=n_jobs)
                 self.assertTrue(returntup, 'MCMC inference of preferences failed to converge for same-errors data for %s at depth of %d' % (charactertype, depth))
                 if returntup:
                     (pi_means, pi_95credint) = returntup
                     inferred_pi = [pi_means[char] for char in characterlist]
                     diffsum = sum([abs(x - y) for (x, y) in zip(pir, inferred_pi)])
                     self.assertTrue(diffsum < maxdiffsum, 'MCMC inference of preferences had excessive large summed absolute difference of %g (max allowed is %g) from true values for same-errors data for %s at depth of %d' % (diffsum, maxdiffsum, charactertype, depth))
-                sys.stderr.write('Converged to correct values for for same-errors data (diffsum = %g).\n' % diffsum)
+                sys.stderr.write('Converged to correct values for same-errors data (diffsum = %g) at depth %d for character type %s.\n' % (diffsum, depth, charactertype))
                 sys.stderr.flush()
-
-
-            
-
+                # now with different errors pre and post
+                nrpre = numpy.random.multinomial(depth, mur + epsilonr - deltar)
+                nrpost = numpy.random.multinomial(depth, mur * pir / numpy.dot(mur, pir) + rhor - deltar)
+                nrerrpre = numpy.random.multinomial(depth, epsilonr)
+                nrerrpost = numpy.random.multinomial(depth, rhor)
+                counts = {\
+                    'nrpre':dict([(char, nrpre[i]) for (i, char) in enumerate(characterlist)]),\
+                    'nrpost':dict([(char, nrpost[i]) for (i, char) in enumerate(characterlist)]),\
+                    'nrerrpre':dict([(char, nrerrpre[i]) for (i, char) in enumerate(characterlist)]),\
+                    'nrerrpost':dict([(char, nrerrpost[i]) for (i, char) in enumerate(characterlist)]),\
+                    }
+                returntup = dms_tools.mcmc.InferSitePreferences(characterlist, wtchar, 'different', counts, priors, n_jobs=n_jobs)
+                self.assertTrue(returntup, 'MCMC inference of preferences failed to converge for different-errors data for %s at depth of %d' % (charactertype, depth))
+                if returntup:
+                    (pi_means, pi_95credint) = returntup
+                    inferred_pi = [pi_means[char] for char in characterlist]
+                    diffsum = sum([abs(x - y) for (x, y) in zip(pir, inferred_pi)])
+                    self.assertTrue(diffsum < maxdiffsum, 'MCMC inference of preferences had excessive large summed absolute difference of %g (max allowed is %g) from true values for different-errors data for %s at depth of %d' % (diffsum, maxdiffsum, charactertype, depth))
+                sys.stderr.write('Converged to correct values for different-errors data (diffsum = %g) at depth %d for character type %s.\n' % (diffsum, depth, charactertype))
+                sys.stderr.flush()
+                # make sure sample with errors does NOT converge without error estimates
+                returntup = dms_tools.mcmc.InferSitePreferences(characterlist, wtchar, 'none', counts, priors, n_jobs=n_jobs)
+                self.assertFalse(returntup, 'MCMC inference of preferences with different-errors data converged even when using a no-errors model. Absolute summed difference of %g from true values for %s at depth of %d' % (charactertype, depth))
+                sys.stderr.write('As expected, analyzing the different-errors data with the no-errors model did not converge at depth %d for character type %s. This is good.\n' % (depth, charactertype))
 
 
 if __name__ == '__main__':
