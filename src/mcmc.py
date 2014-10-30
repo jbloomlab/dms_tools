@@ -160,27 +160,40 @@ def _InitialValuePreferences(error_model, nchains, iwtchar, nchars):
     for initialization and return a list that can be passed to the *StanModel*
     as the *init* argument.
     """
-    assert error_model in ['same', 'different']
     initializationattempts = 10 # multiple attempts, as might fail for pathological random values
     nrescales = 10 # rescale non-wildtype values down this many times
     rescalefactor = 5.0 # rescale non-wildtype values down by this much
-    concentrationparameter = 2.0 # make a bit bigger than one to disfavor very small values which cause problems
     deltar = numpy.zeros(nchars)
     deltar[iwtchar] = 1.0
     init = []
-    if error_model == 'same':
+    concentrationparameters = [1.0 for ichar in range(nchars)]
+    concentrationparameters[iwtchar] = 10.0 # make this element bigger, as it probably should be
+    if error_model == 'none':
+        for chain in range(nchains):
+            while True:
+                chain_init = {\
+                    'pir':numpy.random.dirichlet(concentrationparameters),\
+                    'mur':numpy.random.dirichlet(concentrationparameters),\
+                    }
+                if all(chain_init['pir'] > PRIOR_MIN_VALUE) and all(chain_init['mur'] > PRIOR_MIN_VALUE):
+                    init.append(chain_init)
+                    break
+        return init
+    elif error_model == 'same':
         posterrname = 'epsilonr'
-    else:
+    elif error_model == 'different':
         posterrname = 'rhor'
+    else:
+        raise ValueError("Invalid error_model of %s" % error_model)
     for chain in range(nchains):
         for iattempt in range(initializationattempts):
             chain_init = {\
-                    'pir':numpy.random.dirichlet([concentrationparameter for ichar in range(nchars)]),\
-                    'mur':numpy.random.dirichlet([concentrationparameter for ichar in range(nchars)]),\
-                    'epsilonr':numpy.random.dirichlet([concentrationparameter for ichar in range(nchars)]),\
+                    'pir':numpy.random.dirichlet(concentrationparameters),\
+                    'mur':numpy.random.dirichlet(concentrationparameters),\
+                    'epsilonr':numpy.random.dirichlet(concentrationparameters),\
                     }
             if error_model == 'different':
-                chain_init['rhor'] = numpy.random.dirichlet([concentrationparameter for ichar in range(nchars)])
+                chain_init['rhor'] = numpy.random.dirichlet(concentrationparameters)
             irescale = 0
             while irescale < nrescales and (any(chain_init['pir'] * chain_init['mur'] / numpy.dot(chain_init['pir'], chain_init['mur']) + chain_init[posterrname] - deltar < PRIOR_MIN_VALUE) or any(chain_init['mur'] + chain_init['epsilonr'] - deltar < PRIOR_MIN_VALUE)): 
                 irescale += 1
@@ -198,8 +211,7 @@ def _InitialValuePreferences(error_model, nchains, iwtchar, nchars):
 
 
 
-
-def InferSitePreferences(characterlist, wtchar, error_model, counts, priors, n_jobs=1, seed=1, r_max=1.05, neff_min=200, nchains=4, niter=2000, increasefactor=4, increasetries=2):
+def InferSitePreferences(characterlist, wtchar, error_model, counts, priors, n_jobs=1, seed=1, r_max=1.05, neff_min=200, nchains=3, niter=2000, increasefactor=2, increasetries=6):
     """Infers site-specific preferences by MCMC for a specific site.
 
     Uses MCMC to infer the site-specific preferences :math:`\pi_{r,a}` for some site
@@ -284,7 +296,9 @@ def InferSitePreferences(characterlist, wtchar, error_model, counts, priors, n_j
 
         * *n_jobs* : The number of CPUs to use. If -1, use all available CPUs.
 
-        * *seed* : integer seed for MCMC.
+        * *seed* : integer seed for MCMC. Calling multiple times with same *seed*
+          and data will give identical results provided architecture for floating
+          point math on the computer is also the same.
 
         * The following parameters specify how the MCMC tries to guarantee convergence.
           They all have reasonable default values, so you probably don't need to change them.
@@ -331,7 +345,6 @@ def InferSitePreferences(characterlist, wtchar, error_model, counts, priors, n_j
             # compile global StanModel variable if this has not already been done
             pir_inference_no_err_sm = pystan.StanModel(model_code=pir_inference_no_err_code)
         sm = pir_inference_no_err_sm
-        init = 'random' # can just use random initial parameter values
     elif error_model == 'same':
         data['nrerr'] = [counts['nrerr'][char] for char in characterlist]
         data['epsilonr_prior_params'] = [max(PRIOR_MIN_VALUE, priors['epsilonr_prior_params'][char]) for char in characterlist]
@@ -339,7 +352,6 @@ def InferSitePreferences(characterlist, wtchar, error_model, counts, priors, n_j
             # compile global StanModel variable if this has not already been done
             pir_inference_same_err_sm = pystan.StanModel(model_code=pir_inference_same_err_code)
         sm = pir_inference_same_err_sm
-        init = _InitialValuePreferences(error_model, nchains, characterlist.index(wtchar), len(characterlist))
     elif error_model == 'different':
         data['nrerrpre'] = [counts['nrerrpre'][char] for char in characterlist]
         data['nrerrpost'] = [counts['nrerrpost'][char] for char in characterlist]
@@ -349,13 +361,13 @@ def InferSitePreferences(characterlist, wtchar, error_model, counts, priors, n_j
             # compile global StanModel variable if this has not already been done
             pir_inference_different_err_sm = pystan.StanModel(model_code=pir_inference_different_err_code)
         sm = pir_inference_different_err_sm
-        init = _InitialValuePreferences(error_model, nchains, characterlist.index(wtchar), len(characterlist))
     else:
         raise ValueError("Invalid error_model of %s" % error_model)
     ntry = 0
     while True: # run until converged or tries exhausted
         # run MCMC
         # this next command unfortunately creates a lot of output that I have not been able to re-direct...
+        init = _InitialValuePreferences(error_model, nchains, characterlist.index(wtchar), len(characterlist))
         fit = sm.sampling(data=data, iter=niter, chains=nchains, seed=seed, n_jobs=n_jobs, refresh=-1, init=init)
         # extract output
         fitsummary = fit.summary()
@@ -369,7 +381,7 @@ def InferSitePreferences(characterlist, wtchar, error_model, counts, priors, n_j
         nefflist = [summary[char_row_indices[char]][neffindex] for char in characterlist]
         if (max(rlist) <= r_max) and (min(nefflist) >= neff_min):
             # converged
-            #print "Converged with %d iterations, max R = %g and min Neff = %g" % (niter, max(rlist), min(nefflist))
+            #print "DEBUGGING: Converged with %d iterations, max R = %g and min Neff = %g" % (niter, max(rlist), min(nefflist))
             meanindex = colnames.index('mean')
             lower95index = colnames.index('2.5%')
             upper95index = colnames.index('97.5%')
@@ -378,7 +390,7 @@ def InferSitePreferences(characterlist, wtchar, error_model, counts, priors, n_j
             return (pi_means, pi_95credint)
         else:
             # failed to converge
-            #print "Failed to converge with %d iterations, max R = %g and min Neff = %g" % (niter, max(rlist), min(nefflist))
+            #print "DEBUGGING: Failed to converge with %d iterations, max R = %g and min Neff = %g" % (niter, max(rlist), min(nefflist))
             if ntry < increasetries:
                 ntry += 1
                 niter = int(niter * increasefactor)
