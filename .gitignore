@@ -8,3 +8,4 @@ docs/_static/
 docs/_template/
 build/
 *.sbatch
+*.swp

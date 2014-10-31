@@ -32,6 +32,7 @@ sys.path.insert(0, '%s/../src/' % os.path.abspath('.'))
 extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.mathjax',
+    'sphinxarg.ext',
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -82,7 +83,7 @@ language = None
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
-exclude_patterns = ['_build']
+exclude_patterns = ['_build', 'README.rst']
 
 # The reST default role (used for this markup: `text`) to use for all
 # documents.
