@@ -11,6 +11,7 @@ Contents:
 .. toctree::
    :maxdepth: 2
 
+   dms_inferpreferences
    pythonapi
 
 

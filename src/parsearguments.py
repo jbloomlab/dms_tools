@@ -24,7 +24,8 @@ import argparse
 
 def InferPreferencesParser():
     """Returns *argparse.ArgumentParser* for ``dms_inferpreferences`` script."""
-    parser = argparse.ArgumentParser()
-    parser.add_argument('foo', default=False, help='foo help')
-    parser.add_argument('bar', default=True)
+    parser = argparse.ArgumentParser(description='Inference of site-specific preferences for amino acids, nucleotides, or codons.')
+    parser.add_argument('pre-selection_counts', help='Existing file with pre-selection counts from deep sequencing.')
+    parser.add_argument('post-selection_counts', help='Existing file with post-selection counts from deep sequencing')
+    parser.add_argument('outfile', help='Created output file with site-specific preferences')
     return parser

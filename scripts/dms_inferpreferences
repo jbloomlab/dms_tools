@@ -5,10 +5,13 @@
 Written by Jesse Bloom."""
 
 
+import argparse
+import dms_tools.parsearguments
+
 
 def main():
     """Main body of script."""
-    pass
+    parser = dms_tools.parsearguments.InferPreferencesParser()
 
 
 if __name__ == '__main__':
