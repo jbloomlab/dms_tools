@@ -24,9 +24,9 @@ def main():
         result = unittest.TestResult()
         suite.run(result)
         if result.wasSuccessful():
-            sys.stderr.write('\nAll tests in %s were successful for seed %d.\n' % (test, seed))
+            sys.stderr.write('\nAll tests in %s were successful.\n' % test)
         else:
-            sys.stderr.write('\nTest in %s FAILED for seed %d!\n' % (test, seed))
+            sys.stderr.write('\nTest in %s FAILED!\n' % test)
             for (testcase, failstring) in result.failures + result.errors:
                 failurestrings.append(failstring)
 
