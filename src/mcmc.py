@@ -34,8 +34,9 @@ import pystan
 PRIOR_MIN_VALUE = 1.0e-7 # minimum value for Dirichlet prior elements
 
 
-# Code and StanModel when the error rates are zero
-pir_inference_no_err_code =\
+# StanModel when the error rates are zero
+class _StanModelNoneErr:
+    pystancode =\
 """
 data {
     int<lower=1> Nchar; // 64 for codons, 20 for amino acids, 4 for nucleotides
@@ -59,10 +60,16 @@ model {
     nrpost ~ multinomial(fr);
 }
 """ % (PRIOR_MIN_VALUE, PRIOR_MIN_VALUE)
-pir_inference_no_err_sm = None # global variable compiled to StanModel when first needed
+    stanmodel = None
+    @classmethod
+    def Model(cls):
+        if not cls.stanmodel:
+            cls.stanmodel = pystan.StanModel(model_code=cls.pystancode)
+        return cls.stanmodel
 
-# Code and StanModel when same error rate for pre and post-selection libraries
-pir_inference_same_err_code =\
+# StanModel when same error rate for pre and post-selection libraries
+class _StanModelSameErr:
+    pystancode =\
 """
 data {
     int<lower=1> Nchar; // 64 for codons, 20 for amino acids, 4 for nucleotides
@@ -101,10 +108,16 @@ model {
     nrpost ~ multinomial(fr_plus_err);
 }
 """ % (PRIOR_MIN_VALUE, PRIOR_MIN_VALUE, PRIOR_MIN_VALUE)
-pir_inference_same_err_sm = None # global variable compiled to StanModel when first needed
+    stanmodel = None
+    @classmethod
+    def Model(cls):
+        if not cls.stanmodel:
+            cls.stanmodel = pystan.StanModel(model_code=cls.pystancode)
+        return cls.stanmodel
 
-# Code and StanModel when different error rates for pre and post-selection libraries
-pir_inference_different_err_code =\
+# StanModel when different error rates for pre and post-selection libraries
+class _StanModelDifferentErr:
+    pystancode =\
 """
 data {
     int<lower=1> Nchar; // 64 for codons, 20 for amino acids, 4 for nucleotides
@@ -148,7 +161,12 @@ model {
     nrpost ~ multinomial(fr_plus_err);
 }
 """ % (PRIOR_MIN_VALUE, PRIOR_MIN_VALUE, PRIOR_MIN_VALUE, PRIOR_MIN_VALUE)
-pir_inference_different_err_sm = None # global variable compiled to StanModel when first needed
+    stanmodel = None
+    @classmethod
+    def Model(cls):
+        if not cls.stanmodel:
+            cls.stanmodel = pystan.StanModel(model_code=cls.pystancode)
+        return cls.stanmodel
 
 
 def _InitialValuePreferences(error_model, nchains, iwtchar, nchars):
@@ -326,11 +344,6 @@ def InferSitePreferences(characterlist, wtchar, error_model, counts, priors, n_j
               median-centered credible interval for :math:`\pi_{r,a}`.
     """
     numpy.random.seed(seed)
-    # make these global so they only have to be compiled once
-    global pir_inference_no_err_sm
-    global pir_inference_same_err_sm
-    global pir_inference_different_err_sm
-
     assert nchains >= 2, "nchains must be at least two"
     assert niter >= 100, "niter must be at least 100"
     assert len(characterlist) == len(set(characterlist)), "characterlist contains a duplicate character:\n%s" % str(characterlist)
@@ -341,26 +354,17 @@ def InferSitePreferences(characterlist, wtchar, error_model, counts, priors, n_j
     data['pir_prior_params'] = [max(PRIOR_MIN_VALUE, priors['pir_prior_params'][char]) for char in characterlist]
     data['mur_prior_params'] = [max(PRIOR_MIN_VALUE, priors['mur_prior_params'][char]) for char in characterlist]
     if error_model == 'none':
-        if pir_inference_no_err_sm == None: 
-            # compile global StanModel variable if this has not already been done
-            pir_inference_no_err_sm = pystan.StanModel(model_code=pir_inference_no_err_code)
-        sm = pir_inference_no_err_sm
+        sm = _StanModelNoneErr.Model()
     elif error_model == 'same':
+        sm = _StanModelSameErr.Model()
         data['nrerr'] = [counts['nrerr'][char] for char in characterlist]
         data['epsilonr_prior_params'] = [max(PRIOR_MIN_VALUE, priors['epsilonr_prior_params'][char]) for char in characterlist]
-        if pir_inference_same_err_sm == None: 
-            # compile global StanModel variable if this has not already been done
-            pir_inference_same_err_sm = pystan.StanModel(model_code=pir_inference_same_err_code)
-        sm = pir_inference_same_err_sm
     elif error_model == 'different':
+        sm = _StanModelDifferentErr.Model()
         data['nrerrpre'] = [counts['nrerrpre'][char] for char in characterlist]
         data['nrerrpost'] = [counts['nrerrpost'][char] for char in characterlist]
         data['epsilonr_prior_params'] = [max(PRIOR_MIN_VALUE, priors['epsilonr_prior_params'][char]) for char in characterlist]
         data['rhor_prior_params'] = [max(PRIOR_MIN_VALUE, priors['rhor_prior_params'][char]) for char in characterlist]
-        if pir_inference_different_err_sm == None: 
-            # compile global StanModel variable if this has not already been done
-            pir_inference_different_err_sm = pystan.StanModel(model_code=pir_inference_different_err_code)
-        sm = pir_inference_different_err_sm
     else:
         raise ValueError("Invalid error_model of %s" % error_model)
     ntry = 0
