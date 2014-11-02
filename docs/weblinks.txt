@@ -1,2 +1,4 @@
 .. _`Python`: https://www.python.org
-.. _`dms_tools`: https://github.com/jbloom/dms_tools
+.. _`dms_tools`: http://jbloom.github.io/dms_tools
+.. _`dms_tools source code`: https://github.com/jbloom/dms_tools
+.. _`mapmuts`: http://jbloom.github.io/mapmuts

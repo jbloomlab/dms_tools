@@ -3,15 +3,18 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to dms_tools's documentation!
+Documentation for `dms_tools`_
 =====================================
 
-Contents:
+Contents
+---------
 
-.. toctree::
+.. toctree:: 
    :maxdepth: 2
 
-   dms_inferpreferences
+   dms_inferprefs
+   dms_inferdiffprefs
+   fileformats
    pythonapi
 
 
@@ -23,3 +26,4 @@ Indices and tables
 * :ref:`modindex`
 * :ref:`search`
 
+.. include:: weblinks.txt

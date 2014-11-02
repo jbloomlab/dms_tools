@@ -11,7 +11,8 @@ import dms_tools.parsearguments
 
 def main():
     """Main body of script."""
-    parser = dms_tools.parsearguments.InferPreferencesParser()
+    parser = dms_tools.parsearguments.InferPrefsParser()
+    args = parser.parse_args()
 
 
 if __name__ == '__main__':

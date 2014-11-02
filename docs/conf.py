@@ -57,9 +57,9 @@ copyright = u'2014, Jesse Bloom'
 #
 # The short X.Y version.
 # Read in the version from file
-versionfile = '../src/_version.py'
-versionline = open(versionfile).read()
-versionstring = re.search("^__version__ = ['\"]([^'\"]+)['\"]", versionline)
+versionfile = '../src/_metadata.py'
+versiontext = open(versionfile).read()
+versionstring = re.search("__version__ = ['\"]([^'\"]+)['\"]", versiontext)
 if not versionstring:
     raise RuntimeError("Unable to parse version number from %s" % versionfile)
 else:

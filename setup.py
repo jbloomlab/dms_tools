@@ -11,22 +11,27 @@ from distutils.core import setup
 from distutils.core import Extension
 from distutils.core import Command
 
-# get version
-versionfile = 'src/_version.py'
-versionline = open(versionfile).read()
-versionstring = re.search("^__version__ = ['\"]([^'\"]+)['\"]", versionline)
-if not versionstring:
-    raise RuntimeError("Unable to parse version number from %s" % versionfile)
-else:
-    versionstring = versionstring.group(1)
+# get metadata
+metadata = {}
+lines = open('src/_metadata.py').readlines()
+for dataname in ['version', 'author', 'author_email', 'url']:
+    for line in lines:
+        entries = line.split('=')
+        assert len(entries) == 2, "Failed to parse metadata:\n%s" % line
+        if entries[0].strip() == '__%s__' % dataname:
+            if dataname in metadata:
+                raise ValueError("Duplicate metadata for %s" % dataname)
+            else:
+                metadata[dataname] = entries[1].strip()[1 : -1]
+    assert dataname in metadata, "Failed to find metadata for %s" % dataname
 
 # main setup command
 setup(
     name = 'dms_tools', 
-    version = versionstring, 
-    author = 'Jesse D. Bloom', 
-    author_email = 'jbloom@fredhutch.org', 
-    url = 'https://github.com/jbloom/dms_tools', 
+    version = metadata['version'],
+    author = metadata['author'],
+    author_email = metadata['author_email'],
+    url = metadata['url'],
     description = 'Deep mutational scanning (DMS) analysis tools.',
     classifiers = [
         'Intended Audience :: Science/Research',
@@ -40,6 +45,6 @@ setup(
     packages = ['dms_tools'],
     package_dir = {'dms_tools':'src'},
     scripts = [
-            'scripts/dms_inferpreferences',
+            'scripts/dms_inferprefs',
             ],
 )
