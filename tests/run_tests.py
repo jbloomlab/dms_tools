@@ -1,4 +1,8 @@
-"""Runs tests on every file in directory with name ``test_*.py``.
+"""Runs tests on ``dms_tools``.
+
+Tests every file in directory with name ``test_*.py``.
+
+Also tests all modules in package with ``docutils``.
 
 Written by Jesse Bloom."""
 
@@ -8,6 +12,9 @@ import sys
 import glob
 import doctest
 import unittest
+import doctest
+import pkgutil
+import dms_tools
 
 
 def main():
@@ -16,7 +23,23 @@ def main():
     sys.stderr.write('Running tests...\n')
     failurestrings = []
 
-    # test all
+    # test all modules with doctest
+    for (importer, modname, ispkg) in pkgutil.iter_modules(dms_tools.__path__):
+        if (not ispkg) and modname[0] != '_':
+            sys.stderr.write('\nTesting %s with doctest... ' % modname)
+            module = __import__('dms_tools.%s' % modname, None, None, modname.split('.'))
+            suite = doctest.DocTestSuite(module)
+            del module
+            result = unittest.TestResult()
+            suite.run(result)
+            if result.wasSuccessful():
+                sys.stderr.write('all %d tests were successful.\n' % result.testsRun)
+            else:
+                sys.stderr.write('test FAILED!\n')
+                for (testcase, failstring) in result.failures:
+                    failurestrings.append(failstring)
+
+    # all tests in files with names test_*.py
     for test in glob.glob('test_*.py'):
         test = os.path.splitext(test)[0]
         sys.stderr.write('\nRunning tests in %s...\n' % test)

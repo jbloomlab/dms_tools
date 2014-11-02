@@ -401,3 +401,7 @@ def InferSitePreferences(characterlist, wtchar, error_model, counts, priors, n_j
             else:
                 return False # failed to converge after trying step increases
 
+
+if __name__ == '__main__':
+    import doctest
+    doctest.testmod()

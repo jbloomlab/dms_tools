@@ -52,3 +52,8 @@ def InferPrefsParser():
     parser.add_argument('--seed', default=1, help='Random number seed.', type=int)
     parser.add_argument('--version', action='version', version='%(prog)s {version}'.format(version=dms_tools.__version__))
     return parser
+
+
+if __name__ == '__main__':
+    import doctest
+    doctest.testmod()
