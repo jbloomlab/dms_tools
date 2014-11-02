@@ -18,13 +18,7 @@ Command-line usage
    :prog: dms_inferprefs
 
    n_pre
-    See :ref:`dms_counts` for specification of the file format.
-
-   n_post
-    See :ref:`dms_counts` for specification of the file format.
-
-   errmodel
-    See :ref:`dms_counts` for specification of the file format for the error files "n_err* or "n_errpre" and "n_errpost".
+    See :ref:`dms_counts` for full specification of the file format.
 
 Examples
 -----------
