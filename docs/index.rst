@@ -12,9 +12,8 @@ Contents
 .. toctree:: 
    :maxdepth: 2
 
-   dms_inferprefs
-   dms_inferdiffprefs
-   fileformats
+   programs
+   algorithms
    pythonapi
 
 

@@ -2,3 +2,11 @@
 .. _`dms_tools`: http://jbloom.github.io/dms_tools
 .. _`dms_tools source code`: https://github.com/jbloom/dms_tools
 .. _`mapmuts`: http://jbloom.github.io/mapmuts
+.. _`PyStan`: http://pystan.readthedocs.org/en/latest/
+.. _`GelmanRubin1992`: http://www.jstor.org/stable/2246093
+.. _`Firnberg2012`: http://www.plosone.org/article/info%3Adoi%2F10.1371%2Fjournal.pone.0052031
+.. _`Kronecker delta`: http://en.wikipedia.org/wiki/Kronecker_delta
+.. _`Hadamard product`: http://en.wikipedia.org/wiki/Hadamard_product_(matrices)
+.. _`Multinomial`: http://en.wikipedia.org/wiki/Multinomial_distribution
+.. _`Dirichlet`: http://en.wikipedia.org/wiki/Dirichlet_distribution
+.. _`MCMC`: http://en.wikipedia.org/wiki/Markov_chain_Monte_Carlo
