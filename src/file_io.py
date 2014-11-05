@@ -10,6 +10,8 @@ Written by Jesse Bloom.
 Functions in this module
 ---------------------------
 
+* *Versions* : Returns string giving versions of utilized packages.
+
 * *ReadDMSCounts* : reads deep mutational scanning counts.
 
 Function documentation
@@ -20,8 +22,13 @@ Function documentation
 
 import sys
 import os
+import time
+import platform
+import importlib
 import cStringIO
 import Bio.Alphabet.IUPAC
+import dms_tools
+
 
 # lists of upper case DNA nucleotides and codons
 aminoacids = Bio.Alphabet.IUPAC.IUPACProtein.letters
@@ -32,6 +39,31 @@ for nt1 in nts:
     for nt2 in nts:
         for nt3 in nts:
             codons.append('%s%s%s' % (nt1, nt2, nt3))
+
+
+def Versions():
+    """Returns a string with version information.
+
+    You would call this function if you want a string giving detailed information
+    on the version of ``dms_tools`` and the associated packages that it uses.
+    This string might be useful if you want to print this information at the beginning
+    of a script.
+    """
+    s = [\
+            'Version information for dms_tools and associated packages.',
+            '\tTime and date: %s' % time.asctime(),
+            '\tPlatform: %s' % platform.platform(),
+            '\tPython version: %s' % sys.version.replace('\n', ' '),
+            '\tdms_tools version: %s' % dms_tools.__version__,
+            ]
+    for modname in ['Bio', 'numpy', 'matplotlib', 'cython', 'pystan']:
+        try:
+            v = importlib.import_module(modname).__version__
+            s.append('\t%s version: %s' % (modname, v))
+        except ImportError:
+            s.append('\t%s cannot be imported into Python' % modname)
+    return '\n'.join(s)
+
 
 
 def ReadDMSCounts(f, chartype):

@@ -5,14 +5,100 @@
 Written by Jesse Bloom."""
 
 
-import argparse
+import sys
+import os
+import logging
 import dms_tools.parsearguments
+import dms_tools.file_io
+import dms_tools.mcmc
 
 
 def main():
     """Main body of script."""
+
+    # Parse command line arguments
     parser = dms_tools.parsearguments.InferPrefsParser()
-    args = parser.parse_args()
+    args = vars(parser.parse_args())
+    if args['logfile'] == 'Base name of "outfile" with extension ".log"':
+        args['logfile'] = "%s.log" % os.path.splitext(args['outfile'])[0]
+        if os.path.isfile(args['logfile']):
+            os.remove(args['logfile'])
+    prog = parser.prog
+
+    # Set up to log everything to logfile.
+    # Confusingly, pystan defines its own logger which I have NOT been able to silence.
+    # So even though the logger set up in this script will only log to logfile, the
+    # pystan one imported by both dms_tools.mcmc and the call to dms_tools.file_io.Versions()
+    # will log to standard outpout. This is very confusing, but I have not been able to find
+    # a better solution until I determine how to silence the pystan logger.
+    versionstring = dms_tools.file_io.Versions() 
+    logging.shutdown()
+    logger = logging.getLogger(prog)
+    logger.setLevel(logging.INFO)
+    logfile_handler = logging.FileHandler(args['logfile'])
+    logger.addHandler(logfile_handler)
+    formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+    logfile_handler.setFormatter(formatter)
+
+    # begin execution
+    try:
+        logger.info('Beginning execution of %s.' % prog)
+        logger.info('Progress is being logged to %s' % args['logfile'])
+        logger.info(versionstring)
+        logger.info('Parsed the following arguments:\n%s' % '\n'.join(['\t%s = %s' % tup for tup in args.iteritems()]))
+
+        # read in the counts
+        if args['chartype'].lower() == 'codon_to_aa':
+            chartype = 'codons'
+            transform_to_aa = True
+        elif args['chartype'].lower() == 'codon':
+            chartype = 'codons'
+            transform_to_aa = False
+        elif args['chartype'].upper() == 'DNA':
+            chartype = 'DNA'
+            transform_to_aa = False
+        else:
+            raise ValueError("Invalid chartype of %s" % args['chartype'])
+        counts_files = {'nrpre':args['n_pre'], 'nrpost':args['n_post']}
+        errmodel = errmodel.split()
+        if errmodel[0].lower() == 'none':
+            assert len(errmodel) == 1, "If errmodel is none there should not be further files specified for this argument"
+            errmodel = errmodel[0]
+        elif errmodel[0].lower() == 'same':
+            assert len(errmodel) == 2, "If errmodel is same then there should be exactly one file specified with the error control counts"
+            counts_files['nrerr'] = errmodel[1]
+            errmodel = errmodel[0]
+        elif errmodel[0].lower() == 'different':
+            assert len(errmodel) == 3, "If errmodel is same then there should be exactly two files specified with the error control counts"
+            counts_files['nrerrpre'] = errmodel[1]
+            counts_files['nrerrpost'] = errmodel[2]
+            errmodel = errmodel[0]
+        else:
+            raise ValueError("Invalid value for errmodel")
+        counts = {}
+        sites = None
+        wts = {}
+        for (key, fname) in counts_files.iteritems():
+            assert os.path.isfile(fname), "Cannot find file %s" % fname
+            counts[key] = dms_utils.file_io.ReadDMSCounts(fname, chartype)
+            if sites == None:
+                sites = counts[key].values()
+                assert sites, "%s does not specify information for any sites" % fname
+                sites.sort()
+                wts[r] = [counts[key][r]['WT'] for r in sites]
+                logger.info('There are counts for %d sites, which are:\n%s' % (len(sites), '\n'.join(['\t%s (wiltype identity of %s)' % (r, wts[r]) for r in sites])))
+            else:
+                if set(sites) != set(counts[key].values()):
+                    raise ValueError("Not all of the counts files have the same set of sites")
+                for r in sites:
+                    if wts[r] != counts[key][r]['WT']:
+                        raise ValueError("The counts files are not consisten on the wildtype identity for site %s" % r)
+
+        # compute average mutation and error rates for priors
+
+
+    finally:
+        logging.shutdown()
 
 
 if __name__ == '__main__':
