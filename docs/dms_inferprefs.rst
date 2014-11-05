@@ -31,6 +31,11 @@ Command-line usage
     
     See :ref:`dms_counts` for full specification of the format for this file.
 
+   outfile
+    In addition to the inferred preferences :math:`\pi_{r,x}`, this file also gives the site entropies calculated from these preferences and the median-centered 95% credible intervals for each preference. 
+
+    See :ref:`preferences_file` for full specification of the format for this file.
+
    \-\-errmodel
     Setting this option to "none" corresponds to setting to zero the error rates :math:`\epsilon_{r,x}` and :math:`\rho_{r,x}` described in :ref:`inferprefs_algorithm`.
 
@@ -58,6 +63,10 @@ Command-line usage
 
    \-\-includestop
     A value of "True" means that when using ``--chartype codon_to_aa``, we infer preferences for 21 amino acids, with stop codons (denoted by ``*``) one of the possibilities. A value of "False" means that we constrain the preference for stop codons to be zero regardless of whether or not there are counts for these codons in the data, and so only infer preferences for the 20 non-stop amino acids.
+
+Output
+----------
+The inferred preferences are in the :ref:`preferences_file` specified by ``outfile``. A summary of the progress is in the file specified by ``logfile``. In addition, some information will be written to standard output. You should **not** be concerned if this information includes some warnings about convergence -- the program automatically tests for convergence as descrbed in :ref:`MCMC_inference`, and will stop with an error if the inference cannot converge. Unless that happens, the warnings don't indicate a problem, as the MCMC will continue to add steps until there is convergence.
 
 Examples
 -----------

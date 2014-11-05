@@ -2,7 +2,7 @@
 Python API
 ==============================
 
-`dms_tools`_ is written in `Python`_, so if you install the package you can access the following API via `Python`_.
+`dms_tools`_ is written in `Python`_, so if you install the package you can access the following API for the package via `Python`_.
 
 .. automodule:: __init__
    :members:

@@ -336,7 +336,9 @@ in Equations :eq:`pr_nrpre`, :eq:`pr_nrpost`,
 and
 :math:`\mathbf{A}\left(\mbox{$\mathbf{n_r^{\textbf{err,post}}}$}\right)`.
 
-Inferring the posterior probability over the preferences.
+.. _MCMC_inference:
+
+Inferring the preferences by MCMC.
 ---------------------------------------------------------
 
 Given the sequencing data and the parameters that specify the priors,
