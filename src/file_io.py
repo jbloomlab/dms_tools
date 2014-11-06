@@ -77,7 +77,7 @@ def ReadDMSCounts(f, chartype):
         - *DNA* : DNA nucleotides, those listed in the *nts* variable
           defined in this module.
 
-        - *codons* : DNA codons, those listed in the *codons* variable
+        - *codon* : DNA codons, those listed in the *codons* variable
           defined in this module.
 
     The counts are returned in the dictionary *counts*. The dictionary
