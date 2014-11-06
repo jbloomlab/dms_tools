@@ -8,7 +8,7 @@
 
 Overview
 -------------
-``dms_inferprefs`` is a program included with the `dms_tools`_ package. It infers the site-specific preferences :math:`\pi_{r,a}` for each character :math:`a` (an amino acid, codon, or nucleotide) at each site :math:`r`.
+``dms_inferprefs`` is a program included with the `dms_tools`_ package. It infers the site-specific preferences :math:`\pi_{r,a}` for each character :math:`a` (an amino acid, codon, or nucleotide) at each site :math:`r`. The inference is done by `MCMC`_ using `PyStan`_.
 
 For a detailed description of the algorithm implemented by this program, see :ref:`inferprefs_algorithm`.
 
@@ -66,7 +66,7 @@ Command-line usage
 
 Output
 ----------
-The inferred preferences are in the :ref:`preferences_file` specified by ``outfile``. A summary of the progress is in the file specified by ``logfile``. In addition, some information will be written to standard output. You should **not** be concerned if this information includes some warnings about convergence -- the program automatically tests for convergence as descrbed in :ref:`MCMC_inference`, and will stop with an error if the inference cannot converge. Unless that happens, the warnings don't indicate a problem, as the MCMC will continue to add steps until there is convergence.
+The inferred preferences are in the :ref:`preferences_file` specified by ``outfile``. A summary of the progress is in the file specified by ``logfile``. In addition, some information will be written to standard output. You should **not** be concerned if this information includes some warnings from `PyStan`_ about convergence -- the program automatically tests for convergence as described in :ref:`MCMC_inference`. The program will stop with an error if the inference cannot converge. Unless that happens, the warnings don't indicate a problem, as the `MCMC`_ will continue to add steps until there is convergence.
 
 Examples
 -----------
