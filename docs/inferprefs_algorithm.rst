@@ -222,7 +222,7 @@ Our prior assumption is that the mutagenesis is done so that all mutant characte
 .. math::
    :label: avgmu
 
-   \overline{\mu} = \left(\frac{1}{L}\sum\limits_r \frac{1}{\mbox{$N_r^{\textrm{pre}}$}}\sum\limits_{x\ne \operatorname{wt}\left(r\right)} \mbox{$n_{r,x}^{\textrm{pre}}$}\right) - \frac{1}{\mathcal{N}_x} \sum\limits_{m \ge 1} \mathcal{C}_m \times \overline{\epsilon_m}.
+   \overline{\mu} = \left(\frac{1}{L}\sum\limits_r \frac{1}{\mbox{$N_r^{\textrm{pre}}$}}\sum\limits_{x\ne \operatorname{wt}\left(r\right)} \mbox{$n_{r,x}^{\textrm{pre}}$}\right) - \sum\limits_{m \ge 1} \overline{\epsilon_m}.
 
 Note that a value of :math:`\overline{\mu} \le 0` would suggest that mutations are no more prevalent (or actually less prevalent) in the pre-selection mutant library then the pre-selection error control. Such a situation would violate the assumptions of the experiment, and so the algorithm will halt if this is the case. The prior vector for the mutagenesis rate is then 
 

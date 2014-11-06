@@ -14,6 +14,8 @@ Functions in this module
 
 * *ReadDMSCounts* : reads deep mutational scanning counts.
 
+* *ReadMultipleDMSCountsFiles* : reads multiple counts files for the same sequence.
+
 Function documentation
 ---------------------------
 
@@ -26,19 +28,9 @@ import time
 import platform
 import importlib
 import cStringIO
-import Bio.Alphabet.IUPAC
 import dms_tools
+import dms_tools.utils
 
-
-# lists of upper case DNA nucleotides and codons
-aminoacids = Bio.Alphabet.IUPAC.IUPACProtein.letters
-nts = Bio.Alphabet.IUPAC.IUPACUnambiguousDNA.letters
-nts = [nt.upper() for nt in nts]
-codons = []
-for nt1 in nts:
-    for nt2 in nts:
-        for nt3 in nts:
-            codons.append('%s%s%s' % (nt1, nt2, nt3))
 
 
 def Versions():
@@ -63,6 +55,47 @@ def Versions():
         except ImportError:
             s.append('\t%s cannot be imported into Python' % modname)
     return '\n'.join(s)
+
+
+def ReadMultipleDMSCountsFiles(filelist, chartype):
+    """Reads multiple deep mutational scanning counts for the same sequence.
+
+    *filelist* is a list of names of files that can be read by *ReadDMSCounts*
+    using *chartype*. 
+
+    This function reads the counts for all files in *filelist*. It confirms
+    that each file specifies counts for the same set of sites, and that
+    the wildtype sequence specified in each file is the same. It then returns
+    the following tuple: *(sites, wts, counts)*. In this tuple:
+
+        - *sites* is a list of strings giving the sites, sorted so that the
+          numeric portion of the string is interpreted as a number.
+
+        - *wts* is a dictionary, with *wts[r]* giving the wildtype character
+          for site *r* for each *r* in *sites*.
+
+        - *counts* is a dictionary keyed by each file in *filelist*, with the value
+          for each file name being the counts dictonary for that file in the format
+          returned by *ReadDMSCounts*.
+    """
+    assert len(filelist) >= 1, "filelist must specify at least one file"
+    counts = {}
+    sites = None
+    for fname in filelist:
+        assert os.path.isfile(fname), "Cannot find DMS counts file %s" % fname
+        counts[fname] = ReadDMSCounts(fname, chartype)
+        if sites == None:
+            sites = counts[fname].keys()
+            assert sites, "%s does not specify information for any sites" % fname
+            dms_tools.utils.NaturalSort(sites)
+            wts = dict([(r, counts[fname][r]['WT']) for r in sites])
+        else:
+            if set(sites) != set(counts[fname].keys()):
+                raise ValueError("Not all of the counts files have the same set of sites")
+            for r in sites:
+                if wts[r] != counts[fname][r]['WT']:
+                    raise ValueError("The counts files are not consistent on the wildtype identity for site %s" % r)
+    return (sites, wts, counts)
 
 
 
@@ -196,9 +229,9 @@ def ReadDMSCounts(f, chartype):
 
     """
     if chartype.upper() == 'DNA':
-        characters = nts
+        characters = dms_tools.nts
     elif chartype.upper() == 'CODON':
-        characters = codons
+        characters = dms_tools.codons
     else:
         raise ValueError("Invalid chartype of %s" % chartype)
     characterindices = dict([(char, False) for char in characters])

@@ -36,12 +36,15 @@ Command-line usage
 
     See :ref:`preferences_file` for full specification of the format for this file.
 
-   \-\-errmodel
-    Setting this option to "none" corresponds to setting to zero the error rates :math:`\epsilon_{r,x}` and :math:`\rho_{r,x}` described in :ref:`inferprefs_algorithm`.
+   \-\-errpre
+    Setting this option to "none" corresponds to setting to zero the error rates :math:`\epsilon_{r,x}` described in :ref:`inferprefs_algorithm`.
 
-    Setting this option to "same n_err" corresponds to setting :math:`\epsilon_{r,x} = \rho_{r,x}` for the error rates described in :ref:`inferprefs_algorithm`. In this case, the file specified by "nerr" should have the format specified by :ref:`dms_counts`.
+    If you set this option to the name of a file, that file is assumed to give the counts for sequencing the pre-selection error control (:math:`n_{r,x}^{\textrm{err,pre}}`) and is used to estimate the error rate :math:`\epsilon_{r,x}` described in :ref:`inferprefs_algorithm`. This file should have the format specified by :ref:`dms_counts`.
 
-    Setting this option to "same n_errpre n_errpost" correspdonds to allowing distinct values for the error rates :math:`\epsilon_{r,x}` and :math:`\rho_{r,x}` described in :ref:`inferprefs_algorithm`. In this case, the files specified by "n_errpre" and "n_errpost" (which given the :math:`n_{r,x}^{\textrm{err,pre}}` and :math:`n_{r,x}^{\textrm{err,post}}` values) should have the format specified by :ref:`dms_counts`.
+   \-\-errpost
+    Setting this option to "none" corresponds to setting to zero the error rates :math:`\rho_{r,x}` described in :ref:`inferprefs_algorithm`.
+
+    If you set this option to the name of a file, that file is assumed to give the counts for sequencing the post-selection error control (:math:`n_{r,x}^{\textrm{err,post}}`) and is used to estimate the error rate :math:`\rho_{r,x}` described in :ref:`inferprefs_algorithm`. This file should have the format specified by :ref:`dms_counts`.
 
    \-\-pi_alpha
     This is the parameter :math:`\alpha_{\pi}` described in :ref:`inferprefs_algorithm`. 
@@ -52,7 +55,7 @@ Command-line usage
     This is the parameter :math:`\alpha_{\mu}` described in :ref:`inferprefs_algorithm`.
 
    \-\-err_alpha
-    This gives the parameters :math:`\alpha_{\epsilon}` and :math:`\alpha_{\rho}` described in :ref:`inferprefs_algorithm`; current these two parameters must be equal.
+    This gives the parameters :math:`\alpha_{\epsilon}` and :math:`\alpha_{\rho}` described in :ref:`inferprefs_algorithm`; currently these two parameters must be equal.
 
    \-\-chartype
     A value of "codon_to_aa" corresponds to using codon characters for the deep sequencing data, but inferring preferences for amino acids, as described in :ref:`chartype_codon_to_aa` This would be the sensible approach if you assume that selection is operating on the amino-acid level. Note that the priors over the mutagenesis rates assume that all codon mutations are made at equal frequencies (``NNN`` libraries).
@@ -82,14 +85,14 @@ The command above would include preferences for 21 different possible amino acid
 
 If we instead wanted to account for error rates, and we had sequenced unmutated plasmid to generate the codon counts file ``DNA_codoncounts.txt`` and had sequenced unmutated virus to generate the codon counts file ``virus_codoncounts.txt``, we would use the command::
 
-    dms_inferprefs --errmodel different DNA_codoncounts.txt virus_codoncounts.txt mutDNA_codoncounts.txt mutvirus_codoncounts.txt amino_acid_preferences_corrected_for_errors.txt
+    dms_inferprefs --errpre DNA_codoncounts.txt --errpost virus_codoncounts.txt mutDNA_codoncounts.txt mutvirus_codoncounts.txt amino_acid_preferences_corrected_for_errors.txt
 
 If we ran that command and it was taking too long, we might want to use more CPUs if we have multi-core processors. If we want to use 12 CPUs, we would run::
 
-    dms_inferprefs --ncpus 12 --errmodel different DNA_codoncounts.txt virus_codoncounts.txt mutDNA_codoncounts.txt mutvirus_codoncounts.txt amino_acid_preferences_no_errors.txt
+    dms_inferprefs --ncpus 12 --errpre DNA_codoncounts.txt --errpost virus_codoncounts.txt mutDNA_codoncounts.txt mutvirus_codoncounts.txt amino_acid_preferences_no_errors.txt
 
 `MCMC`_ is a stochastic algorithm. If we wanted to re-run it with a different random number seed to ensure we get the same results, we could use a different random number seed::
 
-    dms_inferprefs --seed 2 --ncpus 12 --errmodel different DNA_codoncounts.txt virus_codoncounts.txt mutDNA_codoncounts.txt mutvirus_codoncounts.txt amino_acid_preferences_no_errors.txt
+    dms_inferprefs --seed 2 --ncpus 12 --errpre DNA_codoncounts.txt --errpost virus_codoncounts.txt mutDNA_codoncounts.txt mutvirus_codoncounts.txt amino_acid_preferences_no_errors.txt
 
 .. include:: weblinks.txt

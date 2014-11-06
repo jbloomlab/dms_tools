@@ -19,6 +19,11 @@ Python API
    :undoc-members:
    :show-inheritance:
 
+.. automodule:: utils
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 .. automodule:: parsearguments
    :members:
    :undoc-members:

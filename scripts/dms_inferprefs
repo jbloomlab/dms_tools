@@ -8,6 +8,7 @@ Written by Jesse Bloom."""
 import sys
 import os
 import logging
+import dms_tools.utils
 import dms_tools.parsearguments
 import dms_tools.file_io
 import dms_tools.mcmc
@@ -49,52 +50,59 @@ def main():
 
         # read in the counts
         if args['chartype'].lower() == 'codon_to_aa':
-            chartype = 'codons'
+            chartype = 'codon'
             transform_to_aa = True
+            characters = dms_tools.codons
+            if args['includestop']:
+                aas = dms_tools.aminoacids_withstop
+            else:
+                aas = dms_tools.aminoacids_nostop
         elif args['chartype'].lower() == 'codon':
             chartype = 'codons'
             transform_to_aa = False
+            characters = dms_tools.codons
         elif args['chartype'].upper() == 'DNA':
             chartype = 'DNA'
             transform_to_aa = False
+            characters = dms_tools.nts
         else:
             raise ValueError("Invalid chartype of %s" % args['chartype'])
         counts_files = {'nrpre':args['n_pre'], 'nrpost':args['n_post']}
-        errmodel = errmodel.split()
-        if errmodel[0].lower() == 'none':
-            assert len(errmodel) == 1, "If errmodel is none there should not be further files specified for this argument"
-            errmodel = errmodel[0]
-        elif errmodel[0].lower() == 'same':
-            assert len(errmodel) == 2, "If errmodel is same then there should be exactly one file specified with the error control counts"
-            counts_files['nrerr'] = errmodel[1]
-            errmodel = errmodel[0]
-        elif errmodel[0].lower() == 'different':
-            assert len(errmodel) == 3, "If errmodel is same then there should be exactly two files specified with the error control counts"
-            counts_files['nrerrpre'] = errmodel[1]
-            counts_files['nrerrpost'] = errmodel[2]
-            errmodel = errmodel[0]
+        if args['errpre'].lower() == args['errpost'].lower() == 'none':
+            error_model = 'none'
+        elif args['errpre'] == args['errpost']:
+            error_model = 'same'
+            counts_files['nrerr'] = args['errpre']
+        elif args['errpre'].lower() == 'none' or args['errpost'].lower() == 'none':
+            raise ValueError("Either --errpre and --errpost must both be 'none', or they must both NOT be 'none'")
         else:
-            raise ValueError("Invalid value for errmodel")
-        counts = {}
-        sites = None
-        wts = {}
-        for (key, fname) in counts_files.iteritems():
-            assert os.path.isfile(fname), "Cannot find file %s" % fname
-            counts[key] = dms_utils.file_io.ReadDMSCounts(fname, chartype)
-            if sites == None:
-                sites = counts[key].values()
-                assert sites, "%s does not specify information for any sites" % fname
-                sites.sort()
-                wts[r] = [counts[key][r]['WT'] for r in sites]
-                logger.info('There are counts for %d sites, which are:\n%s' % (len(sites), '\n'.join(['\t%s (wiltype identity of %s)' % (r, wts[r]) for r in sites])))
-            else:
-                if set(sites) != set(counts[key].values()):
-                    raise ValueError("Not all of the counts files have the same set of sites")
-                for r in sites:
-                    if wts[r] != counts[key][r]['WT']:
-                        raise ValueError("The counts files are not consisten on the wildtype identity for site %s" % r)
+            error_model = 'different'
+            counts_files['nrerrpre'] = args['errpre']
+            counts_files['nrerrpost'] = args['errpost']
+        (sites, wts, counts) = dms_tools.file_io.ReadMultipleDMSCountsFiles(counts_files.values(), chartype)
+        logger.info('There are counts for %d sites, which are:\n%s' % (len(sites), '\n'.join(['\t%s (wildtype identity of %s)' % (r, wts[r]) for r in sites])))
+        counts = dict([(name, counts[counts_files[name]]) for name in counts_files.iterkeys()]) # make names count type rather than file
 
-        # compute average mutation and error rates for priors
+        # set up priors
+        if error_model == 'none':
+            avgmu = sum([dms_tools.utils.AvgMutRate(counts['nrpre'], chartype)[m] for m in range(1, len(characters[0]) + 1)]) 
+            logger.info('Average per-site mutation rate: %g' % avgmu)
+        elif error_model == 'same':
+            avgepsilon = dms_tools.utils.AvgMutRate(counts['nrerr'], chartype)
+            logger.info('Average per-site error rate: %s' % ', '.join(['%g for characters that require %d nucleotide changes' % (avgepsilon[m], m) for m in range(1, len(characters[0]))]))
+            avgmu = sum([dms_tools.utils.AvgMutRate(counts['nrpre'], chartype)[m] for m in range(1, len(characters[0]) + 1)])  - sum([avgepsilon[m] for m in range(1, len(characters[0]) + 1)])
+            logger.info('Average per-site mutation rate: %g' % avgmu)
+        elif error_model == 'different':
+            avgepsilon = dms_tools.utils.AvgMutRate(counts['nrerrpre'], chartype)
+            logger.info('Average per-site error rate in pre-selection control: %s' % ', '.join(['%g for characters that require %d nucleotide changes' % (avgepsilon[m], m) for m in range(1, len(characters[0]) + 1)]))
+            avgmu = sum([dms_tools.utils.AvgMutRate(counts['nrpre'], chartype)[m] for m in range(1, len(characters[0]) + 1)])  - sum([avgepsilon[m] for m in range(1, len(characters[0]) + 1)])
+            logger.info('Average per-site mutation rate: %g' % avgmu)
+            avgrho = dms_tools.utils.AvgMutRate(counts['nrerrpost'], chartype)
+            logger.info('Average per-site error rate in post-selection control: %s' % ', '.join(['%g for characters that require %d nucleotide changes' % (avgrho[m], m) for m in range(1, len(characters[0]) + 1)]))
+        else:
+            raise ValueError("Invalid error_model %s" % error_model)
+        if avgmu <= 0:
+            raise ValueError("Average mutation rate of %g is <= 0. Either there are no mutations or the error control has a higher mutation rate than the pre-selection library. Either one is an irresolvable problem." % avgmu)
 
 
     finally:
