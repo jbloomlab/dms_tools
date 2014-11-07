@@ -326,10 +326,11 @@ is given by the product of Equations :eq:`pr_nrpre`,
 implemented by `PyStan`_ 
 to sample from this posterior distribution. We
 monitor for convergence of the sampling of the site-specific preferences
- by running three chains, and ensuring that the potential scale
+ by running four chains, and ensuring that the mean over all :math:`\pi_{r,x}`
+values of the potential scale
 reduction statistic :math:`\hat{R}` of `GelmanRubin1992`_ is :math:`\le 1.05` and that the
-effective sample size is :math:`\ge 200` (the number of steps is
-increased until convergence occurs). The inferred preferences are
+mean effective sample size is :math:`\ge 100`. We repeatedly increase the number of steps (starting with :math:`10^4` per chain)
+until convergence occurs. The inferred preferences are
 summarized by the posterior mean and median-centered 95% credible
 interval for each :math:`\pi_{r,x}`.
 

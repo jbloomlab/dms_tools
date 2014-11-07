@@ -229,7 +229,7 @@ def _InitialValuePreferences(error_model, nchains, iwtchar, nchars):
 
 
 
-def InferSitePreferences(characterlist, wtchar, error_model, counts, priors, n_jobs=1, seed=1, r_max=1.05, neff_min=200, nchains=3, niter=2000, increasefactor=2, increasetries=6):
+def InferSitePreferences(characterlist, wtchar, error_model, counts, priors, n_jobs=1, seed=1, r_max=1.05, neff_min=100, nchains=4, niter=10000, increasefactor=2, increasetries=6, logger=None):
     """Infers site-specific preferences by MCMC for a specific site.
 
     Uses MCMC to infer the site-specific preferences :math:`\pi_{r,a}` for some site
@@ -320,14 +320,18 @@ def InferSitePreferences(characterlist, wtchar, error_model, counts, priors, n_j
 
         * The following parameters specify how the MCMC tries to guarantee convergence.
           They all have reasonable default values, so you probably don't need to change them.
-          The MCMC is considered to have converged if for all :math:`\pi_{r,a}` values,
-          both the Gelman-Rubin R statistic (http://www.jstor.org/stable/2246093)
-          has a value less than or equal to *r_max* and the effective sample size
+          The MCMC is considered to have converged if the mean Gelman-Rubin R
+          statistic (http://www.jstor.org/stable/2246093) over all :math:`\pi_{r,x}`
+          values is less than or equal to *r_max*, and the mean effective sample size
           is greater than or equal to *neff_min*. The MCMC first runs with *nchains*
           chains and *niter* iterations. If it fails to converge, it then increases
           the number of iterations by a factor of *increasefactor* and tries again,
-          and repeats this process until it converges or until it has tried *increasetries*
+          and repeats until it converges or until it has tried *increasetries*
           times to increase the number of iterations.
+
+        * *logger* is *None* or a a *logging* logger (as returned by 
+          *logging.getLogger*). If it is a logger, then information is
+          written at the *logging.INFO* level to update on progress.
 
     The return values are as follows:
 
@@ -383,9 +387,14 @@ def InferSitePreferences(characterlist, wtchar, error_model, counts, priors, n_j
         neffindex = colnames.index('n_eff')
         rlist = [summary[char_row_indices[char]][rindex] for char in characterlist]
         nefflist = [summary[char_row_indices[char]][neffindex] for char in characterlist]
-        if (max(rlist) <= r_max) and (min(nefflist) >= neff_min):
+        rmean = sum(rlist) / float(len(rlist))
+        neffmean = sum(nefflist) / float(len(nefflist))
+        if logger:
+            logger.info('After %d MCMC chains each of %d steps, the mean R = %.2f and the mean Neff = %d' % (nchains, niter, rmean, neffmean))
+        if (rmean <= r_max) and (neffmean >= neff_min):
             # converged
-            #print "DEBUGGING: Converged with %d iterations, max R = %g and min Neff = %g" % (niter, max(rlist), min(nefflist))
+            if logger:
+                logger.info('MCMC is deemed to have converged.')
             meanindex = colnames.index('mean')
             lower95index = colnames.index('2.5%')
             upper95index = colnames.index('97.5%')
@@ -394,11 +403,14 @@ def InferSitePreferences(characterlist, wtchar, error_model, counts, priors, n_j
             return (pi_means, pi_95credint)
         else:
             # failed to converge
-            #print "DEBUGGING: Failed to converge with %d iterations, max R = %g and min Neff = %g" % (niter, max(rlist), min(nefflist))
             if ntry < increasetries:
                 ntry += 1
                 niter = int(niter * increasefactor)
+                if logger:
+                    logger.info("MCMC failed to converge. Doing retry %d with %d iterations per chain." % (ntry, niter))
             else:
+                if logger:
+                    logger.info("MCMC failed to converge. No more tries, so we have FAILED.")
                 return False # failed to converge after trying step increases
 
 

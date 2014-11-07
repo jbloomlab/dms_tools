@@ -12,6 +12,8 @@ Defined in this module
 
 * *ArgumentParserNoArgHelp* : argument parser that prints help when no args
 
+* *FloatGreaterThanZero* : parses whether string is float greater than zero.
+
 * *InferPrefsParser* : parser for ``dms_inferprefs``
 
 
@@ -35,6 +37,31 @@ class ArgumentParserNoArgHelp(argparse.ArgumentParser):
         sys.exit(2)
 
 
+def FloatGreaterThanZero(x):
+    """If *x* is string for float > 0, returns it, otherwise an error.
+
+    Designed based on this: http://stackoverflow.com/questions/12116685/how-can-i-require-my-python-scripts-argument-to-be-a-float-between-0-0-1-0-usin
+
+    >>> print "%.3f" % FloatGreaterThanZero('0.1')
+    0.100
+
+    >>> FloatGreaterThanZero('0.0')
+    Traceback (most recent call last):
+        ...
+    ArgumentTypeError: 0.0 not a float greater than zero
+
+    >>> FloatGreaterThanZero('hi')
+    Traceback (most recent call last):
+        ...
+    ValueError: could not convert string to float: hi
+    """
+    x = float(x)
+    if x > 0:
+        return x
+    else:
+        raise argparse.ArgumentTypeError("%r not a float greater than zero" % x)
+
+
 def InferPrefsParser():
     """Returns *argparse.ArgumentParser* for ``dms_inferprefs`` script."""
     parser = ArgumentParserNoArgHelp(description='Infer site-specific preferences for amino acids, nucleotides, or codons. This script is part of %s (version %s) written by %s. Detailed documentation is at %s' % (dms_tools.__name__, dms_tools.__version__, dms_tools.__author__, dms_tools.__url__), formatter_class=argparse.ArgumentDefaultsHelpFormatter)
@@ -45,9 +72,9 @@ def InferPrefsParser():
     parser.add_argument('--errpre', default='none', help='Control used to estimate errors in counts from "n_pre". If "none" then the counts in "n_pre" are assumed to have no errors; otherwise this should be a counts file with the same format as "n_pre" giving the counts for sequencing unmutated gene. Currently if this option is not "none" then --errpost also cannot be "none".')
     parser.add_argument('--errpost', default='none', help='Control used to estimate errors in counts from "n_post". If "none" then the counts in "n_post" are assumed to have no errors; otherwise this should be a counts file with the same format as "n_pre" giving the counts for sequencing unmutated gene. If you have the same error control for "n_pre" and "n_post", then set that file name for both this option and --errpre. Currently if this option is not "none" then --errpre also cannot be "none".')
     parser.add_argument('--includestop', help='Are stop codons considered a possible amino acid if using "--chartype codon_to_aa"? Valid values are "True" or "False".', type=bool, default='True')
-    parser.add_argument('--pi_alpha', help='Concentration parameter for Dirichlet prior over preferences (pi).', default=1.0, type=float)
-    parser.add_argument('--mu_alpha', help='Concentration parameter for Dirichlet prior over mutagenesis rate (mu).', default=1.0, type=float)
-    parser.add_argument('--err_alpha', help='Concentration parameter for Dirichlet priors over error rates (epsilon, rho).', default=1.0, type=float)
+    parser.add_argument('--pi_alpha', help='Concentration parameter for Dirichlet prior over preferences (pi).', default=1.0, type=FloatGreaterThanZero)
+    parser.add_argument('--mu_alpha', help='Concentration parameter for Dirichlet prior over mutagenesis rate (mu).', default=1.0, type=FloatGreaterThanZero)
+    parser.add_argument('--err_alpha', help='Concentration parameter for Dirichlet priors over error rates (epsilon, rho).', default=1.0, type=FloatGreaterThanZero)
     parser.add_argument('--logfile', help='Log progress to this file; overwritten if it already exists.', default='Base name of "outfile" with extension ".log"')
     parser.add_argument('--ncpus', default=1, help='Number of CPUs to use.', type=int)
     parser.add_argument('--seed', default=1, help='Random number seed.', type=int)

@@ -29,14 +29,17 @@ The following variables are defined for this package:
 
 * *codons* : a list of the 64 codons as upper-case three-letter strings.
 
+* *codon_to_aa* : dictionary keyed by codons in *codons*, values are amino acids.
+
 """
 from _metadata import __version__
 from _metadata import __author__
 from _metadata import __author_email__
 from _metadata import __url__
-import Bio.Alphabet.IUPAC
 
 # lists of upper case DNA nucleotides and codons
+import Bio.Alphabet.IUPAC
+import Bio.Seq
 aminoacids = [aa.upper() for aa in Bio.Alphabet.IUPAC.IUPACProtein.letters]
 aminoacids.sort()
 aminoacids_nostop = aminoacids
@@ -49,3 +52,4 @@ for nt1 in nts:
     for nt2 in nts:
         for nt3 in nts:
             codons.append('%s%s%s' % (nt1, nt2, nt3))
+codon_to_aa = dict([(codon, str(Bio.Seq.Seq(codon).translate())) for codon in codons])

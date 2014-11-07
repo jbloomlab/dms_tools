@@ -69,7 +69,9 @@ Command-line usage
 
 Output
 ----------
-The inferred preferences are in the :ref:`preferences_file` specified by ``outfile``. A summary of the progress is in the file specified by ``logfile``. In addition, some information will be written to standard output. You should **not** be concerned if this information includes some warnings from `PyStan`_ about convergence -- the program automatically tests for convergence as described in :ref:`MCMC_inference`. The program will stop with an error if the inference cannot converge. Unless that happens, the warnings don't indicate a problem, as the `MCMC`_ will continue to add steps until there is convergence.
+The inferred preferences are in the :ref:`preferences_file` specified by ``outfile``. A summary of the progress is in the file specified by ``logfile``. In addition, some information will be written to standard output. You should **not** be concerned if this information includes some warnings from `PyStan`_ about convergence -- the program automatically tests for convergence as described in :ref:`MCMC_inference`, and will terminate with an error in the unlikely case it doesn't converge.
+
+Becase standard output will include lots of informational messages from `PyStan`_ that obscure what is happening, it will be more informative to track the progress by watching ``logfile``.
 
 Examples
 -----------

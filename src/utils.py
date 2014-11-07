@@ -14,6 +14,8 @@ Functions in this module
 
 * *AvgMutRate* : Returns the average mutation rate across all sites.
 
+* *SumCodonToAA* : Sums all codon entries for each amino acid.
+
 Function documentation
 ---------------------------
 
@@ -106,6 +108,57 @@ def AvgMutRate(counts, chartype):
     assert abs(sum(epsilon.values()) - 1.0) < 1.0e-5, "Sum of mutrates is not close to one: %g" % (sum(epsilon.values()))
     return epsilon
 
+
+def SumCodonToAA(codondict, includestop=True):
+    """Sums all codon entries for each amino acid.
+
+    *codondict* is a dictionary keyed by all codons (*dms_tools.codons*).
+    The values should be numbers.
+
+    *includestop* specifies whether we also sum values for stop codons to
+    give an entry for ``*`` (the stop codon). Do this only if has default
+    value of *True*.
+
+    The return value is *aadict* which is keyed by all amino acids and
+    has values equal to the sum of the entries for the encoding
+    codons in *codondict*.
+
+    >>> codondict = dict([(codon, 0) for codon in dms_tools.codons])
+    >>> codondict['GGG'] = 0.1
+    >>> codondict['GGA'] = 0.2
+    >>> codondict['TGA'] = 0.3
+    >>> codondict['CCC'] = 0.4
+    >>> aadict = SumCodonToAA(codondict)
+    >>> print "%.2f" % aadict['G']
+    0.30
+    >>> print "%.2f" % aadict['P']
+    0.40
+    >>> print "%.2f" % aadict['*']
+    0.30
+    >>> print "%.2f" % aadict['Y']
+    0.00
+    >>> aadict = SumCodonToAA(codondict, includestop=False)
+    >>> print "%.2f" % aadict['G']
+    0.30
+    >>> print "%.2f" % aadict['P']
+    0.40
+    >>> print "%.2f" % aadict['*']
+    Traceback (most recent call last):
+        ...
+    KeyError: '*'
+    >>> print "%.2f" % aadict['Y']
+    0.00
+    """
+    if includestop:
+        aas = dms_tools.aminoacids_withstop
+    else:
+        aas = dms_tools.aminoacids_nostop
+    aadict = dict([(aa, 0) for aa in aas])
+    for codon in dms_tools.codons:
+        aa = dms_tools.codon_to_aa[codon]
+        if aa in aas:
+            aadict[aa] += codondict[codon]
+    return aadict
 
 
 if __name__ == '__main__':
