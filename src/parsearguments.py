@@ -76,7 +76,7 @@ def InferPrefsParser():
     parser.add_argument('--mu_alpha', help='Concentration parameter for Dirichlet prior over mutagenesis rate (mu).', default=1.0, type=FloatGreaterThanZero)
     parser.add_argument('--err_alpha', help='Concentration parameter for Dirichlet priors over error rates (epsilon, rho).', default=1.0, type=FloatGreaterThanZero)
     parser.add_argument('--logfile', help='Log progress to this file; overwritten if it already exists.', default='Base name of "outfile" with extension ".log"')
-    parser.add_argument('--ncpus', default=1, help='Number of CPUs to use.', type=int)
+    parser.add_argument('--ncpus', default=1, help='Number of CPUs to use; set to -1 to use all available CPUs.', type=int)
     parser.add_argument('--seed', default=1, help='Random number seed.', type=int)
     parser.add_argument('--version', action='version', version='%(prog)s {version}'.format(version=dms_tools.__version__))
     return parser

@@ -7,15 +7,18 @@ Module that performs MCMC to infer preferences and differential preferences.
 
 MCMC done using ``Stan`` (http://mc-stan.org/) via ``pystan``.
 
-The first time some of the functions in this module are run, the ``pystan`` code
-will be compiled, which will take some time.
-
 Written by Jesse Bloom.
 
 Functions in this module
 ----------------------------------
 
 * *InferSitePreferences* : use MCMC to infer site-specific preferences.
+
+* *StanModelNoneErr* : ``pystan`` model used by *InferSitePreferences*.
+
+* *StanModelSameErr* : ``pystan`` model used by *InferSitePreferences*.
+
+* *StanModelDifferentErr* : ``pystan`` model used by *InferSitePreferences*.
 
 
 Function documentation
@@ -26,6 +29,7 @@ Function documentation
 
 import sys
 import tempfile
+import time
 import numpy
 import numpy.random
 import pystan
@@ -35,8 +39,10 @@ PRIOR_MIN_VALUE = 1.0e-7 # minimum value for Dirichlet prior elements
 
 
 # StanModel when the error rates are zero
-class _StanModelNoneErr:
-    pystancode =\
+class StanModelNoneErr(object):
+    """PyStan model for *error_model* of 'none' for *InferSitePreferences*."""
+    def __init__(self):
+        self.pystancode =\
 """
 data {
     int<lower=1> Nchar; // 64 for codons, 20 for amino acids, 4 for nucleotides
@@ -60,16 +66,13 @@ model {
     nrpost ~ multinomial(fr);
 }
 """ % (PRIOR_MIN_VALUE, PRIOR_MIN_VALUE)
-    stanmodel = None
-    @classmethod
-    def Model(cls):
-        if not cls.stanmodel:
-            cls.stanmodel = pystan.StanModel(model_code=cls.pystancode)
-        return cls.stanmodel
+        self.model = pystan.StanModel(model_code=self.pystancode)
 
 # StanModel when same error rate for pre and post-selection libraries
-class _StanModelSameErr:
-    pystancode =\
+class StanModelSameErr:
+    """PyStan model for *error_model* of 'same' for *InferSitePreferences*."""
+    def __init__(self):
+        self.pystancode =\
 """
 data {
     int<lower=1> Nchar; // 64 for codons, 20 for amino acids, 4 for nucleotides
@@ -108,16 +111,13 @@ model {
     nrpost ~ multinomial(fr_plus_err);
 }
 """ % (PRIOR_MIN_VALUE, PRIOR_MIN_VALUE, PRIOR_MIN_VALUE)
-    stanmodel = None
-    @classmethod
-    def Model(cls):
-        if not cls.stanmodel:
-            cls.stanmodel = pystan.StanModel(model_code=cls.pystancode)
-        return cls.stanmodel
+        self.model = pystan.StanModel(model_code=self.pystancode)
 
 # StanModel when different error rates for pre and post-selection libraries
-class _StanModelDifferentErr:
-    pystancode =\
+class StanModelDifferentErr:
+    """PyStan model for *error_model* of 'different' for *InferSitePreferences*."""
+    def __init__(self):
+        self.pystancode =\
 """
 data {
     int<lower=1> Nchar; // 64 for codons, 20 for amino acids, 4 for nucleotides
@@ -161,12 +161,7 @@ model {
     nrpost ~ multinomial(fr_plus_err);
 }
 """ % (PRIOR_MIN_VALUE, PRIOR_MIN_VALUE, PRIOR_MIN_VALUE, PRIOR_MIN_VALUE)
-    stanmodel = None
-    @classmethod
-    def Model(cls):
-        if not cls.stanmodel:
-            cls.stanmodel = pystan.StanModel(model_code=cls.pystancode)
-        return cls.stanmodel
+        self.model = pystan.StanModel(model_code=self.pystancode)
 
 
 def _InitialValuePreferences(error_model, nchains, iwtchar, nchars):
@@ -202,7 +197,7 @@ def _InitialValuePreferences(error_model, nchains, iwtchar, nchars):
     elif error_model == 'different':
         posterrname = 'rhor'
     else:
-        raise ValueError("Invalid error_model of %s" % error_model)
+        raise ValueError("Invalid error_model of %s when getting initial values" % error_model)
     for chain in range(nchains):
         for iattempt in range(initializationattempts):
             chain_init = {\
@@ -229,7 +224,7 @@ def _InitialValuePreferences(error_model, nchains, iwtchar, nchars):
 
 
 
-def InferSitePreferences(characterlist, wtchar, error_model, counts, priors, n_jobs=1, seed=1, r_max=1.05, neff_min=100, nchains=4, niter=10000, increasefactor=2, increasetries=6, logger=None):
+def InferSitePreferences(characterlist, wtchar, error_model, counts, priors, seed=1, n_jobs=1, r_max=1.05, neff_min=100, nchains=4, niter=10000, increasefactor=2, increasetries=6):
     """Infers site-specific preferences by MCMC for a specific site.
 
     Uses MCMC to infer the site-specific preferences :math:`\pi_{r,a}` for some site
@@ -270,7 +265,8 @@ def InferSitePreferences(characterlist, wtchar, error_model, counts, priors, n_j
         * *wtchar* is a character that is in *characterlist* and defines the wildtype
           character at the site.
 
-        * *error_model* is a string specifying how the errors are estimated:
+        * *error_model* specifies how the errors are estimated. It might
+          be one of the following strings:
 
               - *none* : no errors (:math:`\\boldsymbol{\mathbf{\epsilon_r}} = \\boldsymbol{\mathbf{\\rho_r}} = \mathbf{0}`)
 
@@ -279,6 +275,14 @@ def InferSitePreferences(characterlist, wtchar, error_model, counts, priors, n_j
 
               - *different* : different error rates for pre and post
                 selection (:math:`\\boldsymbol{\mathbf{\epsilon_r}} \\ne \\boldsymbol{\mathbf{\\rho_r}}`).
+
+          Alternatively, it could be an instance of *StanModelNoneErr*, 
+          *StanModelSameErr*, or *StanModelDifferentErr*. These are the
+          ``pystan`` models that implement the three strings described above.
+          If you pass these model objects, then they will not need to be
+          compiled by this function (strings require models to be compiled).
+          So it is advantageous to pass the ``pystan`` models rather than
+          the strings if calling this function repeatedly.
 
         * *counts* is a dictionary specifying the deep sequencing counts.
           Each string key should specify a dictionary keyed by all characters
@@ -312,11 +316,11 @@ def InferSitePreferences(characterlist, wtchar, error_model, counts, priors, n_j
           Any values less than *PRIOR_MIN_VALUE* (a constant specified in this module)
           are automatically set to *PRIOR_MIN_VALUE*.
 
-        * *n_jobs* : The number of CPUs to use. If -1, use all available CPUs.
-
         * *seed* : integer seed for MCMC. Calling multiple times with same *seed*
           and data will give identical results provided architecture for floating
           point math on the computer is also the same.
+
+        * *n_jobs* : The number of CPUs to use. If -1, use all available CPUs.
 
         * The following parameters specify how the MCMC tries to guarantee convergence.
           They all have reasonable default values, so you probably don't need to change them.
@@ -329,24 +333,22 @@ def InferSitePreferences(characterlist, wtchar, error_model, counts, priors, n_j
           and repeats until it converges or until it has tried *increasetries*
           times to increase the number of iterations.
 
-        * *logger* is *None* or a a *logging* logger (as returned by 
-          *logging.getLogger*). If it is a logger, then information is
-          written at the *logging.INFO* level to update on progress.
+    The return values is: *(converged, pi_means, pi_95credint, logstring)*.
+    The entries in this tuple have the following meanings:
 
-    The return values are as follows:
+        - *converged* is *True* if the MCMC converges and *False* otherwise.
 
-        * If the MCMC **fails** to converge, then the return value is *False*.
+        - *pi_means* is a dictionary keyed by all characters in *characterlist*
+          with the value for each character giving the :math:`\pi_{r,a}` value.
 
-        * If the MCMC successfully converges, then the return value is the 2-tuple
-          *(pi_means, pi_95credint)* where
+        - *pi_95credint* is a dictionary keyed by all characters in *characterlist*
+          with the value being a 2-tuple giving the lower and upper limits on the
+          median-centered credible interval for :math:`\pi_{r,a}`.
 
-            - *pi_means* is a dictionary keyed by all characters in *characterlist*
-              with the value for each character giving the :math:`\pi_{r,a}` value.
-
-            - *pi_95credint* is a dictionary keyed by all characters in *characterlist*
-              with the value being a 2-tuple giving the lower and upper limits on the
-              median-centered credible interval for :math:`\pi_{r,a}`.
+        - *logstring* is a string that can be printed to give summary information
+          about the MCMC run and its convergence.
     """
+    logstring = ['\tBeginning MCMC at %s' % time.asctime()]
     numpy.random.seed(seed)
     assert nchains >= 2, "nchains must be at least two"
     assert niter >= 100, "niter must be at least 100"
@@ -358,13 +360,24 @@ def InferSitePreferences(characterlist, wtchar, error_model, counts, priors, n_j
     data['pir_prior_params'] = [max(PRIOR_MIN_VALUE, priors['pir_prior_params'][char]) for char in characterlist]
     data['mur_prior_params'] = [max(PRIOR_MIN_VALUE, priors['mur_prior_params'][char]) for char in characterlist]
     if error_model == 'none':
-        sm = _StanModelNoneErr.Model()
-    elif error_model == 'same':
-        sm = _StanModelSameErr.Model()
+        sm = StanModelNoneErr().model
+    elif isinstance(error_model, StanModelNoneErr):
+        sm = error_model.model
+        error_model = 'none'
+    elif error_model == 'same' or isinstance(error_model, StanModelSameErr):
+        if error_model == 'same':
+            sm = StanModelSameErr().model
+        else:
+            sm = error_model.model
+            error_model = 'same'
         data['nrerr'] = [counts['nrerr'][char] for char in characterlist]
         data['epsilonr_prior_params'] = [max(PRIOR_MIN_VALUE, priors['epsilonr_prior_params'][char]) for char in characterlist]
-    elif error_model == 'different':
-        sm = _StanModelDifferentErr.Model()
+    elif error_model == 'different' or isinstance(error_model, StanModelDifferentErr):
+        if error_model == 'different':
+            sm = StanModelDifferentErr().model
+        else:
+            sm = error_model.model
+            error_model = 'different'
         data['nrerrpre'] = [counts['nrerrpre'][char] for char in characterlist]
         data['nrerrpost'] = [counts['nrerrpost'][char] for char in characterlist]
         data['epsilonr_prior_params'] = [max(PRIOR_MIN_VALUE, priors['epsilonr_prior_params'][char]) for char in characterlist]
@@ -389,29 +402,30 @@ def InferSitePreferences(characterlist, wtchar, error_model, counts, priors, n_j
         nefflist = [summary[char_row_indices[char]][neffindex] for char in characterlist]
         rmean = sum(rlist) / float(len(rlist))
         neffmean = sum(nefflist) / float(len(nefflist))
-        if logger:
-            logger.info('After %d MCMC chains each of %d steps, the mean R = %.2f and the mean Neff = %d' % (nchains, niter, rmean, neffmean))
+        logstring.append('\tAfter %d MCMC chains each of %d steps, mean R = %.2f and mean Neff = %d' % (nchains, niter, rmean, neffmean))
         if (rmean <= r_max) and (neffmean >= neff_min):
             # converged
-            if logger:
-                logger.info('MCMC is deemed to have converged.')
+            logstring.append('\tMCMC is deemed to have converged at %s.' % time.asctime())
             meanindex = colnames.index('mean')
             lower95index = colnames.index('2.5%')
             upper95index = colnames.index('97.5%')
             pi_means = dict([(char, summary[char_row_indices[char]][meanindex]) for char in characterlist])
             pi_95credint = dict([(char, (summary[char_row_indices[char]][lower95index], summary[char_row_indices[char]][upper95index])) for char in characterlist])
-            return (pi_means, pi_95credint)
+            return (True, pi_means, pi_95credint, '\n'.join(logstring))
         else:
             # failed to converge
             if ntry < increasetries:
                 ntry += 1
                 niter = int(niter * increasefactor)
-                if logger:
-                    logger.info("MCMC failed to converge. Doing retry %d with %d iterations per chain." % (ntry, niter))
+                logstring.append("\tMCMC failed to converge. Doing retry %d with %d iterations per chain." % (ntry, niter))
             else:
-                if logger:
-                    logger.info("MCMC failed to converge. No more tries, so we have FAILED.")
-                return False # failed to converge after trying step increases
+                logstring.append("\tMCMC FAILED to converge after all attempts at %s." % time.asctime())
+                meanindex = colnames.index('mean')
+                lower95index = colnames.index('2.5%')
+                upper95index = colnames.index('97.5%')
+                pi_means = dict([(char, summary[char_row_indices[char]][meanindex]) for char in characterlist])
+                pi_95credint = dict([(char, (summary[char_row_indices[char]][lower95index], summary[char_row_indices[char]][upper95index])) for char in characterlist])
+                return (False, pi_means, pi_95credint, '\n'.join(logstring))
 
 
 if __name__ == '__main__':

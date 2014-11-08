@@ -57,7 +57,7 @@ def main():
     if not failurestrings:
         sys.stderr.write('\nTesting complete. All tests were passed successfully.\n')
     else:
-        syst.stderr.write('\nTesting complete. Failed on the following tests:\n')
+        sys.stderr.write('\nTesting complete. Failed on the following tests:\n')
         for failstring in failurestrings:
             sys.stderr.write('\n*****************\n%s\n\n****************\n' % failstring)
 

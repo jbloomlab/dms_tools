@@ -7,7 +7,9 @@ Written by Jesse Bloom."""
 
 import sys
 import os
+import multiprocessing
 import logging
+import time
 import dms_tools.utils
 import dms_tools.parsearguments
 import dms_tools.file_io
@@ -43,10 +45,10 @@ def main():
 
     # begin execution
     try:
-        logger.info('Beginning execution of %s.' % prog)
-        logger.info('Progress is being logged to %s' % args['logfile'])
+        logger.info('Beginning execution of %s in directory %s\n' % (prog, os.getcwd()))
+        logger.info('Progress is being logged to %s\n' % args['logfile'])
         logger.info(versionstring)
-        logger.info('Parsed the following arguments:\n%s' % '\n'.join(['\t%s = %s' % tup for tup in args.iteritems()]))
+        logger.info('Parsed the following arguments:\n%s\n' % '\n'.join(['\t%s = %s' % tup for tup in args.iteritems()]))
 
         # read in the counts
         if args['chartype'].lower() == 'codon_to_aa':
@@ -72,18 +74,21 @@ def main():
             raise ValueError("Invalid chartype of %s" % args['chartype'])
         counts_files = {'nrpre':args['n_pre'], 'nrpost':args['n_post']}
         if args['errpre'].lower() == args['errpost'].lower() == 'none':
+            pystan_error_model = dms_tools.mcmc.StanModelNoneErr
             error_model = 'none'
         elif args['errpre'] == args['errpost']:
+            pystan_error_model = dms_tools.mcmc.StanModelSameErr
             error_model = 'same'
             counts_files['nrerr'] = args['errpre']
         elif args['errpre'].lower() == 'none' or args['errpost'].lower() == 'none':
             raise ValueError("Either --errpre and --errpost must both be 'none', or they must both NOT be 'none'")
         else:
+            pystan_error_model = dms_tools.mcmc.StanModelDifferentErr
             error_model = 'different'
             counts_files['nrerrpre'] = args['errpre']
             counts_files['nrerrpost'] = args['errpost']
         (sites, wts, counts) = dms_tools.file_io.ReadMultipleDMSCountsFiles(counts_files.values(), chartype)
-        logger.info('There are counts for %d sites, which are:\n%s' % (len(sites), '\n'.join(['\t%s (wildtype identity of %s)' % (r, wts[r]) for r in sites])))
+        logger.info('There are counts for %d sites, which are:\n%s\n' % (len(sites), '\n'.join(['\t%s (wildtype identity of %s)' % (r, wts[r]) for r in sites])))
         counts = dict([(name, counts[counts_files[name]]) for name in counts_files.iterkeys()]) # make names count type rather than file
 
         # compute mutation rates for priors
@@ -92,25 +97,35 @@ def main():
             logger.info('Average per-site mutation rate: %g' % avgmu)
         elif error_model == 'same':
             avgepsilon = dms_tools.utils.AvgMutRate(counts['nrerr'], chartype)
-            logger.info('Average per-site error rate:\n%s' % '\n'.join(['\t%g for characters that require %d nucleotide changes' % (avgepsilon[m], m) for m in range(1, charlength + 1)]))
+            logger.info('Average per-site error rate:\n%s\n' % '\n'.join(['\t%g for characters that require %d nucleotide changes' % (avgepsilon[m], m) for m in range(1, charlength + 1)]))
             avgmu = sum([dms_tools.utils.AvgMutRate(counts['nrpre'], chartype)[m] for m in range(1, charlength + 1)])  - sum([avgepsilon[m] for m in range(1, charlength + 1)])
             logger.info('Average per-site mutation rate: %g' % avgmu)
         elif error_model == 'different':
             avgepsilon = dms_tools.utils.AvgMutRate(counts['nrerrpre'], chartype)
-            logger.info('Average per-site error rate in pre-selection control:\n%s' % '\n'.join(['\t%g for characters that require %d nucleotide changes' % (avgepsilon[m], m) for m in range(1, charlength + 1)]))
+            logger.info('Average per-site error rate in pre-selection control:\n%s\n' % '\n'.join(['\t%g for characters that require %d nucleotide changes' % (avgepsilon[m], m) for m in range(1, charlength + 1)]))
             avgmu = sum([dms_tools.utils.AvgMutRate(counts['nrpre'], chartype)[m] for m in range(1, charlength + 1)])  - sum([avgepsilon[m] for m in range(1, charlength + 1)])
-            logger.info('Average per-site mutation rate: %g' % avgmu)
+            logger.info('Average per-site mutation rate: %g\n' % avgmu)
             avgrho = dms_tools.utils.AvgMutRate(counts['nrerrpost'], chartype)
-            logger.info('Average per-site error rate in post-selection control:\n%s' % '\n'.join(['\t%g for characters that require %d nucleotide changes' % (avgrho[m], m) for m in range(1, charlength + 1)]))
+            logger.info('Average per-site error rate in post-selection control:\n%s\n' % '\n'.join(['\t%g for characters that require %d nucleotide changes' % (avgrho[m], m) for m in range(1, charlength + 1)]))
         else:
             raise ValueError("Invalid error_model %s" % error_model)
         if not 0 < avgmu < 1:
             raise ValueError("Average mutation rate of %g is not > 0 and < 1. Perhaps there are no mutations or the error control has a higher mutation rate than the pre-selection library. Either one is an irresolvable problem." % avgmu)
 
+        # begin inferring preferences, using a multiprocessing pool to enable multiple CPUs
+        logger.info('Compiling PyStan model...')
+        pystan_error_model = pystan_error_model()
+        logger.info('Completed compiling PyStan model.\n')
+        if args['ncpus'] == -1:
+            nprocesses = None
+        else:
+            nprocesses = args['ncpus']
+            assert nprocesses > 0, "Must specify at least one process"
+        pool = multiprocessing.Pool(nprocesses)
+        results = {}
+        logged = {}
         logger.info('Now beginning inference for each site...\n')
-        # begin inferring preferences
         for r in sites:
-            logger.info('Setting up priors for site %s' % r)
             rcounts = dict([(name, counts[name][r]) for name in counts.iterkeys()])
             wt = wts[r]
             nchars_with_m = dict([(m, 0) for m in range(charlength + 1)])
@@ -144,9 +159,23 @@ def main():
             for (name, alpha) in [('mur_prior_params', 'mu_alpha'), ('epsilonr_prior_params', 'err_alpha'), ('rhor_prior_params', 'err_alpha')]:
                 priors[name] = dict([(x, priors[name][x] * len(characters) * args[alpha]) for x in characters])
             priors['pir_prior_params'] = dict([(x, args['pi_alpha']) for x in characters])
-            logger.info('Beginning preference inference for site %s' % r)
-            (pi_means, pi_95credint) = dms_tools.mcmc.InferSitePreferences(characters, wt, error_model, rcounts, priors, seed=args['seed'], logger=logger)
-            logger.info('Completed preference inference for site %s\n' % r)
+            logged[r] = False
+            results[r] = pool.apply_async(dms_tools.mcmc.InferSitePreferences, (characters, wt, pystan_error_model, rcounts, priors, args['seed']))
+        while not all([logged[r] for r in sites]):
+            time.sleep(1) # wait a bit before polling again
+            for r in sites:
+                if results[r].ready() and not logged[r]:
+                    logged[r] = True
+                    logger.info('Getting results site %s...' % r)
+                    (converged, pi_means, pi_95credint, logstring) = results[r].get()
+                    logger.info('Finished inference for site %s. Here is the summary:\n%s\n' % (r, logstring))
+                    if not converged:
+                        raise RuntimeError("Preference inference MCMC failed to converge for site %s:\n%s" % (r, logstring))
+        pool.terminate()
+    except:
+        logger.exception('Terminating %s at %s with ERROR' % (prog, time.asctime()))
+    else:
+        logger.info('Successful completion of %s at %s' % (prog, time.asctime()))
     finally:
         logging.shutdown()
 

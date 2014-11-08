@@ -125,9 +125,8 @@ class TestInferSitePreferences(unittest.TestCase):
                         'nrpre':dict([(char, nrpre[i]) for (i, char) in enumerate(characterlist)]),\
                         'nrpost':dict([(char, nrpost[i]) for (i, char) in enumerate(characterlist)]),\
                         }
-                    returntup = dms_tools.mcmc.InferSitePreferences(characterlist, wtchar, 'none', counts, priors, n_jobs=self.n_jobs)
-                    self.assertTrue(returntup, 'MCMC inference of preferences failed to converge for no-errors data for %s at depth of %d for seed %d' % (charactertype, depth, seed))
-                    (pi_means, pi_95credint) = returntup
+                    (converged, pi_means, pi_95credint, logstring) = dms_tools.mcmc.InferSitePreferences(characterlist, wtchar, 'none', counts, priors, n_jobs=self.n_jobs)
+                    self.assertTrue(converged, 'MCMC inference of preferences failed to converge for no-errors data for %s at depth of %d for seed %d' % (charactertype, depth, seed))
                     inferred_pi = [pi_means[char] for char in characterlist]
                     diffsum = sum([abs(x - y) for (x, y) in zip(pir, inferred_pi)])
                     self.assertTrue(diffsum < maxdiffsum, 'MCMC inference of preferences had excessive large summed absolute difference of %g (max allowed is %g) from true values for no-errors data for %s at depth of %d for seed %d' % (diffsum, maxdiffsum, charactertype, depth, seed))
@@ -142,9 +141,8 @@ class TestInferSitePreferences(unittest.TestCase):
                         'nrpost':dict([(char, nrpost[i]) for (i, char) in enumerate(characterlist)]),\
                         'nrerr':dict([(char, nrerr[i]) for (i, char) in enumerate(characterlist)]),\
                         }
-                    returntup = dms_tools.mcmc.InferSitePreferences(characterlist, wtchar, 'same', counts, priors, n_jobs=self.n_jobs)
-                    self.assertTrue(returntup, 'MCMC inference of preferences failed to converge for same-errors data for %s at depth of %d for seed %d' % (charactertype, depth, seed))
-                    (pi_means, pi_95credint) = returntup
+                    (converged, pi_means, pi_95credint, logstring) = dms_tools.mcmc.InferSitePreferences(characterlist, wtchar, 'same', counts, priors, n_jobs=self.n_jobs)
+                    self.assertTrue(converged, 'MCMC inference of preferences failed to converge for same-errors data for %s at depth of %d for seed %d' % (charactertype, depth, seed))
                     inferred_pi = [pi_means[char] for char in characterlist]
                     diffsum = sum([abs(x - y) for (x, y) in zip(pir, inferred_pi)])
                     self.assertTrue(diffsum < maxdiffsum, 'MCMC inference of preferences had excessive large summed absolute difference of %g (max allowed is %g) from true values for same-errors data for %s at depth of %d for seed %d' % (diffsum, maxdiffsum, charactertype, depth, seed))
@@ -161,9 +159,8 @@ class TestInferSitePreferences(unittest.TestCase):
                         'nrerrpre':dict([(char, nrerrpre[i]) for (i, char) in enumerate(characterlist)]),\
                         'nrerrpost':dict([(char, nrerrpost[i]) for (i, char) in enumerate(characterlist)]),\
                         }
-                    returntup = dms_tools.mcmc.InferSitePreferences(characterlist, wtchar, 'different', counts, priors, n_jobs=self.n_jobs)
-                    self.assertTrue(returntup, 'MCMC inference of preferences failed to converge for different-errors data for %s at depth of %d for seed %d' % (charactertype, depth, seed))
-                    (pi_means, pi_95credint) = returntup
+                    (converged, pi_means, pi_95credint, logstring) = dms_tools.mcmc.InferSitePreferences(characterlist, wtchar, 'different', counts, priors, n_jobs=self.n_jobs)
+                    self.assertTrue(converged, 'MCMC inference of preferences failed to converge for different-errors data for %s at depth of %d for seed %d' % (charactertype, depth, seed))
                     inferred_pi = [pi_means[char] for char in characterlist]
                     diffsum = sum([abs(x - y) for (x, y) in zip(pir, inferred_pi)])
                     self.assertTrue(diffsum < maxdiffsum, 'MCMC inference of preferences had excessive large summed absolute difference of %g (max allowed is %g) from true values for different-errors data for %s at depth of %d for seed %d' % (diffsum, maxdiffsum, charactertype, depth, seed))
