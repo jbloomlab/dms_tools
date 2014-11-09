@@ -307,7 +307,7 @@ def WritePreferences(f, sites, wts, pi_means, pi_95credint):
      characters are nucleotide, codons, or amino acids. 
 
     *pi_95credint* can either be *None* or a dictionary keyed by all
-     sites that also key *pi_means, and has as values 2-tuples giving
+     sites that also key *pi_means*, and has as values 2-tuples giving
      the upper and lower bounds of the 95% credible interval.
 
     The written file has the following format::
@@ -353,11 +353,14 @@ def WritePreferences(f, sites, wts, pi_means, pi_95credint):
     """
     openedfile = False
     if isinstance(f, str):
-        f = open(f)
+        f = open(f, 'w')
         openedfile = True
     assert sites and len(sites) >= 1 and not isinstance(sites, str), "sites must be a list with at least one entry"
     characters = pi_means[sites[0]].keys()
     characters.sort()
+    if '*' in characters:
+        i = characters.index('*')
+        characters = characters[ : i] + characters[i + 1 : ] + ['*']
     f.write('# POSITION WT SITE_ENTROPY %s' % ' '.join(['PI_%s' % x for x in characters]))
     if pi_95credint:
         f.write(' %s\n' % ' '.join(['PI_%s_95' % x for x in characters]))

@@ -124,17 +124,18 @@ def main():
         pool = multiprocessing.Pool(nprocesses)
         results = {}
         logged = {}
+        pi_means = {}
+        pi_95credint = {}
         logger.info('Now beginning inference for each site...\n')
         for r in sites:
             rcounts = dict([(name, counts[name][r]) for name in counts.iterkeys()])
-            wt = wts[r]
             nchars_with_m = dict([(m, 0) for m in range(charlength + 1)])
             for x in countcharacters:
-                m = len([i for i in range(charlength) if wt[i] != x[i]])
+                m = len([i for i in range(charlength) if wts[r][i] != x[i]])
                 nchars_with_m[m] += 1
             priors = dict([(name, {}) for name in ['mur_prior_params', 'epsilonr_prior_params', 'rhor_prior_params']])
             for x in countcharacters:
-                m = len([i for i in range(charlength) if wt[i] != x[i]])
+                m = len([i for i in range(charlength) if wts[r][i] != x[i]])
                 if m == 0: # wildtype
                     priors['mur_prior_params'][x] = 1.0 - avgmu
                 else:
@@ -146,7 +147,7 @@ def main():
             for (name, d) in priors.iteritems():
                 assert (not d) or (abs(sum(d.values()) - 1.0) < 1.0e-6), "Sum not close to one for %s: %g" % (name, sum(d.values()))
             if transform_to_aa:
-                wt = dms_tools.codon_to_aa[wt]
+                wts[r] = dms_tools.codon_to_aa[wts[r]]
                 for (name, d) in priors.items():
                     if not d:
                         continue
@@ -160,18 +161,22 @@ def main():
                 priors[name] = dict([(x, priors[name][x] * len(characters) * args[alpha]) for x in characters])
             priors['pir_prior_params'] = dict([(x, args['pi_alpha']) for x in characters])
             logged[r] = False
-            results[r] = pool.apply_async(dms_tools.mcmc.InferSitePreferences, (characters, wt, pystan_error_model, rcounts, priors, args['seed']))
+            results[r] = pool.apply_async(dms_tools.mcmc.InferSitePreferences, (characters, wts[r], pystan_error_model, rcounts, priors, args['seed']))
         while not all([logged[r] for r in sites]):
             time.sleep(1) # wait a bit before polling again
             for r in sites:
                 if results[r].ready() and not logged[r]:
                     logged[r] = True
                     logger.info('Getting results site %s...' % r)
-                    (converged, pi_means, pi_95credint, logstring) = results[r].get()
+                    (converged, pi, pi95, logstring) = results[r].get()
                     logger.info('Finished inference for site %s. Here is the summary:\n%s\n' % (r, logstring))
                     if not converged:
                         raise RuntimeError("Preference inference MCMC failed to converge for site %s:\n%s" % (r, logstring))
+                    pi_means[r] = pi
+                    pi_95credint[r] = pi95
         pool.terminate()
+        logger.info('Now writing preferences to %s\n' % args['outfile'])
+        dms_tools.file_io.WritePreferences(args['outfile'], sites, wts, pi_means, pi_95credint)
     except:
         logger.exception('Terminating %s at %s with ERROR' % (prog, time.asctime()))
     else:
