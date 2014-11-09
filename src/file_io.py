@@ -16,6 +16,10 @@ Functions in this module
 
 * *ReadMultipleDMSCountsFiles* : reads multiple counts files for the same sequence.
 
+* *WritePreferences* : writes site-specific preferences.
+
+* *ReadPreferences* : reads the preferences file written by *WritePreferences*.
+
 Function documentation
 ---------------------------
 
@@ -24,6 +28,7 @@ Function documentation
 
 import sys
 import os
+import re
 import time
 import platform
 import importlib
@@ -282,6 +287,161 @@ def ReadDMSCounts(f, chartype):
     if openedfile:
         f.close()
     return counts
+
+
+def WritePreferences(f, sites, wts, pi_means, pi_95credint):
+    """Writes site-specific preferences to a file.
+
+    *f* is a writeable file-like object to which we write the counts,
+     or a string giving the name of a file that we create.
+
+    *sites* is a list of all site numbers (as strings) for which
+     we have preferences.
+     
+    *wts* is a dictionary with *wts[r]* giving the wildtype character
+     at site *r* for all *r* in *sites*.
+
+    *pi_means* is a dictionary keyed by all sites (as strings). For each 
+     site *r*, *pi_means[r]* is a dictionary where *pi_means[r][x]*
+     is the preference of *r* for character *x*, where the
+     characters are nucleotide, codons, or amino acids. 
+
+    *pi_95credint* can either be *None* or a dictionary keyed by all
+     sites that also key *pi_means, and has as values 2-tuples giving
+     the upper and lower bounds of the 95% credible interval.
+
+    The written file has the following format::
+
+        # POSITION WT SITE_ENTROPY PI_A PI_C PI_G PI_T PI_A_95 PI_C_95 PI_G_95 PI_T_95
+        1 G 1.61 0.21 0.09 0.58 0.12 0.17,0.28 0.04,0.12 0.51,0.69 0.09,0.15
+
+    In this format, the first header line begins with ``#`` and indicates the
+    characters as the suffix to ``PI_``. The 95% credible intervals (if given)
+    are indicated by columns beginning with ``PI_`` and ending with ``_95``.
+    The ``SITE_ENTROPY`` column gives the site entropy in bits (log base 2)
+    as :math:`h_r = \sum_x \pi_{r,x} \\times \log_2 \pi_{r,x}`
+
+    >>> sites = ['1']
+    >>> pi_means = {'1':{'A':0.2, 'C':0.3, 'G':0.4, 'T':0.1}}
+    >>> wts = {'1':'G'}
+    >>> pi_95credint = {'1':{'A':(0.1, 0.3), 'C':(0.25, 0.35), 'G':(0.3, 0.5), 'T':(0.05, 0.15)}}
+    >>> f = cStringIO.StringIO()
+    >>> WritePreferences(f, sites, wts, pi_means, pi_95credint)
+    >>> f.seek(0)
+    >>> lines = f.readlines()
+    >>> lines[0] == '# POSITION WT SITE_ENTROPY PI_A PI_C PI_G PI_T PI_A_95 PI_C_95 PI_G_95 PI_T_95\\n'
+    True
+    >>> f2 = cStringIO.StringIO()
+    >>> WritePreferences(f2, sites, wts, pi_means, None)
+    >>> f2.seek(0)
+    >>> lines = f2.readlines()
+    >>> lines[0] == '# POSITION WT SITE_ENTROPY PI_A PI_C PI_G PI_T\\n'
+    True
+    >>> f2.seek(0)
+    >>> (sites2, wts2, pi_means2, pi_95credint2, h) = ReadPreferences(f2)
+    >>> sites == sites2
+    True
+    >>> wts == wts2
+    True
+    >>> pi_95credint2 == None
+    True
+    >>> r = sites[0]
+    >>> all([abs(pi_means[r][x] - pi_means2[r][x]) < 1.0e-6 for x in pi_means[r].keys()])
+    True
+    >>> print "%.3f" % h[r]
+    1.846
+    """
+    openedfile = False
+    if isinstance(f, str):
+        f = open(f)
+        openedfile = True
+    assert sites and len(sites) >= 1 and not isinstance(sites, str), "sites must be a list with at least one entry"
+    characters = pi_means[sites[0]].keys()
+    characters.sort()
+    f.write('# POSITION WT SITE_ENTROPY %s' % ' '.join(['PI_%s' % x for x in characters]))
+    if pi_95credint:
+        f.write(' %s\n' % ' '.join(['PI_%s_95' % x for x in characters]))
+    else:
+        f.write('\n')
+    for r in sites:
+        h = dms_tools.utils.SiteEntropy([pi_means[r][x] for x in characters])
+        f.write('%s %s %g ' % (r, wts[r], h))
+        f.write('%s' % ' '.join(['%g' % pi_means[r][x] for x in characters]))
+        if pi_95credint:
+            f.write(' %s\n' % ' '.join(['%g,%g' % pi_95credint[r][x] for x in characters]))
+        else:
+            f.write('\n')
+    if openedfile:
+        f.close()
+
+
+def ReadPreferences(f):
+    """Reads the site-specific preferences written by *WritePreferences*.
+
+    *f* is the name of an existing file or a readable file-like object.
+
+    The return value is the tuple: *(sites, wts, pi_means, pi_95credint, h)*
+    where *sites*, *wts*, *pi_means*, and *pi_95credint* will all
+    have the same values used to write the file with *WritePreferences*,
+    and *h* is a dictionary with *h[r]* giving the site entropy (log base
+    2) for each *r* in *sites*.
+
+    See docstring of *WritePreferences* for example usage.
+    """
+    charmatch = re.compile('^PI_([A-z\*\-]+)$')
+    if isinstance(f, str):
+        open(f)
+        lines = f.readlines()
+        f.close()
+    else:
+        lines = f.readlines()
+    characters = []
+    sites = []
+    wts = {}
+    pi_means = {}
+    pi_95credint = {}
+    h = {}
+    for line in lines:
+        if line.isspace():
+            continue
+        elif line[0] == '#' and not characters:
+            entries = line[1 : ].strip().split()
+            if len(entries) < 4:
+                raise ValueError("Insufficient entries in header:\n%s" % line)
+            if not (entries[0] == 'POSITION' and entries[1] == 'WT' and entries[2] == 'SITE_ENTROPY'):
+                raise ValueError("Not the correct first three header columns:\n%s" % line)
+            i = 3
+            while i < len(entries) and charmatch.search(entries[i]):
+                characters.append(charmatch.search(entries[i]).group(1))
+                i += 1
+            if i  == len(entries):
+                pi_95credint = None
+                linelength = len(characters) + 3
+            else:
+                if not len(entries) - i == len(characters):
+                    raise ValueError("Header line does not have valid credible interval format:\n%s" % line)
+                if not all([entries[i + j] == 'PI_%s_95' % characters[j] for j in range(len(characters))]):
+                    raise ValueError("mean and credible interval character mismatch in header:\n%s" % line)
+                linelength = 2 * len(characters) + 3
+        elif line[0] == '#':
+            continue
+        elif not characters:
+            raise ValueError("Found data lines before encountering a valid header")
+        else:
+            entries = line.strip().split()
+            if len(entries) != linelength:
+                raise ValueError("Line does not have expected %d entries:\n%s" % (linelength, line))
+            r = entries[0]
+            assert r not in sites, "Duplicate site of %s" % r
+            sites.append(r)
+            wts[r] = entries[1]
+            assert entries[1] in characters, "Character %s is not one of the valid ones in header. Valid possibilities: %s" % (entries[1], ', '.join(characters))
+            h[r] = float(entries[2])
+            pi_means[r] = dict([(x, float(entries[3 + i])) for (i, x) in enumerate(characters)])
+            if pi_95credint != None:
+                pi_95credint[r] = dict([(x, (float(entries[3 + len(characters) + i].split()[0], float(entries[3 + len(characters) + i].split()[1])))) for (i, x) in enumerate(characters)])
+    return (sites, wts, pi_means, pi_95credint, h)
+
 
 
 if __name__ == '__main__':

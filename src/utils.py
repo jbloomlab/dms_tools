@@ -16,6 +16,8 @@ Functions in this module
 
 * *SumCodonToAA* : Sums all codon entries for each amino acid.
 
+* *SiteEntropy* : Computes site entropy.
+
 Function documentation
 ---------------------------
 
@@ -23,7 +25,29 @@ Function documentation
 
 
 import re
+import math
 import dms_tools
+
+
+def SiteEntropy(xlist, base=2.0):
+    """Computes site entropy to log base *base*.
+
+    *xlist* should be a list of numbers :math:`\ge 0` that
+    sum to one.
+
+    >>> print "%.3f" % SiteEntropy([1.0, 0.0])
+    0.000
+    >>> print "%.3f" % SiteEntropy([0.5, 0.5])
+    1.000
+
+    """
+    assert abs(sum(xlist) - 1.0) < 1.0e5, "Sum of xlist is not close to one: %g" % sum(xlist)
+    assert all([x >= 0 for x in xlist]), "xlist does not have all entries >= 0"
+    h = 0.0
+    for x in xlist:
+        if x != 0:
+            h -= x * math.log(x, base)
+    return h
 
 
 def NaturalSort(xlist):
