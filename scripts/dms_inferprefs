@@ -167,7 +167,7 @@ def main():
             for r in sites:
                 if results[r].ready() and not logged[r]:
                     logged[r] = True
-                    logger.info('Getting results site %s...' % r)
+                    logger.info('Getting results for site %s...' % r)
                     (converged, pi, pi95, logstring) = results[r].get()
                     logger.info('Finished inference for site %s. Here is the summary:\n%s\n' % (r, logstring))
                     if not converged:
