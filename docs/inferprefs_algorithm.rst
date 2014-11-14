@@ -1,5 +1,5 @@
 .. _inferprefs_algorithm:
-
+  
 ===================================================
 Algorithm to infer site-specific preferences
 ===================================================
@@ -161,22 +161,22 @@ site :math:`r`:
 .. math::
    :label: pr_pir
 
-   \Pr\left(\mbox{$\boldsymbol{\mathbf{\pi_r}}$}\right) &=& \operatorname{Dirichlet}\left(\alpha_{\pi} \times \mathbf{1}\right)
+   \Pr\left(\boldsymbol{\mathbf{\pi_r}}\right) &=& \operatorname{Dirichlet}\left(\boldsymbol{\mathbf{\pi_r}}; \alpha_{\pi} \times \mathbf{1}\right)
 
 .. math::
    :label: pr_mur
 
-   \Pr\left(\mbox{$\boldsymbol{\mathbf{\mu_r}}$}\right) &=& \operatorname{Dirichlet}\left(\alpha_{\mu} \times \mathcal{N}_x \times \mbox{$\boldsymbol{\mathbf{a_{r,\mu}}}$}\right)
+   \Pr\left(\boldsymbol{\mathbf{\mu_r}}\right) &=& \operatorname{Dirichlet}\left(\boldsymbol{\mathbf{\mu_r}}; \alpha_{\mu} \times \mathcal{N}_x \times \boldsymbol{\mathbf{a_{r,\mu}}}\right)
 
 .. math::
    :label: pr_epsilonr
 
-   \Pr\left(\mbox{$\boldsymbol{\mathbf{\epsilon_r}}$}\right) &=& \operatorname{Dirichlet}\left(\alpha_{\epsilon} \times \mathcal{N}_x \times \mbox{$\boldsymbol{\mathbf{a_{r,\epsilon}}}$}\right) 
+   \Pr\left(\boldsymbol{\mathbf{\epsilon_r}}\right) &=& \operatorname{Dirichlet}\left(\boldsymbol{\mathbf{\epsilon_r}}; \alpha_{\epsilon} \times \mathcal{N}_x \times \boldsymbol{\mathbf{a_{r,\epsilon}}}\right) 
 
 .. math::
    :label: pr_rhor
 
-   \Pr\left(\mbox{$\boldsymbol{\mathbf{\rho_r}}$}\right) &=& \operatorname{Dirichlet}\left(\alpha_{\rho} \times \mathcal{N}_x \times \mbox{$\boldsymbol{\mathbf{a_{r,\rho}}}$}\right)
+   \Pr\left(\boldsymbol{\mathbf{\rho_r}}\right) &=& \operatorname{Dirichlet}\left(\boldsymbol{\mathbf{\rho_r}}; \alpha_{\rho} \times \mathcal{N}_x \times \boldsymbol{\mathbf{a_{r,\rho}}}\right)
 
 where :math:`\mathbf{1}` is a vector of ones, :math:`\mathcal{N}_x` is
 the number of characters (i.e. 64 for codons, 20 for amino acids, 4 for
@@ -184,9 +184,9 @@ nucleotides), the :math:`\alpha` parameters (i.e. :math:`\alpha_{\pi}`,
 :math:`\alpha_{\mu}`, :math:`\alpha_{\epsilon}`, and
 :math:`\alpha_{\rho}`) are scalar concentration parameters with values
 :math:`> 0` specified by the user, and the :math:`\mathbf{a_r}` vectors
-(i.e. , , ) are vectors with entries :math:`> 0` that sum to one.
+have entries :math:`> 0` that sum to one.
 
-We specify the prior vectors :math:`\mathbf{a_{r,\mu}}`, :math:`\mathbf{a_{r,\epsilon}}`, and :math:`\mathbf{a_{r,\rho}}` in terms of the average per-site mutation rates over the entire library. 
+We specify the prior vectors :math:`\mathbf{a_{r,\mu}}`, :math:`\mathbf{a_{r,\epsilon}}`, and :math:`\mathbf{a_{r,\rho}}` in terms of the average per-site mutation or error rates over the entire library. 
 
 Our prior assumption is that the rate of sequencing errors depends on the number of nucleotides being changed -- for nucleotide characters all mutations have only one nucleotide changed, but for codon characters there can be one, two, or three nucleotides changed. 
 Specifically, the average per-site error rate for mutations with :math:`m` nucleotide changes :math:`\overline{\epsilon_m}` and :math:`\overline{\rho_m}` in the pre-selection and post-selection controls, respectively, are defined as
