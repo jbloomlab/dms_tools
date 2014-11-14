@@ -14,11 +14,17 @@ Functions in this module
 
 * *InferSitePreferences* : use MCMC to infer site-specific preferences.
 
+* *InferSiteDiffPrefs* : use MCMC to infer site-specific differential preferences.
+
 * *StanModelNoneErr* : ``pystan`` model used by *InferSitePreferences*.
 
 * *StanModelSameErr* : ``pystan`` model used by *InferSitePreferences*.
 
 * *StanModelDifferentErr* : ``pystan`` model used by *InferSitePreferences*.
+
+* *StanModelDiffPrefNoErr* : ``pystan`` model used by *InferSiteDiffPrefs*.
+
+* *StanModelDiffPrefSameErr* : ``pystan`` model used by *InferSiteDiffPrefs*.
 
 
 Function documentation
@@ -38,7 +44,47 @@ import pystan
 PRIOR_MIN_VALUE = 1.0e-7 # minimum value for Dirichlet prior elements
 
 
-# StanModel when the error rates are zero
+class StanModelDiffPrefNoErr(object):
+    """PyStan model for *error_model* of 'none' for *InferSiteDiffPrefs*."""
+    def __init__(self):
+        self.pystancode =\
+"""
+data {
+    int<lower=1> Nchar; // 64 for codons, 20 for amino acids, 4 for nucleotides
+    int<lower=0> nrstart[Nchar]; // counts in starting library
+    int<lower=0> nrs1[Nchar]; // counts in selection s1
+    int<lower=0> nrs2[Nchar]; // counts in selection s2
+    vector<lower=%g>[Nchar] pirs1_prior_params; // Dirichlet prior params
+    vector<lower=%g>[Nchar] frstart_prior_params; // Dirichlet prior params
+    real<lower=%g> deltapi_concentration; // concentration parameter for delta pi prior
+}
+parameters {
+    simplex[Nchar] pirs1;
+    simplex[Nchar] frstart;
+    vector[Nchar] deltapir;
+}
+transformed parameters {
+    simplex[Nchar] frs1;
+    frs1 <- frstart .* pirs1 / dot_product(frstart, pirs1);
+    simplex[Nchar] pirs1_plus_deltapir;
+    pirs1_plus_deltapir <- pirs1 + deltapir;
+    simplex[Nchar] frs2;
+    frs2 <- frstart .* (pirs1_plus_deltapir) / dot_product(frstart, pirs1_plus_deltapir);
+    pirs1_plus_deltapir_prior_params <- Nchar * deltapir_concentration * pirs1;
+}
+model {
+    pirs1 ~ dirichlet(pirs1_prior_params);
+    frstart ~ dirichlet(frstart_prior_params);
+    pirs1_plus_deltapir ~ dirichlet(pirs1_plus_deltapir_prior_params);
+    nrstart ~ multinomial(frstart);
+    nrs1 ~ multinomial(frs1);
+    nrs2 ~ multinomial(frs2);
+}
+
+""" % (PRIOR_MIN_VALUE, PRIOR_MIN_VALUE, PRIOR_MIN_VALUE)
+        self.model = pystan.StanModel(model_code=self.pystancode)
+
+
 class StanModelNoneErr(object):
     """PyStan model for *error_model* of 'none' for *InferSitePreferences*."""
     def __init__(self):
@@ -68,7 +114,7 @@ model {
 """ % (PRIOR_MIN_VALUE, PRIOR_MIN_VALUE)
         self.model = pystan.StanModel(model_code=self.pystancode)
 
-# StanModel when same error rate for pre and post-selection libraries
+
 class StanModelSameErr:
     """PyStan model for *error_model* of 'same' for *InferSitePreferences*."""
     def __init__(self):
@@ -113,7 +159,7 @@ model {
 """ % (PRIOR_MIN_VALUE, PRIOR_MIN_VALUE, PRIOR_MIN_VALUE)
         self.model = pystan.StanModel(model_code=self.pystancode)
 
-# StanModel when different error rates for pre and post-selection libraries
+
 class StanModelDifferentErr:
     """PyStan model for *error_model* of 'different' for *InferSitePreferences*."""
     def __init__(self):
@@ -164,12 +210,60 @@ model {
         self.model = pystan.StanModel(model_code=self.pystancode)
 
 
-def _InitialValuePreferences(error_model, nchains, iwtchar, nchars):
-    """Gets valid initial values for pir_inference_same_err_sm.
+def _InitialValueDiffPrefs(error_model, nchains, iwtchar, nchars):
+    """Gets valid initial values for PyStan differential preference inference.
 
-    The values automatically initialized by stypan frequently have invalid *mur_plus_err*
-    or *fr_plus_err* due to negative values from the *mur*, *pir*, *epsilonr*, *rhor*
-    choices. This function will generate random values that are valid
+    The values automatically initialized by PyStan frequently have invalid values.
+    This function will generate random values that are valid
+    for initialization and return a list that can be passed to the *StanModel*
+    as the *init* argument.
+    """
+    initializationattempts = 10 # multiple attempts, as might fail for pathological random values
+    nrescales = 10 # rescale non-wildtype values down this many times
+    rescalefactor = 5.0 # rescale non-wildtype values down by this much
+    deltar = numpy.zeros(nchars)
+    deltar[iwtchar] = 1.0
+    init = []
+    concentrationparameters = [1.0 for ichar in range(nchars)]
+    concentrationparameters[iwtchar] = 10.0 # make this element bigger, as it probably should be
+    for chain in range(nchains):
+        for iattempt in range(initializationattempts):
+            chain_init = {\
+                'pirs1':numpy.random.dirichlet(concentrationparameters),\
+                'frstart':numpy.random.dirichlet(concentrationparameters),\
+                'xir':numpy.random.dirichlet(concentrationparameters),\
+                }
+            chain_init['deltapir'] = numpy.random.dirichlet(concentrationparameters) - chain_init['frstart']
+            irescale = 0
+            while (irescale < nrescales) and (\
+                    any(chain_init['deltapir'] + chain_init['pirs1'] < PRIOR_MIN_VALUE) or \
+                    any(chain_init['deltapir'] + chain_init['pirs1'] > 1.0) or \
+                    any(chain_init['pirs1'] < PRIOR_MIN_VALUE) or \
+                    any(chain_init['frstart'] < PRIOR_MIN_VALUE) or \
+                    any(chain_init['xir'] < PRIOR_MIN_VALUE) or \
+                    any(chain_init['frstart'] + chain_init['xir'] - deltar < PRIOR_MIN_VALUE) or \
+                    any(chain_init['frstart'] * chain_init['pirs1'] / numpy.dot(chain_init['frstart'], chain_init['pirs1']) + chain_init['xir' - deltar < PRIOR_MIN_VALUE) or \
+                    any(chain_init['frstart'] * (chain_init['pirs1'] + chain_init['deltapir']) / numpy.dot(chain_init['frstart'], chain_init['pirs1'] + chain_init['deltapir']) + chain_init['xir' - deltar < PRIOR_MIN_VALUE)):
+                irescale += 1
+                chain_init['deltapir'] /= rescalefactor
+                chain_init['xir'] /= rescalefactor
+                chain_init['xir'][iwtchar] = 1.0 - sum([chain_init['xir'][ichar] for ichar in range(nchars) if ichar != iwtchar])
+            if irescale < nrescales:
+                break
+        else:
+            raise ValueError("Failed to initialize for same even after %d attempts" % initializationattempts)
+        if error_model == 'none':
+            del chain_init['xir']
+        init.append(chain_init)
+    return init
+
+
+
+def _InitialValuePreferences(error_model, nchains, iwtchar, nchars):
+    """Gets valid initial values for PyStan preference inference.
+
+    The values automatically initialized by PyStan frequently have invalid values.
+    This function will generate random values that are valid
     for initialization and return a list that can be passed to the *StanModel*
     as the *init* argument.
     """
@@ -288,7 +382,7 @@ def InferSitePreferences(characterlist, wtchar, error_model, counts, priors, see
           Each string key should specify a dictionary keyed by all characters
           and with values giving the integer counts for that character. Keys:
 
-            - *npre* : specifies :math:`\\boldsymbol{\mathbf{n_r^{\\rm{pre}}}}`
+            - *nrpre* : specifies :math:`\\boldsymbol{\mathbf{n_r^{\\rm{pre}}}}`
 
             - *nrpost* : specifies :math:`\\boldsymbol{\mathbf{n_r^{\\rm{post}}}}`
 
@@ -333,7 +427,7 @@ def InferSitePreferences(characterlist, wtchar, error_model, counts, priors, see
           and repeats until it converges or until it has tried *increasetries*
           times to increase the number of iterations.
 
-    The return values is: *(converged, pi_means, pi_95credint, logstring)*.
+    The return value is: *(converged, pi_means, pi_95credint, logstring)*.
     The entries in this tuple have the following meanings:
 
         - *converged* is *True* if the MCMC converges and *False* otherwise.
@@ -386,9 +480,8 @@ def InferSitePreferences(characterlist, wtchar, error_model, counts, priors, see
         raise ValueError("Invalid error_model of %s" % error_model)
     ntry = 0
     while True: # run until converged or tries exhausted
-        # run MCMC
-        # this next command unfortunately creates a lot of output that I have not been able to re-direct...
         init = _InitialValuePreferences(error_model, nchains, characterlist.index(wtchar), len(characterlist))
+        # this next command unfortunately creates a lot of output that I have not been able to re-direct...
         fit = sm.sampling(data=data, iter=niter, chains=nchains, seed=seed, n_jobs=n_jobs, refresh=-1, init=init)
         # extract output
         fitsummary = fit.summary()
@@ -426,6 +519,171 @@ def InferSitePreferences(characterlist, wtchar, error_model, counts, priors, see
                 pi_means = dict([(char, summary[char_row_indices[char]][meanindex]) for char in characterlist])
                 pi_95credint = dict([(char, (summary[char_row_indices[char]][lower95index], summary[char_row_indices[char]][upper95index])) for char in characterlist])
                 return (False, pi_means, pi_95credint, '\n'.join(logstring))
+
+
+
+def InferSiteDiffPrefs(characterlist, wtchar, error_model, counts, priors, seed=1, n_jobs=1, r_max=1.05, neff_min=100, nchains=4, niter=10000, increasefactor=2, increasetries=6):
+    """Infers site-specific differntial preferences by MCMC for a specific site.
+
+    The algorithm is explained in the documentation for the ``dms_tools`` package.
+
+    The MCMC automatically tries to guarantee convergence via the parameters specified
+    by *r_max*, *neff_min*, *nchains*, *niter*, *increasefactor*, and *increasetries*.
+
+    Here are the calling variables:    
+
+        * *characterlist* is a list of all valid characters; entries must be unique. 
+           Typically a list of all amino acids, codons, or nucleotides. Characters
+           are case sensitive.
+
+        * *wtchar* is a character that is in *characterlist* and defines the wildtype
+          character at the site.
+
+        * *error_model* specifies how the errors are estimated. It can
+          be one of the following strings:
+
+              - *none* : no errors 
+
+              - *same* : same error rates for starting library and selections :math:`s1`
+                and :math:`s2`.
+
+          Alternatively, it could be an instance of *StanModelDiffPrefNoErr*
+          or *StanModelDiffPrefSameErr*. These are the
+          ``pystan`` models that implement the three strings described above.
+          If you pass these model objects, then they will not need to be
+          compiled by this function (strings require models to be compiled).
+          So it is advantageous to pass the ``pystan`` models rather than
+          the strings if calling this function repeatedly.
+
+        * *counts* is a dictionary specifying the deep sequencing counts.
+          Each string key should specify a dictionary keyed by all characters
+          and with values giving the integer counts for that character. Keys:
+
+            - *nrstart* : counts for starting library
+
+            - *nrs1* : counts for selection :math:`s1`
+
+            - *nrs2* : counts for selection :math:`s2`
+
+            - *nrerr* : only required if *error_model* is
+              *same*, specifis counts for error control.
+
+        * *priors* is a dictionary specifying the parameter vectors for the
+          Dirichlet priors. Each string key should specify a dictionary keyed by
+          all characters and with values giving the prior for that character. Keys:
+
+            - *pirs1_prior_params* : specifies Dirichlet prior vector for :math:`\pi_r^{s1}`
+
+            - *frstart_prior_params* : specifies Dirichlet prior vector for 
+              :math:`f_r^{\\textrm{start}}`
+
+            - *deltapi_concentration* : specifies floating number giving concentration
+              parameter for :math:`\Delta\pi_r`
+
+            - *xir_prior_params* : only required if *error_model* is *same*,
+              specified Dirichlet prior vector for error rates :math:`\xi_r`
+
+          Any values less than *PRIOR_MIN_VALUE* (a constant specified in this module)
+          are automatically set to *PRIOR_MIN_VALUE*.
+
+        * *seed* : integer seed for MCMC. Calling multiple times with same *seed*
+          and data will give identical results provided architecture for floating
+          point math on the computer is also the same.
+
+        * *n_jobs* : The number of CPUs to use. If -1, use all available CPUs.
+
+        * The following parameters specify how the MCMC tries to guarantee convergence.
+          They all have reasonable default values, so you probably don't need to change them.
+          The MCMC is considered to have converged if the mean Gelman-Rubin R
+          statistic (http://www.jstor.org/stable/2246093) over all :math:`\pi_{r,x}`
+          values is less than or equal to *r_max*, and the mean effective sample size
+          is greater than or equal to *neff_min*. The MCMC first runs with *nchains*
+          chains and *niter* iterations. If it fails to converge, it then increases
+          the number of iterations by a factor of *increasefactor* and tries again,
+          and repeats until it converges or until it has tried *increasetries*
+          times to increase the number of iterations.
+
+    The return value is: *(converged, deltapi_means, pr_deltapi_gt0, pr_deltapi_lt0, logstring)*.
+    The entries in this tuple have the following meanings:
+
+        - *converged* is *True* if the MCMC converges and *False* otherwise.
+
+        - *deltapi_means* is a dictionary keyed by all characters in *characterlist*
+          with the value for each character giving the :math:`\Delta\pi_{r,a}` value.
+
+        - *pr_deltapi_gt0* is a dictionary keyed by all characters in *characterlist*
+          with the value being the posterior probability that :math:`\Delta\pi_{r,a} > 0`.
+
+        - *pr_deltapi_lt0* is a dictionary keyed by all characters in *characterlist*
+          with the value being the posterior probability that :math:`\Delta\pi_{r,a} < 0`.
+
+        - *logstring* is a string that can be printed to give summary information
+          about the MCMC run and its convergence.
+    """
+    logstring = ['\tBeginning MCMC at %s' % time.asctime()]
+    numpy.random.seed(seed)
+    assert nchains >= 2, "nchains must be at least two"
+    assert niter >= 100, "niter must be at least 100"
+    assert len(characterlist) == len(set(characterlist)), "characterlist contains a duplicate character:\n%s" % str(characterlist)
+    assert wtchar in characterlist, "wtchar %s is not in characterlist %s" % (wtchar, str(characterlist))
+    data = {'Nchar':len(characterlist), 'iwtchar':characterlist.index(wtchar) + 1}
+    data['nrstart'] = [counts['nrstart'][char] for char in characterlist]
+    data['nrs1'] = [counts['nrs1'][char] for char in characterlist]
+    data['nrs2'] = [counts['nrs2'][char] for char in characterlist]
+    data['pirs1_prior_params'] = [max(PRIOR_MIN_VALUE, priors['pir_prior_params'][char]) for char in characterlist]
+    data['frstart_prior_params'] = [max(PRIOR_MIN_VALUE, priors['mur_prior_params'][char]) for char in characterlist]
+    data['deltapi_concentration'] = max(PRIOR_MIN_VALUE, priors['deltapi_concentration'])
+    if error_model == 'none':
+        sm = StanModelDiffPrefNoErr().model
+    elif isinstance(error_model, StanModelDiffPrefNoErr):
+        sm = error_model.model
+        error_model = 'none'
+    elif error_model == 'same' or isinstance(error_model, StanModelDiffPrefSameErr):
+        if error_model == 'same':
+            sm = StanModelDiffPrefSameErr().model
+        else:
+            sm = error_model.model
+            error_model = 'same'
+        data['nrerr'] = [counts['nrerr'][char] for char in characterlist]
+        data['xir_prior_params'] = [max(PRIOR_MIN_VALUE, priors['xir_prior_params'][char]) for char in characterlist]
+    else:
+        raise ValueError("Invalid error_model of %s" % error_model)
+    ntry = 0
+    while True: # run until converged or tries exhausted
+        init = _InitialValueDiffPrefs(error_model, nchains, characterlist.index(wtchar), len(characterlist))
+        # this next command unfortunately creates a lot of output that I have not been able to re-direct...
+        fit = sm.sampling(data=data, iter=niter, chains=nchains, seed=seed, n_jobs=n_jobs, refresh=-1, init=init)
+        # extract output
+        fitsummary = fit.summary()
+        rownames = list(fitsummary['summary_rownames'])
+        colnames = list(fitsummary['summary_colnames'])
+        summary = fitsummary['summary']
+        char_row_indices = dict([(char, rownames.index('deltapir[%d]' % characterlist.index(char))) for char in characterlist]) 
+        rindex = colnames.index('Rhat')
+        neffindex = colnames.index('n_eff')
+        rlist = [summary[char_row_indices[char]][rindex] for char in characterlist]
+        nefflist = [summary[char_row_indices[char]][neffindex] for char in characterlist]
+        rmean = sum(rlist) / float(len(rlist))
+        neffmean = sum(nefflist) / float(len(nefflist))
+        logstring.append('\tAfter %d MCMC chains each of %d steps, mean R = %.2f and mean Neff = %d' % (nchains, niter, rmean, neffmean))
+        if (rmean <= r_max) and (neffmean >= neff_min):
+            # converged
+            logstring.append('\tMCMC is deemed to have converged at %s.' % time.asctime())
+            meanindex = colnames.index('mean')
+            deltapi_means = dict([(char, summary[char_row_indices[char]][meanindex]) for char in characterlist])
+            return (True, deltapi_means, None, None, '\n'.join(logstring))
+        else:
+            # failed to converge
+            if ntry < increasetries:
+                ntry += 1
+                niter = int(niter * increasefactor)
+                logstring.append("\tMCMC failed to converge. Doing retry %d with %d iterations per chain." % (ntry, niter))
+            else:
+                logstring.append("\tMCMC FAILED to converge after all attempts at %s." % time.asctime())
+                meanindex = colnames.index('mean')
+                deltapi_means = dict([(char, summary[char_row_indices[char]][meanindex]) for char in characterlist])
+                return (False, pi_means, None, None, '\n'.join(logstring))
+
 
 
 if __name__ == '__main__':
