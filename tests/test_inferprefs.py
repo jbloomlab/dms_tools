@@ -167,9 +167,8 @@ class TestInferSitePreferences(unittest.TestCase):
                     sys.stderr.write('Converged to correct values for different-errors data (diffsum = %g) at depth %d for character type %s for seed %d.\n' % (diffsum, depth, charactertype, seed))
                     sys.stderr.flush()
                     # make sure sample with errors does NOT converge without error estimates
-                    returntup = dms_tools.mcmc.InferSitePreferences(characterlist, wtchar, 'none', counts, priors, n_jobs=self.n_jobs)
-                    self.assertTrue(returntup, 'MCMC inference of preferences failed to converge for different-errors data analyzed with no-errors model for %s at depth of %d for seed %d' % (charactertype, depth, seed))
-                    (pi_means, pi_95credint) = returntup
+                    (converged, pi_means, pi_95credint, logstring) = dms_tools.mcmc.InferSitePreferences(characterlist, wtchar, 'none', counts, priors, n_jobs=self.n_jobs)
+                    self.assertTrue(converged, 'MCMC inference of preferences failed to converge for different-errors data analyzed with no-errors model for %s at depth of %d for seed %d' % (charactertype, depth, seed))
                     inferred_pi = [pi_means[char] for char in characterlist]
                     diffsum = sum([abs(x - y) for (x, y) in zip(pir, inferred_pi)])
                     self.assertFalse(diffsum < maxdiffsum, 'MCMC inference of preferences with different-errors data converged (summed absolute difference of %g) even when using a no-errors model for %s at depth of %d for seed %d' % (diffsum, charactertype, depth, seed))
