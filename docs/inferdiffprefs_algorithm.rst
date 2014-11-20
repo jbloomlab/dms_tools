@@ -146,15 +146,14 @@ site :math:`r`:
 .. math::
    :label: pr_deltapi
 
-   \Pr\left(\boldsymbol{\mathbf{\Delta\pi_r}} \mid \boldsymbol{\mathbf{\pi_r^{s1}}}\right) &=& \operatorname{Dirichlet}\left(\boldsymbol{\mathbf{\Delta\pi_r}} + \boldsymbol{\mathbf{\pi_r^{s1}}}; \alpha_{\Delta\pi} \times \mathcal{N}_x \times \boldsymbol{\mathbf{\pi_r^{s1}}}\right)
+   \Pr\left(\boldsymbol{\mathbf{\Delta\pi_r}} \mid \boldsymbol{\mathbf{\pi_r^{s1}}}\right) &=& \operatorname{Dirichlet}\left(\boldsymbol{\mathbf{\Delta\pi_r}}; \alpha_{\Delta\pi} \times \mathcal{N}_x \times \boldsymbol{\mathbf{\pi_r^{s1}}}\right) - \boldsymbol{\mathbf{\pi_r^{s1}}}
 
-where the :math:`\alpha` parameters (i.e. :math:`\alpha_{\pi}`,
-:math:`\alpha_{\mu}`, :math:`\alpha_{\epsilon}`, and
-:math:`\alpha_{\rho}`) are scalar concentration parameters with values
+where the :math:`\alpha` parameters 
+are scalar concentration parameters with values
 :math:`> 0` specified by the user, and the :math:`\mathbf{a_r}` vectors
-have entries :math:`> 0` that sum to one.
+have entries :math:`> 0` that sum to one. Typically we might choose a fairly large value (such as 10 or 100) for :math:`\alpha_{\Delta\pi}` to enforce the prior expectation that :math:`\Delta\pi_{r,x}` is close to zero.
 
-We specify the prior vectors :math:`\mathbf{a_{r,\pi_{s1}}}` and :math:`\mathbf{a_{r,\xi}}` in terms of the average per-site mutation or error rates over the entire library. 
+We specify the prior vectors :math:`\mathbf{a_{r,\textbf{start}}}` and :math:`\mathbf{a_{r,\xi}}` in terms of the average per-site mutation or error rates over the entire library. 
 
 Our prior assumption is that the rate of sequencing errors depends on the number of nucleotides being changed -- for nucleotide characters all mutations have only one nucleotide changed, but for codon characters there can be one, two, or three nucleotides changed. 
 Specifically, the average per-site error rate for mutations with :math:`m` nucleotide changes :math:`\overline{\xi_m}` is

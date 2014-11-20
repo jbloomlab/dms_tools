@@ -60,22 +60,21 @@ data {
 }
 parameters {
     simplex[Nchar] pirs1;
+    simplex[Nchar] pirs2;
     simplex[Nchar] frstart;
-    vector[Nchar] deltapir;
 }
 transformed parameters {
+    vector[Nchar] deltapir;
     simplex[Nchar] frs1;
-    frs1 <- frstart .* pirs1 / dot_product(frstart, pirs1);
-    simplex[Nchar] pirs1_plus_deltapir;
-    pirs1_plus_deltapir <- pirs1 + deltapir;
     simplex[Nchar] frs2;
-    frs2 <- frstart .* (pirs1_plus_deltapir) / dot_product(frstart, pirs1_plus_deltapir);
-    pirs1_plus_deltapir_prior_params <- Nchar * deltapir_concentration * pirs1;
+    frs1 <- frstart .* pirs1 / dot_product(frstart, pirs1);
+    frs2 <- frstart .* pirs2 / dot_product(frstart, pirs2);
+    deltapir <- pirs2 - pirs1;
 }
 model {
     pirs1 ~ dirichlet(pirs1_prior_params);
     frstart ~ dirichlet(frstart_prior_params);
-    pirs1_plus_deltapir ~ dirichlet(pirs1_plus_deltapir_prior_params);
+    pirs2 ~ dirichlet(pirs1 * Nchar * deltapi_concentration);
     nrstart ~ multinomial(frstart);
     nrs1 ~ multinomial(frs1);
     nrs2 ~ multinomial(frs2);
@@ -83,6 +82,62 @@ model {
 
 """ % (PRIOR_MIN_VALUE, PRIOR_MIN_VALUE, PRIOR_MIN_VALUE)
         self.model = pystan.StanModel(model_code=self.pystancode)
+
+
+class StanModelDiffPrefSameErr(object):
+    """PyStan model for *error_model* of 'same' for *InferSiteDiffPrefs*."""
+    def __init__(self):
+        self.pystancode =\
+"""
+data {
+    int<lower=1> Nchar; // 64 for codons, 20 for amino acids, 4 for nucleotides
+    int<lower=1, upper=Nchar> iwtchar; // index of wildtype character in 1, ... numbering
+    int<lower=0> nrstart[Nchar]; // counts in starting library
+    int<lower=0> nrs1[Nchar]; // counts in selection s1
+    int<lower=0> nrs2[Nchar]; // counts in selection s2
+    int<lower=0> nrerr[Nchar]; // counts in error control
+    vector<lower=%g>[Nchar] pirs1_prior_params; // Dirichlet prior params
+    vector<lower=%g>[Nchar] frstart_prior_params; // Dirichlet prior params
+    vector<lower=%g>[Nchar] xir_prior_params; // Dirichlet prior params
+    real<lower=%g> deltapi_concentration; // concentration parameter for delta pi prior
+}
+transformed data {
+    simplex[Nchar] deltar;
+    for (ichar in 1:Nchar) {
+        deltar[ichar] <- 0.0;
+    }
+    deltar[iwtchar] <- 1.0;
+}
+parameters {
+    simplex[Nchar] pirs1;
+    simplex[Nchar] pirs2;
+    simplex[Nchar] frstart;
+    simplex[Nchar] xir;
+}
+transformed parameters {
+    vector[Nchar] deltapir;
+    simplex[Nchar] frs1;
+    simplex[Nchar] frs2;
+    simplex[Nchar] frstart_plus_err;
+    frs1 <- frstart .* pirs1 / dot_product(frstart, pirs1) + xir - deltar;
+    frs2 <- frstart .* pirs2 / dot_product(frstart, pirs2) + xir - deltar;
+    frstart_plus_err <- frstart + xir - deltar;
+    deltapir <- pirs2 - pirs1;
+}
+model {
+    pirs1 ~ dirichlet(pirs1_prior_params);
+    frstart ~ dirichlet(frstart_prior_params);
+    xir ~ dirichlet(xir_prior_params);
+    pirs2 ~ dirichlet(pirs1 * Nchar * deltapi_concentration);
+    nrstart ~ multinomial(frstart_plus_err);
+    nrs1 ~ multinomial(frs1);
+    nrs2 ~ multinomial(frs2);
+    nrerr ~ multinomial(xir);
+}
+
+""" % (PRIOR_MIN_VALUE, PRIOR_MIN_VALUE, PRIOR_MIN_VALUE, PRIOR_MIN_VALUE)
+        self.model = pystan.StanModel(model_code=self.pystancode)
+
 
 
 class StanModelNoneErr(object):
@@ -242,8 +297,8 @@ def _InitialValueDiffPrefs(error_model, nchains, iwtchar, nchars):
                     any(chain_init['frstart'] < PRIOR_MIN_VALUE) or \
                     any(chain_init['xir'] < PRIOR_MIN_VALUE) or \
                     any(chain_init['frstart'] + chain_init['xir'] - deltar < PRIOR_MIN_VALUE) or \
-                    any(chain_init['frstart'] * chain_init['pirs1'] / numpy.dot(chain_init['frstart'], chain_init['pirs1']) + chain_init['xir' - deltar < PRIOR_MIN_VALUE) or \
-                    any(chain_init['frstart'] * (chain_init['pirs1'] + chain_init['deltapir']) / numpy.dot(chain_init['frstart'], chain_init['pirs1'] + chain_init['deltapir']) + chain_init['xir' - deltar < PRIOR_MIN_VALUE)):
+                    any(chain_init['frstart'] * chain_init['pirs1'] / numpy.dot(chain_init['frstart'], chain_init['pirs1']) + chain_init['xir'] - deltar < PRIOR_MIN_VALUE) or \
+                    any(chain_init['frstart'] * (chain_init['pirs1'] + chain_init['deltapir']) / numpy.dot(chain_init['frstart'], chain_init['pirs1'] + chain_init['deltapir']) + chain_init['xir'] - deltar < PRIOR_MIN_VALUE)):
                 irescale += 1
                 chain_init['deltapir'] /= rescalefactor
                 chain_init['xir'] /= rescalefactor
@@ -254,6 +309,8 @@ def _InitialValueDiffPrefs(error_model, nchains, iwtchar, nchars):
             raise ValueError("Failed to initialize for same even after %d attempts" % initializationattempts)
         if error_model == 'none':
             del chain_init['xir']
+        chain_init['pirs2'] = chain_init['deltapir'] + chain_init['pirs1']
+        del chain_init['deltapir']
         init.append(chain_init)
     return init
 
@@ -532,9 +589,9 @@ def InferSiteDiffPrefs(characterlist, wtchar, error_model, counts, priors, seed=
 
     Here are the calling variables:    
 
-        * *characterlist* is a list of all valid characters; entries must be unique. 
-           Typically a list of all amino acids, codons, or nucleotides. Characters
-           are case sensitive.
+        * *characterlist* is a list of all valid characters; entries must be unique.
+          Typically a list of all amino acids, codons, or nucleotides. Characters
+          are case sensitive.
 
         * *wtchar* is a character that is in *characterlist* and defines the wildtype
           character at the site.
@@ -581,7 +638,7 @@ def InferSiteDiffPrefs(characterlist, wtchar, error_model, counts, priors, seed=
               parameter for :math:`\Delta\pi_r`
 
             - *xir_prior_params* : only required if *error_model* is *same*,
-              specified Dirichlet prior vector for error rates :math:`\xi_r`
+              specified Dirichlet prior vector for error rates :math:`\\xi_r`
 
           Any values less than *PRIOR_MIN_VALUE* (a constant specified in this module)
           are automatically set to *PRIOR_MIN_VALUE*.
@@ -630,8 +687,8 @@ def InferSiteDiffPrefs(characterlist, wtchar, error_model, counts, priors, seed=
     data['nrstart'] = [counts['nrstart'][char] for char in characterlist]
     data['nrs1'] = [counts['nrs1'][char] for char in characterlist]
     data['nrs2'] = [counts['nrs2'][char] for char in characterlist]
-    data['pirs1_prior_params'] = [max(PRIOR_MIN_VALUE, priors['pir_prior_params'][char]) for char in characterlist]
-    data['frstart_prior_params'] = [max(PRIOR_MIN_VALUE, priors['mur_prior_params'][char]) for char in characterlist]
+    data['pirs1_prior_params'] = [max(PRIOR_MIN_VALUE, priors['pirs1_prior_params'][char]) for char in characterlist]
+    data['frstart_prior_params'] = [max(PRIOR_MIN_VALUE, priors['frstart_prior_params'][char]) for char in characterlist]
     data['deltapi_concentration'] = max(PRIOR_MIN_VALUE, priors['deltapi_concentration'])
     if error_model == 'none':
         sm = StanModelDiffPrefNoErr().model
