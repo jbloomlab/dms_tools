@@ -151,7 +151,7 @@ site :math:`r`:
 where the :math:`\alpha` parameters 
 are scalar concentration parameters with values
 :math:`> 0` specified by the user, and the :math:`\mathbf{a_r}` vectors
-have entries :math:`> 0` that sum to one. Typically we might choose a fairly large value (such as 10 or 100) for :math:`\alpha_{\Delta\pi}` to enforce the prior expectation that :math:`\Delta\pi_{r,x}` is close to zero.
+have entries :math:`> 0` that sum to one. Typically we might choose a fairly large value (such as 10) for :math:`\alpha_{\Delta\pi}` to enforce the prior expectation that :math:`\Delta\pi_{r,x}` is close to zero.
 
 We specify the prior vectors :math:`\mathbf{a_{r,\textbf{start}}}` and :math:`\mathbf{a_{r,\xi}}` in terms of the average per-site mutation or error rates over the entire library. 
 

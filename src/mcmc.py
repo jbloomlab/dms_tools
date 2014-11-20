@@ -728,7 +728,12 @@ def InferSiteDiffPrefs(characterlist, wtchar, error_model, counts, priors, seed=
             logstring.append('\tMCMC is deemed to have converged at %s.' % time.asctime())
             meanindex = colnames.index('mean')
             deltapi_means = dict([(char, summary[char_row_indices[char]][meanindex]) for char in characterlist])
-            return (True, deltapi_means, None, None, '\n'.join(logstring))
+            deltapirsamples = fit.extract('deltapir')['deltapir'] 
+            nsamples = niter * nchains // 2
+            assert deltapirsamples.shape == (nsamples, len(characterlist)), "Unexpected shape of deltapirsamples. Got %s, expected (%d, %d)" % (str(deltapirsamples.shape), niter * nchains // 2, len(characterlist))
+            pr_deltapi_gt0 = dict([(char, n / float(nsamples)) for (char, n) in zip(characterlist, sum(deltapirsamples > 0))])
+            pr_deltapi_lt0 = dict([(char, n / float(nsamples)) for (char, n) in zip(characterlist, sum(deltapirsamples < 0))])
+            return (True, deltapi_means, pr_deltapi_gt0, pr_deltapi_lt0, '\n'.join(logstring))
         else:
             # failed to converge
             if ntry < increasetries:
@@ -739,7 +744,12 @@ def InferSiteDiffPrefs(characterlist, wtchar, error_model, counts, priors, seed=
                 logstring.append("\tMCMC FAILED to converge after all attempts at %s." % time.asctime())
                 meanindex = colnames.index('mean')
                 deltapi_means = dict([(char, summary[char_row_indices[char]][meanindex]) for char in characterlist])
-                return (False, pi_means, None, None, '\n'.join(logstring))
+                deltapirsamples = fit.extract('deltapir')['deltapir'] 
+                nsamples = niter * nchains // 2
+                assert deltapirsamples.shape == (nsamples, len(characterlist)), "Unexpected shape of deltapirsamples. Got %s, expected (%d, %d)" % (str(deltapirsamples.shape), niter * nchains // 2, len(characterlist))
+                pr_deltapi_gt0 = dict([(char, n / float(nsamples)) for (char, n) in zip(characterlist, sum(deltapirsamples > 0))])
+                pr_deltapi_lt0 = dict([(char, n / float(nsamples)) for (char, n) in zip(characterlist, sum(deltapirsamples < 0))])
+                return (False, deltapi_means, pr_deltapi_gt0, pr_deltapi_lt0, '\n'.join(logstring))
 
 
 

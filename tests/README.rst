@@ -29,7 +29,7 @@ The file ``test_configuration.txt`` in this directory specifies configuration op
 For instance, here is an example of a valid ``test_configuration.txt`` file::
 
     seeds 0, 1, 2
-    charactertypes DNA, amino acids
+    charactertypes DNA, amino acid
     n_jobs 3
 
 .. _`dms_tools`: https://github.com/jbloom/dms_tools

@@ -81,6 +81,8 @@ If the preferences are for codons, the format is the same except there are now 6
 
 When the credible intervals are present, these columns are named ``PI_A_95``, etc.
 
+.. _diffpreferences_file:
+
 Differential preferences file
 -------------------------------
 The program :ref:`dms_inferdiffprefs` infers the differential preferences :math:`\Delta\pi_{r,x}` and writes these to a file. Here is an example of the formate of one of these files for nucleotide characters::

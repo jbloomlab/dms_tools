@@ -46,5 +46,6 @@ setup(
     package_dir = {'dms_tools':'src'},
     scripts = [
             'scripts/dms_inferprefs',
+            'scripts/dms_inferdiffprefs',
             ],
 )
