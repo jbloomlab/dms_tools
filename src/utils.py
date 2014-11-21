@@ -18,6 +18,8 @@ Functions in this module
 
 * *SiteEntropy* : Computes site entropy.
 
+* *RMS* : Computs root-mean-square value.
+
 Function documentation
 ---------------------------
 
@@ -27,6 +29,17 @@ Function documentation
 import re
 import math
 import dms_tools
+
+
+def RMS(xlist):
+    """Computes root-mean-square value of entries in *xlist*.
+
+    >>> xlist = [-0.2, 0.1, 0.03, 0.5]
+    >>> print "%.5f" % RMS(xlist)
+    0.27427
+    """
+    assert len(xlist) >= 1, "xlist must have lenght of at least one"
+    return math.sqrt(sum([x**2 for x in xlist]) / float(len(xlist)))
 
 
 def SiteEntropy(xlist, base=2.0):

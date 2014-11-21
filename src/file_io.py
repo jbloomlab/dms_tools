@@ -20,6 +20,10 @@ Functions in this module
 
 * *ReadPreferences* : reads the preferences file written by *WritePreferences*.
 
+* *WriteDiffPrefs* : writes site-specific differential preferences.
+
+* *ReadDiffPrefs* : reads differential preferences file written by *WriteDiffPrefs*.
+
 Function documentation
 ---------------------------
 
@@ -32,6 +36,7 @@ import re
 import time
 import platform
 import importlib
+import math
 import cStringIO
 import dms_tools
 import dms_tools.utils
@@ -292,7 +297,7 @@ def ReadDMSCounts(f, chartype):
 def WritePreferences(f, sites, wts, pi_means, pi_95credint):
     """Writes site-specific preferences to a file.
 
-    *f* is a writeable file-like object to which we write the counts,
+    *f* is a writeable file-like object to which we write the preferences,
      or a string giving the name of a file that we create.
 
     *sites* is a list of all site numbers (as strings) for which
@@ -330,6 +335,12 @@ def WritePreferences(f, sites, wts, pi_means, pi_95credint):
     >>> f.seek(0)
     >>> lines = f.readlines()
     >>> lines[0] == '# POSITION WT SITE_ENTROPY PI_A PI_C PI_G PI_T PI_A_95 PI_C_95 PI_G_95 PI_T_95\\n'
+    True
+    >>> f.seek(0)
+    >>> tup = ReadPreferences(f)
+    >>> tup[0] == sites
+    True
+    >>> tup[3] == pi_95credint
     True
     >>> f2 = cStringIO.StringIO()
     >>> WritePreferences(f2, sites, wts, pi_means, None)
@@ -442,8 +453,208 @@ def ReadPreferences(f):
             h[r] = float(entries[2])
             pi_means[r] = dict([(x, float(entries[3 + i])) for (i, x) in enumerate(characters)])
             if pi_95credint != None:
-                pi_95credint[r] = dict([(x, (float(entries[3 + len(characters) + i].split()[0], float(entries[3 + len(characters) + i].split()[1])))) for (i, x) in enumerate(characters)])
+                pi_95credint[r] = dict([(x, (float(entries[3 + len(characters) + i].split(',')[0]), float(entries[3 + len(characters) + i].split(',')[1]))) for (i, x) in enumerate(characters)])
     return (sites, wts, pi_means, pi_95credint, h)
+
+
+
+def WriteDiffPrefs(f, sites, wts, deltapi_means, pr_deltapi_lt0, pr_deltapi_gt0):
+    """Writes differential preferences to a file.
+
+    *f* is a writeable file-like object to which we write the differential
+     preferences, or a string giving the name of a file that we create.
+
+    *sites* is a list of all site numbers (as strings) for which
+     we have preferences.
+     
+    *wts* is a dictionary with *wts[r]* giving the wildtype character
+     at site *r* for all *r* in *sites*.
+
+    *deltapi_means* is a dictionary keyed by all sites (as strings). For each 
+     site *r*, *deltapi_means[r]* is a dictionary where *deltapi_means[r][x]*
+     is the preference of *r* for character *x*, where the
+     characters are nucleotide, codons, or amino acids. 
+
+    *pr_deltapi_gt0* and *pr_deltapi_lt0* can either both be *None*,
+     or can both be dictionaries keyed by all sites in *deltapi_means*
+     that have as their values the posterior probability that particular
+     differential preference is greater than or less than zero, 
+     respectively.
+
+    The written file has the following format::
+
+        # POSITION WT RMS_dPI dPI_A dPI_C dPI_G dPI_T Pr_dPI_A_lt0 Pr_dPI_A_gt0 Pr_dPI_C_lt0 Pr_dPI_C_gt0 Pr_dPI_G_lt0 Pr_dPI_G_gt0 Pr_dPI_T_lt0 Pr_dPI_T_gt0
+        1 G 0.241 0.02 -0.4 0.2 0.18 0.41 0.59 0.90 0.10 0.2 0.8 0.3 0.7
+
+    In this format, the first header line begins with ``#`` and indicates the
+    characters as the suffix to ``dPI_``. The posterior probabilities
+    are indicated by columns of the form ``Pr_dPI_A_gt0`` for greater than zero,
+    and ``Pr_dPI_A_lt0`` for less than zero.
+    The ``RMS_dPI`` column gives the root-mean-square differential preference
+    as :math:`\\textrm{RMS}_{\Delta\pi_r} = \sqrt{\\frac{1}{\mathcal{N}_x}\sum_x \left(\Delta\pi_{r,x}\\right)^2}`
+
+    >>> sites = ['1']
+    >>> deltapi_means = {'1':{'A':-0.2, 'C':-0.3, 'G':0.4, 'T':0.1}}
+    >>> wts = {'1':'G'}
+    >>> f = cStringIO.StringIO()
+    >>> WriteDiffPrefs(f, sites, wts, deltapi_means, None, None)
+    >>> f.seek(0)
+    >>> lines = f.readlines()
+    >>> lines[0] == '# POSITION WT RMS_dPI dPI_A dPI_C dPI_G dPI_T\\n'
+    True
+    >>> entries = lines[1].split()
+    >>> entries[0] == str(sites[0])
+    True
+    >>> entries[1] == wts[sites[0]]
+    True
+    >>> 1.0e-6 > abs(float(entries[2]) - math.sqrt(sum([x**2 for x in deltapi_means[sites[0]].values()]) / float(len(deltapi_means[sites[0]].values()))))
+    True
+    >>> 1.0e-6 > abs(float(entries[3]) - deltapi_means[sites[0]]['A'])
+    True
+    >>> f2 = cStringIO.StringIO()
+    >>> pr_deltapi_gt0 = {'1':{'A':0.95, 'C':0.5, 'G':0.7, 'T':0.5}}
+    >>> pr_deltapi_lt0 = {'1':{'A':0.05, 'C':0.5, 'G':0.3, 'T':0.5}}
+    >>> WriteDiffPrefs(f2, sites, wts, deltapi_means, pr_deltapi_lt0, pr_deltapi_gt0)
+    >>> f2.seek(0)
+    >>> lines = f2.readlines()
+    >>> lines[0] == '# POSITION WT RMS_dPI dPI_A dPI_C dPI_G dPI_T Pr_dPI_A_lt0 Pr_dPI_A_gt0 Pr_dPI_C_lt0 Pr_dPI_C_gt0 Pr_dPI_G_lt0 Pr_dPI_G_gt0 Pr_dPI_T_lt0 Pr_dPI_T_gt0\\n'
+    True
+    >>> f.seek(0)
+    >>> tup = ReadDiffPrefs(f)
+    >>> len(tup) == 6
+    True
+    >>> tup[0] == sites
+    True
+    >>> tup[1] == wts
+    True
+    >>> tup[2] == deltapi_means
+    True
+    >>> tup[3] == tup[4] == None
+    True
+    >>> 1.0e-6 > tup[5]['1'] - float(entries[2])
+    True
+    >>> f.close()
+    >>> f2.seek(0)
+    >>> tup = ReadDiffPrefs(f2)
+    >>> len(tup) == 6
+    True
+    >>> tup[0] == sites
+    True
+    >>> tup[1] == wts
+    True
+    >>> tup[2] == deltapi_means
+    True
+    >>> tup[3] == pr_deltapi_lt0
+    True
+    >>> tup[4] == pr_deltapi_gt0
+    True
+    >>> 1.0e-6 > tup[5]['1'] - float(entries[2])
+    True
+    >>> f2.close()
+    """
+    openedfile = False
+    if isinstance(f, str):
+        f = open(f, 'w')
+        openedfile = True
+    assert sites and len(sites) >= 1 and not isinstance(sites, str), "sites must be a list with at least one entry"
+    characters = deltapi_means[sites[0]].keys()
+    characters.sort()
+    if '*' in characters:
+        i = characters.index('*')
+        characters = characters[ : i] + characters[i + 1 : ] + ['*']
+    f.write('# POSITION WT RMS_dPI %s' % ' '.join(['dPI_%s' % x for x in characters]))
+    if pr_deltapi_gt0 and pr_deltapi_lt0:
+        f.write(' %s\n' % ' '.join(['Pr_dPI_%s_lt0 Pr_dPI_%s_gt0' % (x, x) for x in characters]))
+    elif (not pr_deltapi_gt0) and (not pr_deltapi_lt0):
+        f.write('\n')
+    else:
+        raise ValueError('Either BOTH pr_deltapi_gt0 and pr_deltapi_lt0 must be None, or BOTH must not be None')
+    for r in sites:
+        rms = dms_tools.utils.RMS([deltapi_means[r][x] for x in characters])
+        f.write('%s %s %g ' % (r, wts[r], rms))
+        f.write('%s' % ' '.join(['%g' % deltapi_means[r][x] for x in characters]))
+        if pr_deltapi_lt0:
+            pr_lt0 = [pr_deltapi_lt0[r][x] for x in characters]
+            pr_gt0 = [pr_deltapi_gt0[r][x] for x in characters]
+            for (lt0, gt0) in zip(pr_lt0, pr_gt0):
+                f.write(' %g %g' % (lt0, gt0))
+        f.write('\n')
+    if openedfile:
+        f.close()
+
+
+def ReadDiffPrefs(f):
+    """Reads the differential preferences written by *WriteDiffPrefs*.
+
+    *f* is the name of an existing file or a readable file-like object.
+
+    The return value is the tuple: 
+    *(sites, wts, deltapi_means, pr_deltapi_lt0, pr_deltapi_gt0, rms)*
+    where *sites*, *wts*, *deltapi_means*, *pr_deltapi_lt0*, and 
+    *pr_deltapi_gt0* all have the same values used to write the file
+    with *WriteDiffPrefs* and *rms* is a dictionary with *rms[r]* giving
+    the root-mean-square differential preference for each *r* in 
+    *sites*.
+
+    See docstring of *WriteDiffPrefs* for example usage.
+    """
+    charmatch = re.compile('^dPI_([A-z\*\-]+)$')
+    if isinstance(f, str):
+        open(f)
+        lines = f.readlines()
+        f.close()
+    else:
+        lines = f.readlines()
+    characters = []
+    sites = []
+    wts = {}
+    deltapi_means = {}
+    pr_deltapi_lt0 = {}
+    pr_deltapi_gt0 = {}
+    rms = {}
+    for line in lines:
+        if line.isspace():
+            continue
+        elif line[0] == '#' and not characters:
+            entries = line[1 : ].strip().split()
+            if len(entries) < 4:
+                raise ValueError("Insufficient entries in header:\n%s" % line)
+            if not (entries[0] == 'POSITION' and entries[1] == 'WT' and entries[2] == 'RMS_dPI'):
+                raise ValueError("Not the correct first three header columns:\n%s" % line)
+            i = 3
+            while i < len(entries) and charmatch.search(entries[i]):
+                characters.append(charmatch.search(entries[i]).group(1))
+                i += 1
+            if i  == len(entries):
+                pr_deltapi_lt0 = pr_deltapi_gt0 = None
+                linelength = len(characters) + 3
+            else:
+                if not len(entries) - i == 2 * len(characters):
+                    raise ValueError("Header line does not have posterior probabilities > and < format:\n%s" % line)
+                if not all([entries[i + 2 * j] == 'Pr_dPI_%s_lt0' % characters[j] for j in range(len(characters))]): 
+                    raise ValueError("Pr_dPI_?_lt0 mismatch in header:\n%s" % line)
+                if not all([entries[i + 2 * j + 1] == 'Pr_dPI_%s_gt0' % characters[j] for j in range(len(characters))]):
+                    raise ValueError("Pr_dPI_?_gt0 mismatch in header:\n%s" % line)
+                linelength = 3 * len(characters) + 3
+        elif line[0] == '#':
+            continue
+        elif not characters:
+            raise ValueError("Found data lines before encountering a valid header")
+        else:
+            entries = line.strip().split()
+            if len(entries) != linelength:
+                raise ValueError("Line does not have expected %d entries:\n%s" % (linelength, line))
+            r = entries[0]
+            assert r not in sites, "Duplicate site of %s" % r
+            sites.append(r)
+            wts[r] = entries[1]
+            assert entries[1] in characters, "Character %s is not one of the valid ones in header. Valid possibilities: %s" % (entries[1], ', '.join(characters))
+            rms[r] = float(entries[2])
+            deltapi_means[r] = dict([(x, float(entries[3 + i])) for (i, x) in enumerate(characters)])
+            if pr_deltapi_lt0 != None:
+                pr_deltapi_lt0[r] = dict([(x, float(entries[3 + len(characters) + 2 * i])) for (i, x) in enumerate(characters)])
+                pr_deltapi_gt0[r] = dict([(x, float(entries[3 + len(characters) + 2 * i + 1])) for (i, x) in enumerate(characters)])
+    return (sites, wts, deltapi_means, pr_deltapi_lt0, pr_deltapi_gt0, rms)
 
 
 

@@ -69,7 +69,7 @@ class TestInferSiteDiffPreferences(unittest.TestCase):
         pidist = (0.2, 0.8) # pi drawn uniformly from this range (after correcting for proportionality)
         frange = (0.005, 0.1)
         depth = 1e9
-        maxdiffsum = 0.01
+        maxdiffsum = 0.02
         for seed in self.seeds:
             random.seed(seed)
             numpy.random.seed(seed)
