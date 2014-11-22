@@ -28,8 +28,6 @@ def main():
             os.remove(args['logfile'])
     prog = parser.prog
 
-    raise RuntimeError('end of implemented code')
-
     # Set up to log everything to logfile.
     # Confusingly, pystan defines its own logger which I have NOT been able to silence.
     # So even though the logger set up in this script will only log to logfile, the
@@ -122,8 +120,7 @@ def main():
             for x in countcharacters:
                 m = len([i for i in range(charlength) if wts[r][i] != x[i]])
                 nchars_with_m[m] += 1
-            priors = dict([(name, {}) for name in ['frstart_prior_params', 'pirs1_prior_params', 'xir_prior_params']])
-            priors['deltapi_concentration'] = args['alpha_deltapi']
+            priors = dict([(name, {}) for name in ['frstart_prior_params', 'xir_prior_params']])
             for x in countcharacters:
                 m = len([i for i in range(charlength) if wts[r][i] != x[i]])
                 if m == 0: # wildtype
@@ -145,8 +142,11 @@ def main():
                     priors[name] = dict([(aa, x / float(entrysum)) for (aa, x) in priors[name].iteritems()])
                 for (name, d) in rcounts.items():
                     rcounts[name] = dms_tools.utils.SumCodonToAA(d, args['includestop'])
-            for (name, alpha) in [('frstart_prior_params', 'alpha_start'), ('pirs1_prior_params', 'alpha_pis1'), ('xir_prior_params', 'alpha_err')]:
-                priors[name] = dict([(x, priors[name][x] * len(characters) * args[alpha]) for x in characters])
+            for (name, alpha) in [('frstart_prior_params', 'alpha_start'), ('xir_prior_params', 'alpha_err')]:
+                if priors[name]:
+                    priors[name] = dict([(x, priors[name][x] * len(characters) * args[alpha]) for x in characters])
+            priors['pirs1_prior_params'] = dict([(x, args['alpha_pis1']) for x in characters])
+            priors['deltapi_concentration'] = args['alpha_deltapi']
             logged[r] = False
             results[r] = pool.apply_async(dms_tools.mcmc.InferSiteDiffPrefs, (characters, wts[r], pystan_error_model, rcounts, priors, args['seed']))
         while not all([logged[r] for r in sites]):
@@ -159,7 +159,7 @@ def main():
                     logger.info('Finished inference for site %s. Here is the summary:\n%s\n' % (r, logstring))
                     if not converged:
                         raise RuntimeError("Differential preference inference MCMC failed to converge for site %s:\n%s" % (r, logstring))
-                    deltapi_means[r] = pi
+                    deltapi_means[r] = deltapi
                     pr_deltapi_gt0[r] = pr_gt0
                     pr_deltapi_lt0[r] = pr_lt0
         pool.terminate()
