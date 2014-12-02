@@ -13,6 +13,31 @@ import dms_tools.parsearguments
 import dms_tools.file_io
 
 
+def Pref_or_DiffPref(data, tol=1.0e-3):
+    """Determines if data represent preferences or differential preferences.
+
+    If values are >= 0 and <= 1 and sum to one (within *tol*), then
+    return 'preferences'.
+
+    If values are <= 1 and sum to zero (within *tol*), then return
+    'diffprefs'.
+
+    Otherwise returns 'neither preferences nor diffprefs'
+
+    Otherwise, raise an exception.
+    """
+    sums = []
+    for (r, rdata) in data.iteritems():
+        sums.append((sum(rdata.values())))
+    if all([abs(rsum - 1.0) <= tol for rsum in sums]):
+        return 'preferences'
+    elif all([abs(rsum) <= tol for rsum in sums]):
+        return 'diffprefs'
+    else:
+        return 'neither preferences nor diffprefs'
+
+
+
 def main():
     """Main body of script."""
 
@@ -21,163 +46,54 @@ def main():
     args = vars(parser.parse_args())
     prog = parser.prog
 
-    raise RuntimeError('not implemented past here')
-
-    # Set up to log everything to logfile.
-    # Confusingly, pystan defines its own logger which I have NOT been able to silence.
-    # So even though the logger set up in this script will only log to logfile, the
-    # pystan one imported by both dms_tools.mcmc and the call to dms_tools.file_io.Versions()
-    # will log to standard outpout. This is very confusing, but I have not been able to find
-    # a better solution until I determine how to silence the pystan logger.
+    # print initial information
     versionstring = dms_tools.file_io.Versions() 
-    logging.shutdown()
-    logger = logging.getLogger(prog)
-    logger.setLevel(logging.INFO)
-    logfile_handler = logging.FileHandler(args['logfile'])
-    logger.addHandler(logfile_handler)
-    formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
-    logfile_handler.setFormatter(formatter)
+    print 'Beginning execution of %s in directory %s\n' % (prog, os.getcwd())
+    print versionstring
+    print 'Parsed the following arguments:\n%s\n' % '\n'.join(['\t%s = %s' % tup for tup in args.iteritems()])
 
-    # begin execution
-    try:
-        logger.info('Beginning execution of %s in directory %s\n' % (prog, os.getcwd()))
-        logger.info('Progress is being logged to %s\n' % args['logfile'])
-        logger.info(versionstring)
-        logger.info('Parsed the following arguments:\n%s\n' % '\n'.join(['\t%s = %s' % tup for tup in args.iteritems()]))
+    # remove outfile if it exists
+    if os.path.isfile(args['outfile']):
+        print "Removing existing output file of %s" % args['outfile']
+        os.remove(args['outfile'])
 
-        # read in the counts
-        if args['chartype'].lower() == 'codon_to_aa':
-            chartype = 'codon'
-            transform_to_aa = True
-            charlength = 3 # length of a codon
-            countcharacters = dms_tools.codons
-            if args['includestop']:
-                characters = dms_tools.aminoacids_withstop
-            else:
-                characters = dms_tools.aminoacids_nostop
-        elif args['chartype'].lower() == 'codon':
-            chartype = 'codons'
-            transform_to_aa = False
-            countcharacters = characters = dms_tools.codons
-            charlength = 3 # length of a codon
-        elif args['chartype'].upper() == 'DNA':
-            chartype = 'DNA'
-            charlength = 1 # length of a nucleotide
-            transform_to_aa = False
-            countcharacters = characters = dms_tools.nts
+    # read data, merge, and create outfile
+    if not args['minus']:
+        args['minus'] = [] # reassign from None to empty list
+    (sites, characters, wts, databyfile) = dms_tools.file_io.ReadMultiPrefOrDiffPref(\
+            args['infiles'] + args['minus'], args['excludestop'])
+    filetypes = dict([(fname, Pref_or_DiffPref(databyfile[fname])) for fname in args['infiles'] + args['minus']])
+    print "\nHere are the apparent file types of the input files:\n%s\n" % '\n'.join(['%s is %s' % tup for tup in filetypes.iteritems()])
+    sums = dms_tools.utils.SumPrefsDiffPrefs([databyfile[fname] for fname in args['infiles']], minus=[databyfile[fname] for fname in args['minus']])
+    if args['merge_method'] == 'average':
+        if args['minus']: 
+            raise ValueError('Cannot use --minus option when the merge_method is "average"; can only use it for "sum".')
+        # now conver the sums to averages by dividing values by number of files
+        for r in sums.keys():
+            for x in sums[r].keys():
+                sums[r][x] /= float(len(databyfile))
+        if all([ftype == 'preferences' for ftype in filetypes.values()]):
+            print "Writing the average of the preferences to %s" % args['outfile']
+            dms_tools.file_io.WritePreferences(args['outfile'], sites, wts, sums, None)
+        elif all([ftype == 'diffprefs' for ftype in filetypes.values()]):
+            print "Writing the average of the differential preferences to %s" % args['outfile']
+            dms_tools.file_io.WriteDiffPrefs(args['outfile'], sites, wts, sums, None, None)
         else:
-            raise ValueError("Invalid chartype of %s" % args['chartype'])
-        counts_files = {'nrpre':args['n_pre'], 'nrpost':args['n_post']}
-        if args['errpre'].lower() == args['errpost'].lower() == 'none':
-            pystan_error_model = dms_tools.mcmc.StanModelNoneErr
-            error_model = 'none'
-        elif args['errpre'] == args['errpost']:
-            pystan_error_model = dms_tools.mcmc.StanModelSameErr
-            error_model = 'same'
-            counts_files['nrerr'] = args['errpre']
-        elif args['errpre'].lower() == 'none' or args['errpost'].lower() == 'none':
-            raise ValueError("Either --errpre and --errpost must both be 'none', or they must both NOT be 'none'")
+            raise ValueError("The input files do not all specify the same file type, but this is required when averaging. The file types appear to be:\n%s" % '\n'.join(['%s is %s' % tup for tup in filetypes.iteritems()]))
+    elif args['merge_method'] == 'sum':
+        sumtype = Pref_or_DiffPref(sums)
+        if sumtype == 'preferences':
+            print "The listed files summed to give valid preferences. Now writing these preferences to %s" % args['outfile']
+            dms_tools.file_io.WritePreferences(args['outfile'], sites, wts, sums, None)
+        elif sumtype == 'diffprefs':
+            print "The listed files summed to give valid differential preferences. Now writing these differential preferences to %s" % args['outfile']
+            dms_tools.file_io.WriteDiffPrefs(args['outfile'], sites, wts, sums, None, None)
         else:
-            pystan_error_model = dms_tools.mcmc.StanModelDifferentErr
-            error_model = 'different'
-            counts_files['nrerrpre'] = args['errpre']
-            counts_files['nrerrpost'] = args['errpost']
-        (sites, wts, counts) = dms_tools.file_io.ReadMultipleDMSCountsFiles(counts_files.values(), chartype)
-        logger.info('There are counts for %d sites, which are:\n%s\n' % (len(sites), '\n'.join(['\t%s (wildtype identity of %s)' % (r, wts[r]) for r in sites])))
-        counts = dict([(name, counts[counts_files[name]]) for name in counts_files.iterkeys()]) # make names count type rather than file
-
-        # compute mutation rates for priors
-        if error_model == 'none':
-            avgmu = sum([dms_tools.utils.AvgMutRate(counts['nrpre'], chartype)[m] for m in range(1, charlength + 1)]) 
-            logger.info('Average per-site mutation rate: %g' % avgmu)
-        elif error_model == 'same':
-            avgepsilon = dms_tools.utils.AvgMutRate(counts['nrerr'], chartype)
-            logger.info('Average per-site error rate:\n%s\n' % '\n'.join(['\t%g for characters that require %d nucleotide changes' % (avgepsilon[m], m) for m in range(1, charlength + 1)]))
-            avgmu = sum([dms_tools.utils.AvgMutRate(counts['nrpre'], chartype)[m] for m in range(1, charlength + 1)])  - sum([avgepsilon[m] for m in range(1, charlength + 1)])
-            logger.info('Average per-site mutation rate: %g' % avgmu)
-        elif error_model == 'different':
-            avgepsilon = dms_tools.utils.AvgMutRate(counts['nrerrpre'], chartype)
-            logger.info('Average per-site error rate in pre-selection control:\n%s\n' % '\n'.join(['\t%g for characters that require %d nucleotide changes' % (avgepsilon[m], m) for m in range(1, charlength + 1)]))
-            avgmu = sum([dms_tools.utils.AvgMutRate(counts['nrpre'], chartype)[m] for m in range(1, charlength + 1)])  - sum([avgepsilon[m] for m in range(1, charlength + 1)])
-            logger.info('Average per-site mutation rate: %g\n' % avgmu)
-            avgrho = dms_tools.utils.AvgMutRate(counts['nrerrpost'], chartype)
-            logger.info('Average per-site error rate in post-selection control:\n%s\n' % '\n'.join(['\t%g for characters that require %d nucleotide changes' % (avgrho[m], m) for m in range(1, charlength + 1)]))
-        else:
-            raise ValueError("Invalid error_model %s" % error_model)
-        if not 0 < avgmu < 1:
-            raise ValueError("Average mutation rate of %g is not > 0 and < 1. Perhaps there are no mutations or the error control has a higher mutation rate than the pre-selection library. Either one is an irresolvable problem." % avgmu)
-
-        # begin inferring preferences, using a multiprocessing pool to enable multiple CPUs
-        logger.info('Compiling PyStan model...')
-        pystan_error_model = pystan_error_model()
-        logger.info('Completed compiling PyStan model.\n')
-        if args['ncpus'] == -1:
-            nprocesses = None
-        else:
-            nprocesses = args['ncpus']
-            assert nprocesses > 0, "Must specify at least one process"
-        pool = multiprocessing.Pool(nprocesses)
-        results = {}
-        logged = {}
-        pi_means = {}
-        pi_95credint = {}
-        logger.info('Now beginning inference for each site...\n')
-        for r in sites:
-            rcounts = dict([(name, counts[name][r]) for name in counts.iterkeys()])
-            nchars_with_m = dict([(m, 0) for m in range(charlength + 1)])
-            for x in countcharacters:
-                m = len([i for i in range(charlength) if wts[r][i] != x[i]])
-                nchars_with_m[m] += 1
-            priors = dict([(name, {}) for name in ['mur_prior_params', 'epsilonr_prior_params', 'rhor_prior_params']])
-            for x in countcharacters:
-                m = len([i for i in range(charlength) if wts[r][i] != x[i]])
-                if m == 0: # wildtype
-                    priors['mur_prior_params'][x] = 1.0 - avgmu
-                else:
-                    priors['mur_prior_params'][x] = avgmu / float(len(countcharacters) - 1.0)
-                if error_model in ['different', 'same']:
-                    priors['epsilonr_prior_params'][x] = avgepsilon[m] / float(nchars_with_m[m])
-                if error_model == 'different':
-                    priors['rhor_prior_params'][x] = avgrho[m] / float(nchars_with_m[m])
-            for (name, d) in priors.iteritems():
-                assert (not d) or (abs(sum(d.values()) - 1.0) < 1.0e-6), "Sum not close to one for %s: %g" % (name, sum(d.values()))
-            if transform_to_aa:
-                wts[r] = dms_tools.codon_to_aa[wts[r]]
-                for (name, d) in priors.items():
-                    if not d:
-                        continue
-                    priors[name] = dms_tools.utils.SumCodonToAA(d, args['includestop'])
-                    entrysum = sum(priors[name].values()) # rescale to sum to one
-                    assert entrysum > 0, "All of sum was stop codons?"
-                    priors[name] = dict([(aa, x / float(entrysum)) for (aa, x) in priors[name].iteritems()])
-                for (name, d) in rcounts.items():
-                    rcounts[name] = dms_tools.utils.SumCodonToAA(d, args['includestop'])
-            for (name, alpha) in [('mur_prior_params', 'mu_alpha'), ('epsilonr_prior_params', 'err_alpha'), ('rhor_prior_params', 'err_alpha')]:
-                priors[name] = dict([(x, priors[name][x] * len(characters) * args[alpha]) for x in characters])
-            priors['pir_prior_params'] = dict([(x, args['pi_alpha']) for x in characters])
-            logged[r] = False
-            results[r] = pool.apply_async(dms_tools.mcmc.InferSitePreferences, (characters, wts[r], pystan_error_model, rcounts, priors, args['seed']))
-        while not all([logged[r] for r in sites]):
-            time.sleep(1) # wait a bit before polling again
-            for r in sites:
-                if results[r].ready() and not logged[r]:
-                    logged[r] = True
-                    logger.info('Getting results for site %s...' % r)
-                    (converged, pi, pi95, logstring) = results[r].get()
-                    logger.info('Finished inference for site %s. Here is the summary:\n%s\n' % (r, logstring))
-                    if not converged:
-                        raise RuntimeError("Preference inference MCMC failed to converge for site %s:\n%s" % (r, logstring))
-                    pi_means[r] = pi
-                    pi_95credint[r] = pi95
-        pool.terminate()
-        logger.info('Now writing preferences to %s\n' % args['outfile'])
-        dms_tools.file_io.WritePreferences(args['outfile'], sites, wts, pi_means, pi_95credint)
-    except:
-        logger.exception('Terminating %s at %s with ERROR' % (prog, time.asctime()))
+            raise ValueError("The sum of the files does not yield either valid preferences or differential preferences. Are you sure you are summing a valid combination?")
     else:
-        logger.info('Successful completion of %s at %s' % (prog, time.asctime()))
-    finally:
-        logging.shutdown()
+        raise ValueError("Invalid merge_method of %s" % args['merge_method'])
+
+    print 'Successfully completed %s at %s' % (prog, time.asctime())
 
 
 

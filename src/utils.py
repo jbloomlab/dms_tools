@@ -24,6 +24,8 @@ Functions in this module
 
 * *RemoveStopFromDiffPrefs* : removes stop codon
 
+* *SumPrefsDiffPrefs* : sums preferences and differential preferences
+
 Function documentation
 ---------------------------
 
@@ -33,6 +35,59 @@ Function documentation
 import re
 import math
 import dms_tools
+
+
+def SumPrefsDiffPrefs(datalist, minus=[]):
+    """Sums preferences and differential preferences.
+
+    *datalist* is a list of preferences or differential preferences, which must be keyed
+    by the same sets of sites and characters.
+
+    *minus* is an optional list that is **subtracted** rather than added in the sum.
+
+    Returns a dictionary giving the sums.
+
+    >>> prefs = {'1':{'A':0.2, 'T':0.1, 'C':0.5, 'G':0.2}}
+    >>> diffprefs = {'1':{'A':-0.1, 'T':0.3, 'C':-0.2, 'G':0.0}}
+    >>> datasum = SumPrefsDiffPrefs([prefs, diffprefs])
+    >>> print '%.2f' % datasum['1']['A']
+    0.10
+    >>> print '%.2f' % datasum['1']['T']
+    0.40
+    >>> print '%.2f' % datasum['1']['C']
+    0.30
+    >>> print '%.2f' % datasum['1']['G']
+    0.20
+    >>> minusprefs = {'1':{'A':0.1, 'T':0.1, 'C':-0.1, 'G':-0.1}}
+    >>> datasum = SumPrefsDiffPrefs([prefs, diffprefs], minus=[minusprefs])
+    >>> print '%.2f' % datasum['1']['A']
+    0.00
+    >>> print '%.2f' % datasum['1']['T']
+    0.30
+    >>> print '%.2f' % datasum['1']['C']
+    0.40
+    >>> print '%.2f' % datasum['1']['G']
+    0.30
+
+    """
+    assert len(datalist) >= 1, "datalist must have at least one entry."
+    sites = datalist[0].keys()
+    assert len(sites) >= 1, "datalist must have at least one site"
+    characters = datalist[0][sites[0]].keys()
+    datasum = {}
+    for r in sites:
+        datasum[r] = dict([(x, 0.0) for x in characters])
+        for idata in datalist:
+            assert set(sites) == set(idata.keys()), "Not the same set of sites in all preferences / differential preferences"
+            assert set(characters) == set(idata[r].keys()), "Not the same set of characters in all preferences / differential preferences"
+            for x in characters:
+                datasum[r][x] += idata[r][x]
+        for idata in minus:
+            assert set(sites) == set(idata.keys()), "Not the same set of sites in all preferences / differential preferences"
+            assert set(characters) == set(idata[r].keys()), "Not the same set of characters in all preferences / differential preferences"
+            for x in characters:
+                datasum[r][x] -= idata[r][x]
+    return datasum
 
 
 def RemoveStopFromDiffPrefs(deltapi_means):

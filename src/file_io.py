@@ -326,7 +326,9 @@ def WritePreferences(f, sites, wts, pi_means, pi_95credint):
     characters as the suffix to ``PI_``. The 95% credible intervals (if given)
     are indicated by columns beginning with ``PI_`` and ending with ``_95``.
     The ``SITE_ENTROPY`` column gives the site entropy in bits (log base 2)
-    as :math:`h_r = \sum_x \pi_{r,x} \\times \log_2 \pi_{r,x}`
+    as :math:`h_r = \sum_x \pi_{r,x} \\times \log_2 \pi_{r,x}`.
+
+    The ``POSITION`` header can also be ``SITE``.
 
     >>> sites = ['1']
     >>> pi_means = {'1':{'A':0.2, 'C':0.3, 'G':0.4, 'T':0.1}}
@@ -406,7 +408,7 @@ def ReadPreferences(f):
     """
     charmatch = re.compile('^PI_([A-z\*\-]+)$')
     if isinstance(f, str):
-        open(f)
+        f = open(f)
         lines = f.readlines()
         f.close()
     else:
@@ -424,7 +426,7 @@ def ReadPreferences(f):
             entries = line[1 : ].strip().split()
             if len(entries) < 4:
                 raise ValueError("Insufficient entries in header:\n%s" % line)
-            if not (entries[0] == 'POSITION' and entries[1] == 'WT' and entries[2] == 'SITE_ENTROPY'):
+            if not (entries[0] in ['POSITION', 'SITE'] and entries[1][ : 2] == 'WT' and entries[2] == 'SITE_ENTROPY'):
                 raise ValueError("Not the correct first three header columns:\n%s" % line)
             i = 3
             while i < len(entries) and charmatch.search(entries[i]):
@@ -602,7 +604,7 @@ def ReadDiffPrefs(f):
     """
     charmatch = re.compile('^dPI_([A-z\*\-]+)$')
     if isinstance(f, str):
-        open(f)
+        f = open(f)
         lines = f.readlines()
         f.close()
     else:
@@ -621,7 +623,7 @@ def ReadDiffPrefs(f):
             entries = line[1 : ].strip().split()
             if len(entries) < 4:
                 raise ValueError("Insufficient entries in header:\n%s" % line)
-            if not (entries[0] == 'POSITION' and entries[1] == 'WT' and entries[2] == 'RMS_dPI'):
+            if not (entries[0] in ['POSITION', 'SITE'] and entries[1][ : 2] == 'WT' and entries[2] == 'RMS_dPI'):
                 raise ValueError("Not the correct first three header columns:\n%s" % line)
             i = 3
             while i < len(entries) and charmatch.search(entries[i]):
@@ -713,12 +715,12 @@ def ReadMultiPrefOrDiffPref(infiles, removestop=False):
         try:
             (isites, iwts, data, pi_95credint, h) = ReadPreferences(infile)
             if removestop:
-                data = RemoveStopFromPreferences(data)
+                data = dms_tools.utils.RemoveStopFromPreferences(data)
         except:
             try:
                 (isites, iwts, data, pr_deltapi_lt0, pr_deltapi_gt0, rms) = ReadDiffPrefs(infile)
                 if removestop:
-                    data = RemoveStopFromDiffPrefs(data)
+                    data = dms_tools.utils.RemoveStopFromDiffPrefs(data)
             except:
                 raise IOError("infile %s is neither a valid preferences or differential preferences file" % infile)
         dms_tools.utils.NaturalSort(isites)
@@ -732,6 +734,7 @@ def ReadMultiPrefOrDiffPref(infiles, removestop=False):
             if set(characters) != set(data[sites[0]].keys()):
                 raise ValueError("Character sets do not match in all files. Expecting from the first file the following set:\n%s\nInstead got:\n%s\nin file %s" % (', '.join(characters), ', '.join(data[sites[0]].keys()), infile))
         else:
+            firstfileread = True
             wts = iwts
             sites = isites
             databyfile = {infile:data}
