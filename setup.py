@@ -47,5 +47,6 @@ setup(
     scripts = [
             'scripts/dms_inferprefs',
             'scripts/dms_inferdiffprefs',
+            'scripts/dms_merge',
             ],
 )

@@ -18,7 +18,11 @@ Functions in this module
 
 * *SiteEntropy* : Computes site entropy.
 
-* *RMS* : Computs root-mean-square value.
+* *RMS* : Computes root-mean-square value.
+
+* *RemoveStopFromPreferences* : removes stop codon
+
+* *RemoveStopFromDiffPrefs* : removes stop codon
 
 Function documentation
 ---------------------------
@@ -29,6 +33,105 @@ Function documentation
 import re
 import math
 import dms_tools
+
+
+def RemoveStopFromDiffPrefs(deltapi_means):
+    """Removes stop codon and rescales differential preferences to sum to zero.
+
+    Stop codons are denoted by ``*``.
+
+    Essentially, the preference assigned to the stop codon is removed
+    and all other preferences are scaled by an additive factor
+    so they sum to zero.
+
+    If there is not a stop codon present, then nothing is done.
+
+    >>> aas = dms_tools.aminoacids_withstop
+    >>> deltapi_means = {'1':dict([(aa, 1.0 / (len(aas) - 1)) for aa in aas if aa != '*'])}
+    >>> deltapi_means['1']['*'] = -1.0
+    >>> nostop_deltapi_means = RemoveStopFromDiffPrefs(deltapi_means)
+    >>> deltapi_means == nostop_deltapi_means
+    False
+    >>> all(["%.3f" % nostop_deltapi_means['1'][aa] == '0.000' for aa in aas if aa != '*'])
+    True
+    >>> '*' in nostop_deltapi_means['1']
+    False
+
+    >>> aas = dms_tools.aminoacids_withstop
+    >>> deltapi_means = {'1':dict([(aa, 1.0 / (len(aas) - 1)) for aa in aas[1 : ]])}
+    >>> deltapi_means['1'][aas[0]] = -1.0
+    >>> nostop_deltapi_means = RemoveStopFromDiffPrefs(deltapi_means)
+    >>> deltapi_means == nostop_deltapi_means
+    False
+    >>> '*' in nostop_deltapi_means['1']
+    False
+    >>> print '%.5f' % nostop_deltapi_means['1'][aas[0]]
+    -0.99750
+    >>> print '%.5f' % nostop_deltapi_means['1'][aas[1]]
+    0.05250
+
+    >>> aas = dms_tools.aminoacids_nostop
+    >>> deltapi_means = {'1':dict([(aa, 1.0 / (len(aas) - 1)) for aa in aas[1 : ]])}
+    >>> deltapi_means['1'][aas[0]] = -1.0
+    >>> nostop_deltapi_means = RemoveStopFromDiffPrefs(deltapi_means)
+    >>> deltapi_means == nostop_deltapi_means
+    True
+
+    """
+    nostop_deltapi_means = {}
+    for (r, rdeltapi) in deltapi_means.iteritems():
+        if '*' in rdeltapi:
+            istopx = deltapi_means[r]['*']
+            shift = istopx / float(len(rdeltapi) - 1)
+            nostop_deltapi_means[r] = dict([(x, deltapix + shift) for (x, deltapix) in rdeltapi.iteritems() if x != '*'])
+        else:
+            nostop_deltapi_means[r] = rdeltapi
+    return nostop_deltapi_means
+
+
+def RemoveStopFromPreferences(pi_means):
+    """Removes stop codon and renormalizes preference to sum to one.
+
+    Stop codons are denoted by ``*``.
+
+    Essentially, the preference assigned to the stop codon is removed
+    and all other preferences are scaled by a multiplicative factor
+    :math:`\ge 1` until they sum to one.
+
+    If there is not a stop codon present, then nothing is done.
+
+    >>> aas = dms_tools.aminoacids_withstop
+    >>> pi_means = {'1':dict([(aa, 1.0 / len(aas)) for aa in aas]), '2':dict([(aas[0], 0.9)] + [(aa, 0.1 / (len(aas) - 1)) for aa in aas[1 : ]])}
+    >>> nostop_pi_means = RemoveStopFromPreferences(pi_means)
+    >>> pi_means == nostop_pi_means
+    False
+    >>> all(["%.3f" % nostop_pi_means['1'][aa] == '0.050' for aa in aas if aa != '*'])
+    True
+    >>> '*' in nostop_pi_means['1']
+    False
+    >>> '*' in nostop_pi_means['2']
+    False
+    >>> print '%.4f' % nostop_pi_means['2'][aas[0]]
+    0.9045
+    >>> print '%.6f' % nostop_pi_means['2'][aas[1]]
+    0.005025
+
+    >>> aas = dms_tools.aminoacids_nostop
+    >>> pi_means = {'1':dict([(aa, 1.0 / len(aas)) for aa in aas]), '2':dict([(aas[0], 0.9)] + [(aa, 0.1 / (len(aas) - 1)) for aa in aas[1 : ]])}
+    >>> nostop_pi_means = RemoveStopFromPreferences(pi_means)
+    >>> pi_means == nostop_pi_means
+    True
+    """
+    nostop_pi_means = {}
+    for (r, rpi) in pi_means.iteritems():
+        if '*' in rpi:
+            istopx = pi_means[r]['*']
+            assert 0 <= istopx < 1, "Preference for stop codon must be >= 0 and < 1, but got %g" % istopx
+            scale = 1.0 / (1.0 - istopx)
+            nostop_pi_means[r] = dict([(x, pix * scale) for (x, pix) in rpi.iteritems() if x != '*'])
+        else:
+            nostop_pi_means[r] = rpi
+    return nostop_pi_means
 
 
 def RMS(xlist):

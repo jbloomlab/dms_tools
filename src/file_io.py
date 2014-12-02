@@ -24,6 +24,8 @@ Functions in this module
 
 * *ReadDiffPrefs* : reads differential preferences file written by *WriteDiffPrefs*.
 
+* *ReadMultiPrefOrDiffPref* : reads multiple preferences or differential preferences files.
+
 Function documentation
 ---------------------------
 
@@ -281,7 +283,7 @@ def ReadDMSCounts(f, chartype):
             wt = entries[1].strip()
             if r in counts:
                 raise ValueError("Duplicate entry for position %s in line:\n%s" % (r, line))
-            if wt not in characters:
+            if not (wt in characters):
                 raise ValueError("Invalid wildtype character of %s is not a valid %s:\n%s" % (wt, chartype, line))
             counts[r] = {'WT':wt}
             for char in characters:
@@ -449,7 +451,7 @@ def ReadPreferences(f):
             assert r not in sites, "Duplicate site of %s" % r
             sites.append(r)
             wts[r] = entries[1]
-            assert entries[1] in characters, "Character %s is not one of the valid ones in header. Valid possibilities: %s" % (entries[1], ', '.join(characters))
+            assert entries[1] in characters or entries[1] == '?', "Character %s is not one of the valid ones in header. Valid possibilities: %s" % (entries[1], ', '.join(characters))
             h[r] = float(entries[2])
             pi_means[r] = dict([(x, float(entries[3 + i])) for (i, x) in enumerate(characters)])
             if pi_95credint != None:
@@ -648,7 +650,7 @@ def ReadDiffPrefs(f):
             assert r not in sites, "Duplicate site of %s" % r
             sites.append(r)
             wts[r] = entries[1]
-            assert entries[1] in characters, "Character %s is not one of the valid ones in header. Valid possibilities: %s" % (entries[1], ', '.join(characters))
+            assert entries[1] in characters or entries[1] == '?', "Character %s is not one of the valid ones in header. Valid possibilities: %s" % (entries[1], ', '.join(characters))
             rms[r] = float(entries[2])
             deltapi_means[r] = dict([(x, float(entries[3 + i])) for (i, x) in enumerate(characters)])
             if pr_deltapi_lt0 != None:
@@ -656,6 +658,96 @@ def ReadDiffPrefs(f):
                 pr_deltapi_gt0[r] = dict([(x, float(entries[3 + len(characters) + 2 * i + 1])) for (i, x) in enumerate(characters)])
     return (sites, wts, deltapi_means, pr_deltapi_lt0, pr_deltapi_gt0, rms)
 
+
+
+def ReadMultiPrefOrDiffPref(infiles, removestop=False):
+    """Reads multiple preferences or differential preferences files.
+
+    *infiles* is a list of preferences or differential preferences files in
+    the formats read by *ReadPreferences* or *ReadDiffPrefs*. The files can
+    be a mix of these two formats. Each of the files must have data for the
+    same set of sites or a *ValueError* is raised. In addition, the
+    files must use the same sets of characters or a *ValueError* is raised.
+    Valid character sets are:
+
+        * nucleotides
+
+        * codons
+
+        * amino acids without stop codons
+
+        * amino acids with stop codons
+
+        * a mix of amino acids with and without stop codons if *removestop*
+          is *True*.
+
+    *removestop* specifies whether we remove stop codons from amino acids. If
+    this is done, all preferences are renormalized to sum to one by scaling
+    them, and all differential preferences are renormalized to sum to zero
+    by adding or subtracting a fixed amount to each.
+
+    The return value is as follows: 
+    *(sites, characters, wts, databyfile)*. In this tuple:
+
+        *sites* is a list of all site numbers (as strings) for which
+        we have preferences or differential preferences.
+
+        *characters* is a list of the characters that are being used
+        (i.e. nucleotides, codons, or amino acids with or without
+        stop codons).
+     
+        *wts* is a dictionary with *wts[r]* giving the wildtype character
+        at site *r* for all *r* in *sites*. If the files do not all have
+        the same wildtype at *r*, then *wts[r] = '?'*.
+
+        *databyfile* is a dictionary keyed by each file name in *infiles*
+        If that file is a preferences file, then the value is the dictionary
+        *pi_means* that would be returned by *ReadPreferences*. If that file
+        is a differential preferences file, then the value is the 
+        dictionary *deltapi_means* that would be returned by *ReadDiffPrefs*.
+    """
+    assert len(infiles) >= 1, "infiles must specify at least one file"
+    firstfileread = False
+    for infile in infiles:
+        assert os.path.isfile(infile), "Cannot find infile %s" % infile
+        try:
+            (isites, iwts, data, pi_95credint, h) = ReadPreferences(infile)
+            if removestop:
+                data = RemoveStopFromPreferences(data)
+        except:
+            try:
+                (isites, iwts, data, pr_deltapi_lt0, pr_deltapi_gt0, rms) = ReadDiffPrefs(infile)
+                if removestop:
+                    data = RemoveStopFromDiffPrefs(data)
+            except:
+                raise IOError("infile %s is neither a valid preferences or differential preferences file" % infile)
+        dms_tools.utils.NaturalSort(isites)
+        if firstfileread:
+            if isites != sites:
+                raise ValueError("infile %s does not specify the same set of sites as at least one other file in: %s" % (infile, ', '.join(infiles)))
+            for r in sites:
+                if wts[r] != iwts[r]:
+                    wts[r] = '?'
+            databyfile[infile] = data
+            if set(characters) != set(data[sites[0]].keys()):
+                raise ValueError("Character sets do not match in all files. Expecting from the first file the following set:\n%s\nInstead got:\n%s\nin file %s" % (', '.join(characters), ', '.join(data[sites[0]].keys()), infile))
+        else:
+            wts = iwts
+            sites = isites
+            databyfile = {infile:data}
+            characters = data[sites[0]].keys()
+            if set(characters) == set(dms_tools.nts):
+                pass # characters are nucleotides
+            elif set(characters) == set(dms_tools.codons):
+                pass # characters are codons
+            elif set(characters) == set(dms_tools.aminoacids_nostop):
+                pass # characters are amino acids, no stop codon
+            elif set(characters) == set(dms_tools.aminoacids_withstop):
+                assert not removestop, "Failed to remove stop codon"
+                pass # characters are amino acids, with stop codon
+            else:
+                raise ValueError("Invalid character set of: %s" % ', '.join(characters))
+    return (sites, characters, wts, databyfile)
 
 
 if __name__ == '__main__':
