@@ -78,8 +78,8 @@ Command-line usage
 
     A value of "codon" corresponds to using codon characters for both the deep sequencing data and inferred preferences, as described in :ref:`chartype_codon` You would prefer this option over "codon_to_aa" if you thought that there was different selection on different synonymous mutations. Note that the priors over the mutagenesis rates assume that all codon mutations are made at equal frequencies (``NNN`` libraries).
 
-   \-\-includestop
-    A value of "True" means that when using ``--chartype codon_to_aa``, we infer preferences for 21 amino acids, with stop codons (denoted by ``*``) one of the possibilities. A value of "False" means that we constrain the preference for stop codons to be zero regardless of whether or not there are counts for these codons in the data, and so only infer preferences for the 20 non-stop amino acids.
+   \-\-excludestop
+    By default, when using ``--chartype codon_to_aa``, we infer differential preferences for 21 amino acids, with stop codons (denoted by ``*``) one of the possibilities. If you specify the ``--excludestop`` option, then we constrain the differential preference for stop codons to be zero regardless of whether or not there are counts for these codons in the data, and so only infer differential preferences for the 20 non-stop amino acids.
 
 Output
 ----------

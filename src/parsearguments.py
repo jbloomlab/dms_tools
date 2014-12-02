@@ -68,6 +68,7 @@ def FloatGreaterThanZero(x):
     else:
         raise argparse.ArgumentTypeError("%r not a float greater than zero" % x)
 
+
 def ExistingFile(fname):
     """If *fname* is name of an existing file return it, otherwise an error.
     
@@ -80,11 +81,12 @@ def ExistingFile(fname):
 
 def MergeParser():
     """Returns *argparse.ArgumentParser* for ``dms_merge`` script."""
-    parser = ArgumentParserNoArgHelp(description='Merge preferences or differential preferences by averaging or adding / subtracting the values in multiple files. All files must specify the same character type: can be nucleotide, codon, or amino acid (see "--removestop" if using amino acids). This script is part of %s (version %s) written by %s. Detailed documentation is at %s' % (dms_tools.__name__, dms_tools.__version__, dms_tools.__author__, dms_tools.__url__), formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    parser.add_argument('outfile', help='Created output file with merged preferences / differential preferences. If the "infiles" do not all have the same wildtype residue at a site, then the wildtype is indicated as "?" in "outfile".')
+    parser = ArgumentParserNoArgHelp(description='Merge preferences or differential preferences by averaging or adding / subtracting the values in multiple files. All files must specify the same character type: can be nucleotide, codon, or amino acid (see "--excludestop" if using amino acids). This script is part of %s (version %s) written by %s. Detailed documentation is at %s' % (dms_tools.__name__, dms_tools.__version__, dms_tools.__author__, dms_tools.__url__), formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser.add_argument('outfile', help='Created output file with merged preferences / differential preferences; removed if it already exists. If the "infiles" do not all have the same wildtype residue at a site, then the wildtype is indicated as "?" in "outfile".')
     parser.add_argument('merge_method', help='How to merge: If "average" then all "infiles" must specify either preferences or differential preferences; these are then averaged in "outfile". If "sum" then "infiles" can either all be differential preferences, or can be a combination of preferences and differential preferences that (along with any additional files specified by "--minus") sum to a total preference or a total differential preference of zero at each site.', choices=['average', 'sum'])
     parser.add_argument('infiles', nargs='+', help='Files to average or sum. Must all have the same sites and character type, but do not need to have the same wildtype residue at each site.', type=ExistingFile)
-    parser.add_argument('--removestop', default=False, type=bool, help='If we are using amino-acids, do we remove stop codons (denoted by "*"). If "False", then stop codons are NOT removed and all files must either have or lack stop codons. If "True", then any files with stop codons have these codons removed (re-normalizing preferences to sum to one, and differential preferences to sum to zero) before the merge.')
+    parser.add_argument('--excludestop', dest='excludestop', action='store_true', help='If we are using amino acids, do we remove stop codons (denoted by "*")? We only remove stop codons if this argument is specified. If this option is used, then any files with stop codons have these codons removed (re-normalizing preferences to sum to one, and differential preferences to sum to zero) before the merge.')
+    parser.set_defaults(excludestop=False)
     parser.add_argument('--minus', nargs='+', help='Files to subtract when summing. Can only be used if "merge_method" is "sum".', type=ExistingFile)
     return parser
 
@@ -98,7 +100,8 @@ def InferPrefsParser():
     parser.add_argument('--chartype', default='codon_to_aa', help='Characters for which preferences are inferred: "codon_to_aa" = counts for codons and inferred preferences for amino acids; "DNA" = counts and inferred preference for DNA; "codon" = counts and inferred preferences for codons.')
     parser.add_argument('--errpre', default='none', help='Control used to estimate errors in counts from "n_pre". If "none" then the counts in "n_pre" are assumed to have no errors; otherwise this should be a counts file with the same format as "n_pre" giving the counts for sequencing unmutated gene. Currently if this option is not "none" then --errpost also cannot be "none".', type=ExistingFile)
     parser.add_argument('--errpost', default='none', help='Control used to estimate errors in counts from "n_post". If "none" then the counts in "n_post" are assumed to have no errors; otherwise this should be a counts file with the same format as "n_pre" giving the counts for sequencing unmutated gene. If you have the same error control for "n_pre" and "n_post", then set that file name for both this option and --errpre. Currently if this option is not "none" then --errpre also cannot be "none".', type=ExistingFile)
-    parser.add_argument('--includestop', help='Are stop codons considered a possible amino acid if using "--chartype codon_to_aa"? Valid values are "True" or "False".', type=bool, default='True')
+    parser.add_argument('--excludestop', help='Exclude stop codons as a possible amino acid if using "--chartype codon_to_aa". Stop codons are only excluded if this option is specified; otherwise they are included.', dest='excludestop', action='store_true')
+    parser.set_defaults(excludestop=False)
     parser.add_argument('--pi_alpha', help='Concentration parameter for Dirichlet prior over preferences (pi).', default=1.0, type=FloatGreaterThanZero)
     parser.add_argument('--mu_alpha', help='Concentration parameter for Dirichlet prior over mutagenesis rate (mu).', default=1.0, type=FloatGreaterThanZero)
     parser.add_argument('--err_alpha', help='Concentration parameter for Dirichlet priors over error rates (epsilon, rho).', default=1.0, type=FloatGreaterThanZero)
@@ -118,7 +121,8 @@ def InferDiffPrefsParser():
     parser.add_argument('outfile', help='Created output file with differential preferences; overwritten if it already exists.')
     parser.add_argument('--chartype', default='codon_to_aa', help='Characters for which preferences are inferred: "codon_to_aa" = counts for codons and inferred preferences for amino acids; "DNA" = counts and inferred preference for DNA; "codon" = counts and inferred preferences for codons.')
     parser.add_argument('--err', default='none', help='Control used to estimate errors in counts for all libraries ("n_start", "n_s1", "n_s2"). If "none" then the counts are assumed to have no errors; otherwise this should be a counts file with the same format as "n_start" giving the counts for sequencing unmutated gene.', type=ExistingFile)
-    parser.add_argument('--includestop', help='Are stop codons considered a possible amino acid if using "--chartype codon_to_aa"? Valid values are "True" or "False".', type=bool, default='True')
+    parser.add_argument('--excludestop', help='Exclude stop codons as a possible amino acid if using "--chartype codon_to_aa". Stop codons are only excluded if this option is specified; otherwise they are included.', dest='excludestop', action='store_true')
+    parser.set_defaults(excludestop=False)
     parser.add_argument('--alpha_start', help='Concentration parameter for Dirichlet prior over starting frequencies.', default=1.0, type=FloatGreaterThanZero)
     parser.add_argument('--alpha_pis1', help='Concentration parameter for Dirichlet prior over preferences for selection 1.', default=1.0, type=FloatGreaterThanZero)
     parser.add_argument('--alpha_err', help='Concentration parameter for Dirichlet priors over error rate.', default=1.0, type=FloatGreaterThanZero)

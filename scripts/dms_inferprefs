@@ -56,10 +56,10 @@ def main():
             transform_to_aa = True
             charlength = 3 # length of a codon
             countcharacters = dms_tools.codons
-            if args['includestop']:
-                characters = dms_tools.aminoacids_withstop
-            else:
+            if args['excludestop']:
                 characters = dms_tools.aminoacids_nostop
+            else:
+                characters = dms_tools.aminoacids_withstop
         elif args['chartype'].lower() == 'codon':
             chartype = 'codons'
             transform_to_aa = False
@@ -151,12 +151,12 @@ def main():
                 for (name, d) in priors.items():
                     if not d:
                         continue
-                    priors[name] = dms_tools.utils.SumCodonToAA(d, args['includestop'])
+                    priors[name] = dms_tools.utils.SumCodonToAA(d, not args['excludestop'])
                     entrysum = sum(priors[name].values()) # rescale to sum to one
                     assert entrysum > 0, "All of sum was stop codons?"
                     priors[name] = dict([(aa, x / float(entrysum)) for (aa, x) in priors[name].iteritems()])
                 for (name, d) in rcounts.items():
-                    rcounts[name] = dms_tools.utils.SumCodonToAA(d, args['includestop'])
+                    rcounts[name] = dms_tools.utils.SumCodonToAA(d, not args['excludestop'])
             for (name, alpha) in [('mur_prior_params', 'mu_alpha'), ('epsilonr_prior_params', 'err_alpha'), ('rhor_prior_params', 'err_alpha')]:
                 priors[name] = dict([(x, priors[name][x] * len(characters) * args[alpha]) for x in characters])
             priors['pir_prior_params'] = dict([(x, args['pi_alpha']) for x in characters])

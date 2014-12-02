@@ -64,8 +64,8 @@ Command-line usage
 
     A value of "codon" corresponds to using codon characters for both the deep sequencing data and inferred preferences, as described in :ref:`chartype_codon` You would prefer this option over "codon_to_aa" if you thought that there was different selection on different synonymous mutations. Note that the priors over the mutagenesis rates assume that all codon mutations are made at equal frequencies (``NNN`` libraries).
 
-   \-\-includestop
-    A value of "True" means that when using ``--chartype codon_to_aa``, we infer preferences for 21 amino acids, with stop codons (denoted by ``*``) one of the possibilities. A value of "False" means that we constrain the preference for stop codons to be zero regardless of whether or not there are counts for these codons in the data, and so only infer preferences for the 20 non-stop amino acids.
+   \-\-excludestop
+    By default, when using ``--chartype codon_to_aa``, we infer preferences for 21 amino acids, with stop codons (denoted by ``*``) one of the possibilities. If you specify the ``--excludestop`` option, then we constrain the preference for stop codons to be zero regardless of whether or not there are counts for these codons in the data, and so only infer preferences for the 20 non-stop amino acids.
 
 Output
 ----------
@@ -83,7 +83,7 @@ The inferred preferences would then be in the created file ``amino_acid_preferen
 
 The command above would include preferences for 21 different possible amino acids, as stop codons are considered a possible amino acid by default. If you do **not** want stop codons to be considered a possible amino acid (essentially constraining the preference for stop codons to zero), then use::
 
-    dms_inferprefs --includestop False mutDNA_codoncounts.txt mutvirus_codoncounts.txt amino_acid_preferences_no_errors.txt
+    dms_inferprefs --excludestop mutDNA_codoncounts.txt mutvirus_codoncounts.txt amino_acid_preferences_no_errors.txt
 
 If we instead wanted to account for error rates, and we had sequenced unmutated plasmid to generate the codon counts file ``DNA_codoncounts.txt`` and had sequenced unmutated virus to generate the codon counts file ``virus_codoncounts.txt``, we would use the command::
 
