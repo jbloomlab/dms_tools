@@ -1,6 +1,6 @@
 #!python
 
-"""Merges (averages, adds, or subtracts) preferences or differential preferences.
+"""Determines and plots correlation between preferences or differential preferences.
 
 Written by Jesse Bloom."""
 
@@ -13,6 +13,7 @@ import dms_tools.parsearguments
 import dms_tools.file_io
 
 
+
 def main():
     """Main body of script."""
 
@@ -20,6 +21,8 @@ def main():
     parser = dms_tools.parsearguments.MergeParser()
     args = vars(parser.parse_args())
     prog = parser.prog
+
+    raise RuntimeError('not yet implemented')
 
     # print initial information
     versionstring = dms_tools.file_io.Versions() 
@@ -37,7 +40,7 @@ def main():
         args['minus'] = [] # reassign from None to empty list
     (sites, characters, wts, databyfile) = dms_tools.file_io.ReadMultiPrefOrDiffPref(\
             args['infiles'] + args['minus'], args['excludestop'])
-    filetypes = dict([(fname, dms_tools.utils.Pref_or_DiffPref(databyfile[fname])) for fname in args['infiles'] + args['minus']])
+    filetypes = dict([(fname, Pref_or_DiffPref(databyfile[fname])) for fname in args['infiles'] + args['minus']])
     print "\nHere are the apparent file types of the input files:\n%s\n" % '\n'.join(['%s is %s' % tup for tup in filetypes.iteritems()])
     sums = dms_tools.utils.SumPrefsDiffPrefs([databyfile[fname] for fname in args['infiles']], minus=[databyfile[fname] for fname in args['minus']])
     if args['merge_method'] == 'average':
@@ -56,7 +59,7 @@ def main():
         else:
             raise ValueError("The input files do not all specify the same file type, but this is required when averaging. The file types appear to be:\n%s" % '\n'.join(['%s is %s' % tup for tup in filetypes.iteritems()]))
     elif args['merge_method'] == 'sum':
-        sumtype = dms_tools.utils.Pref_or_DiffPref(sums)
+        sumtype = Pref_or_DiffPref(sums)
         if sumtype == 'preferences':
             print "The listed files summed to give valid preferences. Now writing these preferences to %s" % args['outfile']
             dms_tools.file_io.WritePreferences(args['outfile'], sites, wts, sums, None)

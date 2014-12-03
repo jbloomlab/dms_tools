@@ -26,6 +26,8 @@ Functions in this module
 
 * *SumPrefsDiffPrefs* : sums preferences and differential preferences
 
+* *Pref_or_DiffPref* : determines whether data represent preferences or differential preferences.
+
 Function documentation
 ---------------------------
 
@@ -36,6 +38,44 @@ import re
 import math
 import dms_tools
 
+
+def Pref_or_DiffPref(data, tol=1.0e-3):
+    """Determines if data represent preferences or differential preferences.
+
+    *data* is a dictionary keyed by site, with each entry a dictionary
+    keyed by character giving the preference / differential preference
+    for that character.
+
+    If values for each site are >= 0 and <= 1 and sum to one (within *tol*), then
+    returns 'preferences'.
+
+    If values are <= 1 and sum to zero (within *tol*), then returns
+    'diffprefs'.
+
+    Otherwise returns 'neither preferences nor diffprefs'
+
+    >>> data = {'1':{'A':0.5, 'T':0.1, 'C':0.2, 'G':0.2}}
+    >>> print Pref_or_DiffPref(data)
+    preferences
+
+    >>> data = {'1':{'A':-0.5, 'T':0.1, 'C':0.2, 'G':0.2}}
+    >>> print Pref_or_DiffPref(data)
+    diffprefs
+
+    >>> data = {'1':{'A':-0.5, 'T':0.1, 'C':0.2, 'G':0.1}}
+    >>> print Pref_or_DiffPref(data)
+    neither preferences nor diffprefs
+
+    """
+    sums = []
+    for (r, rdata) in data.iteritems():
+        sums.append((sum(rdata.values())))
+    if all([abs(rsum - 1.0) <= tol for rsum in sums]):
+        return 'preferences'
+    elif all([abs(rsum) <= tol for rsum in sums]):
+        return 'diffprefs'
+    else:
+        return 'neither preferences nor diffprefs'
 
 def SumPrefsDiffPrefs(datalist, minus=[]):
     """Sums preferences and differential preferences.

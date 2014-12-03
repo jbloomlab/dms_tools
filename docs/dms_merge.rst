@@ -12,7 +12,7 @@ Overview
 
 For a detailed description of the algorithm implemented by this program, see :ref:`inferprefs_algorithm`.
 
-After you install `dms_tools`_, this program will be available to run at the command line.
+After you install `dms_tools`_, this program will be available to run at the command line. 
 
 Command-line usage
 ---------------------
