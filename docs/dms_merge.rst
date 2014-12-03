@@ -10,8 +10,6 @@ Overview
 -------------
 ``dms_merge`` is a program included with the `dms_tools`_ package. It merges preferences or differential preferences in different files by averaging them or adding / subtracting them. See `Examples`_ for illustrations of how you might do this.
 
-For a detailed description of the algorithm implemented by this program, see :ref:`inferprefs_algorithm`.
-
 After you install `dms_tools`_, this program will be available to run at the command line. 
 
 Command-line usage
