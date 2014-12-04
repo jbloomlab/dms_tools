@@ -268,13 +268,24 @@ def NaturalSort(xlist):
     as numbers. Currently works for integers, but not floats (anything 
     including or after a decimal is handled as a string, not number).
 
-    This function simply returns *None*, but *xlist* is sorted in place.
+    Any entries that are integers or floats are converted to strings.
+
+    This function simply returns *None*, but *xlist* is sorted in place,
+    with the integer/float to string conversion if relevant.
 
     >>> xlist = ['1', '20', '100', '5A', '51A', '5']
     >>> NaturalSort(xlist)
     >>> print xlist
     ['1', '5', '5A', '20', '51A', '100']
+
+    >>> xlist = [1, '20', 100, '5A', '51A', '5']
+    >>> NaturalSort(xlist)
+    >>> print xlist
+    ['1', '5', '5A', '20', '51A', '100']
     """
+    for i in range(len(xlist)):
+        if isinstance(xlist[i], (int, float)):
+            xlist[i] = str(xlist[i])
     nsre = re.compile('([0-9]+\.{0,1}[0-9]*)')
     def natural_sort_keys(s):
         return [int(text) if text.isdigit() else text.lower() for text in re.split(nsre, s)]
