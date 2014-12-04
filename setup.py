@@ -49,5 +49,7 @@ setup(
             'scripts/dms_inferdiffprefs',
             'scripts/dms_merge',
             'scripts/dms_correlate',
+            'scripts/dms_logoplot',
             ],
+    package_data = {'dms_tools':['weblogo_template.eps']}, # template from weblogo version 3.4
 )
