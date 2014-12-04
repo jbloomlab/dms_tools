@@ -1,5 +1,0 @@
-#!/bin/bash
-# Shell script to run analysis
-echo "Starting analysis..."
-dms_inferprefs --ncpus -1 --errpre codoncounts/replicate_1_DNA_codoncounts.txt --errpost codoncounts/replicate_1_virus_codoncounts.txt codoncounts/replicate_1_mutDNA_codoncounts.txt codoncounts/replicate_1_mutvirus_codoncounts.txt replicate_1_preferences.txt
-echo "Finished analysis."
