@@ -9,6 +9,7 @@ Installation of `dms_tools`_ installs the following programs that can be run at 
    dms_inferprefs
    dms_inferdiffprefs
    dms_merge
+   dms_correlate
    fileformats
 
 

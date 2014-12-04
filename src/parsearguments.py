@@ -22,6 +22,8 @@ Defined in this module
 
 * *MergeParser* : parser for ``dms_merge``
 
+* *CorrelateParser* : parser for ``dms_correlate``
+
 
 Detailed documentation
 ----------------------------------
@@ -77,6 +79,29 @@ def ExistingFile(fname):
         return fname
     else:
         raise argparse.ArgumentTypeError("%s does not specify a valid file name" % fname)
+
+
+def CorrelateParser():
+    """Returns *argparse.ArgumentParser* for ``dms_correlate`` script."""
+    parser = ArgumentParserNoArgHelp(description='Determine and plot the Pearson correlation between pairs of preferences or pairs of differential preferences. This script is part of %s (version %s) written by %s. Detailed documentation is at %s' % (dms_tools.__name__, dms_tools.__version__, dms_tools.__author__, dms_tools.__url__), formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser.add_argument('file1', help='Existing file giving first set of preferences or differential preferences.', type=ExistingFile)
+    parser.add_argument('file2', help='Existing file giving second set of preferences or differential preferences. Must give the same type of data (preferences or differential preferences) for the same set of sites and same type of character as "file1".', type=ExistingFile)
+    parser.add_argument('outfileprefix', help='Prefix for name of created output files (these files are overwritten if they already exist). The correlations are written to a file with this prefix and the suffix ".txt". Unless you use the option "--noplot", a scatter plot is written to a file with this prefix and the suffix ".pdf". In the correlations text file, the first line gives the Pearson correlation coefficient in the format: "R = 0.5312". The second line gives the P-value in the format: "P = 0.0000131". The third line gives the number of points in the format: "N = 4200".')
+    parser.add_argument('--name1', default='data 1', help='Name used for the data in "file1" in the correlation plot. The string specified here uses LaTex formatting; names with spaces should be enclosed in quotes.')
+    parser.add_argument('--name2', default='data 2', help='Name used for the data in "file2" in the correlation plot. The string specified here uses LaTex formatting; names with spaces should be enclosed in quotes.')
+    parser.add_argument('--excludestop', dest='excludestop', action='store_true', help='If we are using amino acids, do we remove stop codons (denoted by "*")? We only remove stop codons if this argument is specified. If this option is used, then data for stop codons is removed by re-normalizing preferences to sum to one, and differential preferences to sum to zero.')
+    parser.set_defaults(excludestop=False)
+    parser.add_argument('--noplot', dest='noplot', action='store_true', help='Normally this script creates a PDF scatter plot. If this option is specified, then no such plot will be created.')
+    parser.set_defaults(noplot=False)
+    parser.add_argument('--alpha', default=0.1, help='The transparency (alpha value) for the points on the scatter plot. A value of 1.0 correspond to no transparency; values close to zero give high transparency. Transparency (alpha < 1) might be helpful if you have many points on top of each other.', type=float)
+    parser.add_argument('--plot_title', default='None', help='Title put at the top of the correlation plot. The string specified here uses LaTex formatting; names with spaces should be enclosed in spaces. A value of "None" means no title.')
+    parser.add_argument('--corr_on_plot', dest='corr_on_plot', action='store_true', help='If this option is used, then the correlation coefficient will be visually displayed on the plot.')
+    parser.set_defaults(corr_on_plot=False)
+    parser.add_argument('--rms_dpi', dest='rms_dpi', action='store_true', help='If "file1" and "file2" specify differential preferences, this argument specifies that we compute the correlation between the root-mean-square (RMS) differential preference at each site rather than between the differential preferences themselves.')
+    parser.set_defaults(rms_dpi=False)
+    parser.add_argument('--pref_entropy', dest='pref_entropy', action='store_true', help='If "file1" and "file2" specify preferences, this argument specifies that we compute the correlation between the site entropy of the preferences (logarithm base 2, so bits) at each site rather than between the preferences themselves.')
+    parser.set_defaults(pref_entropy=False)
+    return parser
 
 
 def MergeParser():

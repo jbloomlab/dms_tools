@@ -29,4 +29,9 @@ Python API
    :undoc-members:
    :show-inheritance:
 
+.. automodule:: plot
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 .. include:: weblinks.txt
