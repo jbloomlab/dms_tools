@@ -13,6 +13,7 @@ Contents
    :maxdepth: 2
 
    programs
+   fileformats
    algorithms
    pythonapi
 

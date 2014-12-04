@@ -10,3 +10,4 @@
 .. _`Multinomial`: http://en.wikipedia.org/wiki/Multinomial_distribution
 .. _`Dirichlet`: http://en.wikipedia.org/wiki/Dirichlet_distribution
 .. _`MCMC`: http://en.wikipedia.org/wiki/Markov_chain_Monte_Carlo
+.. _`weblogo`: https://code.google.com/p/weblogo/

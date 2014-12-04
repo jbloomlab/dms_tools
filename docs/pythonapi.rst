@@ -34,4 +34,9 @@ Python API
    :undoc-members:
    :show-inheritance:
 
+.. automodule:: weblogo
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 .. include:: weblinks.txt

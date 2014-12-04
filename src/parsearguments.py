@@ -16,6 +16,8 @@ Defined in this module
 
 * *ExistingFile* : parses whether string gives an existing file.
 
+* *PDF_File* : parses whether string gives a PDF file name.
+
 * *InferPrefsParser* : parser for ``dms_inferprefs``
 
 * *InferDiffPrefsParser* : parser for ``dms_inferdiffprefs``
@@ -23,6 +25,8 @@ Defined in this module
 * *MergeParser* : parser for ``dms_merge``
 
 * *CorrelateParser* : parser for ``dms_correlate``
+
+* *LogoPlotParser* : parser for ``dms_logoplot``
 
 
 Detailed documentation
@@ -79,6 +83,27 @@ def ExistingFile(fname):
         return fname
     else:
         raise argparse.ArgumentTypeError("%s does not specify a valid file name" % fname)
+
+
+def PDF_File(fname):
+    """If *fname* ends in PDF extension, returns it. Otherwise an error."""
+    if os.path.splitext(fname)[1].lower() == '.pdf':
+        return fname
+    else:
+        raise argparse.ArgumentTypeError('Not a valid PDF file name; should end in ".pdf":\n%s' % fname)
+
+
+def LogoPlotParser():
+    """Returns *argparse.ArgumentParser* for ``dms_logoplot`` script."""
+    parser = ArgumentParserNoArgHelp(description='Make a logo plot visually displaying the preferences or differential preferences. Utilizes weblogo (https://code.google.com/p/weblogo/). This script is part of %s (version %s) written by %s. Detailed documentation is at %s' % (dms_tools.__name__, dms_tools.__version__, dms_tools.__author__, dms_tools.__url__), formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser.add_argument('infile', help='Existing file giving the preferences or differential preferences. The program auto-detects which type of data is present. The preferences can be for DNA or amino acids (stop codons allowed, indicated by "*").', type=ExistingFile)
+    parser.add_argument('logoplot', help='Name of created file containing the logo plot, must end in the extension ".pdf". Overwritten if it already exists.', type=PDF_File)
+    parser.add_argument('--nperline', type=int, default=60, help='Put this many sites per line of the logo plot.')
+    parser.add_argument('--numberevery', type=int, default=10, help='Number x-axis ticks for sites at this interval.')
+    parser.add_argument('--diffprefheight', type=float, default=1.0, help='This option is only meaningful if "infile" gives differential preferences. In that case, it gives the height of logo stacks (extends from minus this to plus this). Cannot be smaller than the maximum total differential preference range.')
+    parser.add_argument('--excludestop', dest='excludestop', action='store_true', help='If we are using amino acids, do we remove stop codons (denoted by "*")? We only remove stop codons if this argument is specified. If this option is used, then data for stop codons is removed by re-normalizing preferences to sum to one, and differential preferences to sum to zero.')
+    parser.set_defaults(excludestop=False)
+    return parser
 
 
 def CorrelateParser():

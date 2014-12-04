@@ -12,7 +12,7 @@ Written by Jesse Bloom.
 
 Functions in this module
 ----------------------------------
-*LogoPlot* : plots a sequence logo of site-specific preferences or differential preferences.
+* *LogoPlot* : plots a sequence logo of site-specific preferences or differential preferences.
 
 * *KyteDoolittleColorMapping* : maps amino-acid hydrophobicities to colors.
 
@@ -145,7 +145,7 @@ def LogoPlot(sites, datatype, data, plotfile, nperline, numberevery=10, allowuns
     characters = data[sites[0]].keys()
     if set(characters) == set(dms_tools.nts):
         alphabet_type = 'nt'
-    elif set(characters) == set(dms_tools.aminacids_nostop) or set(characters) == set(dms_tools.aminoacids_withstop):
+    elif set(characters) == set(dms_tools.aminoacids_nostop) or set(characters) == set(dms_tools.aminoacids_withstop):
         alphabet_type = 'aa'
     else:
         raise ValueError("Invalid set of character keys in data. Do not specify either nucleotides or amino acids:\n%s" % str(characters))
@@ -196,7 +196,7 @@ def LogoPlot(sites, datatype, data, plotfile, nperline, numberevery=10, allowuns
             chars_for_string = characters
             f.write('ID ID\nBF BF\nP0 %s\n' % ' '.join(chars_for_string))
             for (isite, r) in enumerate(sites):
-                f.write('%s %s\n' % (r, ' '.join([str(data[r][x] for x in characters]))
+                f.write('%s %s\n' % (r, ' '.join([str(data[r][x]) for x in characters])))
                 pi_r = [(data[r][x], x) for x in characters]
                 pi_r.sort()
                 ordered_alphabets[isite] = [tup[1] for tup in pi_r] # order from smallest to biggest
@@ -253,7 +253,7 @@ def LogoPlot(sites, datatype, data, plotfile, nperline, numberevery=10, allowuns
         colormapping[separatorchar] = '#000000' # black
         color_scheme = weblogolib.colorscheme.ColorScheme()
         for x in chars_for_string:
-            color_scheme.groups.append(weblogolib.colorscheme.ColorGroup(x, colormapping[aa], "'%s'" % x))
+            color_scheme.groups.append(weblogolib.colorscheme.ColorGroup(x, colormapping[x], "'%s'" % x))
         logo_options.color_scheme = color_scheme
         logo_options.annotate = [{True:r, False:''}[0 == isite % numberevery] for (isite, r) in enumerate(sites)]
         logoformat = weblogolib.LogoFormat(logodata, logo_options)
@@ -474,7 +474,7 @@ def _my_eps_formatter(logodata, format, ordered_alphabets) :
 
 
     # Create and output logo
-    template = corebio.utils.resource_string( __name__, 'template.eps', __file__).decode()
+    template = corebio.utils.resource_string( __name__, 'weblogo_template.eps', __file__).decode()
     logo = string.Template(template).substitute(substitutions)
 
     return logo.encode()

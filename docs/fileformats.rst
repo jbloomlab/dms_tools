@@ -1,5 +1,5 @@
 ==========================================
-Input / output file formats for programs
+Data file formats for programs
 ==========================================
 
 Below is information about the formats of the input and output files used by the programs in `dms_tools`_.
