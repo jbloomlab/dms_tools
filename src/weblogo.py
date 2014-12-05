@@ -14,6 +14,8 @@ Functions in this module
 ----------------------------------
 * *LogoPlot* : plots a sequence logo of site-specific preferences or differential preferences.
 
+* *LogoOverlay* : makes logo plot overlays, called by *LogoPlot*.
+
 * *KyteDoolittleColorMapping* : maps amino-acid hydrophobicities to colors.
 
 Function documentation
@@ -27,6 +29,8 @@ import tempfile
 import string
 import numpy
 import pylab
+import matplotlib
+import PyPDF2
 import dms_tools.utils
 # the following are part of the weblogo 3.4 library
 import weblogolib # weblogo library
@@ -134,8 +138,31 @@ def LogoPlot(sites, datatype, data, plotfile, nperline, numberevery=10, allowuns
 
     * *ydatamax* : meaningful only if *datatype* is 'diffprefs'. In this case, it gives
       the maximum that the logo stacks extend in the positive and negative directions.
+      Cannot be smaller than the maximum extent of the differential preferences.
 
-    * *overlay* : currently this option is not implemented; it must be *None*.
+    * *overlay* : this argument allows you to make overlay bars that indicated
+      other properties for the sites. By default, this option is *None*, meaning that
+      no overlay is created. If you set it to something else, it must be a list
+      giving either one or two properties. Each property is a tuple:
+      *(prop_d, shortname, longname)* where:
+
+        - *prop_d* is a dictionary keyed by site numbers that are in *sites*.
+          For each *r* in *sites*, *prop_d[r]* gives the value of the property,
+          or if there is no entry in *prop_d* for *r*, then the property
+          is undefined and is colored white. Properties can either be:
+
+            * continuous: in this case, all of the values should be numbers.
+
+            * discrete : in this case, all of the values should be strings.
+              While in practice, if you have more than a few discrete
+              categories (different strings), the plot will be a mess.
+
+        - *shortname* : short name for the property; will not format well
+          if more than 4 or 5 characters.
+
+        - *longname* : longer name for property used on axes label. Can be the
+          same as *shortname* if you don't need a different long name.
+
     """
     assert datatype in ['prefs', 'diffprefs']
 
@@ -178,7 +205,8 @@ def LogoPlot(sites, datatype, data, plotfile, nperline, numberevery=10, allowuns
     barspacing = 2.0 # spacing between bars in points if using overlay
     stackaspectratio = 4.4 # ratio of stack height:width, doesn't count part going over maximum value of 1
     if overlay:
-        raise RuntimeError("overlay option not currently implemented")
+        if not (1 <= len(overlay) <= 2):
+            raise ValueError("overlay must be a list of one or two entries; instead it had %d entries" % len(overlay))
         ymax = (stackaspectratio * stackwidth + len(overlay) * (barspacing + barheight)) / float(stackaspectratio * stackwidth)
         aspectratio = ymax * stackaspectratio # effective aspect ratio for full range
     else:
@@ -210,7 +238,7 @@ def LogoPlot(sites, datatype, data, plotfile, nperline, numberevery=10, allowuns
                 if abs(positivesum + negativesum) > 1.0e-6:
                     raise ValueError("Differential preferences sum of %s is not close to zero for site %s" % (positivesum + negativesum, r))
                 if 2.0 * positivesum > ydatamax:
-                    raise ValueError("You need to increase ymax: the total differential preferences sum to more than the y-axis limits.")
+                    raise ValueError("You need to increase ydatamax: the total differential preferences sum to more than the y-axis limits.")
                 f.write('%s' % r)
                 deltapi_r = []
                 for x in characters:
@@ -271,25 +299,39 @@ def LogoPlot(sites, datatype, data, plotfile, nperline, numberevery=10, allowuns
         # remove temporary file
         if os.path.isfile(transfacfile):
             os.remove(transfacfile)
+
     # now build the overlay
     if overlay:
-        raise RuntimeError("overlay option not currently implemented")
-        # make the overlay plot
-        overlayfile = '_overlay_tempfile.pdf'
-        mergedfile = '_merged_tempfile.pdf'
-        LogoOverlay(sites, overlayfile, overlay[0], overlay[1], nperline, sitewidth=stackwidth, rmargin=rmargin, logoheight=stackwidth * stackaspectratio + stackheightmargin, barheight=barheight, barspacing=barspacing)
-        # overlay onto plotfile using pyPdf
-        plot = pyPdf.PdfFileReader(open(plotfile, 'rb')).getPage(0)
-        overlay = pyPdf.PdfFileReader(open(overlayfile, 'rb')).getPage(0)
-        xshift = overlay.artBox[2] - plot.artBox[2]
-        overlay.mergeTranslatedPage(plot, xshift, 0)
-        output = pyPdf.PdfFileWriter()
-        output.addPage(overlay)
-        outputstream = open(mergedfile, 'wb')
-        output.write(outputstream)
-        outputstream.close()
-        os.rename(mergedfile, plotfile)
-        os.remove(overlayfile)
+        try:
+            (fdoverlay, overlayfile) = tempfile.mkstemp()
+            (fdmerged, mergedfile) = tempfile.mkstemp()
+            foverlay = os.fdopen(fdoverlay, 'wb')
+            foverlay.close() # close, but we still have the path overlayfile...
+            fmerged = os.fdopen(fdmerged, 'wb')
+            LogoOverlay(sites, overlayfile, overlay, nperline, sitewidth=stackwidth, rmargin=rmargin, logoheight=stackwidth * stackaspectratio + stackheightmargin, barheight=barheight, barspacing=barspacing)
+            with open(plotfile, 'rb') as f:
+                plot = PyPDF2.PdfFileReader(f).getPage(0)
+            with open(overlayfile, 'rb') as f:
+                overlay = PyPDF2.PdfFileReader(f).getPage(0)
+            xshift = overlay.artBox[2] - plot.artBox[2]
+            overlay.mergeTranslatedPage(plot, xshift, 0)
+            output = PyPDF2.PdfFileWriter()
+            output.addPage(overlay)
+            output.write(fmerged)
+            fmerged.close()
+            os.rename(mergedfile, plotfile)
+        finally:
+            try:
+                foverlay.close()
+            except:
+                pass
+            try:
+                fmerged.close()
+            except:
+                pass
+            for fname in [overlayfile, mergedfile]:
+                if os.path.isfile(fname):
+                    os.remove(fname)
 
 
 #########################################################################
@@ -661,6 +703,152 @@ class _my_Motif(corebio.matrix.AlphabeticArray) :
 
 # End of code modified from weblogo version 3.4
 #==============================================================
+
+
+def LogoOverlay(sites, overlayfile, overlay, nperline, sitewidth, rmargin, logoheight, barheight, barspacing):
+    """Makes overlay for *LogoPlot*.
+
+    This function creates colored bars overlay bars showing up to two
+    properties.
+    The trick of this function is to create the bars the right
+    size so they align when they overlay the logo plot. 
+
+    CALLING VARIABLES:
+
+    * *sites* : same as the variable of this name used by *LogoPlot*.
+
+    * *overlayfile* is a string giving the name of created PDF file containing
+      the overlay. It must end in the extension ``.pdf``.
+
+    * *overlay* : same as the variable of this name used by *LogoPlot*.
+
+    * *nperline* : same as the variable of this name used by *LogoPlot*.
+
+    * *sitewidth* is the width of each site in points.
+
+    * *rmargin* is the right margin in points.
+
+    * *logoheight* is the total height of each logo row in points.
+
+    * *barheight* is the total height of each bar in points.
+
+    * *barspacing* is the vertical spacing between bars in points.
+
+    * *cmap* is a ``pylab`` *LinearSegmentedColorMap* used for the bar coloring.
+    """
+    if os.path.splitext(overlayfile)[1] != '.pdf':
+        raise ValueError("overlayfile must end in .pdf: %s" % overlayfile)
+    (cmap, mapping_d, mapper) = KyteDoolittleColorMapping()
+    pts_per_inch = 72.0 # to convert between points and inches
+    # some general properties of the plot
+    matplotlib.rc('text', usetex=True)
+    matplotlib.rc('xtick', labelsize=9)
+    matplotlib.rc('xtick', direction='out')
+    matplotlib.rc('ytick', direction='out')
+    matplotlib.rc('axes', linewidth=0.5)
+    matplotlib.rc('ytick.major', size=3)
+    matplotlib.rc('xtick.major', size=2.5)
+    # define sizes (still in points)
+    colorbar_bmargin = 20 # margin below color bars in points
+    colorbar_tmargin = 15 # margin above color bars in points
+    nlines = int(math.ceil(len(sites) / float(nperline)))
+    lmargin = 25 # left margin in points
+    barwidth = nperline * sitewidth
+    figwidth = lmargin + rmargin + barwidth
+    figheight = nlines * (logoheight + len(overlay) * (barheight + barspacing)) + barheight + colorbar_bmargin + colorbar_tmargin
+    # set up the figure and axes
+    fig = pylab.figure(figsize=(figwidth / pts_per_inch, figheight / pts_per_inch))
+    # determine property types
+    prop_types = {}
+    for (prop_d, shortname, longname) in overlay:
+        if all([isinstance(prop, str) for prop in prop_d.iteritems()]):
+            proptype = 'discrete'
+            propcategories = list(set(prop_d.iteritems()))
+            propcategories.sort()
+            (vmin, vmax) = (0, len(propcategories) - 1)
+        elif all ([isinstance(prop, (int, float)) for prop in prop_d.iteritems()]):
+            proptype = 'continuous'
+            propcategories = None
+            (vmin, vmax) = (min(prop_d.items()), max(prop_d.items()))
+            # If vmin is slightly greater than zero, set it to zero. This helps for RSA properties.
+            if vmin > 0 and vmin / float(vmax - vmin) < 0.05:
+                vmin = 0.0
+                # And if vmax is just a bit less than one, set it to that...
+                if 0.9 <= vmax <= 1.0:
+                    vmax = 1.0
+        else:
+            raise ValueError("Property %s is neither continuous or discrete. Values are:\n%s" % (shortname, str(prop_d.items())))
+        prop_types[shortname] = (proptype, vmin, vmax, propcategories)
+    assert len(prop_types) == len(overlay), "Not as many property types as overlays. Did you give the same name (shortname) to multiple properties in the overlay?"
+    # loop over each line of the multi-lined plot
+    prop_image = {}
+    for iline in range(nlines):
+        isites = sites[iline * nperline : min(len(sites), (iline + 1) * nperline)]
+        xlength = len(isites) * sitewidth
+        logo_ax = pylab.axes([lmargin / figwidth, ((nlines - iline - 1) * (logoheight + len(overlay) * (barspacing + barheight))) / figheight, xlength / figwidth, logoheight / figheight], frameon=False)
+        logo_ax.yaxis.set_ticks_position('none')
+        logo_ax.xaxis.set_ticks_position('none')
+        pylab.yticks([])
+        pylab.xlim(xmin - 0.5, xmax + 0.5)
+        pylab.xticks([])
+        for (iprop, (prop_d, shortname, longname)) in enumerate(overlay):
+            (proptype, vmin, vmax, propcategories) = prop_types[shortname]
+            prop_ax = pylab.axes([lmargin / figwidth, ((nlines - iline - 1) * (logoheight + len(overlay) * (barspacing + barheight)) + logoheight + iprop * (barspacing + barheight)) / figheight, xlength / figwidth, barheight / figheight], frameon=True)
+            prop_ax.xaxis.set_ticks_position('none')
+            prop_ax.yaxis.set_ticks_position('left')
+            pylab.xticks([])
+            pylab.yticks([0], [shortname], size=8)
+            pylab.xlim((xmin, xmax))
+            pylab.ylim(-0.5, 0.5)
+            propdata = pylab.zeros(shape=(1, len(isites)))
+            propdata[ : ] = pylab.nan # set to nan for all entries
+            for (isite, site) in enumerate(isites):
+                if site in prop_d:
+                    if proptype == 'continuous':
+                        propdata[(0, isite)] = prop_d[site]
+                    elif proptype == 'discrete':
+                        propdata[(0, isite)] = propcategories.index(prop_d[site])
+                    else:
+                        raise ValueError('neither continuous nor discrete')
+            prop_image[shortname] = pylab.imshow(propdata, interpolation='nearest', aspect='auto', extent=[isites[0], isites[-1], 0.5, -0.5], cmap=cmap, vmin=vmin, vmax=vmax)
+            pylab.yticks([0], [shortname], size=8)
+    # set up colorbar axes, then color bars
+    if len(overlay) == 1:
+        colorbarwidth = 0.4
+        colorbarspacingwidth = 1.0 - colorbarwidth
+    else:
+        colorbarspacingfrac = 0.5 # space between color bars is this fraction of bar width
+        colorbarwidth = 1.0 / (len(overlay) * (1.0 + colorbarspacingfrac)) # width of color bars in fraction of figure width
+        colorbarspacingwidth = colorbarwidth * colorbarspacingfrac # width of color bar spacing in fraction of figure width
+    propnames = {}
+    for (icolorbar, (prop_d, shortname, longname)) in enumerate(overlay):
+        (proptype, vmin, vmax, propcategories) = prop_types[shortname]
+        if shortname == longname or not longname:
+            propame = shortname
+        else:
+            propname = "%s (%s)" % (longname, shortname)
+#        colorbar_ax = pylab.axes([colorbarspacingwidth * 0.5 + icolorbar * (colorbarwidth + colorbarspacingwidth), 1.0 - (colorbar_tmargin + barheight) / figwidth, colorbarwidth, barheight / figwidth], frameon=True)
+        colorbar_ax = pylab.axes([colorbarspacingwidth * 0.5 + icolorbar * (colorbarwidth + colorbarspacingwidth), 1.0 - (colorbar_tmargin + barheight) / figheight, colorbarwidth, barheight / figheight], frameon=True)
+        colorbar_ax.xaxis.set_ticks_position('bottom')
+        colorbar_ax.yaxis.set_ticks_position('none')
+        pylab.xticks([])
+        pylab.yticks([])
+        pylab.title(propname, size=9)
+        if proptype == 'continuous':
+            cb = pylab.colorbar(prop_image[shortname], cax=colorbar_ax, orientation='horizontal')
+            # if range is close to zero to one, manually set tics to 0, 0.5, 1. This helps for RSA
+            if -0.1 <= vmin <= 0 and 1.0 <= vmax <= 1.15:
+                cb.set_ticks([0, 0.5, 1])
+                cb.set_ticklabels(['0', '0.5', '1'])
+        elif proptype == 'discrete':
+            cb = pylab.colorbar(prop_image[shortname], cax=colorbar_ax, orientation='horizontal', boundaries=[i for i in range(len(propcategories) + 1)], values=[i for i in range(len(propcategories))])
+            cb.set_ticks([i + 0.5 for i in range(len(propcategories))])
+            cb.set_ticklabels(propcategories)
+        else:
+            raise ValueError("Invalid proptype")
+    # save the plot
+    pylab.savefig(plotfile, transparent=True)
+
 
 if __name__ == '__main__':
     import doctest
