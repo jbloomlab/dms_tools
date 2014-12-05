@@ -482,7 +482,7 @@ def _my_eps_formatter(logodata, format, ordered_alphabets) :
 
 
     # Create and output logo
-    template = corebio.utils.resource_string( __name__, 'weblogo_template.eps', __file__).decode()
+    template = corebio.utils.resource_string( __name__, '_weblogo_template.eps', __file__).decode()
     logo = string.Template(template).substitute(substitutions)
 
     return logo.encode()

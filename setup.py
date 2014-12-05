@@ -51,5 +51,5 @@ setup(
             'scripts/dms_correlate',
             'scripts/dms_logoplot',
             ],
-    package_data = {'dms_tools':['weblogo_template.eps']}, # template from weblogo version 3.4
+    package_data = {'dms_tools':['_weblogo_template.eps']}, # template from weblogo version 3.4
 )
