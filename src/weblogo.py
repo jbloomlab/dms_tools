@@ -211,13 +211,13 @@ def LogoPlot(sites, datatype, data, plotfile, nperline, numberevery=10, allowuns
                     raise ValueError("Differential preferences sum of %s is not close to zero for site %s" % (positivesum + negativesum, r))
                 if 2.0 * positivesum > ydatamax:
                     raise ValueError("You need to increase ymax: the total differential preferences sum to more than the y-axis limits.")
-                f.write('%s' % site)
+                f.write('%s' % r)
                 deltapi_r = []
                 for x in characters:
                     deltapi_r.append((data[r][x], x))
                     f.write(' %s' % (abs(data[r][x]) / float(ydatamax)))
                 deltapi_r.sort()
-                firstpositiveindiex = 0
+                firstpositiveindex = 0
                 while deltapi_r[firstpositiveindex][0] < 0:
                     firstpositiveindex += 1
                 ordered_alphabets[isite] = [firstblankchar] + [tup[1] for tup in deltapi_r[ : firstpositiveindex]] + [separatorchar] + [tup[1] for tup in deltapi_r[firstpositiveindex : ]] + [lastblankchar] # order from most negative to most positive with blank characters and separators
@@ -249,7 +249,7 @@ def LogoPlot(sites, datatype, data, plotfile, nperline, numberevery=10, allowuns
             colormapping['G'] = '#FFA500'
         else:
             raise ValueError("Invalid alphabet_type %s" % alphabet_type)
-        colormapping[firstblankchar] = colormapping[lastblankchar] = '#FFFFFF' # white
+        colormapping[firstblankchar] = colormapping[lastblankchar] = '#000000' # black, but color doesn't matter as modified weblogo code replaces with empty space
         colormapping[separatorchar] = '#000000' # black
         color_scheme = weblogolib.colorscheme.ColorScheme()
         for x in chars_for_string:
@@ -431,8 +431,16 @@ def _my_eps_formatter(logodata, format, ordered_alphabets) :
             stack_height = 1.0 # Probability
 
         # The following code modified by JDB to use ordered_alphabets
+        # and also to replace the "blank" characters 'b' and 'B'
+        # by spaces.
         s_d = dict(zip(logodata.alphabet, logodata.counts[seq_index]))
-        s = [(s_d[aa], aa) for aa in ordered_alphabets[seq_index]]
+        s = []
+        for aa in ordered_alphabets[seq_index]:
+            if aa not in ['B', 'b']:
+                s.append((s_d[aa], aa))
+            else:
+                s.append((s_d[aa], ' '))
+#        s = [(s_d[aa], aa) for aa in ordered_alphabets[seq_index]]
 
         # Sort by frequency. If equal frequency then reverse alphabetic
         # (So sort reverse alphabetic first, then frequencty)
