@@ -50,6 +50,7 @@ setup(
             'scripts/dms_merge',
             'scripts/dms_correlate',
             'scripts/dms_logoplot',
+            'scripts/dms_editsites',
             ],
     package_data = {'dms_tools':['_weblogo_template.eps']}, # template from weblogo version 3.4
 )

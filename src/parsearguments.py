@@ -24,6 +24,8 @@ Defined in this module
 
 * *MergeParser* : parser for ``dms_merge``
 
+* *EditSitesParser* : parsers for ``dms_editsites``
+
 * *CorrelateParser* : parser for ``dms_correlate``
 
 * *LogoPlotParser* : parser for ``dms_logoplot``
@@ -129,6 +131,16 @@ def CorrelateParser():
     parser.set_defaults(rms_dpi=False)
     parser.add_argument('--pref_entropy', dest='pref_entropy', action='store_true', help='If "file1" and "file2" specify preferences, this argument specifies that we compute the correlation between the site entropy of the preferences (logarithm base 2, so bits) at each site rather than between the preferences themselves.')
     parser.set_defaults(pref_entropy=False)
+    parser.add_argument('-v', '--version', action='version', version='%(prog)s {version}'.format(version=dms_tools.__version__))
+    return parser
+
+
+def EditSitesParser():
+    parser = ArgumentParserNoArgHelp(description='Edits sites in a data file. Typically you would use this program if you wanted to renumber sites or remove certain sites. This script is part of %s (version %s) written by %s. Detailed documentation is at %s' % (dms_tools.__name__, dms_tools.__version__, dms_tools.__author__, dms_tools.__url__), formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser.add_argument('infile', type=ExistingFile, help='Existing data file. This could be a deep mutational scanning counts file, a preferences file, a differential preferences file, or any other file with the following format: blank lines or lines beginning with "#" (comment lines) are ignored; every other line must begin with an entry giving a unique site number (such as "1" or "2A"). The line may then have an arbitrary number of other entries separated from the site number by whitespace.')
+    parser.add_argument('outfile', help='The created output file in which the site editing has been performed on "infile". If this output file already exists, it is overwritten.')
+    parser.add_argument('edit_method', choices=['renumber', 'remove', 'retain'], help='How to do the editing: renumber sites, remove specified sites, or retain only specified sites.')
+    parser.add_argument('edit_file', type=ExistingFile, help='Existing file specifying how edits are made. If "edit_method" is "renumber", then all non-comment lines (those not beginning with "#") must have two space delimited entries specifying the existing site in "infile" and the new site number with which it is replaced; all sites must be specified. If "edit_method" is "remove", then each line should have as its first entry a site, and all of the listed sites are removed. If "edit_method" is "retain", then each line should have as its first entry a site, and only the listed sites are retained.')
     parser.add_argument('-v', '--version', action='version', version='%(prog)s {version}'.format(version=dms_tools.__version__))
     return parser
 

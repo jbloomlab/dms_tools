@@ -1,0 +1,96 @@
+#!python
+
+"""Edits (renumbers, removes) sites from file.
+
+Written by Jesse Bloom."""
+
+
+import sys
+import os
+import time
+import dms_tools.parsearguments
+import dms_tools.file_io
+
+
+
+def main():
+    """Main body of script."""
+
+    # Parse command line arguments
+    parser = dms_tools.parsearguments.EditSitesParser()
+    args = vars(parser.parse_args())
+    prog = parser.prog
+
+    # print initial information
+    versionstring = dms_tools.file_io.Versions() 
+    print '\nBeginning execution of %s in directory %s\n' % (prog, os.getcwd())
+    print versionstring
+    print '\nParsed the following arguments:\n%s\n' % '\n'.join(['\t%s = %s' % tup for tup in args.iteritems()])
+
+    assert args['outfile'] != args['infile'], "outfile and infile are the same"
+
+    # remove outfile if it exists
+    if os.path.isfile(args['outfile']):
+        print "\nRemoving existing output file of %s" % args['outfile']
+        os.remove(args['outfile'])
+
+    try:
+        f = open(args['outfile'], 'w')
+        if args['edit_method'] == 'renumber':
+            with open(args['edit_file']) as f_edit:
+                renumber_d = {}
+                for line in f_edit:
+                    if line and not line.isspace() and line[0] != '#':
+                        entries = line.split()
+                        assert len(entries) == 2, "line in edit_file %s does not have two entries:\n%s" % (args['edit_file'], line)
+                        assert entries[0] not in renumber_d, "Duplicate site %s in edit_file %s" % (entries[0], args['edit_file'])
+                        renumber_d[entries[0]] = entries[1]
+            assert len(renumber_d) == len(set(renumber_d.items())), "Duplicate new (renumbered) sites specified in %s" % args['edit_file']
+            print "Renumbering %d sites as specified in %s to transform %s to %s" % (len(renumber_d), args['edit_file'], args['infile'], args['outfile'])
+            with open(args['infile']) as f_in:
+                for line in f_in:
+                    if not line or line.isspace() or line[0] == '#':
+                        f.write(line)
+                    else:
+                        splitline = line.split(None, 1)
+                        site = splitline[0]
+                        if len(splitline) == 1:
+                            remainderline = '\n'
+                        else:
+                            remainderline = splitline[1]
+                        if site in renumber_d:
+                            f.write('%s %s' % (renumber_d[site], remainderline))
+                            del renumber_d[site]
+                        else:
+                            raise ValueError("Cannot find site %s in edit_file %s in infile %s" % (site, args['edit_file'], args['infile']))
+            assert not renumber_d, "Cannot find all of the sites in edit_file %s in infile %s. Here are the missing sites:\n%s" % (args['edit_file'], args['infile'], ' '.join(renumber_d.keys()))
+        elif args['edit_method'] in ['remove', 'retain']:
+            with open(args['edit_file']) as f_edit:
+                specified_sites = [line.split()[0].strip() for line in f_edit if line and (not line.isspace()) and line[0] != '#']
+            if len(specified_sites) != len(set(specified_sites)):
+                raise ValueError("%s contains duplicate sites:\n%s" % (args['edit_file'], ' '.join(specified_sites)))
+            print "\nNow %s the %d sites specified in %s, thereby transforming %s to %s" % (args['edit_method'], len(specified_sites), args['edit_file'], args['infile'], args['outfile'])
+            with open(args['infile']) as f_in:
+                for line in f_in:
+                    if not line or line.isspace() or line[0] == '#':
+                        f.write(line)
+                    elif ((line.split()[0].strip() in specified_sites) and args['edit_method'] == 'retain') or ((line.split()[0].strip() not in specified_sites) and args['edit_method'] == 'remove'):
+                        f.write(line)
+        else:
+            raise ValueError("Invalid edit_method of %s" % args['edit_method'])
+        f.close()
+    except:
+        try:
+            f.close()
+        except:
+            pass
+        if os.path.isfile(args['outfile']):
+            os.remove(args['outfile'])
+        raise
+
+    print '\nSuccessfully completed %s at %s' % (prog, time.asctime())
+
+
+
+if __name__ == '__main__':
+    main() # run the script
