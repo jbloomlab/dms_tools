@@ -25,6 +25,25 @@ Command-line usage
    logoplot
     See `Examples`_ for images of the types of plots that are created.
 
+   \-\-overlay1
+    For instance, contents of an example file specifying relative solvent accessibility for residues 2, 3, 4, and 6 is shown below. In the created ``logoplot``, residue 5 (assuming it exists in ``infile``) will not have any relative solvent accessibility shown::
+
+        #SITE RSA
+        2     0.3
+        3     0.56
+        4     0.02
+        6     0.72
+
+    A file specifying secondary structure for the same subset of residues is here::
+
+        #SITE SS
+        2     helix
+        3     helix
+        4     coil
+        5     sheet
+
+    For instance, if the above file was named ``secondary_structures.txt``, then you would use the option as ``--overlay1 secondary_structures.txt SS "secondary structure"``.
+
 Examples
 -----------
 
