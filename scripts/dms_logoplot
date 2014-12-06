@@ -16,6 +16,34 @@ import dms_tools.weblogo
 
 
 
+def ReadOverlay(overlayfile):
+    """Reads *overlayfile*, returns dictionary keyed by sites with values properties for those sites."""
+    overlaydata = {}
+    if not os.path.isfile(overlayfile):
+        raise ValueError("Cannot find overlay file %s" % overlayfile)
+    with open(overlayfile) as f:
+        for line in f:
+            if line and not line.isspace() and line[0] != '#':
+                entries = line.split()
+                assert len(entries) >= 2, "overlay file %s has line with less than two columns:\n%s" % (overlayfile, line)
+                (site, value) = (entries[0].strip(), entries[1].strip())
+                assert site not in overlaydata, "overlay file %s has multiple lines specifying site %s" % (overlayfile, site)
+                overlaydata[site] = value
+    try:
+        for value in overlaydata.itervalues():
+            x = float(value)
+            if value.lower() == 'nan':
+                raise
+    except:
+        return overlaydata # not all numbers, so must be discrete data
+    else:
+        # all numbers, so continuous data
+        for (site, value) in overlaydata.items():
+            overlaydata[site] = float(value)
+        return overlaydata
+
+
+
 def main():
     """Main body of script."""
 
@@ -26,9 +54,9 @@ def main():
 
     # print initial information
     versionstring = dms_tools.file_io.Versions() 
-    print 'Beginning execution of %s in directory %s\n' % (prog, os.getcwd())
+    print '\nBeginning execution of %s in directory %s\n' % (prog, os.getcwd())
     print versionstring
-    print 'Parsed the following arguments:\n%s\n' % '\n'.join(['\t%s = %s' % tup for tup in args.iteritems()])
+    print '\nParsed the following arguments:\n%s\n' % '\n'.join(['\t%s = %s' % tup for tup in args.iteritems()])
 
     # some argument checking
     assert args['nperline'] >= 1, "nperline of %d is not >= 1" % args['nperline']
@@ -55,9 +83,30 @@ def main():
     else:
         raise ValueError("infile %s does not either valid preferences or valid differential preferences" % args['infile'])
 
+    # read overlays if they exist
+    if args['overlay1']:
+        [overlayfile1, overlayshortname1, overlaylongname1] = args['overlay1']
+        overlaydata1 = ReadOverlay(overlayfile1)
+        extrasites = set(overlaydata1.keys()) - set(sites)
+        if extrasites:
+            raise ValueError("Set of sites specified for overlay1 includes sites not in infile:\n%s" % str(extrasites))
+        overlay = [(overlaydata1, overlayshortname1, overlaylongname1)]
+        if args['overlay2']:
+            [overlayfile2, overlayshortname2, overlaylongname2] = args['overlay2']
+            assert overlayshortname1 != overlayshortname2, "overlay1 and overlay2 have the same SHORTNAME. This is not allowed."
+            overlaydata2 = ReadOverlay(overlayfile2)
+            extrasites = set(overlaydata2.keys()) - set(sites)
+            if extrasites:
+                raise ValueError("Set of sites specified for overlay2 includes sites not in infile:\n%s" % str(extrasites))
+            overlay.append((overlaydata2, overlayshortname2, overlaylongname2))
+    elif args['overlay2']:
+        raise ValueError("You cannot specify --overlay2 unless you also specify --overlay1")
+    else:
+        overlay = None
+
     # make logo plot
     print "\nNow making the logo plot in file %s" % args['logoplot']
-    dms_tools.weblogo.LogoPlot(sites, datatype, data, args['logoplot'], args['nperline'], numberevery=args['numberevery'], ydatamax=args['diffprefheight'])
+    dms_tools.weblogo.LogoPlot(sites, datatype, data, args['logoplot'], args['nperline'], numberevery=args['numberevery'], ydatamax=args['diffprefheight'], overlay=overlay)
     assert os.path.isfile(args['logoplot']), "Failed to create %s" % args['logoplot']
 
     print '\nSuccessfully completed %s at %s' % (prog, time.asctime())

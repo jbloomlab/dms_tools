@@ -47,7 +47,7 @@ Command-line usage
 Examples
 -----------
 
-A preferences logo plot
+Preferences logo plot
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Imagine that you have used inferred site-specific preferences into ``preferences.txt``, which has the format of a :ref:`preferences_file`. To display these preferences using a logo plot, run::
 
@@ -60,7 +60,7 @@ This will create the file ``prefs_logoplot.pdf``, which will look something like
    :alt: prefs_logoplot.pdf
    :align: center
 
-A differential preferences logo plot
+Differential preferences logo plot
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Imagine that you have inferred differential preferences into ``diffprefs.txt``, which has the format of a :ref:`diffpreferences_file`. To display these differential preferences, run::
 
@@ -72,5 +72,45 @@ This will create the file ``diffprefs_logoplot.pdf``, which will look something 
    :width: 90%
    :alt: diffprefs_logoplot.pdf
    :align: center
+
+Plot with an overlay
+~~~~~~~~~~~~~~~~~~~~~~~~~
+Now let's add an overlay to the `Preferences logo plot`_. We create files giving the secondary structure and the relative solvent accessibility. These files are ``SSs.txt``, which has the first few lines as follows::
+
+    #SITE SS
+    18 loop
+    19 strand
+    20 strand
+    21 strand
+    22 strand
+    23 strand
+    24 strand
+    25 strand
+    26 loop
+
+and ``RSAs.txt``, which has the first few lines as follows::
+
+    #SITE RSA
+    18 0.170984455959
+    19 0.168604651163
+    20 0.0
+    21 0.0778443113772
+    22 0.00507614213198
+    23 0.0
+    24 0.0
+    25 0.0803571428571
+    26 0.0077519379845
+
+We now use the command::
+
+    dms_logoplot preferences.txt prefs_logoplot.pdf --nperline 81 --excludestop --overlay1 RSAs.txt RSA "relative solvent accessibility" --overlay2 SSs.txt SS "secondary structure"
+
+to create the following image, which displays overlay bars with the secondary structure and solvent accessibility:
+
+.. image:: prefs_logoplot_withoverlay.pdf
+   :width: 90%
+   :alt: prefs_logoplot_withoverlay.pdf
+   :align: center
+
 
 .. include:: weblinks.txt

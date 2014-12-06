@@ -27,9 +27,12 @@ Function documentation
 import os
 import tempfile
 import string
+import math
+import shutil
 import numpy
-import pylab
 import matplotlib
+matplotlib.use('pdf')
+import pylab
 import PyPDF2
 import dms_tools.utils
 # the following are part of the weblogo 3.4 library
@@ -303,24 +306,33 @@ def LogoPlot(sites, datatype, data, plotfile, nperline, numberevery=10, allowuns
     # now build the overlay
     if overlay:
         try:
-            (fdoverlay, overlayfile) = tempfile.mkstemp()
-            (fdmerged, mergedfile) = tempfile.mkstemp()
+            (fdoverlay, overlayfile) = tempfile.mkstemp(suffix='.pdf')
+            (fdmerged, mergedfile) = tempfile.mkstemp(suffix='.pdf')
             foverlay = os.fdopen(fdoverlay, 'wb')
             foverlay.close() # close, but we still have the path overlayfile...
             fmerged = os.fdopen(fdmerged, 'wb')
             LogoOverlay(sites, overlayfile, overlay, nperline, sitewidth=stackwidth, rmargin=rmargin, logoheight=stackwidth * stackaspectratio + stackheightmargin, barheight=barheight, barspacing=barspacing)
-            with open(plotfile, 'rb') as f:
-                plot = PyPDF2.PdfFileReader(f).getPage(0)
-            with open(overlayfile, 'rb') as f:
-                overlay = PyPDF2.PdfFileReader(f).getPage(0)
+            plotfile_f = open(plotfile, 'rb')
+            plot = PyPDF2.PdfFileReader(plotfile_f).getPage(0)
+            overlayfile_f = open(overlayfile, 'rb')
+            overlay = PyPDF2.PdfFileReader(overlayfile_f).getPage(0)
             xshift = overlay.artBox[2] - plot.artBox[2]
             overlay.mergeTranslatedPage(plot, xshift, 0)
+            overlay.compressContentStreams() 
             output = PyPDF2.PdfFileWriter()
             output.addPage(overlay)
             output.write(fmerged)
             fmerged.close()
-            os.rename(mergedfile, plotfile)
+            shutil.move(mergedfile, plotfile)
         finally:
+            try:
+                plotfile_f.close()
+            except:
+                pass
+            try:
+                overlayfile_f.close()
+            except:
+                pass
             try:
                 foverlay.close()
             except:
@@ -736,6 +748,8 @@ def LogoOverlay(sites, overlayfile, overlay, nperline, sitewidth, rmargin, logoh
 
     * *cmap* is a ``pylab`` *LinearSegmentedColorMap* used for the bar coloring.
     """
+    if not pylab.get_backend().lower() == 'pdf':
+        raise ValueError("You cannot use this function without first setting the matplotlib / pylab backend to 'pdf'. Do this with: matplotlib.use('pdf')")
     if os.path.splitext(overlayfile)[1] != '.pdf':
         raise ValueError("overlayfile must end in .pdf: %s" % overlayfile)
     (cmap, mapping_d, mapper) = KyteDoolittleColorMapping()
@@ -761,17 +775,17 @@ def LogoOverlay(sites, overlayfile, overlay, nperline, sitewidth, rmargin, logoh
     # determine property types
     prop_types = {}
     for (prop_d, shortname, longname) in overlay:
-        if all([isinstance(prop, str) for prop in prop_d.iteritems()]):
+        if all([isinstance(prop, str) for prop in prop_d.itervalues()]):
             proptype = 'discrete'
-            propcategories = list(set(prop_d.iteritems()))
+            propcategories = list(set(prop_d.values()))
             propcategories.sort()
             (vmin, vmax) = (0, len(propcategories) - 1)
-        elif all ([isinstance(prop, (int, float)) for prop in prop_d.iteritems()]):
+        elif all ([isinstance(prop, (int, float)) for prop in prop_d.itervalues()]):
             proptype = 'continuous'
             propcategories = None
-            (vmin, vmax) = (min(prop_d.items()), max(prop_d.items()))
+            (vmin, vmax) = (min(prop_d.values()), max(prop_d.values()))
             # If vmin is slightly greater than zero, set it to zero. This helps for RSA properties.
-            if vmin > 0 and vmin / float(vmax - vmin) < 0.05:
+            if vmin >= 0 and vmin / float(vmax - vmin) < 0.05:
                 vmin = 0.0
                 # And if vmax is just a bit less than one, set it to that...
                 if 0.9 <= vmax <= 1.0:
@@ -789,7 +803,7 @@ def LogoOverlay(sites, overlayfile, overlay, nperline, sitewidth, rmargin, logoh
         logo_ax.yaxis.set_ticks_position('none')
         logo_ax.xaxis.set_ticks_position('none')
         pylab.yticks([])
-        pylab.xlim(xmin - 0.5, xmax + 0.5)
+        pylab.xlim(0.5, len(isites) + 0.5)
         pylab.xticks([])
         for (iprop, (prop_d, shortname, longname)) in enumerate(overlay):
             (proptype, vmin, vmax, propcategories) = prop_types[shortname]
@@ -798,7 +812,7 @@ def LogoOverlay(sites, overlayfile, overlay, nperline, sitewidth, rmargin, logoh
             prop_ax.yaxis.set_ticks_position('left')
             pylab.xticks([])
             pylab.yticks([0], [shortname], size=8)
-            pylab.xlim((xmin, xmax))
+            pylab.xlim((0, len(isites)))
             pylab.ylim(-0.5, 0.5)
             propdata = pylab.zeros(shape=(1, len(isites)))
             propdata[ : ] = pylab.nan # set to nan for all entries
@@ -810,7 +824,7 @@ def LogoOverlay(sites, overlayfile, overlay, nperline, sitewidth, rmargin, logoh
                         propdata[(0, isite)] = propcategories.index(prop_d[site])
                     else:
                         raise ValueError('neither continuous nor discrete')
-            prop_image[shortname] = pylab.imshow(propdata, interpolation='nearest', aspect='auto', extent=[isites[0], isites[-1], 0.5, -0.5], cmap=cmap, vmin=vmin, vmax=vmax)
+            prop_image[shortname] = pylab.imshow(propdata, interpolation='nearest', aspect='auto', extent=[0, len(isites), 0.5, -0.5], cmap=cmap, vmin=vmin, vmax=vmax)
             pylab.yticks([0], [shortname], size=8)
     # set up colorbar axes, then color bars
     if len(overlay) == 1:
@@ -847,7 +861,7 @@ def LogoOverlay(sites, overlayfile, overlay, nperline, sitewidth, rmargin, logoh
         else:
             raise ValueError("Invalid proptype")
     # save the plot
-    pylab.savefig(plotfile, transparent=True)
+    pylab.savefig(overlayfile, transparent=True)
 
 
 if __name__ == '__main__':
