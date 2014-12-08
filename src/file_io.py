@@ -290,7 +290,18 @@ def ReadDMSCounts(f, chartype):
                 i = characterindices[char]
                 if len(entries) <= i:
                     raise ValueError("Not enough entries for counts for %s expected at index %d:\n%s" % (char, i, line))
-                counts[r][char] = int(entries[i])
+                try:
+                    counts[r][char] = int(entries[i])
+                except ValueError:
+                    # number could be in scientific notation, handle this properly
+                    if 'e' or 'E' in s:
+                        n = float(entries[i])
+                        if n % 1:
+                            raise ValueError("Scientific notation number of %s is not an integer" % entries[1])
+                        else
+                            counts[r][char] = int(n)
+                    else:
+                        raise
     if openedfile:
         f.close()
     return counts

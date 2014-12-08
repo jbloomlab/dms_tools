@@ -31,6 +31,8 @@ The following variables are defined for this package:
 
 * *codon_to_aa* : dictionary keyed by codons in *codons*, values are amino acids.
 
+* *aa_to_codons* : dictionary keyed by all amino acids in *aminoacids*, values list of all encoding codons.
+
 """
 from _metadata import __version__
 from _metadata import __author__
@@ -53,3 +55,6 @@ for nt1 in nts:
         for nt3 in nts:
             codons.append('%s%s%s' % (nt1, nt2, nt3))
 codon_to_aa = dict([(codon, str(Bio.Seq.Seq(codon).translate())) for codon in codons])
+aa_to_codons = {}
+for aa in aminoacids_withstop:
+    aa_to_codons[aa] = [codon for codon in codons if codon_to_aa[codon] == aa]
