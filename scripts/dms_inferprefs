@@ -134,6 +134,11 @@ def main():
                 m = len([i for i in range(charlength) if wts[r][i] != x[i]])
                 nchars_with_m[m] += 1
             priors = dict([(name, {}) for name in ['mur_prior_params', 'epsilonr_prior_params', 'rhor_prior_params']])
+            priors = {'mur_prior_params':{}}
+            if error_model in ['different', 'same']:
+                priors['epsilonr_prior_params'] = {}
+            if error_model == 'different':
+                priors['rhor_prior_params'] = {}
             for x in countcharacters:
                 m = len([i for i in range(charlength) if wts[r][i] != x[i]])
                 if m == 0: # wildtype
@@ -158,7 +163,8 @@ def main():
                 for (name, d) in rcounts.items():
                     rcounts[name] = dms_tools.utils.SumCodonToAA(d, not args['excludestop'])
             for (name, alpha) in [('mur_prior_params', 'mu_alpha'), ('epsilonr_prior_params', 'err_alpha'), ('rhor_prior_params', 'err_alpha')]:
-                priors[name] = dict([(x, priors[name][x] * len(characters) * args[alpha]) for x in characters])
+                if name in priors:
+                    priors[name] = dict([(x, priors[name][x] * len(characters) * args[alpha]) for x in characters])
             priors['pir_prior_params'] = dict([(x, args['pi_alpha']) for x in characters])
             logged[r] = False
             results[r] = pool.apply_async(dms_tools.mcmc.InferSitePreferences, (characters, wts[r], pystan_error_model, rcounts, priors, args['seed']))
