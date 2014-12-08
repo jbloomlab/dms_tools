@@ -298,7 +298,7 @@ def ReadDMSCounts(f, chartype):
                         n = float(entries[i])
                         if n % 1:
                             raise ValueError("Scientific notation number of %s is not an integer" % entries[1])
-                        else
+                        else:
                             counts[r][char] = int(n)
                     else:
                         raise
