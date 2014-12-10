@@ -14,6 +14,8 @@ Functions in this module
 
 * *ReadDMSCounts* : reads deep mutational scanning counts.
 
+* *WriteDMSCounts* : writes deep mutational scanning counts.
+
 * *ReadMultipleDMSCountsFiles* : reads multiple counts files for the same sequence.
 
 * *WritePreferences* : writes site-specific preferences.
@@ -110,6 +112,74 @@ def ReadMultipleDMSCountsFiles(filelist, chartype):
     return (sites, wts, counts)
 
 
+def WriteDMSCounts(f, counts):
+    """Writes deep mutational scanning counts file.
+
+    This function is the inverse of *ReadDMSCounts*. 
+
+    *f* is a writable file-like object, or a string that gives the name of
+    a file that is created.
+
+    *counts* is a dictionary of the same format returned by *ReadDMSCounts*.
+    These counts are written to *f*.
+
+    *wts* is a dictionary keyed by all sites in *counts* with the value being
+    the wildtype character at that site.
+
+    There is no *chartype* argument -- that is automatically determined from
+    *counts*.
+
+    >>> counts = {'1':{'A':2, 'C':3, 'G':4, 'T':1, 'WT':'A'}, '2':{'A':1, 'C':1, 'G':3, 'T':4, 'WT':'C'}}
+    >>> f = cStringIO.StringIO()
+    >>> WriteDMSCounts(f, counts)
+    >>> f.seek(0)
+    >>> readcounts = ReadDMSCounts(f, 'DNA')
+    >>> counts == readcounts
+    True
+
+    """
+    # if f is string, open this file
+    if isinstance(f, str):
+        fname = f
+        if os.path.isfile(fname):
+            os.remove(fname) # remove existing file
+        fileopened = True
+        f = open(f, 'w')
+    else:
+        fileopened = False
+
+    sites = list(counts.keys())
+    dms_tools.utils.NaturalSort(sites)
+    assert sites, "No sites defined in counts"
+    characters = set(counts[sites[0]].keys())
+    assert 'WT' in characters, 'No wildtype specified by "WT" key'
+    characters.remove('WT')
+    for charset in [dms_tools.nts, dms_tools.codons, dms_tools.aminoacids_withstop, dms_tools.aminoacids_nostop]:
+        if characters == set(charset):
+            characters = charset
+            break
+    else:
+        raise ValueError("Invalid character set:\n%s" % str(characters))
+    
+    try:
+        f.write('# POSITION WT %s\n' % ' '.join(characters))
+        for r in sites:
+            assert set(characters + ['WT']) == set(counts[r].keys()), "Not the right set of characters (or missing 'WT')"
+            wt = counts[r]['WT']
+            assert wt in characters, "Invalid wildtype of %s" % wt
+            f.write('%s %s %s\n' % (r, wt, ' '.join(['%d' % counts[r][x] for x in characters])))
+        if fileopened:
+            f.close()
+    except:
+        if fileopened:
+            try:
+                f.close()
+            except:
+                pass
+            if os.path.isfile(fname):
+                os.remove(fname)
+        raise
+
 
 def ReadDMSCounts(f, chartype):
     """Reads deep mutational scanning counts.
@@ -124,6 +194,10 @@ def ReadDMSCounts(f, chartype):
 
         - *codon* : DNA codons, those listed in the *codons* variable
           defined in this module.
+
+        - *aminoacids_nostop* : amino acids, not including stop codons.
+
+        - *aminoacids_withstop* : amino acids, including stop codons (``*``).
 
     The counts are returned in the dictionary *counts*. The dictionary
     is keyed by **strings** giving the position (e.g. '1', '2', or '5A').
@@ -244,6 +318,10 @@ def ReadDMSCounts(f, chartype):
         characters = dms_tools.nts
     elif chartype.upper() == 'CODON':
         characters = dms_tools.codons
+    elif chartype.upper() == 'AMINOACID_NOSTOP':
+        characters = dms_tools.aminoacids_nostop
+    elif chartype.upper() == 'AMINOACID_WITHSTOP':
+        characters = dms_tools.aminoacids_withstop
     else:
         raise ValueError("Invalid chartype of %s" % chartype)
     characterindices = dict([(char, False) for char in characters])
