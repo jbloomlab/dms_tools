@@ -311,6 +311,30 @@ in Equations :eq:`pr_nrpre`, :eq:`pr_nrpost`,
 and
 :math:`\mathbf{A}\left(\mbox{$\mathbf{n_r^{\textbf{err,post}}}$}\right)`.
 
+.. _chartype_aa:
+
+Characters are amino acids; preferences are for amino acids.
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+A fourth scenario is that the deep sequencing counts are for amino-acid
+characters :math:`x`, and that we want to determine the preference
+:math:`\pi_{r,x}` for each amino acid at each site :math:`r`. This scenario
+would only be used if there has already been some post-processing of the deep mutational
+scanning data, since the actual sequence data will always report either
+nucleotides or codons. If at all possible, you should prefer to analyze the data
+using the approach :ref:`chartype_codon_to_aa`. However, in some cases you may receive third-party
+data that has already been processed to amino acids. In this scenario,
+we use the prior assumption that all amino acid mutations are introduced at equal frequency,
+and that all amino-acid errors happen at equal frequency. This first assumption will
+only be true for certain mutagenesis strategies. The second assumption is very unlikely
+to be true -- but we can't do better without analyzing the data at the codon level.
+So in this scenario, we use the prior
+vectors specified by Equations :eq:`arepsilon`, :eq:`arrho`, and :eq:`armu`,
+with the summations over :math:`x` covering the 20 amino acids (or 21 if stop codons
+are allowed),
+and the summations over :math:`m` covering
+the two possible number of amino-acid changes to an amino-acid character (0 and 1).
+
+
 .. _MCMC_inference:
 
 Inferring the preferences by MCMC.

@@ -299,8 +299,7 @@ def AvgMutRate(counts, chartype):
     by *file_io.ReadDMSCounts*.
     
     *chartype* is the character type of these counts, with the same meaning 
-    as for *file_io.ReadDMSCounts*. So the allowable values are the strings
-    *DNA* and *codon*.
+    as for *file_io.ReadDMSCounts*. 
 
     This function computes the average mutation rate over all counts for all sites for 
     mutations with each possible number of nucleotide changes. Specifically, we define the average
@@ -337,6 +336,12 @@ def AvgMutRate(counts, chartype):
         epsilon = dict([(m, 0.0) for m in range(4)])
     elif chartype == 'DNA':
         characters = dms_tools.nts
+        epsilon = dict([(m, 0.0) for m in range(2)])
+    elif chartype == 'aminoacids_withstop':
+        characters = dms_tools.aminoacids_withstop
+        epsilon = dict([(m, 0.0) for m in range(2)])
+    elif chartype == 'aminoacids_nostop':
+        characters = dms_tools.aminoacids_nostop
         epsilon = dict([(m, 0.0) for m in range(2)])
     else:
         raise ValueError("Invalid chartype of %s" % chartype)

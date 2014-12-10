@@ -70,6 +70,15 @@ def main():
             charlength = 1 # length of a nucleotide
             transform_to_aa = False
             countcharacters = characters = dms_tools.nts
+        elif args['chartype'].lower() == 'aa':
+            transform_to_aa = False
+            charlength = 1
+            if args['excludestop']:
+                chartype = 'aminoacids_nostop'
+                characters = countcharacters = dms_tools.aminoacids_nostop
+            else:
+                chartype = 'aminoacids_withstop'
+                characters = countcharacters = dms_tools.aminoacids_withstop
         else:
             raise ValueError("Invalid chartype of %s" % args['chartype'])
         counts_files = {'nrpre':args['n_pre'], 'nrpost':args['n_post']}

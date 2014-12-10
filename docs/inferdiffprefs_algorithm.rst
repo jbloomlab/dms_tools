@@ -187,7 +187,7 @@ Note that a value of :math:`\overline{f^{\textrm{start}}} \le 0` would suggest t
 
    \boldsymbol{\mathbf{a_{r,\textbf{start}}}}&=& \left(\cdots, \frac{\overline{f^{\textrm{start}}}}{\mathcal{N}_x - 1} + \delta_{x,\operatorname{wt}\left(r\right)} \times \left[1 - \overline{f^{\textrm{start}}}\right] ,\cdots\right).
 
-These priors and likelihoods can be applied to several types of characters as described in :ref:`inferprefs_algorithm`. One possibility is that :ref:`chartype_DNA` A second possibility is :ref:`chartype_codon` A third possibility is :ref:`chartype_codon_to_aa`
+These priors and likelihoods can be applied to several types of characters as described in :ref:`inferprefs_algorithm`. One possibility is that :ref:`chartype_DNA` A second possibility is :ref:`chartype_codon` A third possibility is :ref:`chartype_codon_to_aa`. A fourth possibility is :ref:`chartype_aa`.
 
 The actual preferences are inferred by using `MCMC`_ to sample the product of the priors and likelihoods described above. This `MCMC` is done using the same computational approach and convergence criteria described in :ref:`MCMC_inference` But rather than reporting credible intervals, we report the posterior probability that :math:`\Delta\pi_{r,x} > 0`; this gives us an estimate of the probability that :math:`x` is favored at :math:`r` in selection condition :math:`s2` versus :math:`s1`.
 

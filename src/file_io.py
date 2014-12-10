@@ -318,9 +318,9 @@ def ReadDMSCounts(f, chartype):
         characters = dms_tools.nts
     elif chartype.upper() == 'CODON':
         characters = dms_tools.codons
-    elif chartype.upper() == 'AMINOACID_NOSTOP':
+    elif chartype.upper() == 'AMINOACIDS_NOSTOP':
         characters = dms_tools.aminoacids_nostop
-    elif chartype.upper() == 'AMINOACID_WITHSTOP':
+    elif chartype.upper() == 'AMINOACIDS_WITHSTOP':
         characters = dms_tools.aminoacids_withstop
     else:
         raise ValueError("Invalid chartype of %s" % chartype)
