@@ -15,6 +15,16 @@ Modules in the package
 
 * *parsearguments* : Parses command line arguments to scripts.
 
+* *file_io* : File input / output in ``dms_tools`` formats.
+
+* *plot* : make plots
+
+* *weblogo* : use ``weblogolib`` to make logo plots.
+
+* *utils* : assorted utilities for ``dms_tools``
+
+* *simulate* : simulate data to test inferences.
+
 Package-level variables
 --------------------------
 The following variables are defined for this package:
