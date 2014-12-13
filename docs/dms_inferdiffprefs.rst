@@ -10,7 +10,7 @@ Overview
 -------------
 ``dms_inferdiffprefs`` is a program included with the `dms_tools`_ package. It infers the differential preference :math:`\Delta\pi_{r,x}` for each character :math:`x` (an amino acid, codon, or nucleotide) at each site :math:`r` in an alternative selection versus a control selection. Values of :math:`\Delta\pi_{r,x} > 0` indicate that :math:`x` is favored in the alternative selection versus the control selection at site :math:`r`.
 
-The inference is done by `MCMC`_ using `PyStan`_.
+The inference is done by `MCMC`_ using `PyStan`_. 
 
 For a detailed description of the algorithm implemented by this program, see :ref:`inferdiffprefs_algorithm`.
 

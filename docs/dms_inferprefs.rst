@@ -8,7 +8,7 @@
 
 Overview
 -------------
-``dms_inferprefs`` is a program included with the `dms_tools`_ package. It infers the site-specific preferences :math:`\pi_{r,x}` for each character :math:`x` (an amino acid, codon, or nucleotide) at each site :math:`r`. The inference is done by `MCMC`_ using `PyStan`_.
+``dms_inferprefs`` is a program included with the `dms_tools`_ package. It infers the site-specific preferences :math:`\pi_{r,x}` for each character :math:`x` (an amino acid, codon, or nucleotide) at each site :math:`r`. The inference is done by `MCMC`_ using `PyStan`_. 
 
 For a detailed description of the algorithm implemented by this program, see :ref:`inferprefs_algorithm`.
 

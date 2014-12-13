@@ -90,6 +90,11 @@ def main():
             error_model = 'same'
             counts_files['nrerr'] = args['err']
         (sites, wts, counts) = dms_tools.file_io.ReadMultipleDMSCountsFiles(counts_files.values(), chartype)
+        if args['sites']:
+            if not (set(args['sites']) < set(sites)):
+                raise ValueError("The specified sites are not all present in the DMS counts files. The specified sites are:\n%s" % ' '.join(args['sites']))
+            sites = args['sites']
+            logger.info('We will perform inference ONLY for the following specified subset of sites:\n%s' % ' '.join(sites))
         logger.info('There are counts for %d sites, which are:\n%s\n' % (len(sites), '\n'.join(['\t%s (wildtype identity of %s)' % (r, wts[r]) for r in sites])))
         counts = dict([(name, counts[counts_files[name]]) for name in counts_files.iterkeys()]) # make names count type rather than file
 
