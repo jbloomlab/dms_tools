@@ -439,7 +439,7 @@ def InferSitePreferencesFromEnrichmentRatios(characterlist, wtchar, error_model,
 
 
 
-def InferSitePreferences(characterlist, wtchar, error_model, counts, priors, seed=1, niter=10000, n_jobs=1, r_max=1.05, neff_min=100, nchains=4, increasefactor=2, increasetries=6):
+def InferSitePreferences(characterlist, wtchar, error_model, counts, priors, seed=1, niter=10000, n_jobs=1, r_max=1.1, neff_min=100, nchains=4, increasefactor=2, increasetries=6):
     """Infers site-specific preferences by MCMC for a specific site.
 
     Uses MCMC to infer the site-specific preferences :math:`\pi_{r,a}` for some site
@@ -645,7 +645,7 @@ def InferSitePreferences(characterlist, wtchar, error_model, counts, priors, see
 
 
 
-def InferSiteDiffPrefs(characterlist, wtchar, error_model, counts, priors, seed=1, n_jobs=1, r_max=1.05, neff_min=100, nchains=4, niter=10000, increasefactor=2, increasetries=6):
+def InferSiteDiffPrefs(characterlist, wtchar, error_model, counts, priors, seed=1, n_jobs=1, r_max=1.1, neff_min=100, nchains=4, niter=10000, increasefactor=2, increasetries=6):
     """Infers site-specific differntial preferences by MCMC for a specific site.
 
     The algorithm is explained in the documentation for the ``dms_tools`` package.
