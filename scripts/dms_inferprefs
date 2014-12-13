@@ -126,10 +126,16 @@ def main():
         if not 0 < avgmu < 1:
             raise ValueError("Average mutation rate of %g is not > 0 and < 1. Perhaps there are no mutations or the error control has a higher mutation rate than the pre-selection library. Either one is an irresolvable problem." % avgmu)
 
+        # set up error model
+        if args['ratio_estimation']:
+            logger.info('\nPreferences will be computed from enrichment ratios rather than MCMC. Each count will be augmented by a pseudocount of %g.\n' % args['ratio_estimation'])
+            pystan_error_model = error_model
+        else:
+            logger.info('Compiling PyStan model...')
+            pystan_error_model = pystan_error_model()
+            logger.info('Completed compiling PyStan model.\n')
+
         # begin inferring preferences, using a multiprocessing pool to enable multiple CPUs
-        logger.info('Compiling PyStan model...')
-        pystan_error_model = pystan_error_model()
-        logger.info('Completed compiling PyStan model.\n')
         if args['ncpus'] == -1:
             nprocesses = None
         else:
@@ -181,7 +187,10 @@ def main():
                     priors[name] = dict([(x, priors[name][x] * len(characters) * args[alpha]) for x in characters])
             priors['pir_prior_params'] = dict([(x, args['pi_alpha']) for x in characters])
             logged[r] = False
-            results[r] = pool.apply_async(dms_tools.mcmc.InferSitePreferences, (characters, wts[r], pystan_error_model, rcounts, priors, args['seed']))
+            if args['ratio_estimation']:
+                results[r] = pool.apply_async(dms_tools.mcmc.InferSitePreferencesFromEnrichmentRatios, (characters, wts[r], pystan_error_model, rcounts, args['ratio_estimation']))
+            else:
+                results[r] = pool.apply_async(dms_tools.mcmc.InferSitePreferences, (characters, wts[r], pystan_error_model, rcounts, priors, args['seed']))
         while not all([logged[r] for r in sites]):
             time.sleep(1) # wait a bit before polling again
             for r in sites:

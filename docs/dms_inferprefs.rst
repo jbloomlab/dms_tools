@@ -69,6 +69,25 @@ Command-line usage
    \-\-excludestop
     By default, when using ``--chartype codon_to_aa`` or ``--chartype aa``, we infer preferences for 21 amino acids, with stop codons (denoted by ``*``) one of the possibilities. If you specify the ``--excludestop`` option, then we constrain the preference for stop codons to be zero regardless of whether or not there are counts for these codons in the data, and so only infer preferences for the 20 non-stop amino acids.
 
+   \-\-ratio_estimation
+    For each character :math:`x`, we calculate the enrichment ratio relative to the wildtype
+    character :math:`\rm{wt}` at this site as
+
+    .. math::
+    
+        \phi_{x} = \frac{\left(\frac{\max\left(\mathcal{P}, n_x^{\rm{post}} - n_x^{\rm{err,post}} + \mathcal{P}\right)}{\max\left(\mathcal{P}, n_{\rm{wt}}^{\rm{post}} - n_{\rm{wt}}^{\rm{err,post}} + \mathcal{P}\right)}\right)}{\left(\frac{\max\left(\mathcal{P}, n_x^{\rm{pre}} - n_x^{\rm{err,pre}} + \mathcal{P}\right)}{\max\left(\mathcal{P}, n_{\rm{wt}}^{\rm{pre}} - n_{\rm{wt}}^{\rm{err,pre}} + \mathcal{P}\right)}\right)}
+
+    where :math:`\mathcal{P}` is the value of *pseudocounts*. When *error_model* is *none*, then 
+    :math:`0 = n_x^{\rm{post}} = n_x^{\rm{pre}}` and the above equation reduces to a simple ratio
+    of post- and pre-selection. With :math:`\mathcal{P} > 0`, this enrichment is always :math:`> 0` and 
+    :math:`< \infty`.
+
+    We then calculate the preference as proportional to the enrichment ratio:
+
+    .. math::
+
+        \pi_x = \frac{\phi_x}{\sum_y \phi_y}.
+
 Output
 ----------
 The inferred preferences are in the :ref:`preferences_file` specified by ``outfile``. A summary of the progress is in the file specified by ``logfile``. In addition, some information will be written to standard output. You should **not** be concerned if this information includes some warnings from `PyStan`_ about convergence -- the program automatically tests for convergence as described in :ref:`MCMC_inference`, and will terminate with an error in the unlikely case it doesn't converge.

@@ -14,6 +14,8 @@ Functions in this module
 
 * *InferSitePreferences* : use MCMC to infer site-specific preferences.
 
+* *InferSitePreferencesFromEnrichmentRatios* :infers site-specific preferences directly from enrichment ratios.
+
 * *InferSiteDiffPrefs* : use MCMC to infer site-specific differential preferences.
 
 * *StanModelNoneErr* : ``pystan`` model used by *InferSitePreferences*.
@@ -36,6 +38,7 @@ Function documentation
 import sys
 import tempfile
 import time
+import cPickle
 import numpy
 import numpy.random
 import pystan
@@ -374,6 +377,67 @@ def _InitialValuePreferences(error_model, nchains, iwtchar, nchars):
     return init
 
 
+def InferSitePreferencesFromEnrichmentRatios(characterlist, wtchar, error_model, counts, pseudocounts=1):
+    """Infers site-specific preferences from enrichment ratios.
+
+    This function mirrors the operations performed by *InferSitePreferences*, expect the preferences
+    are calculated directly from enrichment ratios. 
+
+    *characterlist*, *wtchar*, *error_model*, and *counts* have the same meaning as for *InferSitePreferences*.
+
+    *pseudocounts* is a number > 0 giving the pseudocounts added to each count in *counts*.
+
+    Briefly, for each character :math:`x`, we calculate the enrichment relative to the wildtype
+    character :math:`\\rm{wt}` at this site as
+
+    .. math::
+
+        \phi_{x} = \\frac{\left(\\frac{\max\left(\mathcal{P}, n_x^{\\rm{post}} - n_x^{\\rm{err,post}} + \mathcal{P}\\right)}{\max\left(\mathcal{P}, n_{\\rm{wt}}^{\\rm{post}} - n_{\\rm{wt}}^{\\rm{err,post}} + \mathcal{P}\\right)}\\right)}{\left(\\frac{\max\left(\mathcal{P}, n_x^{\\rm{pre}} - n_x^{\\rm{err,pre}} + \mathcal{P}\\right)}{\max\left(\mathcal{P}, n_{\\rm{wt}}^{\\rm{pre}} - n_{\\rm{wt}}^{\\rm{err,pre}} + \mathcal{P}\\right)}\\right)}
+
+    where :math:`\mathcal{P}` is the value of *pseudocounts*. When *error_model* is *none*, then 
+    :math:`0 = n_x^{\\rm{post}} = n_x^{\\rm{pre}}` and the above equation reduces to a simple ratio
+    of post- and pre-selection. With :math:`\mathcal{P} > 0`, this enrichment is always :math:`> 0` and 
+    :math:`< \infty`.
+
+    We then calculate the preference as
+
+    .. math::
+
+        \pi_x = \\frac{\phi_x}{\sum_y \phi_y}.
+
+    The return value is: *(converged, pi_means, pi_95credint, logstring)*, where the tuple
+    entries have the same meaning as for *InferSitePreferences* except that *pi_95credint* is
+    *None* since no credible intervals can be estimated from direct enrichment ratio calculation
+    as it is not a statistical model, and *converged* is *True* since this calculation
+    always converges.
+    """
+    assert pseudocounts > 0, "pseudocounts must be greater than zero, invalid value of %g" % pseudocounts
+    assert wtchar in characterlist, "wtchar %s not in characterlist %s" % (wtchar, str(characterlist))
+    logstring = '\tComputed preferences directly from enrichment ratios.'
+    psi = {}
+    for x in characterlist:
+        if error_model == 'none':
+            nrerrpre = nrerrpost = 0.0
+            nrerrprewt = nrerrpostwt = 0.0
+        elif error_model == 'same':
+            nrerrpre = nrerrpost = counts['nrerr'][x]
+            nrerrprewt = nrerrpostwt = counts['nrerr'][wtchar]
+        elif error_model == 'different':
+            nrerrpre = counts['nrerrpre'][x]
+            nrerrpost = counts['nrerrpost'][x]
+            nrerrprewt = counts['nrerrpre'][wtchar]
+            nrerrpostwt = counts['nrerrpost'][wtchar]
+        else:
+            raise ValueError("Invalid error_model of %s" % error_model)
+        postratio = max(pseudocounts, counts['nrpost'][x] - nrerrpost + pseudocounts) / float(max(pseudocounts, counts['nrpost'][wtchar] - nrerrpostwt + pseudocounts))
+        preratio = max(pseudocounts, counts['nrpre'][x] - nrerrpre + pseudocounts) / float(max(pseudocounts, counts['nrpre'][wtchar] - nrerrprewt + pseudocounts))
+        psi[x] = postratio / preratio
+    assert abs(psi[wtchar] - 1) < 1.0e-5, "wtchar does not have enrichment ratio of one: %g" % psi[wtchar]
+    denom = sum(psi.values())
+    pi = dict([(x, psi[x] / float(denom)) for x in characterlist])
+    return (True, pi, None, logstring)
+
+
 
 def InferSitePreferences(characterlist, wtchar, error_model, counts, priors, seed=1, n_jobs=1, r_max=1.05, neff_min=100, nchains=4, niter=10000, increasefactor=2, increasetries=6):
     """Infers site-specific preferences by MCMC for a specific site.
@@ -569,6 +633,8 @@ def InferSitePreferences(characterlist, wtchar, error_model, counts, priors, see
                 niter = int(niter * increasefactor)
                 logstring.append("\tMCMC failed to converge. Doing retry %d with %d iterations per chain." % (ntry, niter))
             else:
+                with open('_no_converge_prefs_debugging.pickle', 'w') as f_debug:
+                    cPickle.dump((init, fit, fitsummary), f_debug)
                 logstring.append("\tMCMC FAILED to converge after all attempts at %s." % time.asctime())
                 meanindex = colnames.index('mean')
                 lower95index = colnames.index('2.5%')

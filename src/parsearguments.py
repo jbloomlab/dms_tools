@@ -176,6 +176,7 @@ def InferPrefsParser():
     parser.add_argument('--ncpus', default=1, help='Number of CPUs to use; set to -1 to use all available CPUs.', type=int)
     parser.add_argument('--seed', default=1, help='Random number seed.', type=int)
     parser.add_argument('--sites', default=None, nargs='+', help='Only perform the inference for the specified sites, which should be a space separated list such as "--sites 1 2 10". All of these sites must have data in the counts files.')
+    parser.add_argument('--ratio_estimation', default=None, metavar='PSEUDOCOUNTS', type=FloatGreaterThanZero, help='Rather than use MCMC to estimate the preferences using a statistical model, we simply compute by calculating enrichment ratios relative to wildtype post- and pre-selection, and then normalizing these ratios to sum to one at each site. The single argument for this option is PSEUDOCOUNTS, which is a number > 0 that specifies the pseudocount added to each count to avoiding estimating ratios of zero or infinity.')
     parser.add_argument('-v', '--version', action='version', version='%(prog)s {version}'.format(version=dms_tools.__version__))
     return parser
 

@@ -404,7 +404,9 @@ def WritePreferences(f, sites, wts, pi_means, pi_95credint):
 
     *pi_95credint* can either be *None* or a dictionary keyed by all
      sites that also key *pi_means*, and has as values 2-tuples giving
-     the upper and lower bounds of the 95% credible interval.
+     the upper and lower bounds of the 95% credible interval. (If it is
+     a dictionary with any value of *None*, that is the same as setting the
+     overall variable to *None*).
 
     The written file has the following format::
 
@@ -455,6 +457,8 @@ def WritePreferences(f, sites, wts, pi_means, pi_95credint):
     >>> print "%.3f" % h[r]
     1.846
     """
+    if pi_95credint and None in pi_95credint.values():
+        pi_95credint = None
     openedfile = False
     if isinstance(f, str):
         f = open(f, 'w')
