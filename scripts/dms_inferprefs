@@ -190,7 +190,8 @@ def main():
             if args['ratio_estimation']:
                 results[r] = pool.apply_async(dms_tools.mcmc.InferSitePreferencesFromEnrichmentRatios, (characters, wts[r], pystan_error_model, rcounts, args['ratio_estimation']))
             else:
-                results[r] = pool.apply_async(dms_tools.mcmc.InferSitePreferences, (characters, wts[r], pystan_error_model, rcounts, priors, args['seed']))
+                niter = {'none':2500, 'same':10000, 'different':20000}[error_model] # these tend to be good values to converge the first time
+                results[r] = pool.apply_async(dms_tools.mcmc.InferSitePreferences, (characters, wts[r], pystan_error_model, rcounts, priors, args['seed'], niter))
         while not all([logged[r] for r in sites]):
             time.sleep(1) # wait a bit before polling again
             for r in sites:
