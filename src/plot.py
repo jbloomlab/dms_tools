@@ -94,7 +94,7 @@ def Base10Formatter(number, exp_cutoff, exp_decimal_digits, decimal_digits):
 
 
 def PlotCorrelation(xs, ys, plotfile, xlabel, ylabel, logx=False, logy=False,\
-        corr=None, title=False, alpha=1.0, symmetrize=False, fixaxes=False, additionalxy=[], bigmargin=0.26, xsize=1.8):
+        corr=None, title=False, alpha=1.0, symmetrize=False, fixaxes=False, additionalxy=[], bigmargin=0.26, xsize=1.8, r2=False):
     """Plots the correlation between two variables as a scatter plot.
     
     The data is plotted as a scatter plot.
@@ -135,6 +135,9 @@ def PlotCorrelation(xs, ys, plotfile, xlabel, ylabel, logx=False, logy=False,\
       coefficient is included. Otherwise, *corr = (r, p)* where *r* is
       the correlation coefficient (displayed with the label ``R``) and *p*
       is the P-value (displayed with the label ``P``).
+
+    * *r2* : if *True* and using *corr*, then display :math:`R^2` rather
+      than :math:`R`.
 
     * *title* is a string giving the title placed above the plot. 
       It can be *False* if no title is to be used. Otherwise, it should
@@ -232,7 +235,10 @@ def PlotCorrelation(xs, ys, plotfile, xlabel, ylabel, logx=False, logy=False,\
         pylab.title(title, size=10)
     if corr:
         (r, p) = corr
-        r = '$R = %.2f$' % r
+        if r2:
+            r = '$R^2 = %.2f$' % (r**2)
+        else:
+            r = '$R = %.2f$' % r
         if p < 1e-10:
             p = '$P < 10^{-10}$'
         else:

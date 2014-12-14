@@ -127,6 +127,8 @@ def CorrelateParser():
     parser.add_argument('--plot_title', default='None', help='Title put at the top of the correlation plot. The string specified here uses LaTex formatting; names with spaces should be enclosed in spaces. A value of "None" means no title.')
     parser.add_argument('--corr_on_plot', dest='corr_on_plot', action='store_true', help='If this option is used, then the correlation coefficient will be visually displayed on the plot.')
     parser.set_defaults(corr_on_plot=False)
+    parser.add_argument('--r2', dest='r2', action='store_true', help='If this option is used, the correlation coefficient displayed on the plot when using "--corr_on_plot" will show R-squared rather than the R value.')
+    parser.set_defaults(r2=False)
     parser.add_argument('--rms_dpi', dest='rms_dpi', action='store_true', help='If "file1" and "file2" specify differential preferences, this argument specifies that we compute the correlation between the root-mean-square (RMS) differential preference at each site rather than between the differential preferences themselves.')
     parser.set_defaults(rms_dpi=False)
     parser.add_argument('--pref_entropy', dest='pref_entropy', action='store_true', help='If "file1" and "file2" specify preferences, this argument specifies that we compute the correlation between the site entropy of the preferences (logarithm base 2, so bits) at each site rather than between the preferences themselves.')
