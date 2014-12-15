@@ -188,10 +188,10 @@ def PlotCorrelation(xs, ys, plotfile, xlabel, ylabel, logx=False, logy=False,\
         raise ValueError("Cannot use fixaxes with logx or logy")
     smallmargin = 0.04
     (lmargin, rmargin, bmargin, tmargin) = (bigmargin, smallmargin, bigmargin, smallmargin)
-    titlemargin = 0.09
     plotmargin = 0.03 # add this much above and below the last data point
     logplotmargin = 2.0 # scale limits by this much if log scale
     if title:
+        titlemargin = 0.09 * (0.5 + title.count('\n'))
         tmargin += titlemargin
     ysize = xsize * (1.0 - lmargin - rmargin) / (1.0 - tmargin - bmargin)
     matplotlib.rc('text', usetex=True)
