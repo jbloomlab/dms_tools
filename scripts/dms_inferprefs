@@ -143,9 +143,12 @@ def main():
             assert nprocesses > 0, "Must specify at least one process"
         pool = multiprocessing.Pool(nprocesses)
         results = {}
+        retry = {}
         logged = {}
         pi_means = {}
         pi_95credint = {}
+        initialincreasetries = 4 # initial tries for MCMC
+        retryincreasetries = 6 # retry tries for MCMC
         logger.info('Now beginning inference for each site...\n')
         for r in sites:
             rcounts = dict([(name, counts[name][r]) for name in counts.iterkeys()])
@@ -191,19 +194,32 @@ def main():
                 results[r] = pool.apply_async(dms_tools.mcmc.InferSitePreferencesFromEnrichmentRatios, (characters, wts[r], pystan_error_model, rcounts, args['ratio_estimation']))
             else:
                 niter = {'none':2500, 'same':10000, 'different':20000}[error_model] # these tend to be good values to converge the first time
-                results[r] = pool.apply_async(dms_tools.mcmc.InferSitePreferences, (characters, wts[r], pystan_error_model, rcounts, priors, args['seed'], niter))
+                results[r] = pool.apply_async(dms_tools.mcmc.InferSitePreferences, (characters, wts[r], pystan_error_model, rcounts, priors, args['seed'], niter, initialincreasetries))
+                retry[r] = (characters, wts[r], pystan_error_model, rcounts, priors, args['seed'] + 1, niter, retryincreasetries)
         while not all([logged[r] for r in sites]):
             time.sleep(1) # wait a bit before polling again
             for r in sites:
+                sitefailed = False
                 if results[r].ready() and not logged[r]:
-                    logged[r] = True
                     logger.info('Getting results for site %s...' % r)
-                    (converged, pi, pi95, logstring) = results[r].get()
-                    logger.info('Finished inference for site %s. Here is the summary:\n%s\n' % (r, logstring))
-                    if not converged:
-                        raise RuntimeError("Preference inference MCMC failed to converge for site %s:\n%s" % (r, logstring))
-                    pi_means[r] = pi
-                    pi_95credint[r] = pi95
+                    try:
+                        (converged, pi, pi95, logstring) = results[r].get()
+                    except:
+                        if r in retry:
+                            sitefailed = True
+                        else:
+                            raise
+                    if (sitefailed or not converged) and r in retry:
+                        logger.warning('Problems with inference for site %s!!! Performing the retry.' % r)
+                        results[r] = pool.apply_async(dms_tools.mcmc.InferSitePreferences, retry[r])
+                        del retry[r]
+                    else:
+                        logged[r] = True
+                        logger.info('Finished inference for site %s. Here is the summary:\n%s\n' % (r, logstring))
+                        if not converged:
+                            raise RuntimeError("Preference inference MCMC failed to converge for site %s:\n%s" % (r, logstring))
+                        pi_means[r] = pi
+                        pi_95credint[r] = pi95
         pool.terminate()
         logger.info('Now writing preferences to %s\n' % args['outfile'])
         dms_tools.file_io.WritePreferences(args['outfile'], sites, wts, pi_means, pi_95credint)
