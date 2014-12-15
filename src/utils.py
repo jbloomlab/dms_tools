@@ -28,6 +28,8 @@ Functions in this module
 
 * *Pref_or_DiffPref* : determines whether data represent preferences or differential preferences.
 
+* *PrefsToEnrichments* : converts preferences to enrichment ratios.
+
 Function documentation
 ---------------------------
 
@@ -37,6 +39,55 @@ Function documentation
 import re
 import math
 import dms_tools
+
+
+def PrefsToEnrichments(wts, pi_means, include_wt):
+    """Converts site-specific preferences to enrichment ratios.
+
+    *wts* and *pi_means* have the same meaning as the arguments by the
+    same name returned by *file_io.ReadPreferences*.
+
+    If *include_wt* is *True*, then the returned dictionary includes
+    ratios for the wildtype characters (these are always one). If it is
+    *False*, then ratios for the wildtype characters are not included.
+
+    The return value is a dictionary *enrichments*, where *enrichments[r][x]*
+    returns the enrichment ratio for character *x* at site *r* for all 
+    sites and characters in *pi_means*.
+
+    The enrichment ratio :math:`\phi_{r,x}` of site :math:`r` for 
+    character :math:`x` is defined in terms of the preference
+    :math:`\pi_{r,x}` as
+
+    .. math::
+
+        \phi_{r,x} = \\frac{\pi_{r,x}}{\pi_{r,\operatorname{wt}\left(r\\right)}}
+
+    where :math:`\operatorname{wt}\left(r\\right)` is the wildtype residue
+    at site :math:`r`.
+
+    >>> wts = {'1':'A'}
+    >>> pi_means = {'1':{'A':0.4, 'C':0.45, 'G':0.1, 'T':0.05}}
+    >>> enrichments = PrefsToEnrichments(wts, pi_means, include_wt=True)
+    >>> print "%.3f" % enrichments['1']['A']
+    1.000
+    >>> print "%.3f" % enrichments['1']['C']
+    1.125
+    >>> print "%.3f" % enrichments['1']['G']
+    0.250
+    >>> print "%.3f" % enrichments['1']['T']
+    0.125
+    >>> enrichments = PrefsToEnrichments(wts, pi_means, include_wt=False)
+    >>> 'A' in enrichments
+    False
+    """
+    enrichments = {}
+    for (r, pir) in pi_means.items():
+        wt = wts[r]
+        wtpi = float(pir[wt])
+        assert wtpi > 0, "wildtype preference is not > 0"
+        enrichments[r] = dict([(x, pir[x] / wtpi) for x in pir.keys() if x != wt or include_wt])
+    return enrichments
 
 
 def Pref_or_DiffPref(data, tol=1.0e-3):

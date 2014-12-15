@@ -25,6 +25,17 @@ Command-line usage
    file2
     Must be in the **same format** as "file1".
 
+   \-\-enrichment
+    The enrichment ratio :math:`\phi_{r,x}` for character :math:`x` at site :math:`r` is defined by
+
+    .. math::
+
+        \phi_{r,x} = \frac{\pi_{r,x}}{\pi_{r,\operatorname{wt}\left(r\right)}}
+
+    where :math:`\pi_{r,x}` is the preference of :math:`r` for :math:`x`, and :math:`\operatorname{wt}\left(r\right)` is the wildtype identity at :math:`r`.
+
+    Note that we do not include enrichment ratios for wildtype characters (which are one by definition) in the correlations or plots, and that the enrichment ratios are log transformed before plotting and computing correlations.
+
 Examples
 -----------
 Imagine that you have used several experiments to measure site-specific preferences in the files ``prefs1.txt`` and ``prefs2.txt``. Then run the command::

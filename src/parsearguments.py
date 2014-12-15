@@ -133,6 +133,8 @@ def CorrelateParser():
     parser.set_defaults(rms_dpi=False)
     parser.add_argument('--pref_entropy', dest='pref_entropy', action='store_true', help='If "file1" and "file2" specify preferences, this argument specifies that we compute the correlation between the site entropy of the preferences (logarithm base 2, so bits) at each site rather than between the preferences themselves.')
     parser.set_defaults(pref_entropy=False)
+    parser.set_defaults(enrichment=False)
+    parser.add_argument('--enrichment', dest='enrichment', action='store_true', help='If this option is set, we plot the enrichment ratio for all mutations on a log scale rather than plotting the preferences. The computed correlations are also then for the log-transformed enrichment ratios. The enrichment ratio for the wildtype identity is always one, and so is not included.')
     parser.add_argument('-v', '--version', action='version', version='%(prog)s {version}'.format(version=dms_tools.__version__))
     return parser
 

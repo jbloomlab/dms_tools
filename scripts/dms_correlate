@@ -30,6 +30,8 @@ def main():
     print versionstring
     print 'Parsed the following arguments:\n%s\n' % '\n'.join(['\t%s = %s' % tup for tup in args.iteritems()])
 
+    assert not (args['pref_entropy'] and args['enrichment']), "The --pref_entropy and --enrichment options are mutually exclusive."
+
     # remove output files if they exist
     corrfile = '%s.txt' % args['outfileprefix']
     plotfile = '%s.pdf' % args['outfileprefix']
@@ -48,6 +50,9 @@ def main():
     if args['plot_title'].upper().strip() == 'NONE':
         args['plot_title'] = None
 
+    # default plot formatting, may be changed depending on options below
+    logx = logy = fixaxes = False
+
     # read data
     (sites, characters, wts, databyfile) = dms_tools.file_io.ReadMultiPrefOrDiffPref([args['file1'], args['file2']], args['excludestop'])
     (data1, data2) = (databyfile[args['file1']], databyfile[args['file2']])
@@ -58,7 +63,17 @@ def main():
             print "Computing site entropies from preferences; the correlations will be for these entropies rather than the preferences themselves."
             xvalues = [dms_tools.utils.SiteEntropy(data1[r].values()) for r in sites]
             yvalues = [dms_tools.utils.SiteEntropy(data2[r].values()) for r in sites]
-            fixaxes = False
+        elif args['enrichment']:
+            print("The correlations will be for enrichment ratios calculated from the preferences.")
+            data1 = dms_tools.utils.PrefsToEnrichments(wts, data1, include_wt=False)
+            data2 = dms_tools.utils.PrefsToEnrichments(wts, data2, include_wt=False)
+            xvalues = []
+            yvalues = []
+            for r in sites:
+                for x in [x for x in characters if x != wts[r]]:
+                    xvalues.append(data1[r][x])
+                    yvalues.append(data2[r][x])
+            logx = logy = True
         else:
             print "The correlations will be for the preferences."
             xvalues = []
@@ -71,11 +86,11 @@ def main():
     elif 'diffprefs' == dms_tools.utils.Pref_or_DiffPref(data1) == dms_tools.utils.Pref_or_DiffPref(data2):
         print "%s and %s both specify differential preferences." % (args['file1'], args['file2'])
         assert not args['pref_entropy'], 'pref_entropy argument cannot be used if files specify differential preferences; it is only valid for preferences'
+        assert not args['enrichment'], 'enrichment option cannot be usef if files specify differential preferences; it is only valid for preferences'
         if args['rms_dpi']:
             print "Computing RMS differential preferences; the correlations will be for these RMS values rather than the differential preferences themselves."
             xvalues = [dms_tools.utils.RMS(data1[r].values()) for r in sites]
             yvalues = [dms_tools.utils.RMS(data2[r].values()) for r in sites]
-            fixaxes = False
         else:
             print "The correlations will be for the differential preferences."
             xvalues = []
@@ -84,7 +99,6 @@ def main():
                 for x in characters:
                     xvalues.append(data1[r][x])
                     yvalues.append(data2[r][x])
-            fixaxes = False
     else:
         raise ValueError("file1 and file2 do not both specify either valid preferences or valid differential preferences")
 
@@ -100,7 +114,7 @@ def main():
             corr = (r, p)
         else:
             corr = None
-        dms_tools.plot.PlotCorrelation(xvalues, yvalues, plotfile, args['name1'], args['name2'], alpha=args['alpha'], title=args['plot_title'], corr=corr, symmetrize=True, fixaxes=fixaxes, r2=args['r2'])
+        dms_tools.plot.PlotCorrelation(xvalues, yvalues, plotfile, args['name1'], args['name2'], alpha=args['alpha'], title=args['plot_title'], corr=corr, symmetrize=True, fixaxes=fixaxes, r2=args['r2'], logx=logx, logy=logy)
 
     print 'Successfully completed %s at %s' % (prog, time.asctime())
 

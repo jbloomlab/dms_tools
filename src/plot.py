@@ -94,7 +94,7 @@ def Base10Formatter(number, exp_cutoff, exp_decimal_digits, decimal_digits):
 
 
 def PlotCorrelation(xs, ys, plotfile, xlabel, ylabel, logx=False, logy=False,\
-        corr=None, title=False, alpha=1.0, symmetrize=False, fixaxes=False, additionalxy=[], bigmargin=0.26, xsize=1.8, r2=False):
+        corr=None, title=False, alpha=1.0, symmetrize=False, fixaxes=False, additionalxy=[], bigmargin=0.29, xsize=1.8, r2=False):
     """Plots the correlation between two variables as a scatter plot.
     
     The data is plotted as a scatter plot.
@@ -186,16 +186,16 @@ def PlotCorrelation(xs, ys, plotfile, xlabel, ylabel, logx=False, logy=False,\
         raise ValueError("xs and ys do not specify lists of the same length with >= 2 entries")
     if fixaxes and (logy or logx):
         raise ValueError("Cannot use fixaxes with logx or logy")
-    smallmargin = 0.05
+    smallmargin = 0.04
     (lmargin, rmargin, bmargin, tmargin) = (bigmargin, smallmargin, bigmargin, smallmargin)
     titlemargin = 0.09
     plotmargin = 0.03 # add this much above and below the last data point
-    logplotmargin = 2 # scale limits by this much if log scale
+    logplotmargin = 2.0 # scale limits by this much if log scale
     if title:
         tmargin += titlemargin
     ysize = xsize * (1.0 - lmargin - rmargin) / (1.0 - tmargin - bmargin)
     matplotlib.rc('text', usetex=True)
-    matplotlib.rc('font', size=10)
+    matplotlib.rc('font', size=9)
     matplotlib.rc('legend', fontsize=10)
     figure = pylab.figure(figsize=(xsize, ysize), facecolor='white')
     ax = pylab.axes([lmargin, bmargin, 1.0 - lmargin - rmargin, 1.0 - tmargin - bmargin])
