@@ -191,7 +191,7 @@ def PlotCorrelation(xs, ys, plotfile, xlabel, ylabel, logx=False, logy=False,\
     plotmargin = 0.03 # add this much above and below the last data point
     logplotmargin = 2.0 # scale limits by this much if log scale
     if title:
-        titlemargin = 0.09 * (0.5 + title.count('\n'))
+        titlemargin = 0.09 * (0.8 + title.count('\n') + title.count('\\\\'))
         tmargin += titlemargin
     ysize = xsize * (1.0 - lmargin - rmargin) / (1.0 - tmargin - bmargin)
     matplotlib.rc('text', usetex=True)
