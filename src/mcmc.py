@@ -634,7 +634,7 @@ def InferSitePreferences(characterlist, wtchar, error_model, counts, priors, see
                 logstring.append("\tMCMC failed to converge. Doing retry %d with %d iterations per chain." % (ntry, niter))
             else:
                 with open('_no_converge_prefs_debugging.pickle', 'w') as f_debug:
-                    cPickle.dump((init, fit, fitsummary), f_debug)
+                    cPickle.dump((init, fitsummary), f_debug)
                 logstring.append("\tMCMC FAILED to converge after all attempts at %s." % time.asctime())
                 meanindex = colnames.index('mean')
                 lower95index = colnames.index('2.5%')

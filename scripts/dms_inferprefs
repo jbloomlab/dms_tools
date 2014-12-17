@@ -10,6 +10,7 @@ import os
 import multiprocessing
 import logging
 import time
+import cPickle
 import dms_tools.utils
 import dms_tools.parsearguments
 import dms_tools.file_io
@@ -147,11 +148,13 @@ def main():
         logged = {}
         pi_means = {}
         pi_95credint = {}
+        counts_r = {}
         initialincreasetries = 4 # initial tries for MCMC
         retryincreasetries = 6 # retry tries for MCMC
         logger.info('Now beginning inference for each site...\n')
         for r in sites:
             rcounts = dict([(name, counts[name][r]) for name in counts.iterkeys()])
+            counts_r[r] = rcounts
             nchars_with_m = dict([(m, 0) for m in range(charlength + 1)])
             for x in countcharacters:
                 m = len([i for i in range(charlength) if wts[r][i] != x[i]])
@@ -208,9 +211,12 @@ def main():
                         if r in retry:
                             sitefailed = True
                         else:
+                            logger.error('Found an error even after a retry for site %s. Here is summary of attempt:\n%s\n' % (r, logstring))
+                            with open('_debugging_counts_%s.pickle' % r, 'w') as f:
+                                cPickle.dump(counts_r[r], f) # information potentially useful for debugging
                             raise
                     if (sitefailed or not converged) and r in retry:
-                        logger.warning('Problems with inference for site %s!!! Performing the retry.' % r)
+                        logger.warning('Problems with inference for site %s!!! Performing the retry. Here is summary of previous attempt:\n%s\n' % (r, logstring))
                         results[r] = pool.apply_async(dms_tools.mcmc.InferSitePreferences, retry[r])
                         del retry[r]
                     else:
