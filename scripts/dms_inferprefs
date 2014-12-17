@@ -102,7 +102,7 @@ def main():
             if not (set(args['sites']) < set(sites)):
                 raise ValueError("The specified sites are not all present in the DMS counts files. The specified sites are:\n%s" % ' '.join(args['sites']))
             sites = args['sites']
-            logger.info('We will perform inference ONLY for the following specified subset of sites:\n%s' % ' '.join(sites))
+            logger.info('We will perform inference ONLY for the following specified subset of sites:\n\t%s' % ' '.join(sites))
         logger.info('There are counts for %d sites, which are:\n%s\n' % (len(sites), '\n'.join(['\t%s (wildtype identity of %s)' % (r, wts[r]) for r in sites])))
         counts = dict([(name, counts[counts_files[name]]) for name in counts_files.iterkeys()]) # make names count type rather than file
 
@@ -154,6 +154,7 @@ def main():
         logger.info('Now beginning inference for each site...\n')
         for r in sites:
             rcounts = dict([(name, counts[name][r]) for name in counts.iterkeys()])
+            rcounts = dms_tools.utils.AdjustErrorCounts(wts[r], rcounts, maxexcess=2)
             counts_r[r] = rcounts
             nchars_with_m = dict([(m, 0) for m in range(charlength + 1)])
             for x in countcharacters:

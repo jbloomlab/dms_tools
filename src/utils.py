@@ -30,6 +30,8 @@ Functions in this module
 
 * *PrefsToEnrichments* : converts preferences to enrichment ratios.
 
+* *AdjustErrorCounts* : adjust error counts so they don't exceed actual counts.
+
 Function documentation
 ---------------------------
 
@@ -38,6 +40,7 @@ Function documentation
 
 import re
 import math
+import copy
 import dms_tools
 
 
@@ -127,6 +130,89 @@ def Pref_or_DiffPref(data, tol=1.0e-3):
         return 'diffprefs'
     else:
         return 'neither preferences nor diffprefs'
+
+
+def AdjustErrorCounts(wt, counts, maxexcess):
+    """Adjust error counts so that they don't exceed counts of interest.
+
+    This deals with the case when the error control estimates a higher
+    rate of a mutation than is found in the actual sample. This will confound
+    the MCMC inference by ``dms_inferprefs`` and ``dms_inferdiffprefs``.
+    So this script adjusts down the error counts until they are compatbile
+    with the counts in the actual sample.
+
+    Returns a dictionary like *counts* but with adjusted counts.
+
+    This is a function utilized to clean counts data for ``dms_inferprefs``
+    and ``dms_inferdiffprefs``.
+
+    Essentially, it checks if the mutation rate in the error control
+    is higher than that of the sample for which it is supposed to control.
+    If so, it reduces the mutation counts for the error control so that
+    they only exceed the controlled for sample by *maxexcess*.
+
+    >>> wt = 'A'
+    >>> counts = {'nrpre':{'A':500, 'C':10, 'G':40, 'T':20}, 'nrerrpre':{'A':250, 'C':1, 'G':30, 'T':10}, 'nrpost':{'A':500, 'C':20, 'G':20, 'T':20}, 'nrerrpost':{'A':1000, 'C':30, 'G':20, 'T':50}}
+    >>> adjusted_counts = AdjustErrorCounts(wt, counts, maxexcess=1)
+    >>> counts['nrpre'] == adjusted_counts['nrpre']
+    True
+    >>> counts['nrpost'] == adjusted_counts['nrpost']
+    True
+    >>> adjusted_counts['nrerrpre'] == {'A':250, 'C':1, 'G':21, 'T':10}
+    True
+    >>> adjusted_counts['nrerrpost'] == {'A':1000, 'C':30, 'G':20, 'T':41}
+    True
+
+    >>> wt = 'A'
+    >>> counts = {'nrpre':{'A':500, 'C':10, 'G':40, 'T':20}, 'nrpost':{'A':500, 'C':20, 'G':20, 'T':20}, 'nrerr':{'A':1000, 'C':30, 'G':20, 'T':50}}
+    >>> adjusted_counts = AdjustErrorCounts(wt, counts, maxexcess=1)
+    >>> counts['nrpre'] == adjusted_counts['nrpre']
+    True
+    >>> counts['nrpost'] == adjusted_counts['nrpost']
+    True
+    >>> adjusted_counts['nrerr'] == {'A':1000, 'C':21, 'G':20, 'T':41}
+    True
+
+    >>> counts = {'nrstart':{'A':500, 'C':10, 'G':40, 'T':20}, 'nrs1':{'A':1000, 'C':20, 'G':80, 'T':40}, 'nrs2':{'A':500, 'C':20, 'G':20, 'T':20}, 'nrerr':{'A':1000, 'C':30, 'G':20, 'T':50}}
+    >>> adjusted_counts = AdjustErrorCounts(wt, counts, maxexcess=1)
+    >>> counts['nrstart'] == adjusted_counts['nrstart']
+    True
+    >>> counts['nrs1'] == adjusted_counts['nrs1']
+    True
+    >>> counts['nrs2'] == adjusted_counts['nrs2']
+    True
+    >>> adjusted_counts['nrerr'] == {'A':1000, 'C':21, 'G':20, 'T':41}
+    True
+    """
+    returncounts = copy.deepcopy(counts)
+    if 'nrpre' in counts and 'nrpost' in counts:
+        # data for preferences
+        mutcharacters = [x for x in counts['nrpre'].keys() if x != wt and x != 'WT']
+        if len(counts) == 2:
+            pass
+        elif len(counts) == 3 and 'nrerr' in counts:
+            # same errors
+            for x in mutcharacters:
+                returncounts['nrerr'][x] = min(counts['nrerr'][x], int(maxexcess + round(counts['nrpre'][x] / float(counts['nrpre'][wt]) * counts['nrerr'][wt])), int(maxexcess + round(counts['nrpost'][x] / float(counts['nrpost'][wt]) * counts['nrerr'][wt])))
+        elif len(counts) == 4 and 'nrerrpre' in counts and 'nrerrpost' in counts:
+            # different errors
+            for x in mutcharacters:
+                returncounts['nrerrpre'][x] = min(counts['nrerrpre'][x], int(maxexcess + round(counts['nrpre'][x] / float(counts['nrpre'][wt]) * counts['nrerrpre'][wt])))
+                returncounts['nrerrpost'][x] = min(counts['nrerrpost'][x], int(maxexcess + round(counts['nrpost'][x] / float(counts['nrpost'][wt]) * counts['nrerrpost'][wt])))
+        else:
+            raise ValueError("counts does not have valid set of keys:\n%s" % str(counts.keys()))
+    elif 'nrstart' in counts and 'nrs1' in counts and 'nrs2' in counts:
+        # data for differential preferences
+        mutcharacters = [x for x in counts['nrstart'].keys() if x != wt]
+        if len(counts) == 3:
+            pass
+        elif len(counts) == 4 and 'nrerr' in counts:
+            for x in mutcharacters:
+                returncounts['nrerr'][x] = min(counts['nrerr'][x], int(maxexcess + round(counts['nrstart'][x] / float(counts['nrstart'][wt]) * counts['nrerr'][wt])), int(maxexcess + round(counts['nrs1'][x] / float(counts['nrs1'][wt]) * counts['nrerr'][wt])), int(maxexcess + round(counts['nrs2'][x] / float(counts['nrs2'][wt]) * counts['nrerr'][wt])))
+    else:
+        raise ValueError("counts does not have valid set of keys:\n%s" % str(counts.keys()))
+    return returncounts
+
 
 def SumPrefsDiffPrefs(datalist, minus=[]):
     """Sums preferences and differential preferences.
