@@ -203,7 +203,7 @@ def AdjustErrorCounts(wt, counts, maxexcess):
             raise ValueError("counts does not have valid set of keys:\n%s" % str(counts.keys()))
     elif 'nrstart' in counts and 'nrs1' in counts and 'nrs2' in counts:
         # data for differential preferences
-        mutcharacters = [x for x in counts['nrstart'].keys() if x != wt]
+        mutcharacters = [x for x in counts['nrstart'].keys() if x != wt and x != 'WT']
         if len(counts) == 3:
             pass
         elif len(counts) == 4 and 'nrerr' in counts:
