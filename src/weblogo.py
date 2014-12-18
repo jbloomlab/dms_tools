@@ -274,6 +274,7 @@ def LogoPlot(sites, datatype, data, plotfile, nperline, numberevery=10, allowuns
         if alphabet_type == 'aa':
             (cmap, colormapping, mapper) = KyteDoolittleColorMapping()
         elif alphabet_type == 'nt':
+            colormapping = {}
             colormapping['A'] = '#008000'
             colormapping['T'] = '#FF0000'
             colormapping['C'] = '#0000FF'
