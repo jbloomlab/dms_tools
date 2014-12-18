@@ -163,7 +163,8 @@ def main():
             priors['pirs1_prior_params'] = dict([(x, args['alpha_pis1']) for x in characters])
             priors['deltapi_concentration'] = args['alpha_deltapi']
             logged[r] = False
-            results[r] = pool.apply_async(dms_tools.mcmc.InferSiteDiffPrefs, (characters, wts[r], pystan_error_model, rcounts, priors, args['seed']))
+            niter = {'none':2500, 'same':10000}[error_model]
+            results[r] = pool.apply_async(dms_tools.mcmc.InferSiteDiffPrefs, (characters, wts[r], pystan_error_model, rcounts, priors, args['seed'], niter))
         while not all([logged[r] for r in sites]):
             time.sleep(1) # wait a bit before polling again
             for r in sites:
