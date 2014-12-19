@@ -118,7 +118,7 @@ around the actual frequencies. So
 
    \begin{eqnarray}
    \Pr\left(\mathbf{n_r^{s2}}\mid N_r^{s2}, \boldsymbol{\mathbf{f_r^{\textbf{start}}}}, \boldsymbol{\mathbf{\pi_r^{s1}}}, \boldsymbol{\mathbf{\Delta\pi_r}}, \boldsymbol{\mathbf{\xi_r}}\right) &=& \operatorname{Multinomial}\left(\mathbf{n_r^{s2}}; N_r^{s2}, \boldsymbol{\mathbf{f_r^{s2}}} + \boldsymbol{\mathbf{\xi_r}}- \boldsymbol{\mathbf{\delta_r}}\right) \\
-   &=& \operatorname{Multinomial}\left(\mathbf{n_r^{s2}}; N_r^{s2}, \frac{\boldsymbol{\mathbf{f_r^{\textbf{start}}}}\circ \left(\boldsymbol{\mathbf{\pi_r^{s1}}}\right)}{\boldsymbol{\mathbf{f_r^{\textbf{start}}}}\cdot \left(\boldsymbol{\mathbf{\pi_r^{s1}}}\right)} + \boldsymbol{\mathbf{\xi_r}}- \boldsymbol{\mathbf{\delta_r}}\right) \\
+   &=& \operatorname{Multinomial}\left(\mathbf{n_r^{s2}}; N_r^{s2}, \frac{\boldsymbol{\mathbf{f_r^{\textbf{start}}}}\circ \left(\boldsymbol{\mathbf{\Delta\pi_r}} + \boldsymbol{\mathbf{\pi_r^{s1}}}\right)}{\boldsymbol{\mathbf{f_r^{\textbf{start}}}}\cdot \left(\boldsymbol{\mathbf{\Delta\pi_r}} + \boldsymbol{\mathbf{\pi_r^{s1}}}\right)} + \boldsymbol{\mathbf{\xi_r}}- \boldsymbol{\mathbf{\delta_r}}\right) \\
    \end{eqnarray}
 
 
