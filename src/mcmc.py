@@ -38,6 +38,7 @@ Function documentation
 import sys
 import tempfile
 import time
+import math
 import cPickle
 import numpy
 import numpy.random
@@ -613,11 +614,16 @@ def InferSitePreferences(characterlist, wtchar, error_model, counts, priors, see
         rindex = colnames.index('Rhat')
         neffindex = colnames.index('n_eff')
         rlist = [summary[char_row_indices[char]][rindex] for char in characterlist]
+        rhat_is_nan = [rhat for rhat in rlist if math.isnan(rhat)]
+        rlist = [rhat for rhat in rlist if not math.isnan(rhat)]
         nefflist = [summary[char_row_indices[char]][neffindex] for char in characterlist]
         rmean = sum(rlist) / float(len(rlist))
         neffmean = sum(nefflist) / float(len(nefflist))
         logstring.append('\tAfter %d MCMC chains each of %d steps, mean R = %.2f and mean Neff = %d' % (nchains, niter, rmean, neffmean))
-        if (rmean <= r_max) and (neffmean >= neff_min):
+        if rhat_is_nan:
+            logstring.append('\t\tThere are %d sites where R is nan' % len(rhat_is_nan))
+        # allow convergence with extra stringent criteria for a few sites with Rhat being nan
+        if ((not rhat_is_nan) and rmean <= r_max and neffmean >= neff_min) or (rhat_is_nan and len(rhat_is_nan) <= 0.25 * len(characterlist) and rmean <= 1.0 + (r_max - 1.0) / 2.0 and neffmean >= 4.0 * neff_min):
             # converged
             logstring.append('\tMCMC is deemed to have converged at %s.' % time.asctime())
             meanindex = colnames.index('mean')
@@ -634,7 +640,7 @@ def InferSitePreferences(characterlist, wtchar, error_model, counts, priors, see
                 logstring.append("\tMCMC failed to converge. Doing retry %d with %d iterations per chain." % (ntry, niter))
             else:
                 with open('_no_converge_prefs_debugging.pickle', 'w') as f_debug:
-                    cPickle.dump((init, fitsummary), f_debug)
+                    cPickle.dump((counts, init, fitsummary), f_debug)
                 logstring.append("\tMCMC FAILED to converge after all attempts at %s." % time.asctime())
                 meanindex = colnames.index('mean')
                 lower95index = colnames.index('2.5%')
@@ -785,11 +791,16 @@ def InferSiteDiffPrefs(characterlist, wtchar, error_model, counts, priors, seed=
         rindex = colnames.index('Rhat')
         neffindex = colnames.index('n_eff')
         rlist = [summary[char_row_indices[char]][rindex] for char in characterlist]
+        rhat_is_nan = [rhat for rhat in rlist if math.isnan(rhat)]
+        rlist = [rhat for rhat in rlist if not math.isnan(rhat)]
         nefflist = [summary[char_row_indices[char]][neffindex] for char in characterlist]
         rmean = sum(rlist) / float(len(rlist))
         neffmean = sum(nefflist) / float(len(nefflist))
         logstring.append('\tAfter %d MCMC chains each of %d steps, mean R = %.2f and mean Neff = %d' % (nchains, niter, rmean, neffmean))
-        if (rmean <= r_max) and (neffmean >= neff_min):
+        if rhat_is_nan:
+            logstring.append('\t\tThere are %d sites where R is nan' % len(rhat_is_nan))
+        # allow convergence with extra stringent criteria for a few sites with Rhat being nan
+        if ((not rhat_is_nan) and rmean <= r_max and neffmean >= neff_min) or (rhat_is_nan and len(rhat_is_nan) <= 0.25 * len(characterlist) and rmean <= 1.0 + (r_max - 1.0) / 2.0 and neffmean >= 4.0 * neff_min):
             # converged
             logstring.append('\tMCMC is deemed to have converged at %s.' % time.asctime())
             meanindex = colnames.index('mean')
@@ -807,6 +818,8 @@ def InferSiteDiffPrefs(characterlist, wtchar, error_model, counts, priors, seed=
                 niter = int(niter * increasefactor)
                 logstring.append("\tMCMC failed to converge. Doing retry %d with %d iterations per chain." % (ntry, niter))
             else:
+                with open('_no_converge_diffprefs_debugging.pickle', 'w') as f_debug:
+                    cPickle.dump((counts, init, fitsummary), f_debug)
                 logstring.append("\tMCMC FAILED to converge after all attempts at %s." % time.asctime())
                 meanindex = colnames.index('mean')
                 deltapi_means = dict([(char, summary[char_row_indices[char]][meanindex]) for char in characterlist])

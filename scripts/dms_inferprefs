@@ -154,7 +154,7 @@ def main():
         logger.info('Now beginning inference for each site...\n')
         for r in sites:
             rcounts = dict([(name, counts[name][r]) for name in counts.iterkeys()])
-            rcounts = dms_tools.utils.AdjustErrorCounts(wts[r], rcounts, maxexcess=2)
+            rcounts = dms_tools.utils.AdjustErrorCounts(wts[r], rcounts, maxexcess=5) # avoid pathologically high error counts, which shouldn't happen if actual data conforms to analysis assumptions
             counts_r[r] = rcounts
             nchars_with_m = dict([(m, 0) for m in range(charlength + 1)])
             for x in countcharacters:
