@@ -25,7 +25,7 @@ import dms_tools
 import dms_tools.file_io
 
 
-def SimulateLibraryCounts(depths_outfiles, prefs_file, avgmu, avgepsilon, avgrho, mu_concentration=250.0, epsilon_concentration=250.0, rho_concentration=250.0, seed=1):
+def SimulateLibraryCounts(depths_outfiles, prefs_file, avgmu, avgepsilon, avgrho, mu_concentration=300.0, epsilon_concentration=300.0, rho_concentration=300.0, seed=1):
     """Simulates counts data for deep mutational scanning experiment.
 
     This function can be used if you want to simulate the creation of a mutant library
