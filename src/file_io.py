@@ -123,9 +123,6 @@ def WriteDMSCounts(f, counts):
     *counts* is a dictionary of the same format returned by *ReadDMSCounts*.
     These counts are written to *f*.
 
-    *wts* is a dictionary keyed by all sites in *counts* with the value being
-    the wildtype character at that site.
-
     There is no *chartype* argument -- that is automatically determined from
     *counts*.
 
