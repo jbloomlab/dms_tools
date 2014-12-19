@@ -238,7 +238,7 @@ def LogoPlot(sites, datatype, data, plotfile, nperline, numberevery=10, allowuns
             for (isite, r) in enumerate(sites):
                 positivesum = sum([data[r][x] for x in characters if data[r][x] > 0]) + separatorheight / 2.0
                 negativesum = sum([data[r][x] for x in characters if data[r][x] < 0]) - separatorheight / 2.0
-                if abs(positivesum + negativesum) > 1.0e-6:
+                if abs(positivesum + negativesum) > 1.0e-3:
                     raise ValueError("Differential preferences sum of %s is not close to zero for site %s" % (positivesum + negativesum, r))
                 if 2.0 * positivesum > ydatamax:
                     raise ValueError("You need to increase ydatamax: the total differential preferences sum to more than the y-axis limits.")
