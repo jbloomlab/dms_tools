@@ -81,7 +81,7 @@ def main():
                 characters = countcharacters = dms_tools.aminoacids_withstop
         else:
             raise ValueError("Invalid chartype of %s" % args['chartype'])
-        counts_files = {'nrstart':args['n_start'], 'nrs1':args['n_s1'], 'nrs2':args['n_s1']}
+        counts_files = {'nrstart':args['n_start'], 'nrs1':args['n_s1'], 'nrs2':args['n_s2']}
         if args['err'].lower() == 'none':
             pystan_error_model = dms_tools.mcmc.StanModelDiffPrefNoErr
             error_model = 'none'
@@ -163,7 +163,7 @@ def main():
             priors['pirs1_prior_params'] = dict([(x, args['alpha_pis1']) for x in characters])
             priors['deltapi_concentration'] = args['alpha_deltapi']
             logged[r] = False
-            niter = {'none':2500, 'same':10000}[error_model]
+            niter = {'none':1500, 'same':6000}[error_model]
             results[r] = pool.apply_async(dms_tools.mcmc.InferSiteDiffPrefs, (characters, wts[r], pystan_error_model, rcounts, priors, args['seed'], niter))
         while not all([logged[r] for r in sites]):
             time.sleep(1) # wait a bit before polling again
