@@ -14,11 +14,11 @@ More often, you might want to run all of the tests using the command::
 
     python run_tests.py
 
-Some of the tests may take quite a while to run. 
+Some of the tests will take a long time (perhaps hours) to run.
 
 You must ``cd`` into this ``./tests/`` subdirectory before running the tests.
 
-The file ``test_configuration.txt`` in this directory specifies configuration options used by all the tests. It should have three lines:
+The file ``test_configuration.txt`` in this directory specifies configuration options used by some of the tests. It should have three lines:
 
     1) The first line should begin with the word *seed* followed by a comma-delimited list of integer random number seeds used for the tests. Each test is run separately for each seed.
 
@@ -28,8 +28,8 @@ The file ``test_configuration.txt`` in this directory specifies configuration op
 
 For instance, here is an example of a valid ``test_configuration.txt`` file::
 
-    seeds 0, 1, 2
-    charactertypes DNA, amino acid
+    seeds 0
+    charactertypes DNA
     n_jobs 3
 
 .. _`dms_tools`: https://github.com/jbloom/dms_tools

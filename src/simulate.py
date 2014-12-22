@@ -29,7 +29,7 @@ import dms_tools
 import dms_tools.file_io
 
 
-def SimulateDiffPrefCounts(depths_outfiles, start_counts, diffprefs_file, avgepsilon, control_concentration=50.0, fracdiffer=0.5, diff_concentration=1.0, epsilon_concentration=300.0, seed=1):
+def SimulateDiffPrefCounts(depths_outfiles, start_counts, diffprefs_file, avgepsilon, control_concentration=50.0, fracdiffer=0.25, diff_concentration=0.5, epsilon_concentration=300.0, seed=1):
     """Simulates counts data for testing differential preference inference.
 
     Use this function if you want to simulate creation of a mutant library with known differential
@@ -130,12 +130,15 @@ def SimulateDiffPrefCounts(depths_outfiles, start_counts, diffprefs_file, avgeps
         delta = numpy.zeros(len(codons))
         delta[iwtcodon] = 1.0
 
-        # choose control preferences somewhat similar to initial freqs
+        # choose control preferences to be zero at sites with tiny initial freqs
         initial_freqs = []
         for aa in aas:
             f_aa = sum([mu[codons.index(codon)] for codon in dms_tools.aa_to_codons[aa]])
-            initial_freqs.append(f_aa)
-        pi_aa = numpy.random.dirichlet(control_concentration * len(codons) * (numpy.array(initial_freqs) + 0.2 * numpy.ones(len(aas))))
+            if f_aa < 0.00005:
+                initial_freqs.append(0.0) # initial freqs for very rare amino acids set to zero to make control preference 0, otherwise differential preference will be hard to infer
+            else:
+                initial_freqs.append(1.0)
+        pi_aa = numpy.random.dirichlet(control_concentration * len(codons) * (numpy.array(initial_freqs))) 
         pi = numpy.array([pi_aa[aas.index(dms_tools.codon_to_aa[codon])] for codon in codons])
 
         deltapi_aa = {}

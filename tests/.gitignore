@@ -1,0 +1,4 @@
+*.log
+*.pdf
+*corr.txt
+*inferred*.txt

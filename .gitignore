@@ -9,3 +9,4 @@ docs/_template/
 build/
 *.sbatch
 *.swp
+*.log
