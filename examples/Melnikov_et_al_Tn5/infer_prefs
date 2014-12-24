@@ -1,0 +1,20 @@
+#!/bin/bash
+#
+# Shell script to analyze Melnikov et al deep mutational scanning to infer site-specific preferences
+
+#
+# Use custom Python script to process Melnikov et al's raw data into dms_tools counts files
+python process_raw_to_dms_counts.py 
+#
+# Use dms_inferprefs to infer site-specific preferences after kanamycin selection for both replicates
+dms_inferprefs ./processed_data/input_1_dms_counts.txt ./processed_data/kanamycin_1_dms_counts.txt ./processed_data/prefs_1.txt --excludestop --ncpus -1 --chartype aa
+dms_inferprefs ./processed_data/input_2_dms_counts.txt ./processed_data/kanamycin_2_dms_counts.txt ./processed_data/prefs_2.txt --excludestop --ncpus -1 --chartype aa
+#
+# Compute correlation between preferences of two replicates
+dms_correlate ./processed_data/prefs_1.txt ./processed_data/prefs_2.txt ./processed_data/replicate_pref_corr --name1 "replicate 1" --name 2 "replicate 2" --corr_on_plot
+#
+# Use dms_merge to average the inferred preferences from the two replicates
+dms_merge ./processed_data/prefs.txt average ./processed_data/prefs_1.txt ./processed_data/prefs_2.txt
+#
+# Use dms_logoplot to make a visual summary of the preferences with overlays showing secondary structure and relative solvent accessibility
+dms_logoplot ./processed_data/prefs.txt prefs_logoplot.pdf --nperline 53 --overlay1 ./PDB_structure/RSAs.txt RSA "relative solvent accessibility" --overlay2 ./PDB_structure/SSs.txt SS "secondary structure"

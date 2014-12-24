@@ -1,0 +1,4 @@
+#!/bin/bash
+#
+dms_inferdiffprefs ./counts_data/input.txt ./counts_data/control.txt ./counts_data/interferon.txt diffprefs.txt --ncpus -1 --chartype DNA 
+dms_logoplot diffprefs.txt diffprefs_logoplot.pdf --nperline 68 --diffprefheight 0.4 

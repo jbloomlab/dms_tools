@@ -1,0 +1,19 @@
+#!/bin/bash
+#
+# Shell script to analyze Thyagarajan et al deep mutational scanning
+#
+# Infer preference for each replicate independently
+dms_inferprefs ./dms_counts/replicate_1_mutDNA_codoncounts.txt ./dms_counts/replicate_1_mutvirus_codoncounts.txt ./inferred_preferences/prefs_replicate_1.txt --errpre ./dms_counts/replicate_1_DNA_codoncounts.txt --errpost ./dms_counts/replicate_1_virus_codoncounts.txt --ncpus -1
+dms_inferprefs ./dms_counts/replicate_2_mutDNA_codoncounts.txt ./dms_counts/replicate_2_mutvirus_codoncounts.txt ./inferred_preferences/prefs_replicate_2.txt --errpre ./dms_counts/replicate_2_DNA_codoncounts.txt --errpost ./dms_counts/replicate_2_virus_codoncounts.txt --ncpus -1
+dms_inferprefs ./dms_counts/replicate_3_mutDNA_codoncounts.txt ./dms_counts/replicate_3_mutvirus_codoncounts.txt ./inferred_preferences/prefs_replicate_3.txt --errpre ./dms_counts/replicate_3_DNA_codoncounts.txt --errpost ./dms_counts/replicate_3_virus_codoncounts.txt --ncpus -1
+#
+# Plot correlations among replicates
+dms_correlate ./inferred_preferences/prefs_replicate_1.txt ./inferred_preferences/prefs_replicate_2.txt ./correlations/corr_1_vs_2 --name1 "replicate 1" --name2 "replicate 2" --corr_on_plot
+dms_correlate ./inferred_preferences/prefs_replicate_1.txt ./inferred_preferences/prefs_replicate_3.txt ./correlations/corr_1_vs_3 --name1 "replicate 1" --name2 "replicate 3" --corr_on_plot
+dms_correlate ./inferred_preferences/prefs_replicate_2.txt ./inferred_preferences/prefs_replicate_3.txt ./correlations/corr_2_vs_3 --name1 "replicate 2" --name2 "replicate 3" --corr_on_plot
+#
+# Compute average over replicates
+dms_merge ./inferred_preferences/prefs_avg.txt average ./inferred_preferences/prefs_replicate_1.txt ./inferred_preferences/prefs_replicate_2.txt ./inferred_preferences/prefs_replicate_3.txt
+#
+# Make a logo plot summarizing the results.
+dms_logoplot ./inferred_preferences/prefs_avg.txt prefs_logoplot.pdf --nperline 71 --overlay1 ./PDB_structure/RSAs.txt RSA "relative solvent accessibility" --overlay2 ./PDB_structure/SSs.txt SS "secondary structure" --excludestop
