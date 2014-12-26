@@ -1,8 +1,8 @@
 ==========================================
-Data file formats for programs
+Data file formats 
 ==========================================
 
-Below is information about the formats of the input and output files used by the programs in `dms_tools`_.
+Below is information about the formats of the input and output files used by the :ref:`Programs` in `dms_tools`_.
 
 .. contents::
 

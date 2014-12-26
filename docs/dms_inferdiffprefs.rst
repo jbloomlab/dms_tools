@@ -86,9 +86,29 @@ Command-line usage
 
 Output
 ----------
-The inferred differential preferences are in the :ref:`diffpreferences_file` specified by ``outfile``. A summary of the progress is in the file specified by ``logfile``. In addition, some information will be written to standard output. You should **not** be concerned if this information includes some warnings from `PyStan`_ about convergence -- the program automatically tests for convergence as described in :ref:`MCMC_inference`, and will terminate with an error in the unlikely case it doesn't converge.
+The inferred differential preferences are in the :ref:`diffpreferences_file` specified by ``outfile``. A summary of the progress is in the file specified by ``logfile``. In addition, some information will be written to standard output. `Do not worry about Informational Messages`_.
 
-Becase standard output will include lots of informational messages from `PyStan`_ that obscure what is happening, it will be more informative to track the progress by watching ``logfile``.
+Becase standard output will include lots of informational messages that obscure what is happening, it will be more informative to track the progress by watching ``logfile``.
+
+Do not worry about Informational Messages
+---------------------------------------------------
+When you run ``dms_inferdiffprefs``, you may get a lot of ``Informational Message`` output on the screen. These messages look like this::
+
+    Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:
+    stan::prob::dirichlet_log(N4stan5agrad3varE): prior sample sizes[1]  is 0:0, but must be > 0!
+    If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,
+    but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.
+
+You do **not** need to worry about these messages. They are automatically produced by `PyStan`_. Although it seems like there are a lot of these messages, running ``dms_inferdiffprefs`` on a 500-residue gene will invoke at least :math:`4 \times 500 = 2000` different `MCMC`_ chains, all of which may sporadically produce this warning.
+
+``dms_inferdiffprefs`` automatically tests for convergence and described in `Runtime and convergence`_ and :ref:`MCMC_inference` If the program actually fails to converge for any site, you will not get an ``outfile`` and the program will terminate with an error message.
+
+Runtime and convergence
+---------------------------
+Because ``dms_inferdiffprefs`` uses `MCMC`_ to infer the preferences as described in :ref:`inferdiffprefs_algorithm`, it may take the program a while to run. The program will run fastest if you use multiple CPUs (such as by using the option ``--ncpus -1`` to use all available CPUs). It should take anywhere from a few minutes to a few hours to complete on a multi-processor machine, depending on the size of the protein, which characters are being used (nucleotides are fastest, codons are slowest), and whether error controls are being included in the analysis (via ``--err``).
+
+The program automatically checks for `MCMC`_ convergence using the criteria described in :ref:`MCMC_inference` The program will terminate with an error if it fails to converge; otherwise it converged properly.
+
 
 Examples
 -----------
