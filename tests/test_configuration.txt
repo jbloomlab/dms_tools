@@ -1,3 +1,0 @@
-seeds 1
-charactertypes DNA
-n_jobs -1

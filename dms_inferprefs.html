@@ -1,0 +1,328 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>dms_inferprefs &mdash; dms_tools 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="dms_tools 1.0 documentation" href="index.html" />
+    <link rel="up" title="Programs" href="programs.html" />
+    <link rel="next" title="dms_inferdiffprefs" href="dms_inferdiffprefs.html" />
+    <link rel="prev" title="Programs" href="programs.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="dms_inferdiffprefs.html" title="dms_inferdiffprefs"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="programs.html" title="Programs"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">dms_tools 1.0 documentation</a> &raquo;</li>
+          <li><a href="programs.html" accesskey="U">Programs</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="dms-inferprefs">
+<span id="id1"></span><h1><a class="toc-backref" href="#id2"><tt class="docutils literal"><span class="pre">dms_inferprefs</span></tt></a><a class="headerlink" href="#dms-inferprefs" title="Permalink to this headline">¶</a></h1>
+<div class="contents topic" id="contents">
+<p class="topic-title first">Contents</p>
+<ul class="simple">
+<li><a class="reference internal" href="#dms-inferprefs" id="id2"><tt class="docutils literal"><span class="pre">dms_inferprefs</span></tt></a><ul>
+<li><a class="reference internal" href="#overview" id="id3">Overview</a></li>
+<li><a class="reference internal" href="#command-line-usage" id="id4">Command-line usage</a></li>
+<li><a class="reference internal" href="#output" id="id5">Output</a></li>
+<li><a class="reference internal" href="#do-not-worry-about-informational-messages" id="id6">Do not worry about Informational Messages</a></li>
+<li><a class="reference internal" href="#runtime-and-convergence" id="id7">Runtime and convergence</a></li>
+<li><a class="reference internal" href="#examples" id="id8">Examples</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="section" id="overview">
+<h2><a class="toc-backref" href="#id3">Overview</a><a class="headerlink" href="#overview" title="Permalink to this headline">¶</a></h2>
+<p><tt class="docutils literal"><span class="pre">dms_inferprefs</span></tt> is a program included with the <a class="reference external" href="http://jbloom.github.io/dms_tools">dms_tools</a> package. It infers the site-specific preferences <span class="math">\(\pi_{r,x}\)</span> for each character <span class="math">\(x\)</span> (an amino acid, codon, or nucleotide) at each site <span class="math">\(r\)</span>. The inference is done by <a class="reference external" href="http://en.wikipedia.org/wiki/Markov_chain_Monte_Carlo">MCMC</a> using <a class="reference external" href="http://pystan.readthedocs.org/en/latest/">PyStan</a>.</p>
+<p>For a detailed description of the algorithm implemented by this program, see <a class="reference internal" href="inferprefs_algorithm.html#inferprefs-algorithm"><em>Algorithm to infer site-specific preferences</em></a>.</p>
+<p>After you install <a class="reference external" href="http://jbloom.github.io/dms_tools">dms_tools</a>, this program will be available to run at the command line.</p>
+</div>
+<div class="section" id="command-line-usage">
+<h2><a class="toc-backref" href="#id4">Command-line usage</a><a class="headerlink" href="#command-line-usage" title="Permalink to this headline">¶</a></h2>
+<p>Infer site-specific preferences for amino acids, nucleotides, or codons. This script is part of dms_tools (version 1.0) written by Jesse D. Bloom. Detailed documentation is at http://jbloom.github.io/dms_tools/</p>
+<pre class="literal-block">
+usage: dms_inferprefs [-h] [--chartype {codon_to_aa,DNA,codon,aa}]
+                      [--errpre ERRPRE] [--errpost ERRPOST] [--excludestop]
+                      [--pi_alpha PI_ALPHA] [--mu_alpha MU_ALPHA]
+                      [--err_alpha ERR_ALPHA] [--logfile LOGFILE]
+                      [--ncpus NCPUS] [--seed SEED]
+                      [--sites SITES [SITES ...]]
+                      [--ratio_estimation PSEUDOCOUNTS] [-v]
+                      n_pre n_post outfile
+</pre>
+<dl class="docutils">
+<dt>Positional arguments:</dt>
+<dd><table class="first last docutils option-list" frame="void" rules="none">
+<col class="option" />
+<col class="description" />
+<tbody valign="top">
+<tr><td class="option-group">
+<kbd>n_pre</kbd></td>
+<td><p class="first">Existing file with pre-selection counts from deep sequencing. For nucleotides, header line should be &#8220;# POSITION WT A C G T&#8221; and then subsequent lines give wildtype and counts for each site (i.e. &#8220;1 G 1013 23 19 47&#8221;); for codons just use the 64 codons instead (i.e. &#8220;AAA AAC AAG ...&#8221;).</p>
+<p>This file gives the <span class="math">\(n_{r,x}^{\textrm{pre}}\)</span> values described in <a class="reference internal" href="inferprefs_algorithm.html#inferprefs-algorithm"><em>Algorithm to infer site-specific preferences</em></a>.</p>
+<p class="last">See <a class="reference internal" href="fileformats.html#dms-counts"><em>Deep mutational scanning counts file</em></a> for full specification of the format for this file.</p>
+</td></tr>
+<tr><td class="option-group">
+<kbd>n_post</kbd></td>
+<td><p class="first">Existing file with post-selection counts from deep sequencing. Same format as &#8220;n_pre&#8221;.</p>
+<p>This file gives the <span class="math">\(n_{r,x}^{\textrm{post}}\)</span> values described in <a class="reference internal" href="inferprefs_algorithm.html#inferprefs-algorithm"><em>Algorithm to infer site-specific preferences</em></a>.</p>
+<p class="last">See <a class="reference internal" href="fileformats.html#dms-counts"><em>Deep mutational scanning counts file</em></a> for full specification of the format for this file.</p>
+</td></tr>
+<tr><td class="option-group">
+<kbd>outfile</kbd></td>
+<td><p class="first">Created output file with site-specific preferences; overwritten if it already exists.</p>
+<p>In addition to the inferred preferences <span class="math">\(\pi_{r,x}\)</span>, this file also gives the site entropies calculated from these preferences and the median-centered 95% credible intervals for each preference.</p>
+<p class="last">See <a class="reference internal" href="fileformats.html#preferences-file"><em>Preferences file</em></a> for full specification of the format for this file.</p>
+</td></tr>
+</tbody>
+</table>
+</dd>
+<dt>Options:</dt>
+<dd><table class="first last docutils option-list" frame="void" rules="none">
+<col class="option" />
+<col class="description" />
+<tbody valign="top">
+<tr><td class="option-group" colspan="2">
+<kbd><span class="option">--chartype=codon_to_aa</span></kbd></td>
+</tr>
+<tr><td>&nbsp;</td><td><p class="first">Characters for which preferences are inferred: &#8220;codon_to_aa&#8221; = counts for codons and inferred preferences for amino acids; &#8220;DNA&#8221; = counts and inferred preference for DNA; &#8220;codon&#8221; = counts and inferred preferences for codons; &#8220;aa&#8221; = counts and inferred preferences for amino acids (possibly including stop codons, see &#8220;&#8211;excludestop&#8221;).</p>
+<p>A value of &#8220;codon_to_aa&#8221; corresponds to using codon characters for the deep sequencing data, but inferring preferences for amino acids, as described in <a class="reference internal" href="inferprefs_algorithm.html#chartype-codon-to-aa"><em>Characters are codons; preferences are for amino acids.</em></a> This would be the sensible approach if you assume that selection is operating on the amino-acid level. Note that the priors over the mutagenesis rates assume that all codon mutations are made at equal frequencies (<tt class="docutils literal"><span class="pre">NNN</span></tt> libraries).</p>
+<p>A value of &#8220;DNA&#8221; corresponds to using DNA characters for both the deep sequencing data and inferred preferences, as described in <a class="reference internal" href="inferprefs_algorithm.html#chartype-dna"><em>Characters are nucleotides; preferences are for nucleotides.</em></a></p>
+<p>A value of &#8220;codon&#8221; corresponds to using codon characters for both the deep sequencing data and inferred preferences, as described in <a class="reference internal" href="inferprefs_algorithm.html#chartype-codon"><em>Characters are codons; preferences are for codons.</em></a> You would prefer this option over &#8220;codon_to_aa&#8221; if you thought that there was different selection on different synonymous mutations. Note that the priors over the mutagenesis rates assume that all codon mutations are made at equal frequencies (<tt class="docutils literal"><span class="pre">NNN</span></tt> libraries).</p>
+<p>A value of &#8220;aa&#8221; corresponds to using amino-acid characters for both the deep sequence data and inferred preferences, as described in <a class="reference internal" href="inferprefs_algorithm.html#chartype-aa"><em>Characters are amino acids; preferences are for amino acids.</em></a>. You should <strong>only</strong> use this option if your data make it impossible to use &#8220;codon_to_aa&#8221;.  Note that the priors for this option assume that all amino-acid mutations are made at equal frequencies.</p>
+<p class="last">Possible choices: codon_to_aa, DNA, codon, aa</p>
+</td></tr>
+<tr><td class="option-group">
+<kbd><span class="option">--errpre=none</span></kbd></td>
+<td><p class="first">Control used to estimate errors in counts from &#8220;n_pre&#8221;. If &#8220;none&#8221; then the counts in &#8220;n_pre&#8221; are assumed to have no errors; otherwise this should be a counts file with the same format as &#8220;n_pre&#8221; giving the counts for sequencing unmutated gene. Currently if this option is not &#8220;none&#8221; then &#8211;errpost also cannot be &#8220;none&#8221;.</p>
+<p>Setting this option to &#8220;none&#8221; corresponds to setting to zero the error rates <span class="math">\(\epsilon_{r,x}\)</span> described in <a class="reference internal" href="inferprefs_algorithm.html#inferprefs-algorithm"><em>Algorithm to infer site-specific preferences</em></a>.</p>
+<p class="last">If you set this option to the name of a file, that file is assumed to give the counts for sequencing the pre-selection error control (<span class="math">\(n_{r,x}^{\textrm{err,pre}}\)</span>) and is used to estimate the error rate <span class="math">\(\epsilon_{r,x}\)</span> described in <a class="reference internal" href="inferprefs_algorithm.html#inferprefs-algorithm"><em>Algorithm to infer site-specific preferences</em></a>. This file should have the format specified by <a class="reference internal" href="fileformats.html#dms-counts"><em>Deep mutational scanning counts file</em></a>.</p>
+</td></tr>
+<tr><td class="option-group">
+<kbd><span class="option">--errpost=none</span></kbd></td>
+<td><p class="first">Control used to estimate errors in counts from &#8220;n_post&#8221;. If &#8220;none&#8221; then the counts in &#8220;n_post&#8221; are assumed to have no errors; otherwise this should be a counts file with the same format as &#8220;n_pre&#8221; giving the counts for sequencing unmutated gene. If you have the same error control for &#8220;n_pre&#8221; and &#8220;n_post&#8221;, then set that file name for both this option and &#8211;errpre. Currently if this option is not &#8220;none&#8221; then &#8211;errpre also cannot be &#8220;none&#8221;.</p>
+<p>Setting this option to &#8220;none&#8221; corresponds to setting to zero the error rates <span class="math">\(\rho_{r,x}\)</span> described in <a class="reference internal" href="inferprefs_algorithm.html#inferprefs-algorithm"><em>Algorithm to infer site-specific preferences</em></a>.</p>
+<p class="last">If you set this option to the name of a file, that file is assumed to give the counts for sequencing the post-selection error control (<span class="math">\(n_{r,x}^{\textrm{err,post}}\)</span>) and is used to estimate the error rate <span class="math">\(\rho_{r,x}\)</span> described in <a class="reference internal" href="inferprefs_algorithm.html#inferprefs-algorithm"><em>Algorithm to infer site-specific preferences</em></a>. This file should have the format specified by <a class="reference internal" href="fileformats.html#dms-counts"><em>Deep mutational scanning counts file</em></a>.</p>
+</td></tr>
+<tr><td class="option-group" colspan="2">
+<kbd><span class="option">--excludestop=False</span></kbd></td>
+</tr>
+<tr><td>&nbsp;</td><td><p class="first">Exclude stop codons as a possible amino acid if using &#8220;&#8211;chartype&#8221; of &#8220;codon_to_aa&#8221; or &#8220;aa&#8221;. Stop codons are only excluded if this option is specified; otherwise they are included, and are required to be specified if &#8220;&#8211;chartype&#8221; is &#8220;aa&#8221;.</p>
+<p class="last">By default, when using <tt class="docutils literal"><span class="pre">--chartype</span> <span class="pre">codon_to_aa</span></tt> or <tt class="docutils literal"><span class="pre">--chartype</span> <span class="pre">aa</span></tt>, we infer preferences for 21 amino acids, with stop codons (denoted by <tt class="docutils literal"><span class="pre">*</span></tt>) one of the possibilities. If you specify the <tt class="docutils literal"><span class="pre">--excludestop</span></tt> option, then we constrain the preference for stop codons to be zero regardless of whether or not there are counts for these codons in the data, and so only infer preferences for the 20 non-stop amino acids.</p>
+</td></tr>
+<tr><td class="option-group">
+<kbd><span class="option">--pi_alpha=1.0</span></kbd></td>
+<td><p class="first">Concentration parameter for Dirichlet prior over preferences (pi).</p>
+<p>This is the parameter <span class="math">\(\alpha_{\pi}\)</span> described in <a class="reference internal" href="inferprefs_algorithm.html#inferprefs-algorithm"><em>Algorithm to infer site-specific preferences</em></a>.</p>
+<p class="last">Smaller values favor distributions of preferences that are more unequal among the possible characters at each site; larger values favor distributions of preferences more equal among the characters at each site.</p>
+</td></tr>
+<tr><td class="option-group">
+<kbd><span class="option">--mu_alpha=1.0</span></kbd></td>
+<td><p class="first">Concentration parameter for Dirichlet prior over mutagenesis rate (mu).</p>
+<p class="last">This is the parameter <span class="math">\(\alpha_{\mu}\)</span> described in <a class="reference internal" href="inferprefs_algorithm.html#inferprefs-algorithm"><em>Algorithm to infer site-specific preferences</em></a>.</p>
+</td></tr>
+<tr><td class="option-group" colspan="2">
+<kbd><span class="option">--err_alpha=1.0</span></kbd></td>
+</tr>
+<tr><td>&nbsp;</td><td><p class="first">Concentration parameter for Dirichlet priors over error rates (epsilon, rho).</p>
+<p class="last">This gives the parameters <span class="math">\(\alpha_{\epsilon}\)</span> and <span class="math">\(\alpha_{\rho}\)</span> described in <a class="reference internal" href="inferprefs_algorithm.html#inferprefs-algorithm"><em>Algorithm to infer site-specific preferences</em></a>; currently these two parameters must be equal.</p>
+</td></tr>
+<tr><td class="option-group" colspan="2">
+<kbd><span class="option">--logfile=Base name of &quot;outfile&quot; with extension &quot;.log&quot;</span></kbd></td>
+</tr>
+<tr><td>&nbsp;</td><td>Log progress to this file; overwritten if it already exists.</td></tr>
+<tr><td class="option-group">
+<kbd><span class="option">--ncpus=1</span></kbd></td>
+<td>Number of CPUs to use; set to -1 to use all available CPUs.</td></tr>
+<tr><td class="option-group">
+<kbd><span class="option">--seed=1</span></kbd></td>
+<td>Random number seed.</td></tr>
+<tr><td class="option-group">
+<kbd><span class="option">--sites</span></kbd></td>
+<td>Only perform the inference for the specified sites, which should be a space separated list such as &#8220;&#8211;sites 1 2 10&#8221;. All of these sites must have data in the counts files.</td></tr>
+<tr><td class="option-group" colspan="2">
+<kbd><span class="option">--ratio_estimation</span></kbd></td>
+</tr>
+<tr><td>&nbsp;</td><td><p class="first">Rather than use MCMC to estimate the preferences using a statistical model, we simply compute by calculating enrichment ratios relative to wildtype post- and pre-selection, and then normalizing these ratios to sum to one at each site. The single argument for this option is PSEUDOCOUNTS, which is a number &gt; 0 that specifies the pseudocount added to each count to avoiding estimating ratios of zero or infinity.</p>
+<p>For each character <span class="math">\(x\)</span>, we calculate the enrichment ratio relative to the wildtype
+character <span class="math">\(\rm{wt}\)</span> at this site as</p>
+<div class="math">
+\[\phi_{x} = \frac{\left(\frac{\max\left(\mathcal{P}, n_x^{\rm{post}} - n_x^{\rm{err,post}} + \mathcal{P}\right)}{\max\left(\mathcal{P}, n_{\rm{wt}}^{\rm{post}} - n_{\rm{wt}}^{\rm{err,post}} + \mathcal{P}\right)}\right)}{\left(\frac{\max\left(\mathcal{P}, n_x^{\rm{pre}} - n_x^{\rm{err,pre}} + \mathcal{P}\right)}{\max\left(\mathcal{P}, n_{\rm{wt}}^{\rm{pre}} - n_{\rm{wt}}^{\rm{err,pre}} + \mathcal{P}\right)}\right)}\]</div>
+<p>where <span class="math">\(\mathcal{P}\)</span> is the value of <em>pseudocounts</em>. When <em>error_model</em> is <em>none</em>, then
+<span class="math">\(0 = n_x^{\rm{post}} = n_x^{\rm{pre}}\)</span> and the above equation reduces to a simple ratio
+of post- and pre-selection. With <span class="math">\(\mathcal{P} &gt; 0\)</span>, this enrichment is always <span class="math">\(&gt; 0\)</span> and
+<span class="math">\(&lt; \infty\)</span>.</p>
+<p>We then calculate the preference as proportional to the enrichment ratio:</p>
+<div class="last math">
+\[\pi_x = \frac{\phi_x}{\sum_y \phi_y}.\]</div>
+</td></tr>
+<tr><td class="option-group">
+<kbd><span class="option">-v</span>, <span class="option">--version</span></kbd></td>
+<td>show program&#8217;s version number and exit</td></tr>
+</tbody>
+</table>
+</dd>
+</dl>
+</div>
+<div class="section" id="output">
+<h2><a class="toc-backref" href="#id5">Output</a><a class="headerlink" href="#output" title="Permalink to this headline">¶</a></h2>
+<p>The inferred preferences are in the <a class="reference internal" href="fileformats.html#preferences-file"><em>Preferences file</em></a> specified by <tt class="docutils literal"><span class="pre">outfile</span></tt>. A summary of the progress is in the file specified by <tt class="docutils literal"><span class="pre">logfile</span></tt>. In addition, some information will be written to standard output. <a class="reference internal" href="#do-not-worry-about-informational-messages">Do not worry about Informational Messages</a>.</p>
+<p>Because standard output will include lots of informational messages that obscure what is happening, it is most informative to track the progress by watching <tt class="docutils literal"><span class="pre">logfile</span></tt>.</p>
+</div>
+<div class="section" id="do-not-worry-about-informational-messages">
+<h2><a class="toc-backref" href="#id6">Do not worry about Informational Messages</a><a class="headerlink" href="#do-not-worry-about-informational-messages" title="Permalink to this headline">¶</a></h2>
+<p>When you run <tt class="docutils literal"><span class="pre">dms_inferprefs</span></tt>, you may get a lot of <tt class="docutils literal"><span class="pre">Informational</span> <span class="pre">Message</span></tt> output on the screen. These messages look like this:</p>
+<div class="highlight-python"><div class="highlight"><pre>Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:
+stan::prob::dirichlet_log(N4stan5agrad3varE): prior sample sizes[1]  is 0:0, but must be &gt; 0!
+If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,
+but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.
+</pre></div>
+</div>
+<p>You do <strong>not</strong> need to worry about these messages. They are automatically produced by <a class="reference external" href="http://pystan.readthedocs.org/en/latest/">PyStan</a>. Although it seems like there are a lot of these messages, running <tt class="docutils literal"><span class="pre">dms_inferprefs</span></tt> on a 500-residue gene will invoke at least <span class="math">\(4 \times 500 = 2000\)</span> different <a class="reference external" href="http://en.wikipedia.org/wiki/Markov_chain_Monte_Carlo">MCMC</a> chains, all of which may sporadically produce this warning.</p>
+<p><tt class="docutils literal"><span class="pre">dms_inferprefs</span></tt> automatically tests for convergence and described in <a class="reference internal" href="#runtime-and-convergence">Runtime and convergence</a> and <a class="reference internal" href="inferprefs_algorithm.html#mcmc-inference"><em>Inferring the preferences by MCMC.</em></a> If the program actually fails to converge for any site, you will not get an <tt class="docutils literal"><span class="pre">outfile</span></tt> and the program will terminate with an error message.</p>
+</div>
+<div class="section" id="runtime-and-convergence">
+<h2><a class="toc-backref" href="#id7">Runtime and convergence</a><a class="headerlink" href="#runtime-and-convergence" title="Permalink to this headline">¶</a></h2>
+<p>Because <tt class="docutils literal"><span class="pre">dms_inferprefs</span></tt> uses <a class="reference external" href="http://en.wikipedia.org/wiki/Markov_chain_Monte_Carlo">MCMC</a> to infer the preferences as described in <a class="reference internal" href="inferprefs_algorithm.html#inferprefs-algorithm"><em>Algorithm to infer site-specific preferences</em></a>, it may take the program a while to run. The program will run fastest if you use multiple CPUs (such as by using the option <tt class="docutils literal"><span class="pre">--ncpus</span> <span class="pre">-1</span></tt> to use all available CPUs). It should take anywhere from a few minutes to a few hours to complete on a multi-processor machine, depending on the size of the protein, which characters are being used (nucleotides are fastest, codons are slowest), and whether error controls are being included in the analysis (via <tt class="docutils literal"><span class="pre">--errpre</span></tt> and <tt class="docutils literal"><span class="pre">--errpost</span></tt>).</p>
+<p>The program automatically checks for <a class="reference external" href="http://en.wikipedia.org/wiki/Markov_chain_Monte_Carlo">MCMC</a> convergence using the criteria described in <a class="reference internal" href="inferprefs_algorithm.html#mcmc-inference"><em>Inferring the preferences by MCMC.</em></a> The program will terminate with an error if it fails to converge; otherwise it converged properly.</p>
+</div>
+<div class="section" id="examples">
+<h2><a class="toc-backref" href="#id8">Examples</a><a class="headerlink" href="#examples" title="Permalink to this headline">¶</a></h2>
+<p>Imagine we have data from codon-level mutagenesis of an influenza gene followed by functional sequencing and deep sequencing. We want to determine amino acid preferences. Let&#8217;s say the pre-selection mutant library codon counts are in a file called <tt class="docutils literal"><span class="pre">mutDNA_codoncounts.txt</span></tt> and the post-selection codon counts are in a file called <tt class="docutils literal"><span class="pre">mutvirus_codoncounts.txt</span></tt>. If we are <strong>not</strong> trying to account for error rates, we would use the command:</p>
+<div class="highlight-python"><div class="highlight"><pre>dms_inferprefs mutDNA_codoncounts.txt mutvirus_codoncounts.txt amino_acid_preferences_no_errors.txt
+</pre></div>
+</div>
+<p>The inferred preferences would then be in the created file <tt class="docutils literal"><span class="pre">amino_acid_preferences_no_errors.txt</span></tt>. The log of the output would be in the file <tt class="docutils literal"><span class="pre">amino_acid_preferences_no_errors.log</span></tt>.</p>
+<p>The command above would include preferences for 21 different possible amino acids, as stop codons are considered a possible amino acid by default. If you do <strong>not</strong> want stop codons to be considered a possible amino acid (essentially constraining the preference for stop codons to zero), then use:</p>
+<div class="highlight-python"><div class="highlight"><pre>dms_inferprefs --excludestop mutDNA_codoncounts.txt mutvirus_codoncounts.txt amino_acid_preferences_no_errors.txt
+</pre></div>
+</div>
+<p>If we instead wanted to account for error rates, and we had sequenced unmutated plasmid to generate the codon counts file <tt class="docutils literal"><span class="pre">DNA_codoncounts.txt</span></tt> and had sequenced unmutated virus to generate the codon counts file <tt class="docutils literal"><span class="pre">virus_codoncounts.txt</span></tt>, we would use the command:</p>
+<div class="highlight-python"><div class="highlight"><pre>dms_inferprefs --errpre DNA_codoncounts.txt --errpost virus_codoncounts.txt mutDNA_codoncounts.txt mutvirus_codoncounts.txt amino_acid_preferences_corrected_for_errors.txt
+</pre></div>
+</div>
+<p>If we ran that command and it was taking too long, we might want to use more CPUs if we have multi-core processors. If we want to use 12 CPUs, we would run:</p>
+<div class="highlight-python"><div class="highlight"><pre>dms_inferprefs --ncpus 12 --errpre DNA_codoncounts.txt --errpost virus_codoncounts.txt mutDNA_codoncounts.txt mutvirus_codoncounts.txt amino_acid_preferences_no_errors.txt
+</pre></div>
+</div>
+<p><a class="reference external" href="http://en.wikipedia.org/wiki/Markov_chain_Monte_Carlo">MCMC</a> is a stochastic algorithm. If we wanted to re-run it with a different random number seed to ensure we get the same results, we could use a different random number seed:</p>
+<div class="highlight-python"><div class="highlight"><pre>dms_inferprefs --seed 2 --ncpus 12 --errpre DNA_codoncounts.txt --errpost virus_codoncounts.txt mutDNA_codoncounts.txt mutvirus_codoncounts.txt amino_acid_preferences_no_errors.txt
+</pre></div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#"><tt class="docutils literal"><span class="pre">dms_inferprefs</span></tt></a><ul>
+<li><a class="reference internal" href="#overview">Overview</a></li>
+<li><a class="reference internal" href="#command-line-usage">Command-line usage</a></li>
+<li><a class="reference internal" href="#output">Output</a></li>
+<li><a class="reference internal" href="#do-not-worry-about-informational-messages">Do not worry about Informational Messages</a></li>
+<li><a class="reference internal" href="#runtime-and-convergence">Runtime and convergence</a></li>
+<li><a class="reference internal" href="#examples">Examples</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="programs.html"
+                        title="previous chapter">Programs</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="dms_inferdiffprefs.html"
+                        title="next chapter"><tt class="docutils literal"><span class="pre">dms_inferdiffprefs</span></tt></a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/dms_inferprefs.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="dms_inferdiffprefs.html" title="dms_inferdiffprefs"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="programs.html" title="Programs"
+             >previous</a> |</li>
+        <li><a href="index.html">dms_tools 1.0 documentation</a> &raquo;</li>
+          <li><a href="programs.html" >Programs</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2014, Jesse Bloom.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3a0.
+    </div>
+  </body>
+</html>

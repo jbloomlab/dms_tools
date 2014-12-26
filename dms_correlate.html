@@ -1,0 +1,254 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>dms_correlate &mdash; dms_tools 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="dms_tools 1.0 documentation" href="index.html" />
+    <link rel="up" title="Programs" href="programs.html" />
+    <link rel="next" title="dms_editsites" href="dms_editsites.html" />
+    <link rel="prev" title="dms_merge" href="dms_merge.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="dms_editsites.html" title="dms_editsites"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="dms_merge.html" title="dms_merge"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">dms_tools 1.0 documentation</a> &raquo;</li>
+          <li><a href="programs.html" accesskey="U">Programs</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="dms-correlate">
+<span id="id1"></span><h1><a class="toc-backref" href="#id2"><tt class="docutils literal"><span class="pre">dms_correlate</span></tt></a><a class="headerlink" href="#dms-correlate" title="Permalink to this headline">¶</a></h1>
+<div class="contents topic" id="contents">
+<p class="topic-title first">Contents</p>
+<ul class="simple">
+<li><a class="reference internal" href="#dms-correlate" id="id2"><tt class="docutils literal"><span class="pre">dms_correlate</span></tt></a><ul>
+<li><a class="reference internal" href="#overview" id="id3">Overview</a></li>
+<li><a class="reference internal" href="#command-line-usage" id="id4">Command-line usage</a></li>
+<li><a class="reference internal" href="#examples" id="id5">Examples</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="section" id="overview">
+<h2><a class="toc-backref" href="#id3">Overview</a><a class="headerlink" href="#overview" title="Permalink to this headline">¶</a></h2>
+<p><tt class="docutils literal"><span class="pre">dms_correlate</span></tt> is a program included with the <a class="reference external" href="http://jbloom.github.io/dms_tools">dms_tools</a> package. It computes the correlations between pairs of preferences or differential preferences.</p>
+<p>After you install <a class="reference external" href="http://jbloom.github.io/dms_tools">dms_tools</a>, this program will be available to run at the command line.</p>
+</div>
+<div class="section" id="command-line-usage">
+<h2><a class="toc-backref" href="#id4">Command-line usage</a><a class="headerlink" href="#command-line-usage" title="Permalink to this headline">¶</a></h2>
+<p>Determine and plot the Pearson correlation between pairs of preferences or pairs of differential preferences. This script is part of dms_tools (version 1.0) written by Jesse D. Bloom. Detailed documentation is at http://jbloom.github.io/dms_tools/</p>
+<pre class="literal-block">
+usage: dms_correlate [-h] [--name1 NAME1] [--name2 NAME2] [--excludestop]
+                     [--noplot] [--alpha ALPHA] [--plot_title PLOT_TITLE]
+                     [--corr_on_plot] [--r2] [--rms_dpi] [--pref_entropy]
+                     [--enrichment] [-v]
+                     file1 file2 outfileprefix
+</pre>
+<dl class="docutils">
+<dt>Positional arguments:</dt>
+<dd><table class="first last docutils option-list" frame="void" rules="none">
+<col class="option" />
+<col class="description" />
+<tbody valign="top">
+<tr><td class="option-group">
+<kbd>file1</kbd></td>
+<td><p class="first">Existing file giving first set of preferences or differential preferences.</p>
+<p class="last">Should be in the formats of a <a class="reference internal" href="fileformats.html#preferences-file"><em>Preferences file</em></a> or a <a class="reference internal" href="fileformats.html#diffpreferences-file"><em>Differential preferences file</em></a>.</p>
+</td></tr>
+<tr><td class="option-group">
+<kbd>file2</kbd></td>
+<td><p class="first">Existing file giving second set of preferences or differential preferences. Must give the same type of data (preferences or differential preferences) for the same set of sites and same type of character as &#8220;file1&#8221;.</p>
+<p class="last">Must be in the <strong>same format</strong> as &#8220;file1&#8221;.</p>
+</td></tr>
+<tr><td class="option-group">
+<kbd>outfileprefix</kbd></td>
+<td>Prefix for name of created output files (these files are overwritten if they already exist). The correlations are written to a file with this prefix and the suffix &#8221;.txt&#8221;. Unless you use the option &#8220;&#8211;noplot&#8221;, a scatter plot is written to a file with this prefix and the suffix &#8221;.pdf&#8221;. In the correlations text file, the first line gives the Pearson correlation coefficient in the format: &#8220;R = 0.5312&#8221;. The second line gives the P-value in the format: &#8220;P = 0.0000131&#8221;. The third line gives the number of points in the format: &#8220;N = 4200&#8221;.</td></tr>
+</tbody>
+</table>
+</dd>
+<dt>Options:</dt>
+<dd><table class="first last docutils option-list" frame="void" rules="none">
+<col class="option" />
+<col class="description" />
+<tbody valign="top">
+<tr><td class="option-group">
+<kbd><span class="option">--name1=data 1</span></kbd></td>
+<td>Name used for the data in &#8220;file1&#8221; in the correlation plot. The string specified here uses LaTex formatting; names with spaces should be enclosed in quotes.</td></tr>
+<tr><td class="option-group">
+<kbd><span class="option">--name2=data 2</span></kbd></td>
+<td>Name used for the data in &#8220;file2&#8221; in the correlation plot. The string specified here uses LaTex formatting; names with spaces should be enclosed in quotes.</td></tr>
+<tr><td class="option-group" colspan="2">
+<kbd><span class="option">--excludestop=False</span></kbd></td>
+</tr>
+<tr><td>&nbsp;</td><td>If we are using amino acids, do we remove stop codons (denoted by &#8220;*&#8221;)? We only remove stop codons if this argument is specified. If this option is used, then data for stop codons is removed by re-normalizing preferences to sum to one, and differential preferences to sum to zero.</td></tr>
+<tr><td class="option-group">
+<kbd><span class="option">--noplot=False</span></kbd></td>
+<td>Normally this script creates a PDF scatter plot. If this option is specified, then no such plot will be created.</td></tr>
+<tr><td class="option-group">
+<kbd><span class="option">--alpha=0.1</span></kbd></td>
+<td>The transparency (alpha value) for the points on the scatter plot. A value of 1.0 correspond to no transparency; values close to zero give high transparency. Transparency (alpha &lt; 1) might be helpful if you have many points on top of each other.</td></tr>
+<tr><td class="option-group" colspan="2">
+<kbd><span class="option">--plot_title=None</span></kbd></td>
+</tr>
+<tr><td>&nbsp;</td><td>Title put at the top of the correlation plot. The string specified here uses LaTex formatting; names with spaces should be enclosed in spaces. A value of &#8220;None&#8221; means no title.</td></tr>
+<tr><td class="option-group" colspan="2">
+<kbd><span class="option">--corr_on_plot=False</span></kbd></td>
+</tr>
+<tr><td>&nbsp;</td><td>If this option is used, then the correlation coefficient will be visually displayed on the plot.</td></tr>
+<tr><td class="option-group">
+<kbd><span class="option">--r2=False</span></kbd></td>
+<td>If this option is used, the correlation coefficient displayed on the plot when using &#8220;&#8211;corr_on_plot&#8221; will show R-squared rather than the R value.</td></tr>
+<tr><td class="option-group" colspan="2">
+<kbd><span class="option">--rms_dpi=False</span></kbd></td>
+</tr>
+<tr><td>&nbsp;</td><td>If &#8220;file1&#8221; and &#8220;file2&#8221; specify differential preferences, this argument specifies that we compute the correlation between the root-mean-square (RMS) differential preference at each site rather than between the differential preferences themselves.</td></tr>
+<tr><td class="option-group" colspan="2">
+<kbd><span class="option">--pref_entropy=False</span></kbd></td>
+</tr>
+<tr><td>&nbsp;</td><td>If &#8220;file1&#8221; and &#8220;file2&#8221; specify preferences, this argument specifies that we compute the correlation between the site entropy of the preferences (logarithm base 2, so bits) at each site rather than between the preferences themselves.</td></tr>
+<tr><td class="option-group" colspan="2">
+<kbd><span class="option">--enrichment=False</span></kbd></td>
+</tr>
+<tr><td>&nbsp;</td><td><p class="first">If this option is set, we plot the enrichment ratio for all mutations on a log scale rather than plotting the preferences. The computed correlations are also then for the log-transformed enrichment ratios. The enrichment ratio for the wildtype identity is always one, and so is not included.</p>
+<p>The enrichment ratio <span class="math">\(\phi_{r,x}\)</span> for character <span class="math">\(x\)</span> at site <span class="math">\(r\)</span> is defined by</p>
+<div class="math">
+\[\phi_{r,x} = \frac{\pi_{r,x}}{\pi_{r,\operatorname{wt}\left(r\right)}}\]</div>
+<p>where <span class="math">\(\pi_{r,x}\)</span> is the preference of <span class="math">\(r\)</span> for <span class="math">\(x\)</span>, and <span class="math">\(\operatorname{wt}\left(r\right)\)</span> is the wildtype identity at <span class="math">\(r\)</span>.</p>
+<p class="last">Note that we do not include enrichment ratios for wildtype characters (which are one by definition) in the correlations or plots, and that the enrichment ratios are log transformed before plotting and computing correlations.</p>
+</td></tr>
+<tr><td class="option-group">
+<kbd><span class="option">-v</span>, <span class="option">--version</span></kbd></td>
+<td>show program&#8217;s version number and exit</td></tr>
+</tbody>
+</table>
+</dd>
+</dl>
+</div>
+<div class="section" id="examples">
+<h2><a class="toc-backref" href="#id5">Examples</a><a class="headerlink" href="#examples" title="Permalink to this headline">¶</a></h2>
+<p>Imagine that you have used several experiments to measure site-specific preferences in the files <tt class="docutils literal"><span class="pre">prefs1.txt</span></tt> and <tt class="docutils literal"><span class="pre">prefs2.txt</span></tt>. Then run the command:</p>
+<div class="highlight-python"><div class="highlight"><pre>dms_correlate prefs1.txt prefs2.txt pref1_vs_pref2_corr --name1 &quot;sample 1&quot; --name2 &quot;sample 2&quot;
+</pre></div>
+</div>
+<p>This will create the files <tt class="docutils literal"><span class="pre">pref1_vs_pref2_corr.txt</span></tt> and <tt class="docutils literal"><span class="pre">pref1_vs_pref2_corr.pdf</span></tt>.</p>
+<p>Here are the contents of <tt class="docutils literal"><span class="pre">pref1_vs_pref2_corr.txt</span></tt>:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">R</span> <span class="o">=</span> <span class="mf">0.540113</span>
+<span class="n">P</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="n">N</span> <span class="o">=</span> <span class="mi">11844</span>
+</pre></div>
+</div>
+<p>Here is an image of <tt class="docutils literal"><span class="pre">pref1_vs_pref2_corr.pdf</span></tt>:</p>
+<a class="reference internal image-reference" href="_images/pref1_vs_pref2_corr.pdf"><img alt="pref1_vs_pref2_corr.pdf" class="align-center" src="_images/pref1_vs_pref2_corr.pdf" style="width: 30%;" /></a>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#"><tt class="docutils literal"><span class="pre">dms_correlate</span></tt></a><ul>
+<li><a class="reference internal" href="#overview">Overview</a></li>
+<li><a class="reference internal" href="#command-line-usage">Command-line usage</a></li>
+<li><a class="reference internal" href="#examples">Examples</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="dms_merge.html"
+                        title="previous chapter"><tt class="docutils literal"><span class="pre">dms_merge</span></tt></a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="dms_editsites.html"
+                        title="next chapter"><tt class="docutils literal"><span class="pre">dms_editsites</span></tt></a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/dms_correlate.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="dms_editsites.html" title="dms_editsites"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="dms_merge.html" title="dms_merge"
+             >previous</a> |</li>
+        <li><a href="index.html">dms_tools 1.0 documentation</a> &raquo;</li>
+          <li><a href="programs.html" >Programs</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2014, Jesse Bloom.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3a0.
+    </div>
+  </body>
+</html>

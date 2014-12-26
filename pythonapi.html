@@ -1,0 +1,1857 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Python API &mdash; dms_tools 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="dms_tools 1.0 documentation" href="index.html" />
+    <link rel="next" title="Citations and Acknowledgments" href="citations.html" />
+    <link rel="prev" title="Algorithm to infer differential preferences" href="inferdiffprefs_algorithm.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="citations.html" title="Citations and Acknowledgments"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="inferdiffprefs_algorithm.html" title="Algorithm to infer differential preferences"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">dms_tools 1.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="python-api">
+<span id="pythonapi"></span><h1>Python API<a class="headerlink" href="#python-api" title="Permalink to this headline">¶</a></h1>
+<p><a class="reference external" href="http://jbloom.github.io/dms_tools">dms_tools</a> is written in <a class="reference external" href="https://www.python.org">Python</a>, so if you install the package you can access the following API for the package via <a class="reference external" href="https://www.python.org">Python</a>.</p>
+<span class="target" id="module-__init__"></span><div class="section" id="dms-tools-package">
+<h2><tt class="docutils literal"><span class="pre">dms_tools</span></tt> package<a class="headerlink" href="#dms-tools-package" title="Permalink to this headline">¶</a></h2>
+<p>This package contains utilities for analyzing deep mutational scanning (DMS) data.</p>
+<p>The package webpage is <a class="reference external" href="https://github.com/jbloom/dms_tools">https://github.com/jbloom/dms_tools</a></p>
+<p>The package is typically run via a series of command line scripts. However,
+it also provides the following Python API.</p>
+<div class="section" id="modules-in-the-package">
+<h3>Modules in the package<a class="headerlink" href="#modules-in-the-package" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><em>mcmc</em> : Perform MCMC inference</li>
+<li><em>parsearguments</em> : Parses command line arguments to scripts.</li>
+<li><em>file_io</em> : File input / output in <tt class="docutils literal"><span class="pre">dms_tools</span></tt> formats.</li>
+<li><em>plot</em> : make plots</li>
+<li><em>weblogo</em> : use <tt class="docutils literal"><span class="pre">weblogolib</span></tt> to make logo plots.</li>
+<li><em>utils</em> : assorted utilities for <tt class="docutils literal"><span class="pre">dms_tools</span></tt></li>
+<li><em>simulate</em> : simulate data to test inferences.</li>
+</ul>
+</div>
+<div class="section" id="package-level-variables">
+<h3>Package-level variables<a class="headerlink" href="#package-level-variables" title="Permalink to this headline">¶</a></h3>
+<p>The following variables are defined for this package:</p>
+<ul class="simple">
+<li><em>aminoacids</em> : list of the 20 amino acids in one-letter upper-case code.</li>
+<li><em>aminoacids_nostop</em> : another name for <em>aminoacids</em>.</li>
+<li><em>aminoacids_withstop</em> : like <em>aminoacids</em> but also includes the stop codon (<tt class="docutils literal"><span class="pre">*</span></tt>).</li>
+<li><em>nts</em> : a list of the four upper-case DNA nucleotides.</li>
+<li><em>codons</em> : a list of the 64 codons as upper-case three-letter strings.</li>
+<li><em>codon_to_aa</em> : dictionary keyed by codons in <em>codons</em>, values are amino acids.</li>
+<li><em>aa_to_codons</em> : dictionary keyed by all amino acids in <em>aminoacids</em>, values list of all encoding codons.</li>
+</ul>
+</div>
+</div>
+<span class="target" id="module-mcmc"></span><div class="section" id="mcmc-module">
+<h2><tt class="docutils literal"><span class="pre">mcmc</span></tt> module<a class="headerlink" href="#mcmc-module" title="Permalink to this headline">¶</a></h2>
+<p>Module that performs MCMC to infer preferences and differential preferences.</p>
+<p>MCMC done using <tt class="docutils literal"><span class="pre">Stan</span></tt> (<a class="reference external" href="http://mc-stan.org/">http://mc-stan.org/</a>) via <tt class="docutils literal"><span class="pre">pystan</span></tt>.</p>
+<p>Written by Jesse Bloom.</p>
+<div class="section" id="functions-in-this-module">
+<h3>Functions in this module<a class="headerlink" href="#functions-in-this-module" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><em>InferSitePreferences</em> : use MCMC to infer site-specific preferences.</li>
+<li><em>InferSitePreferencesFromEnrichmentRatios</em> :infers site-specific preferences directly from enrichment ratios.</li>
+<li><em>InferSiteDiffPrefs</em> : use MCMC to infer site-specific differential preferences.</li>
+<li><em>StanModelNoneErr</em> : <tt class="docutils literal"><span class="pre">pystan</span></tt> model used by <em>InferSitePreferences</em>.</li>
+<li><em>StanModelSameErr</em> : <tt class="docutils literal"><span class="pre">pystan</span></tt> model used by <em>InferSitePreferences</em>.</li>
+<li><em>StanModelDifferentErr</em> : <tt class="docutils literal"><span class="pre">pystan</span></tt> model used by <em>InferSitePreferences</em>.</li>
+<li><em>StanModelDiffPrefNoErr</em> : <tt class="docutils literal"><span class="pre">pystan</span></tt> model used by <em>InferSiteDiffPrefs</em>.</li>
+<li><em>StanModelDiffPrefSameErr</em> : <tt class="docutils literal"><span class="pre">pystan</span></tt> model used by <em>InferSiteDiffPrefs</em>.</li>
+</ul>
+</div>
+<div class="section" id="function-documentation">
+<h3>Function documentation<a class="headerlink" href="#function-documentation" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="mcmc.InferSiteDiffPrefs">
+<tt class="descclassname">mcmc.</tt><tt class="descname">InferSiteDiffPrefs</tt><big>(</big><em>characterlist</em>, <em>wtchar</em>, <em>error_model</em>, <em>counts</em>, <em>priors</em>, <em>seed=1</em>, <em>niter=10000</em>, <em>n_jobs=1</em>, <em>r_max=1.1</em>, <em>neff_min=100</em>, <em>nchains=4</em>, <em>increasefactor=2</em>, <em>increasetries=6</em><big>)</big><a class="headerlink" href="#mcmc.InferSiteDiffPrefs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Infers site-specific differntial preferences by MCMC for a specific site.</p>
+<p>The algorithm is explained in the documentation for the <tt class="docutils literal"><span class="pre">dms_tools</span></tt> package.</p>
+<p>The MCMC automatically tries to guarantee convergence via the parameters specified
+by <em>r_max</em>, <em>neff_min</em>, <em>nchains</em>, <em>niter</em>, <em>increasefactor</em>, and <em>increasetries</em>.</p>
+<p>Here are the calling variables:</p>
+<blockquote>
+<div><ul>
+<li><p class="first"><em>characterlist</em> is a list of all valid characters; entries must be unique.
+Typically a list of all amino acids, codons, or nucleotides. Characters
+are case sensitive.</p>
+</li>
+<li><p class="first"><em>wtchar</em> is a character that is in <em>characterlist</em> and defines the wildtype
+character at the site.</p>
+</li>
+<li><p class="first"><em>error_model</em> specifies how the errors are estimated. It can
+be one of the following strings:</p>
+<blockquote>
+<div><ul class="simple">
+<li><em>none</em> : no errors</li>
+<li><em>same</em> : same error rates for starting library and selections <span class="math">\(s1\)</span>
+and <span class="math">\(s2\)</span>.</li>
+</ul>
+</div></blockquote>
+<p>Alternatively, it could be an instance of <em>StanModelDiffPrefNoErr</em>
+or <em>StanModelDiffPrefSameErr</em>. These are the
+<tt class="docutils literal"><span class="pre">pystan</span></tt> models that implement the three strings described above.
+If you pass these model objects, then they will not need to be
+compiled by this function (strings require models to be compiled).
+So it is advantageous to pass the <tt class="docutils literal"><span class="pre">pystan</span></tt> models rather than
+the strings if calling this function repeatedly.</p>
+</li>
+<li><p class="first"><em>counts</em> is a dictionary specifying the deep sequencing counts.
+Each string key should specify a dictionary keyed by all characters
+and with values giving the integer counts for that character. Keys:</p>
+<blockquote>
+<div><ul class="simple">
+<li><em>nrstart</em> : counts for starting library</li>
+<li><em>nrs1</em> : counts for selection <span class="math">\(s1\)</span></li>
+<li><em>nrs2</em> : counts for selection <span class="math">\(s2\)</span></li>
+<li><em>nrerr</em> : only required if <em>error_model</em> is
+<em>same</em>, specifis counts for error control.</li>
+</ul>
+</div></blockquote>
+</li>
+<li><p class="first"><em>priors</em> is a dictionary specifying the parameter vectors for the
+Dirichlet priors. Each string key should specify a dictionary keyed by
+all characters and with values giving the prior for that character. Keys:</p>
+<blockquote>
+<div><ul class="simple">
+<li><em>pirs1_prior_params</em> : specifies Dirichlet prior vector for <span class="math">\(\pi_r^{s1}\)</span></li>
+<li><em>frstart_prior_params</em> : specifies Dirichlet prior vector for 
+<span class="math">\(f_r^{\textrm{start}}\)</span></li>
+<li><em>deltapi_concentration</em> : specifies floating number giving concentration
+parameter for <span class="math">\(\Delta\pi_r\)</span></li>
+<li><em>xir_prior_params</em> : only required if <em>error_model</em> is <em>same</em>,
+specified Dirichlet prior vector for error rates <span class="math">\(\xi_r\)</span></li>
+</ul>
+</div></blockquote>
+<p>Any values less than <em>PRIOR_MIN_VALUE</em> (a constant specified in this module)
+are automatically set to <em>PRIOR_MIN_VALUE</em>.</p>
+</li>
+<li><p class="first"><em>seed</em> : integer seed for MCMC. Calling multiple times with same <em>seed</em>
+and data will give identical results provided architecture for floating
+point math on the computer is also the same.</p>
+</li>
+<li><p class="first"><em>n_jobs</em> : The number of CPUs to use. If -1, use all available CPUs.</p>
+</li>
+<li><p class="first">The following parameters specify how the MCMC tries to guarantee convergence.
+They all have reasonable default values, so you probably don&#8217;t need to change them.
+The MCMC is considered to have converged if the mean Gelman-Rubin R
+statistic (<a class="reference external" href="http://www.jstor.org/stable/2246093">http://www.jstor.org/stable/2246093</a>) over all <span class="math">\(\pi_{r,x}\)</span>
+values is less than or equal to <em>r_max</em>, and the mean effective sample size
+is greater than or equal to <em>neff_min</em>. The MCMC first runs with <em>nchains</em>
+chains and <em>niter</em> iterations. If it fails to converge, it then increases
+the number of iterations by a factor of <em>increasefactor</em> and tries again,
+and repeats until it converges or until it has tried <em>increasetries</em>
+times to increase the number of iterations.</p>
+</li>
+</ul>
+</div></blockquote>
+<p>The return value is: <em>(converged, deltapi_means, pr_deltapi_gt0, pr_deltapi_lt0, logstring)</em>.
+The entries in this tuple have the following meanings:</p>
+<blockquote>
+<div><ul class="simple">
+<li><em>converged</em> is <em>True</em> if the MCMC converges and <em>False</em> otherwise.</li>
+<li><em>deltapi_means</em> is a dictionary keyed by all characters in <em>characterlist</em>
+with the value for each character giving the <span class="math">\(\Delta\pi_{r,a}\)</span> value.</li>
+<li><em>pr_deltapi_gt0</em> is a dictionary keyed by all characters in <em>characterlist</em>
+with the value being the posterior probability that <span class="math">\(\Delta\pi_{r,a} &gt; 0\)</span>.</li>
+<li><em>pr_deltapi_lt0</em> is a dictionary keyed by all characters in <em>characterlist</em>
+with the value being the posterior probability that <span class="math">\(\Delta\pi_{r,a} &lt; 0\)</span>.</li>
+<li><em>logstring</em> is a string that can be printed to give summary information
+about the MCMC run and its convergence.</li>
+</ul>
+</div></blockquote>
+</dd></dl>
+
+<dl class="function">
+<dt id="mcmc.InferSitePreferences">
+<tt class="descclassname">mcmc.</tt><tt class="descname">InferSitePreferences</tt><big>(</big><em>characterlist</em>, <em>wtchar</em>, <em>error_model</em>, <em>counts</em>, <em>priors</em>, <em>seed=1</em>, <em>niter=10000</em>, <em>increasetries=6</em>, <em>n_jobs=1</em>, <em>r_max=1.1</em>, <em>neff_min=100</em>, <em>nchains=4</em>, <em>increasefactor=2</em><big>)</big><a class="headerlink" href="#mcmc.InferSitePreferences" title="Permalink to this definition">¶</a></dt>
+<dd><p>Infers site-specific preferences by MCMC for a specific site.</p>
+<p>Uses MCMC to infer the site-specific preferences <span class="math">\(\pi_{r,a}\)</span> for some site
+<span class="math">\(r\)</span> for each character <span class="math">\(a\)</span> by integrating over the posterior defined by the product 
+of the following priors and likelihoods, where for instance <span class="math">\(\boldsymbol{\mathbf{\pi_r}}\)</span>
+is used to indicate the vector of <span class="math">\(\pi_{r,a}\)</span> values for all characters:</p>
+<div class="math">
+\[\Pr\left(\boldsymbol{\mathbf{\pi_r}}\right) = \mathrm{Dirichlet}\left(\boldsymbol{\mathbf{a_{\pi,r}}}\right)\]\[\Pr\left(\boldsymbol{\mathbf{\mu_r}}\right) = \mathrm{Dirichlet}\left(\boldsymbol{\mathbf{a_{\mu,r}}}\right)\]\[\Pr\left(\boldsymbol{\mathbf{\epsilon_r}}\right) = \mathrm{Dirichlet}\left(\boldsymbol{\mathbf{a_{\epsilon,r}}}\right)\]\[\Pr\left(\boldsymbol{\mathbf{\rho_r}}\right) = \mathrm{Dirichlet}\left(\boldsymbol{\mathbf{a_{\rho,r}}}\right)\]\[\Pr\left(\boldsymbol{\mathbf{n_r^{\rm{pre}}}} \mid \boldsymbol{\mathbf{\mu_r}}, \boldsymbol{\mathbf{\epsilon_r}}\right) = \mathrm{Multinomial}\left(\boldsymbol{\mathbf{n_r^{\rm{pre}}}}; \boldsymbol{\mathbf{\mu_r}} + \boldsymbol{\mathbf{\epsilon_r}} - \boldsymbol{\mathbf{\delta_r}}\right)\]\[\Pr\left(\boldsymbol{\mathbf{n_r^{\rm{post}}}} \mid \boldsymbol{\mathbf{\mu_r}}, \boldsymbol{\mathbf{\epsilon_r}}\right) = \mathrm{Multinomial}\left(\boldsymbol{\mathbf{n_r^{\rm{post}}}}; \frac{\boldsymbol{\mathbf{\mu_r}} \circ \boldsymbol{\mathbf{\pi_r}}}{\boldsymbol{\mathbf{\mu_r}} \cdot \boldsymbol{\mathbf{\pi_r}}} + \boldsymbol{\mathbf{\rho_r}} - \boldsymbol{\mathbf{\delta_r}}\right)\]\[\Pr\left(\boldsymbol{\mathbf{n_r^{\rm{err,pre}}}} \mid \boldsymbol{\mathbf{\epsilon_r}}\right) = \mathrm{Multinomial}\left(\boldsymbol{\mathbf{n_r^{\rm{err,pre}}}}; \boldsymbol{\mathbf{\epsilon_r}}\right)\]\[\Pr\left(\boldsymbol{\mathbf{n_r^{\rm{err,post}}}} \mid \boldsymbol{\mathbf{\rho_r}}\right) = \mathrm{Multinomial}\left(\boldsymbol{\mathbf{n_r^{\rm{err,post}}}}; \boldsymbol{\mathbf{\rho_r}}\right)\]</div>
+<p>where <span class="math">\(\boldsymbol{\mathbf{\delta_r}}\)</span> is a vector that is zero except for a one at the element
+corresponding to the wildtype character.</p>
+<p>The MCMC automatically tries to guarantee convergence via the parameters specified
+by <em>r_max</em>, <em>neff_min</em>, <em>nchains</em>, <em>niter</em>, <em>increasefactor</em>, and <em>increasetries</em>.</p>
+<p>Here are the calling variables:</p>
+<blockquote>
+<div><ul>
+<li><dl class="first docutils">
+<dt><em>characterlist</em> is a list of all valid characters; entries must be unique. </dt>
+<dd><p class="first last">Typically a list of all amino acids, codons, or nucleotides. Characters
+are case sensitive.</p>
+</dd>
+</dl>
+</li>
+<li><p class="first"><em>wtchar</em> is a character that is in <em>characterlist</em> and defines the wildtype
+character at the site.</p>
+</li>
+<li><p class="first"><em>error_model</em> specifies how the errors are estimated. It might
+be one of the following strings:</p>
+<blockquote>
+<div><ul class="simple">
+<li><em>none</em> : no errors (<span class="math">\(\boldsymbol{\mathbf{\epsilon_r}} = \boldsymbol{\mathbf{\rho_r}} = \mathbf{0}\)</span>)</li>
+<li><em>same</em> : same error rates for pre and post-selection 
+(<span class="math">\(\boldsymbol{\mathbf{\epsilon_r}} = \boldsymbol{\mathbf{\rho_r}}\)</span>).</li>
+<li><em>different</em> : different error rates for pre and post
+selection (<span class="math">\(\boldsymbol{\mathbf{\epsilon_r}} \ne \boldsymbol{\mathbf{\rho_r}}\)</span>).</li>
+</ul>
+</div></blockquote>
+<p>Alternatively, it could be an instance of <em>StanModelNoneErr</em>, 
+<em>StanModelSameErr</em>, or <em>StanModelDifferentErr</em>. These are the
+<tt class="docutils literal"><span class="pre">pystan</span></tt> models that implement the three strings described above.
+If you pass these model objects, then they will not need to be
+compiled by this function (strings require models to be compiled).
+So it is advantageous to pass the <tt class="docutils literal"><span class="pre">pystan</span></tt> models rather than
+the strings if calling this function repeatedly.</p>
+</li>
+<li><p class="first"><em>counts</em> is a dictionary specifying the deep sequencing counts.
+Each string key should specify a dictionary keyed by all characters
+and with values giving the integer counts for that character. Keys:</p>
+<blockquote>
+<div><ul class="simple">
+<li><em>nrpre</em> : specifies <span class="math">\(\boldsymbol{\mathbf{n_r^{\rm{pre}}}}\)</span></li>
+<li><em>nrpost</em> : specifies <span class="math">\(\boldsymbol{\mathbf{n_r^{\rm{post}}}}\)</span></li>
+<li><em>nrerr</em> : only required if <em>error_model</em> is <em>same</em>, specifies
+<span class="math">\(\boldsymbol{\mathbf{n_r^{\rm{err,pre}}}} = \boldsymbol{\mathbf{n_r^{\rm{err,post}}}}\)</span></li>
+<li><em>nrerrpre</em> and <em>nrerrpost</em> : only required if <em>error_model</em> is
+<em>different</em>, specify <span class="math">\(\boldsymbol{\mathbf{n_r^{\rm{err,pre}}}}\)</span> and
+<span class="math">\(\boldsymbol{\mathbf{n_r^{\rm{err,post}}}}\)</span>.</li>
+</ul>
+</div></blockquote>
+</li>
+<li><p class="first"><em>priors</em> is a dictionary specifying the parameter vectors for the
+Dirichlet priors. Each string key should specify a dictionary keyed by
+all characters and with values giving the prior for that character. Keys:</p>
+<blockquote>
+<div><ul class="simple">
+<li><em>pir_prior_params</em> : specifies <span class="math">\(\boldsymbol{\mathbf{a_{\pi,r}}}\)</span></li>
+<li><em>mur_prior_params</em> : specifies <span class="math">\(\boldsymbol{\mathbf{a_{\mu,r}}}\)</span></li>
+<li><em>epsilonr_prior_params</em> : only required if <em>error_model</em> is <em>same</em>
+or <em>different</em>, specifies <span class="math">\(\boldsymbol{\mathbf{a_{\epsilon,r}}}\)</span></li>
+<li><em>rhor_prior_params</em> : only required if <em>error_model</em> is <em>different</em>,
+specifies <span class="math">\(\boldsymbol{\mathbf{a_{\rho,r}}}\)</span></li>
+</ul>
+</div></blockquote>
+<p>Any values less than <em>PRIOR_MIN_VALUE</em> (a constant specified in this module)
+are automatically set to <em>PRIOR_MIN_VALUE</em>.</p>
+</li>
+<li><p class="first"><em>seed</em> : integer seed for MCMC. Calling multiple times with same <em>seed</em>
+and data will give identical results provided architecture for floating
+point math on the computer is also the same.</p>
+</li>
+<li><p class="first"><em>n_jobs</em> : The number of CPUs to use. If -1, use all available CPUs.</p>
+</li>
+<li><p class="first">The following parameters specify how the MCMC tries to guarantee convergence.
+They all have reasonable default values, so you probably don&#8217;t need to change them.
+The MCMC is considered to have converged if the mean Gelman-Rubin R
+statistic (<a class="reference external" href="http://www.jstor.org/stable/2246093">http://www.jstor.org/stable/2246093</a>) over all <span class="math">\(\pi_{r,x}\)</span>
+values is less than or equal to <em>r_max</em>, and the mean effective sample size
+is greater than or equal to <em>neff_min</em>. The MCMC first runs with <em>nchains</em>
+chains and <em>niter</em> iterations. If it fails to converge, it then increases
+the number of iterations by a factor of <em>increasefactor</em> and tries again,
+and repeats until it converges or until it has tried <em>increasetries</em>
+times to increase the number of iterations.</p>
+</li>
+</ul>
+</div></blockquote>
+<p>The return value is: <em>(converged, pi_means, pi_95credint, logstring)</em>.
+The entries in this tuple have the following meanings:</p>
+<blockquote>
+<div><ul class="simple">
+<li><em>converged</em> is <em>True</em> if the MCMC converges and <em>False</em> otherwise.</li>
+<li><em>pi_means</em> is a dictionary keyed by all characters in <em>characterlist</em>
+with the value for each character giving the <span class="math">\(\pi_{r,a}\)</span> value.</li>
+<li><em>pi_95credint</em> is a dictionary keyed by all characters in <em>characterlist</em>
+with the value being a 2-tuple giving the lower and upper limits on the
+median-centered credible interval for <span class="math">\(\pi_{r,a}\)</span>.</li>
+<li><em>logstring</em> is a string that can be printed to give summary information
+about the MCMC run and its convergence.</li>
+</ul>
+</div></blockquote>
+</dd></dl>
+
+<dl class="function">
+<dt id="mcmc.InferSitePreferencesFromEnrichmentRatios">
+<tt class="descclassname">mcmc.</tt><tt class="descname">InferSitePreferencesFromEnrichmentRatios</tt><big>(</big><em>characterlist</em>, <em>wtchar</em>, <em>error_model</em>, <em>counts</em>, <em>pseudocounts=1</em><big>)</big><a class="headerlink" href="#mcmc.InferSitePreferencesFromEnrichmentRatios" title="Permalink to this definition">¶</a></dt>
+<dd><p>Infers site-specific preferences from enrichment ratios.</p>
+<p>This function mirrors the operations performed by <em>InferSitePreferences</em>, expect the preferences
+are calculated directly from enrichment ratios.</p>
+<p><em>characterlist</em>, <em>wtchar</em>, <em>error_model</em>, and <em>counts</em> have the same meaning as for <em>InferSitePreferences</em>.</p>
+<p><em>pseudocounts</em> is a number &gt; 0 giving the pseudocounts added to each count in <em>counts</em>.</p>
+<p>Briefly, for each character <span class="math">\(x\)</span>, we calculate the enrichment relative to the wildtype
+character <span class="math">\(\rm{wt}\)</span> at this site as</p>
+<div class="math">
+\[\phi_{x} = \frac{\left(\frac{\max\left(\mathcal{P}, n_x^{\rm{post}} - n_x^{\rm{err,post}} + \mathcal{P}\right)}{\max\left(\mathcal{P}, n_{\rm{wt}}^{\rm{post}} - n_{\rm{wt}}^{\rm{err,post}} + \mathcal{P}\right)}\right)}{\left(\frac{\max\left(\mathcal{P}, n_x^{\rm{pre}} - n_x^{\rm{err,pre}} + \mathcal{P}\right)}{\max\left(\mathcal{P}, n_{\rm{wt}}^{\rm{pre}} - n_{\rm{wt}}^{\rm{err,pre}} + \mathcal{P}\right)}\right)}\]</div>
+<p>where <span class="math">\(\mathcal{P}\)</span> is the value of <em>pseudocounts</em>. When <em>error_model</em> is <em>none</em>, then 
+<span class="math">\(0 = n_x^{\rm{post}} = n_x^{\rm{pre}}\)</span> and the above equation reduces to a simple ratio
+of post- and pre-selection. With <span class="math">\(\mathcal{P} &gt; 0\)</span>, this enrichment is always <span class="math">\(&gt; 0\)</span> and 
+<span class="math">\(&lt; \infty\)</span>.</p>
+<p>We then calculate the preference as</p>
+<div class="math">
+\[\pi_x = \frac{\phi_x}{\sum_y \phi_y}.\]</div>
+<p>The return value is: <em>(converged, pi_means, pi_95credint, logstring)</em>, where the tuple
+entries have the same meaning as for <em>InferSitePreferences</em> except that <em>pi_95credint</em> is
+<em>None</em> since no credible intervals can be estimated from direct enrichment ratio calculation
+as it is not a statistical model, and <em>converged</em> is <em>True</em> since this calculation
+always converges.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="mcmc.StanModelDiffPrefNoErr">
+<em class="property">class </em><tt class="descclassname">mcmc.</tt><tt class="descname">StanModelDiffPrefNoErr</tt><a class="headerlink" href="#mcmc.StanModelDiffPrefNoErr" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<p>PyStan model for <em>error_model</em> of &#8216;none&#8217; for <em>InferSiteDiffPrefs</em>.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="mcmc.StanModelDiffPrefSameErr">
+<em class="property">class </em><tt class="descclassname">mcmc.</tt><tt class="descname">StanModelDiffPrefSameErr</tt><a class="headerlink" href="#mcmc.StanModelDiffPrefSameErr" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<p>PyStan model for <em>error_model</em> of &#8216;same&#8217; for <em>InferSiteDiffPrefs</em>.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="mcmc.StanModelDifferentErr">
+<em class="property">class </em><tt class="descclassname">mcmc.</tt><tt class="descname">StanModelDifferentErr</tt><a class="headerlink" href="#mcmc.StanModelDifferentErr" title="Permalink to this definition">¶</a></dt>
+<dd><p>PyStan model for <em>error_model</em> of &#8216;different&#8217; for <em>InferSitePreferences</em>.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="mcmc.StanModelNoneErr">
+<em class="property">class </em><tt class="descclassname">mcmc.</tt><tt class="descname">StanModelNoneErr</tt><a class="headerlink" href="#mcmc.StanModelNoneErr" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<p>PyStan model for <em>error_model</em> of &#8216;none&#8217; for <em>InferSitePreferences</em>.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="mcmc.StanModelSameErr">
+<em class="property">class </em><tt class="descclassname">mcmc.</tt><tt class="descname">StanModelSameErr</tt><a class="headerlink" href="#mcmc.StanModelSameErr" title="Permalink to this definition">¶</a></dt>
+<dd><p>PyStan model for <em>error_model</em> of &#8216;same&#8217; for <em>InferSitePreferences</em>.</p>
+</dd></dl>
+
+</div>
+</div>
+<span class="target" id="module-file_io"></span><div class="section" id="file-io-module">
+<h2><tt class="docutils literal"><span class="pre">file_io</span></tt> module<a class="headerlink" href="#file-io-module" title="Permalink to this headline">¶</a></h2>
+<p>Module that reads and writes files.</p>
+<p>Written by Jesse Bloom.</p>
+<div class="section" id="id1">
+<h3>Functions in this module<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><em>Versions</em> : Returns string giving versions of utilized packages.</li>
+<li><em>ReadDMSCounts</em> : reads deep mutational scanning counts.</li>
+<li><em>WriteDMSCounts</em> : writes deep mutational scanning counts.</li>
+<li><em>ReadMultipleDMSCountsFiles</em> : reads multiple counts files for the same sequence.</li>
+<li><em>WritePreferences</em> : writes site-specific preferences.</li>
+<li><em>ReadPreferences</em> : reads the preferences file written by <em>WritePreferences</em>.</li>
+<li><em>WriteDiffPrefs</em> : writes site-specific differential preferences.</li>
+<li><em>ReadDiffPrefs</em> : reads differential preferences file written by <em>WriteDiffPrefs</em>.</li>
+<li><em>ReadMultiPrefOrDiffPref</em> : reads multiple preferences or differential preferences files.</li>
+</ul>
+</div>
+<div class="section" id="id2">
+<h3>Function documentation<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="file_io.ReadDMSCounts">
+<tt class="descclassname">file_io.</tt><tt class="descname">ReadDMSCounts</tt><big>(</big><em>f</em>, <em>chartype</em><big>)</big><a class="headerlink" href="#file_io.ReadDMSCounts" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads deep mutational scanning counts.</p>
+<p><em>f</em> is a readable file-like object that contains the counts, or 
+a string that gives the name of a file.</p>
+<p><em>chartype</em> is the type of character. Valid values are the following strings:</p>
+<blockquote>
+<div><ul class="simple">
+<li><em>DNA</em> : DNA nucleotides, those listed in the <em>nts</em> variable
+defined in this module.</li>
+<li><em>codon</em> : DNA codons, those listed in the <em>codons</em> variable
+defined in this module.</li>
+<li><em>aminoacids_nostop</em> : amino acids, not including stop codons.</li>
+<li><em>aminoacids_withstop</em> : amino acids, including stop codons (<tt class="docutils literal"><span class="pre">*</span></tt>).</li>
+</ul>
+</div></blockquote>
+<p>The counts are returned in the dictionary <em>counts</em>. The dictionary
+is keyed by <strong>strings</strong> giving the position (e.g. &#8216;1&#8217;, &#8216;2&#8217;, or &#8216;5A&#8217;).
+For each position <em>r</em>, <em>strings[r]</em> is a dictionary keyed by the
+string <em>WT</em> and all characters (nucleotides or codons) as specified
+by <em>chartype</em>, in upper case. <em>counts[r][&#8216;WT&#8217;]</em> is the wildtype identity
+at the site; <em>counts[r][x]</em> is the number of counts for character <em>x</em>.</p>
+<p>The specifications on the format of the contents of <em>f</em> are as follows:</p>
+<blockquote>
+<div><ul>
+<li><p class="first">Any lines beginning with <em>#</em> are treated as comments or headers, 
+and do not contain data.</p>
+</li>
+<li><p class="first">Columns are space delimited. They can separated by one or more 
+spaces, or by one or more tabs.</p>
+</li>
+<li><p class="first">Before the first data line (a line <strong>not</strong> beginning with <em>#</em>) 
+there must be a header line beginning with <em># POSITION WT</em> and 
+then followed in arbitrary order by entries specifying valid 
+DNA nucleotides or valid DNA codons. The order of the entries 
+in this header line establish the order of the data in subsequent lines.</p>
+</li>
+<li><p class="first">The case does matter, all nucleotides and codons <strong>must be upper case</strong>.</p>
+</li>
+<li><p class="first">It is OK to intersperse columns that do not represent valid codons 
+or nucleotides as long as all of the codons or nucleotides are present. 
+This might be useful if you file is using <em>N</em> to denote ambiguous 
+nucleotides (which are ignored as not being definitive counts), or 
+is using lower-case letters (such as <em>a</em> to denote unsure calls).</p>
+</li>
+<li><p class="first">For every data line, the first two entries will be <em>POSITION</em> and <em>WT</em>:</p>
+<blockquote>
+<div><ul>
+<li><p class="first"><em>POSITION</em> is the position number. These do not have to be 
+consecutive integers, so it is OK to skip sites (e.g. <em>1</em>, <em>2</em>, <em>5</em>) 
+or have negative site numbers (e.g. <em>-1</em>, <em>0</em>, <em>1</em>) or have sites 
+with letter suffixes (e.g. <em>1</em>, <em>2</em>, <em>2A</em>, <em>3</em>). All of these 
+options are useful when referring to numbering schemes that are 
+non-sequential, as is sometimes the case in gene numbering. Note 
+however that each position number must be unique.</p>
+</li>
+<li><dl class="first docutils">
+<dt><em>WT</em> must give a valid wildtype identity of the site as a </dt>
+<dd><p class="first last">nucleotide or codon.</p>
+</dd>
+</dl>
+</li>
+</ul>
+</div></blockquote>
+</li>
+</ul>
+</div></blockquote>
+<p>Example of parsing nucleotide counts files with minimal required format and
+extra lines / columns.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">f</span> <span class="o">=</span> <span class="n">cStringIO</span><span class="o">.</span><span class="n">StringIO</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;# POSITION WT A T C G</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;1 A 310818 13 0 37</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;2 T 16 311782 37 4</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;2A G 27 27 11 312520</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;3 A 313647 13 4 31</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">f</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">f2</span> <span class="o">=</span> <span class="n">cStringIO</span><span class="o">.</span><span class="n">StringIO</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">f2</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;# extra comment line</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">f2</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;# POSITION WT N A T G C a</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">f2</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;1 A 1 310818  13 37 0 15</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">f2</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;2 T 15 16 311782   4 37</span><span class="se">\t</span><span class="s"> 0</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">f2</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;# another comment line</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">f2</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;2A G 7 27 27 312520 11 1</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">f2</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;3 A 0 313647 13 31 4 2</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">f2</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span> <span class="o">=</span> <span class="n">ReadDMSCounts</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="s">&#39;DNA&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d2</span> <span class="o">=</span> <span class="n">ReadDMSCounts</span><span class="p">(</span><span class="n">f2</span><span class="p">,</span> <span class="s">&#39;DNA&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span> <span class="o">==</span> <span class="n">d2</span>
+<span class="go">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span><span class="p">[</span><span class="s">&#39;1&#39;</span><span class="p">][</span><span class="s">&#39;WT&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s">&#39;A&#39;</span>
+<span class="go">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span><span class="p">[</span><span class="s">&#39;2A&#39;</span><span class="p">][</span><span class="s">&#39;WT&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s">&#39;G&#39;</span>
+<span class="go">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span><span class="p">[</span><span class="s">&#39;2&#39;</span><span class="p">][</span><span class="s">&#39;T&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">311782</span>
+<span class="go">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span><span class="p">[</span><span class="s">&#39;2&#39;</span><span class="p">][</span><span class="s">&#39;C&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">37</span>
+<span class="go">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="mi">1</span> <span class="ow">in</span> <span class="n">d</span>
+<span class="go">False</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="s">&#39;N&#39;</span> <span class="ow">in</span> <span class="n">d2</span><span class="p">[</span><span class="s">&#39;1&#39;</span><span class="p">]</span>
+<span class="go">False</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="s">&#39;a&#39;</span> <span class="ow">in</span> <span class="n">d2</span><span class="p">[</span><span class="s">&#39;2&#39;</span><span class="p">]</span>
+<span class="go">False</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">f</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ReadDMSCounts</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="s">&#39;codon&#39;</span><span class="p">)</span>
+<span class="gt">Traceback (most recent call last):</span>
+    <span class="o">...</span>
+<span class="gr">ValueError</span>: <span class="n">file does not have a valid header for codon</span>
+</pre></div>
+</div>
+<p>Example for codons</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">nts</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;A&#39;</span><span class="p">,</span> <span class="s">&#39;C&#39;</span><span class="p">,</span> <span class="s">&#39;G&#39;</span><span class="p">,</span> <span class="s">&#39;T&#39;</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">codons</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">nt1</span> <span class="ow">in</span> <span class="n">nts</span><span class="p">:</span>
+<span class="gp">... </span>    <span class="k">for</span> <span class="n">nt2</span> <span class="ow">in</span> <span class="n">nts</span><span class="p">:</span>
+<span class="gp">... </span>        <span class="k">for</span> <span class="n">nt3</span> <span class="ow">in</span> <span class="n">nts</span><span class="p">:</span>
+<span class="gp">... </span>            <span class="n">codons</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&#39;</span><span class="si">%s%s%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">nt1</span><span class="p">,</span> <span class="n">nt2</span><span class="p">,</span> <span class="n">nt3</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">f</span> <span class="o">=</span> <span class="n">cStringIO</span><span class="o">.</span><span class="n">StringIO</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;# POSITION WT </span><span class="si">%s</span><span class="se">\n</span><span class="s">&#39;</span> <span class="o">%</span> <span class="s">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">codons</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;1 AAA </span><span class="si">%s</span><span class="se">\n</span><span class="s">&#39;</span> <span class="o">%</span> <span class="s">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">codons</span><span class="p">))]))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">f</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span> <span class="o">=</span> <span class="n">ReadDMSCounts</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="s">&#39;codon&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span><span class="p">[</span><span class="s">&#39;1&#39;</span><span class="p">][</span><span class="s">&#39;AAC&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span>
+<span class="go">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span><span class="p">[</span><span class="s">&#39;1&#39;</span><span class="p">][</span><span class="s">&#39;WT&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s">&#39;AAA&#39;</span>
+<span class="go">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span><span class="p">[</span><span class="s">&#39;1&#39;</span><span class="p">][</span><span class="s">&#39;WT&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s">&#39;AAa&#39;</span>
+<span class="go">False</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">codons</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span> <span class="o">=</span> <span class="n">codons</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">f2</span> <span class="o">=</span> <span class="n">cStringIO</span><span class="o">.</span><span class="n">StringIO</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">f2</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;# POSITION WT </span><span class="si">%s</span><span class="se">\n</span><span class="s">&#39;</span> <span class="o">%</span> <span class="s">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">codons</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">f2</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;1 AAA </span><span class="si">%s</span><span class="se">\n</span><span class="s">&#39;</span> <span class="o">%</span> <span class="s">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">codons</span><span class="p">))]))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">f2</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span> <span class="o">=</span> <span class="n">ReadDMSCounts</span><span class="p">(</span><span class="n">f2</span><span class="p">,</span> <span class="s">&#39;codon&#39;</span><span class="p">)</span>
+<span class="gt">Traceback (most recent call last):</span>
+    <span class="o">...</span>
+<span class="gr">ValueError</span>: <span class="n">file does not have a valid header for codon</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="file_io.ReadDiffPrefs">
+<tt class="descclassname">file_io.</tt><tt class="descname">ReadDiffPrefs</tt><big>(</big><em>f</em><big>)</big><a class="headerlink" href="#file_io.ReadDiffPrefs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads the differential preferences written by <em>WriteDiffPrefs</em>.</p>
+<p><em>f</em> is the name of an existing file or a readable file-like object.</p>
+<p>The return value is the tuple: 
+<em>(sites, wts, deltapi_means, pr_deltapi_lt0, pr_deltapi_gt0, rms)</em>
+where <em>sites</em>, <em>wts</em>, <em>deltapi_means</em>, <em>pr_deltapi_lt0</em>, and 
+<em>pr_deltapi_gt0</em> all have the same values used to write the file
+with <em>WriteDiffPrefs</em> and <em>rms</em> is a dictionary with <em>rms[r]</em> giving
+the root-mean-square differential preference for each <em>r</em> in 
+<em>sites</em>.</p>
+<p>See docstring of <em>WriteDiffPrefs</em> for example usage.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="file_io.ReadMultiPrefOrDiffPref">
+<tt class="descclassname">file_io.</tt><tt class="descname">ReadMultiPrefOrDiffPref</tt><big>(</big><em>infiles</em>, <em>removestop=False</em><big>)</big><a class="headerlink" href="#file_io.ReadMultiPrefOrDiffPref" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads multiple preferences or differential preferences files.</p>
+<p><em>infiles</em> is a list of preferences or differential preferences files in
+the formats read by <em>ReadPreferences</em> or <em>ReadDiffPrefs</em>. The files can
+be a mix of these two formats. Each of the files must have data for the
+same set of sites or a <em>ValueError</em> is raised. In addition, the
+files must use the same sets of characters or a <em>ValueError</em> is raised.
+Valid character sets are:</p>
+<blockquote>
+<div><ul class="simple">
+<li>nucleotides</li>
+<li>codons</li>
+<li>amino acids without stop codons</li>
+<li>amino acids with stop codons</li>
+<li>a mix of amino acids with and without stop codons if <em>removestop</em>
+is <em>True</em>.</li>
+</ul>
+</div></blockquote>
+<p><em>removestop</em> specifies whether we remove stop codons from amino acids. If
+this is done, all preferences are renormalized to sum to one by scaling
+them, and all differential preferences are renormalized to sum to zero
+by adding or subtracting a fixed amount to each.</p>
+<p>The return value is as follows: 
+<em>(sites, characters, wts, databyfile)</em>. In this tuple:</p>
+<blockquote>
+<div><p><em>sites</em> is a list of all site numbers (as strings) for which
+we have preferences or differential preferences.</p>
+<p><em>characters</em> is a list of the characters that are being used
+(i.e. nucleotides, codons, or amino acids with or without
+stop codons).</p>
+<p><em>wts</em> is a dictionary with <em>wts[r]</em> giving the wildtype character
+at site <em>r</em> for all <em>r</em> in <em>sites</em>. If the files do not all have
+the same wildtype at <em>r</em>, then <em>wts[r] = &#8216;?&#8217;</em>.</p>
+<p><em>databyfile</em> is a dictionary keyed by each file name in <em>infiles</em>
+If that file is a preferences file, then the value is the dictionary
+<em>pi_means</em> that would be returned by <em>ReadPreferences</em>. If that file
+is a differential preferences file, then the value is the 
+dictionary <em>deltapi_means</em> that would be returned by <em>ReadDiffPrefs</em>.</p>
+</div></blockquote>
+</dd></dl>
+
+<dl class="function">
+<dt id="file_io.ReadMultipleDMSCountsFiles">
+<tt class="descclassname">file_io.</tt><tt class="descname">ReadMultipleDMSCountsFiles</tt><big>(</big><em>filelist</em>, <em>chartype</em><big>)</big><a class="headerlink" href="#file_io.ReadMultipleDMSCountsFiles" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads multiple deep mutational scanning counts for the same sequence.</p>
+<p><em>filelist</em> is a list of names of files that can be read by <em>ReadDMSCounts</em>
+using <em>chartype</em>.</p>
+<p>This function reads the counts for all files in <em>filelist</em>. It confirms
+that each file specifies counts for the same set of sites, and that
+the wildtype sequence specified in each file is the same. It then returns
+the following tuple: <em>(sites, wts, counts)</em>. In this tuple:</p>
+<blockquote>
+<div><ul class="simple">
+<li><em>sites</em> is a list of strings giving the sites, sorted so that the
+numeric portion of the string is interpreted as a number.</li>
+<li><em>wts</em> is a dictionary, with <em>wts[r]</em> giving the wildtype character
+for site <em>r</em> for each <em>r</em> in <em>sites</em>.</li>
+<li><em>counts</em> is a dictionary keyed by each file in <em>filelist</em>, with the value
+for each file name being the counts dictonary for that file in the format
+returned by <em>ReadDMSCounts</em>.</li>
+</ul>
+</div></blockquote>
+</dd></dl>
+
+<dl class="function">
+<dt id="file_io.ReadPreferences">
+<tt class="descclassname">file_io.</tt><tt class="descname">ReadPreferences</tt><big>(</big><em>f</em><big>)</big><a class="headerlink" href="#file_io.ReadPreferences" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads the site-specific preferences written by <em>WritePreferences</em>.</p>
+<p><em>f</em> is the name of an existing file or a readable file-like object.</p>
+<p>The return value is the tuple: <em>(sites, wts, pi_means, pi_95credint, h)</em>
+where <em>sites</em>, <em>wts</em>, <em>pi_means</em>, and <em>pi_95credint</em> will all
+have the same values used to write the file with <em>WritePreferences</em>,
+and <em>h</em> is a dictionary with <em>h[r]</em> giving the site entropy (log base
+2) for each <em>r</em> in <em>sites</em>.</p>
+<p>See docstring of <em>WritePreferences</em> for example usage.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="file_io.Versions">
+<tt class="descclassname">file_io.</tt><tt class="descname">Versions</tt><big>(</big><big>)</big><a class="headerlink" href="#file_io.Versions" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a string with version information.</p>
+<p>You would call this function if you want a string giving detailed information
+on the version of <tt class="docutils literal"><span class="pre">dms_tools</span></tt> and the associated packages that it uses.
+This string might be useful if you want to print this information at the beginning
+of a script.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="file_io.WriteDMSCounts">
+<tt class="descclassname">file_io.</tt><tt class="descname">WriteDMSCounts</tt><big>(</big><em>f</em>, <em>counts</em><big>)</big><a class="headerlink" href="#file_io.WriteDMSCounts" title="Permalink to this definition">¶</a></dt>
+<dd><p>Writes deep mutational scanning counts file.</p>
+<p>This function is the inverse of <em>ReadDMSCounts</em>.</p>
+<p><em>f</em> is a writable file-like object, or a string that gives the name of
+a file that is created.</p>
+<p><em>counts</em> is a dictionary of the same format returned by <em>ReadDMSCounts</em>.
+These counts are written to <em>f</em>.</p>
+<p>There is no <em>chartype</em> argument &#8211; that is automatically determined from
+<em>counts</em>.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">counts</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;1&#39;</span><span class="p">:{</span><span class="s">&#39;A&#39;</span><span class="p">:</span><span class="mi">2</span><span class="p">,</span> <span class="s">&#39;C&#39;</span><span class="p">:</span><span class="mi">3</span><span class="p">,</span> <span class="s">&#39;G&#39;</span><span class="p">:</span><span class="mi">4</span><span class="p">,</span> <span class="s">&#39;T&#39;</span><span class="p">:</span><span class="mi">1</span><span class="p">,</span> <span class="s">&#39;WT&#39;</span><span class="p">:</span><span class="s">&#39;A&#39;</span><span class="p">},</span> <span class="s">&#39;2&#39;</span><span class="p">:{</span><span class="s">&#39;A&#39;</span><span class="p">:</span><span class="mi">1</span><span class="p">,</span> <span class="s">&#39;C&#39;</span><span class="p">:</span><span class="mi">1</span><span class="p">,</span> <span class="s">&#39;G&#39;</span><span class="p">:</span><span class="mi">3</span><span class="p">,</span> <span class="s">&#39;T&#39;</span><span class="p">:</span><span class="mi">4</span><span class="p">,</span> <span class="s">&#39;WT&#39;</span><span class="p">:</span><span class="s">&#39;C&#39;</span><span class="p">}}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">f</span> <span class="o">=</span> <span class="n">cStringIO</span><span class="o">.</span><span class="n">StringIO</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">WriteDMSCounts</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">counts</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">f</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">readcounts</span> <span class="o">=</span> <span class="n">ReadDMSCounts</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="s">&#39;DNA&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">counts</span> <span class="o">==</span> <span class="n">readcounts</span>
+<span class="go">True</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="file_io.WriteDiffPrefs">
+<tt class="descclassname">file_io.</tt><tt class="descname">WriteDiffPrefs</tt><big>(</big><em>f</em>, <em>sites</em>, <em>wts</em>, <em>deltapi_means</em>, <em>pr_deltapi_lt0</em>, <em>pr_deltapi_gt0</em><big>)</big><a class="headerlink" href="#file_io.WriteDiffPrefs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Writes differential preferences to a file.</p>
+<dl class="docutils">
+<dt><em>f</em> is a writeable file-like object to which we write the differential</dt>
+<dd>preferences, or a string giving the name of a file that we create.</dd>
+<dt><em>sites</em> is a list of all site numbers (as strings) for which</dt>
+<dd>we have preferences.</dd>
+<dt><em>wts</em> is a dictionary with <em>wts[r]</em> giving the wildtype character</dt>
+<dd>at site <em>r</em> for all <em>r</em> in <em>sites</em>.</dd>
+<dt><em>deltapi_means</em> is a dictionary keyed by all sites (as strings). For each </dt>
+<dd>site <em>r</em>, <em>deltapi_means[r]</em> is a dictionary where <em>deltapi_means[r][x]</em>
+is the preference of <em>r</em> for character <em>x</em>, where the
+characters are nucleotide, codons, or amino acids.</dd>
+<dt><em>pr_deltapi_gt0</em> and <em>pr_deltapi_lt0</em> can either both be <em>None</em>,</dt>
+<dd>or can both be dictionaries keyed by all sites in <em>deltapi_means</em>
+that have as their values the posterior probability that particular
+differential preference is greater than or less than zero, 
+respectively.</dd>
+</dl>
+<p>The written file has the following format:</p>
+<div class="highlight-python"><div class="highlight"><pre># POSITION WT RMS_dPI dPI_A dPI_C dPI_G dPI_T Pr_dPI_A_lt0 Pr_dPI_A_gt0 Pr_dPI_C_lt0 Pr_dPI_C_gt0 Pr_dPI_G_lt0 Pr_dPI_G_gt0 Pr_dPI_T_lt0 Pr_dPI_T_gt0
+1 G 0.241 0.02 -0.4 0.2 0.18 0.41 0.59 0.90 0.10 0.2 0.8 0.3 0.7
+</pre></div>
+</div>
+<p>In this format, the first header line begins with <tt class="docutils literal"><span class="pre">#</span></tt> and indicates the
+characters as the suffix to <tt class="docutils literal"><span class="pre">dPI_</span></tt>. The posterior probabilities
+are indicated by columns of the form <tt class="docutils literal"><span class="pre">Pr_dPI_A_gt0</span></tt> for greater than zero,
+and <tt class="docutils literal"><span class="pre">Pr_dPI_A_lt0</span></tt> for less than zero.
+The <tt class="docutils literal"><span class="pre">RMS_dPI</span></tt> column gives the root-mean-square differential preference
+as <span class="math">\(\textrm{RMS}_{\Delta\pi_r} = \sqrt{\frac{1}{\mathcal{N}_x}\sum_x \left(\Delta\pi_{r,x}\right)^2}\)</span></p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">sites</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;1&#39;</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">deltapi_means</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;1&#39;</span><span class="p">:{</span><span class="s">&#39;A&#39;</span><span class="p">:</span><span class="o">-</span><span class="mf">0.2</span><span class="p">,</span> <span class="s">&#39;C&#39;</span><span class="p">:</span><span class="o">-</span><span class="mf">0.3</span><span class="p">,</span> <span class="s">&#39;G&#39;</span><span class="p">:</span><span class="mf">0.4</span><span class="p">,</span> <span class="s">&#39;T&#39;</span><span class="p">:</span><span class="mf">0.1</span><span class="p">}}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">wts</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;1&#39;</span><span class="p">:</span><span class="s">&#39;G&#39;</span><span class="p">}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">f</span> <span class="o">=</span> <span class="n">cStringIO</span><span class="o">.</span><span class="n">StringIO</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">WriteDiffPrefs</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">sites</span><span class="p">,</span> <span class="n">wts</span><span class="p">,</span> <span class="n">deltapi_means</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">f</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">lines</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">readlines</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">lines</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s">&#39;# POSITION WT RMS_dPI dPI_A dPI_C dPI_G dPI_T</span><span class="se">\n</span><span class="s">&#39;</span>
+<span class="go">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">entries</span> <span class="o">=</span> <span class="n">lines</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">entries</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="nb">str</span><span class="p">(</span><span class="n">sites</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+<span class="go">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">entries</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">wts</span><span class="p">[</span><span class="n">sites</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
+<span class="go">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="mf">1.0e-6</span> <span class="o">&gt;</span> <span class="nb">abs</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">entries</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span> <span class="o">-</span> <span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="nb">sum</span><span class="p">([</span><span class="n">x</span><span class="o">**</span><span class="mi">2</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">deltapi_means</span><span class="p">[</span><span class="n">sites</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span><span class="o">.</span><span class="n">values</span><span class="p">()])</span> <span class="o">/</span> <span class="nb">float</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">deltapi_means</span><span class="p">[</span><span class="n">sites</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span><span class="o">.</span><span class="n">values</span><span class="p">()))))</span>
+<span class="go">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="mf">1.0e-6</span> <span class="o">&gt;</span> <span class="nb">abs</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">entries</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span> <span class="o">-</span> <span class="n">deltapi_means</span><span class="p">[</span><span class="n">sites</span><span class="p">[</span><span class="mi">0</span><span class="p">]][</span><span class="s">&#39;A&#39;</span><span class="p">])</span>
+<span class="go">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">f2</span> <span class="o">=</span> <span class="n">cStringIO</span><span class="o">.</span><span class="n">StringIO</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pr_deltapi_gt0</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;1&#39;</span><span class="p">:{</span><span class="s">&#39;A&#39;</span><span class="p">:</span><span class="mf">0.95</span><span class="p">,</span> <span class="s">&#39;C&#39;</span><span class="p">:</span><span class="mf">0.5</span><span class="p">,</span> <span class="s">&#39;G&#39;</span><span class="p">:</span><span class="mf">0.7</span><span class="p">,</span> <span class="s">&#39;T&#39;</span><span class="p">:</span><span class="mf">0.5</span><span class="p">}}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pr_deltapi_lt0</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;1&#39;</span><span class="p">:{</span><span class="s">&#39;A&#39;</span><span class="p">:</span><span class="mf">0.05</span><span class="p">,</span> <span class="s">&#39;C&#39;</span><span class="p">:</span><span class="mf">0.5</span><span class="p">,</span> <span class="s">&#39;G&#39;</span><span class="p">:</span><span class="mf">0.3</span><span class="p">,</span> <span class="s">&#39;T&#39;</span><span class="p">:</span><span class="mf">0.5</span><span class="p">}}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">WriteDiffPrefs</span><span class="p">(</span><span class="n">f2</span><span class="p">,</span> <span class="n">sites</span><span class="p">,</span> <span class="n">wts</span><span class="p">,</span> <span class="n">deltapi_means</span><span class="p">,</span> <span class="n">pr_deltapi_lt0</span><span class="p">,</span> <span class="n">pr_deltapi_gt0</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">f2</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">lines</span> <span class="o">=</span> <span class="n">f2</span><span class="o">.</span><span class="n">readlines</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">lines</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s">&#39;# POSITION WT RMS_dPI dPI_A dPI_C dPI_G dPI_T Pr_dPI_A_lt0 Pr_dPI_A_gt0 Pr_dPI_C_lt0 Pr_dPI_C_gt0 Pr_dPI_G_lt0 Pr_dPI_G_gt0 Pr_dPI_T_lt0 Pr_dPI_T_gt0</span><span class="se">\n</span><span class="s">&#39;</span>
+<span class="go">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">f</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tup</span> <span class="o">=</span> <span class="n">ReadDiffPrefs</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">len</span><span class="p">(</span><span class="n">tup</span><span class="p">)</span> <span class="o">==</span> <span class="mi">6</span>
+<span class="go">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tup</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">sites</span>
+<span class="go">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tup</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">wts</span>
+<span class="go">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tup</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="n">deltapi_means</span>
+<span class="go">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tup</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">==</span> <span class="n">tup</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="o">==</span> <span class="bp">None</span>
+<span class="go">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="mf">1.0e-6</span> <span class="o">&gt;</span> <span class="n">tup</span><span class="p">[</span><span class="mi">5</span><span class="p">][</span><span class="s">&#39;1&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="nb">float</span><span class="p">(</span><span class="n">entries</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+<span class="go">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">f2</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tup</span> <span class="o">=</span> <span class="n">ReadDiffPrefs</span><span class="p">(</span><span class="n">f2</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">len</span><span class="p">(</span><span class="n">tup</span><span class="p">)</span> <span class="o">==</span> <span class="mi">6</span>
+<span class="go">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tup</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">sites</span>
+<span class="go">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tup</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">wts</span>
+<span class="go">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tup</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="n">deltapi_means</span>
+<span class="go">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tup</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">==</span> <span class="n">pr_deltapi_lt0</span>
+<span class="go">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tup</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="o">==</span> <span class="n">pr_deltapi_gt0</span>
+<span class="go">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="mf">1.0e-6</span> <span class="o">&gt;</span> <span class="n">tup</span><span class="p">[</span><span class="mi">5</span><span class="p">][</span><span class="s">&#39;1&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="nb">float</span><span class="p">(</span><span class="n">entries</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+<span class="go">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">f2</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="file_io.WritePreferences">
+<tt class="descclassname">file_io.</tt><tt class="descname">WritePreferences</tt><big>(</big><em>f</em>, <em>sites</em>, <em>wts</em>, <em>pi_means</em>, <em>pi_95credint</em><big>)</big><a class="headerlink" href="#file_io.WritePreferences" title="Permalink to this definition">¶</a></dt>
+<dd><p>Writes site-specific preferences to a file.</p>
+<dl class="docutils">
+<dt><em>f</em> is a writeable file-like object to which we write the preferences,</dt>
+<dd>or a string giving the name of a file that we create.</dd>
+<dt><em>sites</em> is a list of all site numbers (as strings) for which</dt>
+<dd>we have preferences.</dd>
+<dt><em>wts</em> is a dictionary with <em>wts[r]</em> giving the wildtype character</dt>
+<dd>at site <em>r</em> for all <em>r</em> in <em>sites</em>.</dd>
+<dt><em>pi_means</em> is a dictionary keyed by all sites (as strings). For each </dt>
+<dd>site <em>r</em>, <em>pi_means[r]</em> is a dictionary where <em>pi_means[r][x]</em>
+is the preference of <em>r</em> for character <em>x</em>, where the
+characters are nucleotide, codons, or amino acids.</dd>
+<dt><em>pi_95credint</em> can either be <em>None</em> or a dictionary keyed by all</dt>
+<dd>sites that also key <em>pi_means</em>, and has as values 2-tuples giving
+the upper and lower bounds of the 95% credible interval. (If it is
+a dictionary with any value of <em>None</em>, that is the same as setting the
+overall variable to <em>None</em>).</dd>
+</dl>
+<p>The written file has the following format:</p>
+<div class="highlight-python"><div class="highlight"><pre># POSITION WT SITE_ENTROPY PI_A PI_C PI_G PI_T PI_A_95 PI_C_95 PI_G_95 PI_T_95
+1 G 1.61 0.21 0.09 0.58 0.12 0.17,0.28 0.04,0.12 0.51,0.69 0.09,0.15
+</pre></div>
+</div>
+<p>In this format, the first header line begins with <tt class="docutils literal"><span class="pre">#</span></tt> and indicates the
+characters as the suffix to <tt class="docutils literal"><span class="pre">PI_</span></tt>. The 95% credible intervals (if given)
+are indicated by columns beginning with <tt class="docutils literal"><span class="pre">PI_</span></tt> and ending with <tt class="docutils literal"><span class="pre">_95</span></tt>.
+The <tt class="docutils literal"><span class="pre">SITE_ENTROPY</span></tt> column gives the site entropy in bits (log base 2)
+as <span class="math">\(h_r = \sum_x \pi_{r,x} \times \log_2 \pi_{r,x}\)</span>.</p>
+<p>The <tt class="docutils literal"><span class="pre">POSITION</span></tt> header can also be <tt class="docutils literal"><span class="pre">SITE</span></tt>.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">sites</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;1&#39;</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pi_means</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;1&#39;</span><span class="p">:{</span><span class="s">&#39;A&#39;</span><span class="p">:</span><span class="mf">0.2</span><span class="p">,</span> <span class="s">&#39;C&#39;</span><span class="p">:</span><span class="mf">0.3</span><span class="p">,</span> <span class="s">&#39;G&#39;</span><span class="p">:</span><span class="mf">0.4</span><span class="p">,</span> <span class="s">&#39;T&#39;</span><span class="p">:</span><span class="mf">0.1</span><span class="p">}}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">wts</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;1&#39;</span><span class="p">:</span><span class="s">&#39;G&#39;</span><span class="p">}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pi_95credint</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;1&#39;</span><span class="p">:{</span><span class="s">&#39;A&#39;</span><span class="p">:(</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">),</span> <span class="s">&#39;C&#39;</span><span class="p">:(</span><span class="mf">0.25</span><span class="p">,</span> <span class="mf">0.35</span><span class="p">),</span> <span class="s">&#39;G&#39;</span><span class="p">:(</span><span class="mf">0.3</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">),</span> <span class="s">&#39;T&#39;</span><span class="p">:(</span><span class="mf">0.05</span><span class="p">,</span> <span class="mf">0.15</span><span class="p">)}}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">f</span> <span class="o">=</span> <span class="n">cStringIO</span><span class="o">.</span><span class="n">StringIO</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">WritePreferences</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">sites</span><span class="p">,</span> <span class="n">wts</span><span class="p">,</span> <span class="n">pi_means</span><span class="p">,</span> <span class="n">pi_95credint</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">f</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">lines</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">readlines</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">lines</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s">&#39;# POSITION WT SITE_ENTROPY PI_A PI_C PI_G PI_T PI_A_95 PI_C_95 PI_G_95 PI_T_95</span><span class="se">\n</span><span class="s">&#39;</span>
+<span class="go">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">f</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tup</span> <span class="o">=</span> <span class="n">ReadPreferences</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tup</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">sites</span>
+<span class="go">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tup</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">==</span> <span class="n">pi_95credint</span>
+<span class="go">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">f2</span> <span class="o">=</span> <span class="n">cStringIO</span><span class="o">.</span><span class="n">StringIO</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">WritePreferences</span><span class="p">(</span><span class="n">f2</span><span class="p">,</span> <span class="n">sites</span><span class="p">,</span> <span class="n">wts</span><span class="p">,</span> <span class="n">pi_means</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">f2</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">lines</span> <span class="o">=</span> <span class="n">f2</span><span class="o">.</span><span class="n">readlines</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">lines</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s">&#39;# POSITION WT SITE_ENTROPY PI_A PI_C PI_G PI_T</span><span class="se">\n</span><span class="s">&#39;</span>
+<span class="go">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">f2</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="p">(</span><span class="n">sites2</span><span class="p">,</span> <span class="n">wts2</span><span class="p">,</span> <span class="n">pi_means2</span><span class="p">,</span> <span class="n">pi_95credint2</span><span class="p">,</span> <span class="n">h</span><span class="p">)</span> <span class="o">=</span> <span class="n">ReadPreferences</span><span class="p">(</span><span class="n">f2</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sites</span> <span class="o">==</span> <span class="n">sites2</span>
+<span class="go">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">wts</span> <span class="o">==</span> <span class="n">wts2</span>
+<span class="go">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pi_95credint2</span> <span class="o">==</span> <span class="bp">None</span>
+<span class="go">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">r</span> <span class="o">=</span> <span class="n">sites</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">all</span><span class="p">([</span><span class="nb">abs</span><span class="p">(</span><span class="n">pi_means</span><span class="p">[</span><span class="n">r</span><span class="p">][</span><span class="n">x</span><span class="p">]</span> <span class="o">-</span> <span class="n">pi_means2</span><span class="p">[</span><span class="n">r</span><span class="p">][</span><span class="n">x</span><span class="p">])</span> <span class="o">&lt;</span> <span class="mf">1.0e-6</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">pi_means</span><span class="p">[</span><span class="n">r</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">()])</span>
+<span class="go">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="s">&quot;</span><span class="si">%.3f</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">h</span><span class="p">[</span><span class="n">r</span><span class="p">]</span>
+<span class="go">1.846</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</div>
+</div>
+<span class="target" id="module-utils"></span><div class="section" id="utils-module">
+<h2><tt class="docutils literal"><span class="pre">utils</span></tt> module<a class="headerlink" href="#utils-module" title="Permalink to this headline">¶</a></h2>
+<p>Module with utilities for manipulating data related to <tt class="docutils literal"><span class="pre">dms_tools</span></tt>.</p>
+<p>Written by Jesse Bloom.</p>
+<div class="section" id="id3">
+<h3>Functions in this module<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><em>NaturalSort</em> : Performs a natural sort (alphanumeric sort) on a list.</li>
+<li><em>AvgMutRate</em> : Returns the average mutation rate across all sites.</li>
+<li><em>SumCodonToAA</em> : Sums all codon entries for each amino acid.</li>
+<li><em>SiteEntropy</em> : Computes site entropy.</li>
+<li><em>RMS</em> : Computes root-mean-square value.</li>
+<li><em>RemoveStopFromPreferences</em> : removes stop codon</li>
+<li><em>RemoveStopFromDiffPrefs</em> : removes stop codon</li>
+<li><em>SumPrefsDiffPrefs</em> : sums preferences and differential preferences</li>
+<li><em>Pref_or_DiffPref</em> : determines whether data represent preferences or differential preferences.</li>
+<li><em>PrefsToEnrichments</em> : converts preferences to enrichment ratios.</li>
+<li><em>AdjustErrorCounts</em> : adjust error counts so they don&#8217;t exceed actual counts.</li>
+</ul>
+</div>
+<div class="section" id="id4">
+<h3>Function documentation<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="utils.AdjustErrorCounts">
+<tt class="descclassname">utils.</tt><tt class="descname">AdjustErrorCounts</tt><big>(</big><em>wt</em>, <em>counts</em>, <em>maxexcess</em><big>)</big><a class="headerlink" href="#utils.AdjustErrorCounts" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adjust error counts so that they don&#8217;t exceed counts of interest.</p>
+<p>This deals with the case when the error control estimates a higher
+rate of a mutation than is found in the actual sample. This will confound
+the MCMC inference by <tt class="docutils literal"><span class="pre">dms_inferprefs</span></tt> and <tt class="docutils literal"><span class="pre">dms_inferdiffprefs</span></tt>.
+So this script adjusts down the error counts until they are compatbile
+with the counts in the actual sample.</p>
+<p>Returns a dictionary like <em>counts</em> but with adjusted counts.</p>
+<p>This is a function utilized to clean counts data for <tt class="docutils literal"><span class="pre">dms_inferprefs</span></tt>
+and <tt class="docutils literal"><span class="pre">dms_inferdiffprefs</span></tt>.</p>
+<p>Essentially, it checks if the mutation rate in the error control
+is higher than that of the sample for which it is supposed to control.
+If so, it reduces the mutation counts for the error control so that
+they only exceed the controlled for sample by <em>maxexcess</em>.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">wt</span> <span class="o">=</span> <span class="s">&#39;A&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">counts</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;nrpre&#39;</span><span class="p">:{</span><span class="s">&#39;A&#39;</span><span class="p">:</span><span class="mi">500</span><span class="p">,</span> <span class="s">&#39;C&#39;</span><span class="p">:</span><span class="mi">10</span><span class="p">,</span> <span class="s">&#39;G&#39;</span><span class="p">:</span><span class="mi">40</span><span class="p">,</span> <span class="s">&#39;T&#39;</span><span class="p">:</span><span class="mi">20</span><span class="p">},</span> <span class="s">&#39;nrerrpre&#39;</span><span class="p">:{</span><span class="s">&#39;A&#39;</span><span class="p">:</span><span class="mi">250</span><span class="p">,</span> <span class="s">&#39;C&#39;</span><span class="p">:</span><span class="mi">1</span><span class="p">,</span> <span class="s">&#39;G&#39;</span><span class="p">:</span><span class="mi">30</span><span class="p">,</span> <span class="s">&#39;T&#39;</span><span class="p">:</span><span class="mi">10</span><span class="p">},</span> <span class="s">&#39;nrpost&#39;</span><span class="p">:{</span><span class="s">&#39;A&#39;</span><span class="p">:</span><span class="mi">500</span><span class="p">,</span> <span class="s">&#39;C&#39;</span><span class="p">:</span><span class="mi">20</span><span class="p">,</span> <span class="s">&#39;G&#39;</span><span class="p">:</span><span class="mi">20</span><span class="p">,</span> <span class="s">&#39;T&#39;</span><span class="p">:</span><span class="mi">20</span><span class="p">},</span> <span class="s">&#39;nrerrpost&#39;</span><span class="p">:{</span><span class="s">&#39;A&#39;</span><span class="p">:</span><span class="mi">1000</span><span class="p">,</span> <span class="s">&#39;C&#39;</span><span class="p">:</span><span class="mi">30</span><span class="p">,</span> <span class="s">&#39;G&#39;</span><span class="p">:</span><span class="mi">20</span><span class="p">,</span> <span class="s">&#39;T&#39;</span><span class="p">:</span><span class="mi">50</span><span class="p">}}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">adjusted_counts</span> <span class="o">=</span> <span class="n">AdjustErrorCounts</span><span class="p">(</span><span class="n">wt</span><span class="p">,</span> <span class="n">counts</span><span class="p">,</span> <span class="n">maxexcess</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">counts</span><span class="p">[</span><span class="s">&#39;nrpre&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">adjusted_counts</span><span class="p">[</span><span class="s">&#39;nrpre&#39;</span><span class="p">]</span>
+<span class="go">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">counts</span><span class="p">[</span><span class="s">&#39;nrpost&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">adjusted_counts</span><span class="p">[</span><span class="s">&#39;nrpost&#39;</span><span class="p">]</span>
+<span class="go">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">adjusted_counts</span><span class="p">[</span><span class="s">&#39;nrerrpre&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="p">{</span><span class="s">&#39;A&#39;</span><span class="p">:</span><span class="mi">250</span><span class="p">,</span> <span class="s">&#39;C&#39;</span><span class="p">:</span><span class="mi">1</span><span class="p">,</span> <span class="s">&#39;G&#39;</span><span class="p">:</span><span class="mi">21</span><span class="p">,</span> <span class="s">&#39;T&#39;</span><span class="p">:</span><span class="mi">10</span><span class="p">}</span>
+<span class="go">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">adjusted_counts</span><span class="p">[</span><span class="s">&#39;nrerrpost&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="p">{</span><span class="s">&#39;A&#39;</span><span class="p">:</span><span class="mi">1000</span><span class="p">,</span> <span class="s">&#39;C&#39;</span><span class="p">:</span><span class="mi">30</span><span class="p">,</span> <span class="s">&#39;G&#39;</span><span class="p">:</span><span class="mi">20</span><span class="p">,</span> <span class="s">&#39;T&#39;</span><span class="p">:</span><span class="mi">41</span><span class="p">}</span>
+<span class="go">True</span>
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">wt</span> <span class="o">=</span> <span class="s">&#39;A&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">counts</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;nrpre&#39;</span><span class="p">:{</span><span class="s">&#39;A&#39;</span><span class="p">:</span><span class="mi">500</span><span class="p">,</span> <span class="s">&#39;C&#39;</span><span class="p">:</span><span class="mi">10</span><span class="p">,</span> <span class="s">&#39;G&#39;</span><span class="p">:</span><span class="mi">40</span><span class="p">,</span> <span class="s">&#39;T&#39;</span><span class="p">:</span><span class="mi">20</span><span class="p">},</span> <span class="s">&#39;nrpost&#39;</span><span class="p">:{</span><span class="s">&#39;A&#39;</span><span class="p">:</span><span class="mi">500</span><span class="p">,</span> <span class="s">&#39;C&#39;</span><span class="p">:</span><span class="mi">20</span><span class="p">,</span> <span class="s">&#39;G&#39;</span><span class="p">:</span><span class="mi">20</span><span class="p">,</span> <span class="s">&#39;T&#39;</span><span class="p">:</span><span class="mi">20</span><span class="p">},</span> <span class="s">&#39;nrerr&#39;</span><span class="p">:{</span><span class="s">&#39;A&#39;</span><span class="p">:</span><span class="mi">1000</span><span class="p">,</span> <span class="s">&#39;C&#39;</span><span class="p">:</span><span class="mi">30</span><span class="p">,</span> <span class="s">&#39;G&#39;</span><span class="p">:</span><span class="mi">20</span><span class="p">,</span> <span class="s">&#39;T&#39;</span><span class="p">:</span><span class="mi">50</span><span class="p">}}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">adjusted_counts</span> <span class="o">=</span> <span class="n">AdjustErrorCounts</span><span class="p">(</span><span class="n">wt</span><span class="p">,</span> <span class="n">counts</span><span class="p">,</span> <span class="n">maxexcess</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">counts</span><span class="p">[</span><span class="s">&#39;nrpre&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">adjusted_counts</span><span class="p">[</span><span class="s">&#39;nrpre&#39;</span><span class="p">]</span>
+<span class="go">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">counts</span><span class="p">[</span><span class="s">&#39;nrpost&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">adjusted_counts</span><span class="p">[</span><span class="s">&#39;nrpost&#39;</span><span class="p">]</span>
+<span class="go">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">adjusted_counts</span><span class="p">[</span><span class="s">&#39;nrerr&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="p">{</span><span class="s">&#39;A&#39;</span><span class="p">:</span><span class="mi">1000</span><span class="p">,</span> <span class="s">&#39;C&#39;</span><span class="p">:</span><span class="mi">21</span><span class="p">,</span> <span class="s">&#39;G&#39;</span><span class="p">:</span><span class="mi">20</span><span class="p">,</span> <span class="s">&#39;T&#39;</span><span class="p">:</span><span class="mi">41</span><span class="p">}</span>
+<span class="go">True</span>
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">counts</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;nrstart&#39;</span><span class="p">:{</span><span class="s">&#39;A&#39;</span><span class="p">:</span><span class="mi">500</span><span class="p">,</span> <span class="s">&#39;C&#39;</span><span class="p">:</span><span class="mi">10</span><span class="p">,</span> <span class="s">&#39;G&#39;</span><span class="p">:</span><span class="mi">40</span><span class="p">,</span> <span class="s">&#39;T&#39;</span><span class="p">:</span><span class="mi">20</span><span class="p">},</span> <span class="s">&#39;nrs1&#39;</span><span class="p">:{</span><span class="s">&#39;A&#39;</span><span class="p">:</span><span class="mi">1000</span><span class="p">,</span> <span class="s">&#39;C&#39;</span><span class="p">:</span><span class="mi">20</span><span class="p">,</span> <span class="s">&#39;G&#39;</span><span class="p">:</span><span class="mi">80</span><span class="p">,</span> <span class="s">&#39;T&#39;</span><span class="p">:</span><span class="mi">40</span><span class="p">},</span> <span class="s">&#39;nrs2&#39;</span><span class="p">:{</span><span class="s">&#39;A&#39;</span><span class="p">:</span><span class="mi">500</span><span class="p">,</span> <span class="s">&#39;C&#39;</span><span class="p">:</span><span class="mi">20</span><span class="p">,</span> <span class="s">&#39;G&#39;</span><span class="p">:</span><span class="mi">20</span><span class="p">,</span> <span class="s">&#39;T&#39;</span><span class="p">:</span><span class="mi">20</span><span class="p">},</span> <span class="s">&#39;nrerr&#39;</span><span class="p">:{</span><span class="s">&#39;A&#39;</span><span class="p">:</span><span class="mi">1000</span><span class="p">,</span> <span class="s">&#39;C&#39;</span><span class="p">:</span><span class="mi">30</span><span class="p">,</span> <span class="s">&#39;G&#39;</span><span class="p">:</span><span class="mi">20</span><span class="p">,</span> <span class="s">&#39;T&#39;</span><span class="p">:</span><span class="mi">50</span><span class="p">}}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">adjusted_counts</span> <span class="o">=</span> <span class="n">AdjustErrorCounts</span><span class="p">(</span><span class="n">wt</span><span class="p">,</span> <span class="n">counts</span><span class="p">,</span> <span class="n">maxexcess</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">counts</span><span class="p">[</span><span class="s">&#39;nrstart&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">adjusted_counts</span><span class="p">[</span><span class="s">&#39;nrstart&#39;</span><span class="p">]</span>
+<span class="go">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">counts</span><span class="p">[</span><span class="s">&#39;nrs1&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">adjusted_counts</span><span class="p">[</span><span class="s">&#39;nrs1&#39;</span><span class="p">]</span>
+<span class="go">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">counts</span><span class="p">[</span><span class="s">&#39;nrs2&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">adjusted_counts</span><span class="p">[</span><span class="s">&#39;nrs2&#39;</span><span class="p">]</span>
+<span class="go">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">adjusted_counts</span><span class="p">[</span><span class="s">&#39;nrerr&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="p">{</span><span class="s">&#39;A&#39;</span><span class="p">:</span><span class="mi">1000</span><span class="p">,</span> <span class="s">&#39;C&#39;</span><span class="p">:</span><span class="mi">21</span><span class="p">,</span> <span class="s">&#39;G&#39;</span><span class="p">:</span><span class="mi">20</span><span class="p">,</span> <span class="s">&#39;T&#39;</span><span class="p">:</span><span class="mi">41</span><span class="p">}</span>
+<span class="go">True</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="utils.AvgMutRate">
+<tt class="descclassname">utils.</tt><tt class="descname">AvgMutRate</tt><big>(</big><em>counts</em>, <em>chartype</em><big>)</big><a class="headerlink" href="#utils.AvgMutRate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns average mutation rate.</p>
+<p><em>counts</em> is a dictionary of deep mutational scanning counts in the format returned
+by <em>file_io.ReadDMSCounts</em>.</p>
+<p><em>chartype</em> is the character type of these counts, with the same meaning 
+as for <em>file_io.ReadDMSCounts</em>.</p>
+<p>This function computes the average mutation rate over all counts for all sites for 
+mutations with each possible number of nucleotide changes. Specifically, we define the average
+rate of mutations to characters with <span class="math">\(m\)</span> nucleotide changes relative to wildtype as</p>
+<div class="math">
+\[\overline{\epsilon_m} = \frac{1}{L}\sum\limits_r \frac{1}{N_r} \sum\limits_x n_{r,x} \times \delta_{m,D_{x,\operatorname{wt}\left(r\right)}}\]</div>
+<p>where <span class="math">\(r\)</span> ranges over all <span class="math">\(L\)</span> sites for which there are deep mutational scanning counts,
+<span class="math">\(N_r\)</span> is the total number of counts at site <span class="math">\(r\)</span>, <span class="math">\(n_{r,x}\)</span> is the number
+of counts that report character <span class="math">\(x\)</span> at site <span class="math">\(r\)</span>, <span class="math">\(D_{x,\operatorname{wt}\left(r\right)}\)</span>
+is the number of nucleotide differences between character <span class="math">\(x\)</span> and the wildtype character
+<span class="math">\(\operatorname{wt}\left(r\right)\)</span> at site <span class="math">\(r\)</span>, and <span class="math">\(\delta_{xy}\)</span> is the Kronecker
+delta. Note that this definition implies <span class="math">\(1 = \sum_m \overline{\epsilon_m}\)</span>. For nucleotides,
+there are just two values of <span class="math">\(m\)</span>: a value of <span class="math">\(m = 0\)</span> is no differences (the wildtype
+character) and a value of <span class="math">\(m = 1\)</span> is the a mutant nucleotide. For codons, <span class="math">\(m\)</span> can
+be 1, 2, or 3.</p>
+<p>The return value is the dictionary <em>mutrates</em> which is keyed by all values of <span class="math">\(m\)</span>
+for the <em>chartype</em> in question. The value of <em>mutrates[m]</em> is the mutation rate for
+characters with this number of differences.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">counts</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;1&#39;</span><span class="p">:{</span><span class="s">&#39;WT&#39;</span><span class="p">:</span><span class="s">&#39;A&#39;</span><span class="p">,</span> <span class="s">&#39;A&#39;</span><span class="p">:</span><span class="mi">7</span><span class="p">,</span> <span class="s">&#39;C&#39;</span><span class="p">:</span><span class="mi">1</span><span class="p">,</span> <span class="s">&#39;G&#39;</span><span class="p">:</span><span class="mi">1</span><span class="p">,</span> <span class="s">&#39;T&#39;</span><span class="p">:</span><span class="mi">1</span><span class="p">},</span>
+<span class="gp">... </span>          <span class="s">&#39;2&#39;</span><span class="p">:{</span><span class="s">&#39;WT&#39;</span><span class="p">:</span><span class="s">&#39;C&#39;</span><span class="p">,</span> <span class="s">&#39;A&#39;</span><span class="p">:</span><span class="mi">2</span><span class="p">,</span> <span class="s">&#39;C&#39;</span><span class="p">:</span><span class="mi">8</span><span class="p">,</span> <span class="s">&#39;G&#39;</span><span class="p">:</span><span class="mi">0</span><span class="p">,</span> <span class="s">&#39;T&#39;</span><span class="p">:</span><span class="mi">0</span><span class="p">}}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mutrates</span> <span class="o">=</span> <span class="n">AvgMutRate</span><span class="p">(</span><span class="n">counts</span><span class="p">,</span> <span class="s">&#39;DNA&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="s">&quot;</span><span class="si">%.3f</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">mutrates</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="go">0.750</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="s">&quot;</span><span class="si">%.3f</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">mutrates</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+<span class="go">0.250</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="utils.NaturalSort">
+<tt class="descclassname">utils.</tt><tt class="descname">NaturalSort</tt><big>(</big><em>xlist</em><big>)</big><a class="headerlink" href="#utils.NaturalSort" title="Permalink to this definition">¶</a></dt>
+<dd><p>Performs a natural sort (alphanumeric sort) in a list of strings.</p>
+<p><em>xlist</em> is a list of strings. Sorts them, reading the integer portion
+as numbers. Currently works for integers, but not floats (anything 
+including or after a decimal is handled as a string, not number).</p>
+<p>Any entries that are integers or floats are converted to strings.</p>
+<p>This function simply returns <em>None</em>, but <em>xlist</em> is sorted in place,
+with the integer/float to string conversion if relevant.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">xlist</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;1&#39;</span><span class="p">,</span> <span class="s">&#39;20&#39;</span><span class="p">,</span> <span class="s">&#39;100&#39;</span><span class="p">,</span> <span class="s">&#39;5A&#39;</span><span class="p">,</span> <span class="s">&#39;51A&#39;</span><span class="p">,</span> <span class="s">&#39;5&#39;</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">NaturalSort</span><span class="p">(</span><span class="n">xlist</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="n">xlist</span>
+<span class="go">[&#39;1&#39;, &#39;5&#39;, &#39;5A&#39;, &#39;20&#39;, &#39;51A&#39;, &#39;100&#39;]</span>
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">xlist</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="s">&#39;20&#39;</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="s">&#39;5A&#39;</span><span class="p">,</span> <span class="s">&#39;51A&#39;</span><span class="p">,</span> <span class="s">&#39;5&#39;</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">NaturalSort</span><span class="p">(</span><span class="n">xlist</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="n">xlist</span>
+<span class="go">[&#39;1&#39;, &#39;5&#39;, &#39;5A&#39;, &#39;20&#39;, &#39;51A&#39;, &#39;100&#39;]</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="utils.Pref_or_DiffPref">
+<tt class="descclassname">utils.</tt><tt class="descname">Pref_or_DiffPref</tt><big>(</big><em>data</em>, <em>tol=0.001</em><big>)</big><a class="headerlink" href="#utils.Pref_or_DiffPref" title="Permalink to this definition">¶</a></dt>
+<dd><p>Determines if data represent preferences or differential preferences.</p>
+<p><em>data</em> is a dictionary keyed by site, with each entry a dictionary
+keyed by character giving the preference / differential preference
+for that character.</p>
+<p>If values for each site are &gt;= 0 and &lt;= 1 and sum to one (within <em>tol</em>), then
+returns &#8216;preferences&#8217;.</p>
+<p>If values are &lt;= 1 and sum to zero (within <em>tol</em>), then returns
+&#8216;diffprefs&#8217;.</p>
+<p>Otherwise returns &#8216;neither preferences nor diffprefs&#8217;</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">data</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;1&#39;</span><span class="p">:{</span><span class="s">&#39;A&#39;</span><span class="p">:</span><span class="mf">0.5</span><span class="p">,</span> <span class="s">&#39;T&#39;</span><span class="p">:</span><span class="mf">0.1</span><span class="p">,</span> <span class="s">&#39;C&#39;</span><span class="p">:</span><span class="mf">0.2</span><span class="p">,</span> <span class="s">&#39;G&#39;</span><span class="p">:</span><span class="mf">0.2</span><span class="p">}}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="n">Pref_or_DiffPref</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+<span class="go">preferences</span>
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">data</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;1&#39;</span><span class="p">:{</span><span class="s">&#39;A&#39;</span><span class="p">:</span><span class="o">-</span><span class="mf">0.5</span><span class="p">,</span> <span class="s">&#39;T&#39;</span><span class="p">:</span><span class="mf">0.1</span><span class="p">,</span> <span class="s">&#39;C&#39;</span><span class="p">:</span><span class="mf">0.2</span><span class="p">,</span> <span class="s">&#39;G&#39;</span><span class="p">:</span><span class="mf">0.2</span><span class="p">}}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="n">Pref_or_DiffPref</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+<span class="go">diffprefs</span>
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">data</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;1&#39;</span><span class="p">:{</span><span class="s">&#39;A&#39;</span><span class="p">:</span><span class="o">-</span><span class="mf">0.5</span><span class="p">,</span> <span class="s">&#39;T&#39;</span><span class="p">:</span><span class="mf">0.1</span><span class="p">,</span> <span class="s">&#39;C&#39;</span><span class="p">:</span><span class="mf">0.2</span><span class="p">,</span> <span class="s">&#39;G&#39;</span><span class="p">:</span><span class="mf">0.1</span><span class="p">}}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="n">Pref_or_DiffPref</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+<span class="go">neither preferences nor diffprefs</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="utils.PrefsToEnrichments">
+<tt class="descclassname">utils.</tt><tt class="descname">PrefsToEnrichments</tt><big>(</big><em>wts</em>, <em>pi_means</em>, <em>include_wt</em><big>)</big><a class="headerlink" href="#utils.PrefsToEnrichments" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts site-specific preferences to enrichment ratios.</p>
+<p><em>wts</em> and <em>pi_means</em> have the same meaning as the arguments by the
+same name returned by <em>file_io.ReadPreferences</em>.</p>
+<p>If <em>include_wt</em> is <em>True</em>, then the returned dictionary includes
+ratios for the wildtype characters (these are always one). If it is
+<em>False</em>, then ratios for the wildtype characters are not included.</p>
+<p>The return value is a dictionary <em>enrichments</em>, where <em>enrichments[r][x]</em>
+returns the enrichment ratio for character <em>x</em> at site <em>r</em> for all 
+sites and characters in <em>pi_means</em>.</p>
+<p>The enrichment ratio <span class="math">\(\phi_{r,x}\)</span> of site <span class="math">\(r\)</span> for 
+character <span class="math">\(x\)</span> is defined in terms of the preference
+<span class="math">\(\pi_{r,x}\)</span> as</p>
+<div class="math">
+\[\phi_{r,x} = \frac{\pi_{r,x}}{\pi_{r,\operatorname{wt}\left(r\right)}}\]</div>
+<p>where <span class="math">\(\operatorname{wt}\left(r\right)\)</span> is the wildtype residue
+at site <span class="math">\(r\)</span>.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">wts</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;1&#39;</span><span class="p">:</span><span class="s">&#39;A&#39;</span><span class="p">}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pi_means</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;1&#39;</span><span class="p">:{</span><span class="s">&#39;A&#39;</span><span class="p">:</span><span class="mf">0.4</span><span class="p">,</span> <span class="s">&#39;C&#39;</span><span class="p">:</span><span class="mf">0.45</span><span class="p">,</span> <span class="s">&#39;G&#39;</span><span class="p">:</span><span class="mf">0.1</span><span class="p">,</span> <span class="s">&#39;T&#39;</span><span class="p">:</span><span class="mf">0.05</span><span class="p">}}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">enrichments</span> <span class="o">=</span> <span class="n">PrefsToEnrichments</span><span class="p">(</span><span class="n">wts</span><span class="p">,</span> <span class="n">pi_means</span><span class="p">,</span> <span class="n">include_wt</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="s">&quot;</span><span class="si">%.3f</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">enrichments</span><span class="p">[</span><span class="s">&#39;1&#39;</span><span class="p">][</span><span class="s">&#39;A&#39;</span><span class="p">]</span>
+<span class="go">1.000</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="s">&quot;</span><span class="si">%.3f</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">enrichments</span><span class="p">[</span><span class="s">&#39;1&#39;</span><span class="p">][</span><span class="s">&#39;C&#39;</span><span class="p">]</span>
+<span class="go">1.125</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="s">&quot;</span><span class="si">%.3f</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">enrichments</span><span class="p">[</span><span class="s">&#39;1&#39;</span><span class="p">][</span><span class="s">&#39;G&#39;</span><span class="p">]</span>
+<span class="go">0.250</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="s">&quot;</span><span class="si">%.3f</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">enrichments</span><span class="p">[</span><span class="s">&#39;1&#39;</span><span class="p">][</span><span class="s">&#39;T&#39;</span><span class="p">]</span>
+<span class="go">0.125</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">enrichments</span> <span class="o">=</span> <span class="n">PrefsToEnrichments</span><span class="p">(</span><span class="n">wts</span><span class="p">,</span> <span class="n">pi_means</span><span class="p">,</span> <span class="n">include_wt</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="s">&#39;A&#39;</span> <span class="ow">in</span> <span class="n">enrichments</span>
+<span class="go">False</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="utils.RMS">
+<tt class="descclassname">utils.</tt><tt class="descname">RMS</tt><big>(</big><em>xlist</em><big>)</big><a class="headerlink" href="#utils.RMS" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes root-mean-square value of entries in <em>xlist</em>.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">xlist</span> <span class="o">=</span> <span class="p">[</span><span class="o">-</span><span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.03</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="s">&quot;</span><span class="si">%.5f</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">RMS</span><span class="p">(</span><span class="n">xlist</span><span class="p">)</span>
+<span class="go">0.27427</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="utils.RemoveStopFromDiffPrefs">
+<tt class="descclassname">utils.</tt><tt class="descname">RemoveStopFromDiffPrefs</tt><big>(</big><em>deltapi_means</em><big>)</big><a class="headerlink" href="#utils.RemoveStopFromDiffPrefs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Removes stop codon and rescales differential preferences to sum to zero.</p>
+<p>Stop codons are denoted by <tt class="docutils literal"><span class="pre">*</span></tt>.</p>
+<p>Essentially, the preference assigned to the stop codon is removed
+and all other preferences are scaled by an additive factor
+so they sum to zero.</p>
+<p>If there is not a stop codon present, then nothing is done.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">aas</span> <span class="o">=</span> <span class="n">dms_tools</span><span class="o">.</span><span class="n">aminoacids_withstop</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">deltapi_means</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;1&#39;</span><span class="p">:</span><span class="nb">dict</span><span class="p">([(</span><span class="n">aa</span><span class="p">,</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">aas</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span> <span class="k">for</span> <span class="n">aa</span> <span class="ow">in</span> <span class="n">aas</span> <span class="k">if</span> <span class="n">aa</span> <span class="o">!=</span> <span class="s">&#39;*&#39;</span><span class="p">])}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">deltapi_means</span><span class="p">[</span><span class="s">&#39;1&#39;</span><span class="p">][</span><span class="s">&#39;*&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mf">1.0</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">nostop_deltapi_means</span> <span class="o">=</span> <span class="n">RemoveStopFromDiffPrefs</span><span class="p">(</span><span class="n">deltapi_means</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">deltapi_means</span> <span class="o">==</span> <span class="n">nostop_deltapi_means</span>
+<span class="go">False</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">all</span><span class="p">([</span><span class="s">&quot;</span><span class="si">%.3f</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">nostop_deltapi_means</span><span class="p">[</span><span class="s">&#39;1&#39;</span><span class="p">][</span><span class="n">aa</span><span class="p">]</span> <span class="o">==</span> <span class="s">&#39;0.000&#39;</span> <span class="k">for</span> <span class="n">aa</span> <span class="ow">in</span> <span class="n">aas</span> <span class="k">if</span> <span class="n">aa</span> <span class="o">!=</span> <span class="s">&#39;*&#39;</span><span class="p">])</span>
+<span class="go">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="s">&#39;*&#39;</span> <span class="ow">in</span> <span class="n">nostop_deltapi_means</span><span class="p">[</span><span class="s">&#39;1&#39;</span><span class="p">]</span>
+<span class="go">False</span>
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">aas</span> <span class="o">=</span> <span class="n">dms_tools</span><span class="o">.</span><span class="n">aminoacids_withstop</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">deltapi_means</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;1&#39;</span><span class="p">:</span><span class="nb">dict</span><span class="p">([(</span><span class="n">aa</span><span class="p">,</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">aas</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span> <span class="k">for</span> <span class="n">aa</span> <span class="ow">in</span> <span class="n">aas</span><span class="p">[</span><span class="mi">1</span> <span class="p">:</span> <span class="p">]])}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">deltapi_means</span><span class="p">[</span><span class="s">&#39;1&#39;</span><span class="p">][</span><span class="n">aas</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span> <span class="o">=</span> <span class="o">-</span><span class="mf">1.0</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">nostop_deltapi_means</span> <span class="o">=</span> <span class="n">RemoveStopFromDiffPrefs</span><span class="p">(</span><span class="n">deltapi_means</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">deltapi_means</span> <span class="o">==</span> <span class="n">nostop_deltapi_means</span>
+<span class="go">False</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="s">&#39;*&#39;</span> <span class="ow">in</span> <span class="n">nostop_deltapi_means</span><span class="p">[</span><span class="s">&#39;1&#39;</span><span class="p">]</span>
+<span class="go">False</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="s">&#39;</span><span class="si">%.5f</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">nostop_deltapi_means</span><span class="p">[</span><span class="s">&#39;1&#39;</span><span class="p">][</span><span class="n">aas</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
+<span class="go">-0.99750</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="s">&#39;</span><span class="si">%.5f</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">nostop_deltapi_means</span><span class="p">[</span><span class="s">&#39;1&#39;</span><span class="p">][</span><span class="n">aas</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span>
+<span class="go">0.05250</span>
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">aas</span> <span class="o">=</span> <span class="n">dms_tools</span><span class="o">.</span><span class="n">aminoacids_nostop</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">deltapi_means</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;1&#39;</span><span class="p">:</span><span class="nb">dict</span><span class="p">([(</span><span class="n">aa</span><span class="p">,</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">aas</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span> <span class="k">for</span> <span class="n">aa</span> <span class="ow">in</span> <span class="n">aas</span><span class="p">[</span><span class="mi">1</span> <span class="p">:</span> <span class="p">]])}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">deltapi_means</span><span class="p">[</span><span class="s">&#39;1&#39;</span><span class="p">][</span><span class="n">aas</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span> <span class="o">=</span> <span class="o">-</span><span class="mf">1.0</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">nostop_deltapi_means</span> <span class="o">=</span> <span class="n">RemoveStopFromDiffPrefs</span><span class="p">(</span><span class="n">deltapi_means</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">deltapi_means</span> <span class="o">==</span> <span class="n">nostop_deltapi_means</span>
+<span class="go">True</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="utils.RemoveStopFromPreferences">
+<tt class="descclassname">utils.</tt><tt class="descname">RemoveStopFromPreferences</tt><big>(</big><em>pi_means</em><big>)</big><a class="headerlink" href="#utils.RemoveStopFromPreferences" title="Permalink to this definition">¶</a></dt>
+<dd><p>Removes stop codon and renormalizes preference to sum to one.</p>
+<p>Stop codons are denoted by <tt class="docutils literal"><span class="pre">*</span></tt>.</p>
+<p>Essentially, the preference assigned to the stop codon is removed
+and all other preferences are scaled by a multiplicative factor
+<span class="math">\(\ge 1\)</span> until they sum to one.</p>
+<p>If there is not a stop codon present, then nothing is done.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">aas</span> <span class="o">=</span> <span class="n">dms_tools</span><span class="o">.</span><span class="n">aminoacids_withstop</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pi_means</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;1&#39;</span><span class="p">:</span><span class="nb">dict</span><span class="p">([(</span><span class="n">aa</span><span class="p">,</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">aas</span><span class="p">))</span> <span class="k">for</span> <span class="n">aa</span> <span class="ow">in</span> <span class="n">aas</span><span class="p">]),</span> <span class="s">&#39;2&#39;</span><span class="p">:</span><span class="nb">dict</span><span class="p">([(</span><span class="n">aas</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mf">0.9</span><span class="p">)]</span> <span class="o">+</span> <span class="p">[(</span><span class="n">aa</span><span class="p">,</span> <span class="mf">0.1</span> <span class="o">/</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">aas</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span> <span class="k">for</span> <span class="n">aa</span> <span class="ow">in</span> <span class="n">aas</span><span class="p">[</span><span class="mi">1</span> <span class="p">:</span> <span class="p">]])}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">nostop_pi_means</span> <span class="o">=</span> <span class="n">RemoveStopFromPreferences</span><span class="p">(</span><span class="n">pi_means</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pi_means</span> <span class="o">==</span> <span class="n">nostop_pi_means</span>
+<span class="go">False</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">all</span><span class="p">([</span><span class="s">&quot;</span><span class="si">%.3f</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">nostop_pi_means</span><span class="p">[</span><span class="s">&#39;1&#39;</span><span class="p">][</span><span class="n">aa</span><span class="p">]</span> <span class="o">==</span> <span class="s">&#39;0.050&#39;</span> <span class="k">for</span> <span class="n">aa</span> <span class="ow">in</span> <span class="n">aas</span> <span class="k">if</span> <span class="n">aa</span> <span class="o">!=</span> <span class="s">&#39;*&#39;</span><span class="p">])</span>
+<span class="go">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="s">&#39;*&#39;</span> <span class="ow">in</span> <span class="n">nostop_pi_means</span><span class="p">[</span><span class="s">&#39;1&#39;</span><span class="p">]</span>
+<span class="go">False</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="s">&#39;*&#39;</span> <span class="ow">in</span> <span class="n">nostop_pi_means</span><span class="p">[</span><span class="s">&#39;2&#39;</span><span class="p">]</span>
+<span class="go">False</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="s">&#39;</span><span class="si">%.4f</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">nostop_pi_means</span><span class="p">[</span><span class="s">&#39;2&#39;</span><span class="p">][</span><span class="n">aas</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
+<span class="go">0.9045</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="s">&#39;</span><span class="si">%.6f</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">nostop_pi_means</span><span class="p">[</span><span class="s">&#39;2&#39;</span><span class="p">][</span><span class="n">aas</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span>
+<span class="go">0.005025</span>
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">aas</span> <span class="o">=</span> <span class="n">dms_tools</span><span class="o">.</span><span class="n">aminoacids_nostop</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pi_means</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;1&#39;</span><span class="p">:</span><span class="nb">dict</span><span class="p">([(</span><span class="n">aa</span><span class="p">,</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">aas</span><span class="p">))</span> <span class="k">for</span> <span class="n">aa</span> <span class="ow">in</span> <span class="n">aas</span><span class="p">]),</span> <span class="s">&#39;2&#39;</span><span class="p">:</span><span class="nb">dict</span><span class="p">([(</span><span class="n">aas</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mf">0.9</span><span class="p">)]</span> <span class="o">+</span> <span class="p">[(</span><span class="n">aa</span><span class="p">,</span> <span class="mf">0.1</span> <span class="o">/</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">aas</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span> <span class="k">for</span> <span class="n">aa</span> <span class="ow">in</span> <span class="n">aas</span><span class="p">[</span><span class="mi">1</span> <span class="p">:</span> <span class="p">]])}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">nostop_pi_means</span> <span class="o">=</span> <span class="n">RemoveStopFromPreferences</span><span class="p">(</span><span class="n">pi_means</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pi_means</span> <span class="o">==</span> <span class="n">nostop_pi_means</span>
+<span class="go">True</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="utils.SiteEntropy">
+<tt class="descclassname">utils.</tt><tt class="descname">SiteEntropy</tt><big>(</big><em>xlist</em>, <em>base=2.0</em><big>)</big><a class="headerlink" href="#utils.SiteEntropy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes site entropy to log base <em>base</em>.</p>
+<p><em>xlist</em> should be a list of numbers <span class="math">\(\ge 0\)</span> that
+sum to one.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="s">&quot;</span><span class="si">%.3f</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">SiteEntropy</span><span class="p">([</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">])</span>
+<span class="go">0.000</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="s">&quot;</span><span class="si">%.3f</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">SiteEntropy</span><span class="p">([</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">])</span>
+<span class="go">1.000</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="utils.SumCodonToAA">
+<tt class="descclassname">utils.</tt><tt class="descname">SumCodonToAA</tt><big>(</big><em>codondict</em>, <em>includestop=True</em><big>)</big><a class="headerlink" href="#utils.SumCodonToAA" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sums all codon entries for each amino acid.</p>
+<p><em>codondict</em> is a dictionary keyed by all codons (<em>dms_tools.codons</em>).
+The values should be numbers.</p>
+<p><em>includestop</em> specifies whether we also sum values for stop codons to
+give an entry for <tt class="docutils literal"><span class="pre">*</span></tt> (the stop codon). Do this only if has default
+value of <em>True</em>.</p>
+<p>The return value is <em>aadict</em> which is keyed by all amino acids and
+has values equal to the sum of the entries for the encoding
+codons in <em>codondict</em>.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">codondict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">([(</span><span class="n">codon</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="k">for</span> <span class="n">codon</span> <span class="ow">in</span> <span class="n">dms_tools</span><span class="o">.</span><span class="n">codons</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">codondict</span><span class="p">[</span><span class="s">&#39;GGG&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.1</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">codondict</span><span class="p">[</span><span class="s">&#39;GGA&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.2</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">codondict</span><span class="p">[</span><span class="s">&#39;TGA&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.3</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">codondict</span><span class="p">[</span><span class="s">&#39;CCC&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.4</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">aadict</span> <span class="o">=</span> <span class="n">SumCodonToAA</span><span class="p">(</span><span class="n">codondict</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="s">&quot;</span><span class="si">%.2f</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">aadict</span><span class="p">[</span><span class="s">&#39;G&#39;</span><span class="p">]</span>
+<span class="go">0.30</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="s">&quot;</span><span class="si">%.2f</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">aadict</span><span class="p">[</span><span class="s">&#39;P&#39;</span><span class="p">]</span>
+<span class="go">0.40</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="s">&quot;</span><span class="si">%.2f</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">aadict</span><span class="p">[</span><span class="s">&#39;*&#39;</span><span class="p">]</span>
+<span class="go">0.30</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="s">&quot;</span><span class="si">%.2f</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">aadict</span><span class="p">[</span><span class="s">&#39;Y&#39;</span><span class="p">]</span>
+<span class="go">0.00</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">aadict</span> <span class="o">=</span> <span class="n">SumCodonToAA</span><span class="p">(</span><span class="n">codondict</span><span class="p">,</span> <span class="n">includestop</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="s">&quot;</span><span class="si">%.2f</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">aadict</span><span class="p">[</span><span class="s">&#39;G&#39;</span><span class="p">]</span>
+<span class="go">0.30</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="s">&quot;</span><span class="si">%.2f</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">aadict</span><span class="p">[</span><span class="s">&#39;P&#39;</span><span class="p">]</span>
+<span class="go">0.40</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="s">&quot;</span><span class="si">%.2f</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">aadict</span><span class="p">[</span><span class="s">&#39;*&#39;</span><span class="p">]</span>
+<span class="gt">Traceback (most recent call last):</span>
+    <span class="o">...</span>
+<span class="gr">KeyError</span>: <span class="n">&#39;*&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="s">&quot;</span><span class="si">%.2f</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">aadict</span><span class="p">[</span><span class="s">&#39;Y&#39;</span><span class="p">]</span>
+<span class="go">0.00</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="utils.SumPrefsDiffPrefs">
+<tt class="descclassname">utils.</tt><tt class="descname">SumPrefsDiffPrefs</tt><big>(</big><em>datalist</em>, <em>minus=</em><span class="optional">[</span><span class="optional">]</span><big>)</big><a class="headerlink" href="#utils.SumPrefsDiffPrefs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sums preferences and differential preferences.</p>
+<p><em>datalist</em> is a list of preferences or differential preferences, which must be keyed
+by the same sets of sites and characters.</p>
+<p><em>minus</em> is an optional list that is <strong>subtracted</strong> rather than added in the sum.</p>
+<p>Returns a dictionary giving the sums.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">prefs</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;1&#39;</span><span class="p">:{</span><span class="s">&#39;A&#39;</span><span class="p">:</span><span class="mf">0.2</span><span class="p">,</span> <span class="s">&#39;T&#39;</span><span class="p">:</span><span class="mf">0.1</span><span class="p">,</span> <span class="s">&#39;C&#39;</span><span class="p">:</span><span class="mf">0.5</span><span class="p">,</span> <span class="s">&#39;G&#39;</span><span class="p">:</span><span class="mf">0.2</span><span class="p">}}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">diffprefs</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;1&#39;</span><span class="p">:{</span><span class="s">&#39;A&#39;</span><span class="p">:</span><span class="o">-</span><span class="mf">0.1</span><span class="p">,</span> <span class="s">&#39;T&#39;</span><span class="p">:</span><span class="mf">0.3</span><span class="p">,</span> <span class="s">&#39;C&#39;</span><span class="p">:</span><span class="o">-</span><span class="mf">0.2</span><span class="p">,</span> <span class="s">&#39;G&#39;</span><span class="p">:</span><span class="mf">0.0</span><span class="p">}}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">datasum</span> <span class="o">=</span> <span class="n">SumPrefsDiffPrefs</span><span class="p">([</span><span class="n">prefs</span><span class="p">,</span> <span class="n">diffprefs</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="s">&#39;</span><span class="si">%.2f</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">datasum</span><span class="p">[</span><span class="s">&#39;1&#39;</span><span class="p">][</span><span class="s">&#39;A&#39;</span><span class="p">]</span>
+<span class="go">0.10</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="s">&#39;</span><span class="si">%.2f</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">datasum</span><span class="p">[</span><span class="s">&#39;1&#39;</span><span class="p">][</span><span class="s">&#39;T&#39;</span><span class="p">]</span>
+<span class="go">0.40</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="s">&#39;</span><span class="si">%.2f</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">datasum</span><span class="p">[</span><span class="s">&#39;1&#39;</span><span class="p">][</span><span class="s">&#39;C&#39;</span><span class="p">]</span>
+<span class="go">0.30</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="s">&#39;</span><span class="si">%.2f</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">datasum</span><span class="p">[</span><span class="s">&#39;1&#39;</span><span class="p">][</span><span class="s">&#39;G&#39;</span><span class="p">]</span>
+<span class="go">0.20</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">minusprefs</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;1&#39;</span><span class="p">:{</span><span class="s">&#39;A&#39;</span><span class="p">:</span><span class="mf">0.1</span><span class="p">,</span> <span class="s">&#39;T&#39;</span><span class="p">:</span><span class="mf">0.1</span><span class="p">,</span> <span class="s">&#39;C&#39;</span><span class="p">:</span><span class="o">-</span><span class="mf">0.1</span><span class="p">,</span> <span class="s">&#39;G&#39;</span><span class="p">:</span><span class="o">-</span><span class="mf">0.1</span><span class="p">}}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">datasum</span> <span class="o">=</span> <span class="n">SumPrefsDiffPrefs</span><span class="p">([</span><span class="n">prefs</span><span class="p">,</span> <span class="n">diffprefs</span><span class="p">],</span> <span class="n">minus</span><span class="o">=</span><span class="p">[</span><span class="n">minusprefs</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="s">&#39;</span><span class="si">%.2f</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">datasum</span><span class="p">[</span><span class="s">&#39;1&#39;</span><span class="p">][</span><span class="s">&#39;A&#39;</span><span class="p">]</span>
+<span class="go">0.00</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="s">&#39;</span><span class="si">%.2f</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">datasum</span><span class="p">[</span><span class="s">&#39;1&#39;</span><span class="p">][</span><span class="s">&#39;T&#39;</span><span class="p">]</span>
+<span class="go">0.30</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="s">&#39;</span><span class="si">%.2f</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">datasum</span><span class="p">[</span><span class="s">&#39;1&#39;</span><span class="p">][</span><span class="s">&#39;C&#39;</span><span class="p">]</span>
+<span class="go">0.40</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="s">&#39;</span><span class="si">%.2f</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">datasum</span><span class="p">[</span><span class="s">&#39;1&#39;</span><span class="p">][</span><span class="s">&#39;G&#39;</span><span class="p">]</span>
+<span class="go">0.30</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</div>
+</div>
+<span class="target" id="module-parsearguments"></span><div class="section" id="parsearguments-module">
+<h2><tt class="docutils literal"><span class="pre">parsearguments</span></tt> module<a class="headerlink" href="#parsearguments-module" title="Permalink to this headline">¶</a></h2>
+<p>Module that parses command-line arguments for the scripts in <tt class="docutils literal"><span class="pre">dms_tools</span></tt>.</p>
+<p>Written by Jesse Bloom.</p>
+<div class="section" id="defined-in-this-module">
+<h3>Defined in this module<a class="headerlink" href="#defined-in-this-module" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><em>ArgumentParserNoArgHelp</em> : argument parser that prints help when no args</li>
+<li><em>FloatGreaterThanZero</em> : parses whether string is float greater than zero.</li>
+<li><em>ExistingFile</em> : parses whether string gives an existing file.</li>
+<li><em>PDF_File</em> : parses whether string gives a PDF file name.</li>
+<li><em>InferPrefsParser</em> : parser for <tt class="docutils literal"><span class="pre">dms_inferprefs</span></tt></li>
+<li><em>InferDiffPrefsParser</em> : parser for <tt class="docutils literal"><span class="pre">dms_inferdiffprefs</span></tt></li>
+<li><em>MergeParser</em> : parser for <tt class="docutils literal"><span class="pre">dms_merge</span></tt></li>
+<li><em>EditSitesParser</em> : parsers for <tt class="docutils literal"><span class="pre">dms_editsites</span></tt></li>
+<li><em>CorrelateParser</em> : parser for <tt class="docutils literal"><span class="pre">dms_correlate</span></tt></li>
+<li><em>LogoPlotParser</em> : parser for <tt class="docutils literal"><span class="pre">dms_logoplot</span></tt></li>
+</ul>
+</div>
+<div class="section" id="detailed-documentation">
+<h3>Detailed documentation<a class="headerlink" href="#detailed-documentation" title="Permalink to this headline">¶</a></h3>
+<dl class="class">
+<dt id="parsearguments.ArgumentParserNoArgHelp">
+<em class="property">class </em><tt class="descclassname">parsearguments.</tt><tt class="descname">ArgumentParserNoArgHelp</tt><big>(</big><em>prog=None</em>, <em>usage=None</em>, <em>description=None</em>, <em>epilog=None</em>, <em>version=None</em>, <em>parents=</em>, <span class="optional">[</span><span class="optional">]</span><em>formatter_class=&lt;class 'argparse.HelpFormatter'&gt;</em>, <em>prefix_chars='-'</em>, <em>fromfile_prefix_chars=None</em>, <em>argument_default=None</em>, <em>conflict_handler='error'</em>, <em>add_help=True</em><big>)</big><a class="headerlink" href="#parsearguments.ArgumentParserNoArgHelp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">argparse.ArgumentParser</span></tt></p>
+<p>Like <em>argparse.ArgumentParser</em>, but prints help when no arguments.</p>
+<dl class="method">
+<dt id="parsearguments.ArgumentParserNoArgHelp.error">
+<tt class="descname">error</tt><big>(</big><em>message</em><big>)</big><a class="headerlink" href="#parsearguments.ArgumentParserNoArgHelp.error" title="Permalink to this definition">¶</a></dt>
+<dd><p>Prints error message, then help.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="parsearguments.CorrelateParser">
+<tt class="descclassname">parsearguments.</tt><tt class="descname">CorrelateParser</tt><big>(</big><big>)</big><a class="headerlink" href="#parsearguments.CorrelateParser" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns <em>argparse.ArgumentParser</em> for <tt class="docutils literal"><span class="pre">dms_correlate</span></tt> script.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="parsearguments.EditSitesParser">
+<tt class="descclassname">parsearguments.</tt><tt class="descname">EditSitesParser</tt><big>(</big><big>)</big><a class="headerlink" href="#parsearguments.EditSitesParser" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="parsearguments.ExistingFile">
+<tt class="descclassname">parsearguments.</tt><tt class="descname">ExistingFile</tt><big>(</big><em>fname</em><big>)</big><a class="headerlink" href="#parsearguments.ExistingFile" title="Permalink to this definition">¶</a></dt>
+<dd><p>If <em>fname</em> is name of an existing file return it, otherwise an error.</p>
+<p>It is also acceptable for <em>fname</em> to be the string &#8220;none&#8221;.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="parsearguments.FloatGreaterThanZero">
+<tt class="descclassname">parsearguments.</tt><tt class="descname">FloatGreaterThanZero</tt><big>(</big><em>x</em><big>)</big><a class="headerlink" href="#parsearguments.FloatGreaterThanZero" title="Permalink to this definition">¶</a></dt>
+<dd><p>If <em>x</em> is string for float &gt; 0, returns it, otherwise an error.</p>
+<p>Designed based on this: <a class="reference external" href="http://stackoverflow.com/questions/12116685/how-can-i-require-my-python-scripts-argument-to-be-a-float-between-0-0-1-0-usin">http://stackoverflow.com/questions/12116685/how-can-i-require-my-python-scripts-argument-to-be-a-float-between-0-0-1-0-usin</a></p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="s">&quot;</span><span class="si">%.3f</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">FloatGreaterThanZero</span><span class="p">(</span><span class="s">&#39;0.1&#39;</span><span class="p">)</span>
+<span class="go">0.100</span>
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">FloatGreaterThanZero</span><span class="p">(</span><span class="s">&#39;0.0&#39;</span><span class="p">)</span>
+<span class="gt">Traceback (most recent call last):</span>
+    <span class="o">...</span>
+<span class="gr">ArgumentTypeError</span>: <span class="n">0.0 not a float greater than zero</span>
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">FloatGreaterThanZero</span><span class="p">(</span><span class="s">&#39;hi&#39;</span><span class="p">)</span>
+<span class="gt">Traceback (most recent call last):</span>
+    <span class="o">...</span>
+<span class="gr">ValueError</span>: <span class="n">could not convert string to float: hi</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="parsearguments.InferDiffPrefsParser">
+<tt class="descclassname">parsearguments.</tt><tt class="descname">InferDiffPrefsParser</tt><big>(</big><big>)</big><a class="headerlink" href="#parsearguments.InferDiffPrefsParser" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns <em>argparse.ArgumentParser</em> for <tt class="docutils literal"><span class="pre">dms_inferdiffprefs</span></tt> script.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="parsearguments.InferPrefsParser">
+<tt class="descclassname">parsearguments.</tt><tt class="descname">InferPrefsParser</tt><big>(</big><big>)</big><a class="headerlink" href="#parsearguments.InferPrefsParser" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns <em>argparse.ArgumentParser</em> for <tt class="docutils literal"><span class="pre">dms_inferprefs</span></tt> script.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="parsearguments.LogoPlotParser">
+<tt class="descclassname">parsearguments.</tt><tt class="descname">LogoPlotParser</tt><big>(</big><big>)</big><a class="headerlink" href="#parsearguments.LogoPlotParser" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns <em>argparse.ArgumentParser</em> for <tt class="docutils literal"><span class="pre">dms_logoplot</span></tt> script.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="parsearguments.MergeParser">
+<tt class="descclassname">parsearguments.</tt><tt class="descname">MergeParser</tt><big>(</big><big>)</big><a class="headerlink" href="#parsearguments.MergeParser" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns <em>argparse.ArgumentParser</em> for <tt class="docutils literal"><span class="pre">dms_merge</span></tt> script.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="parsearguments.PDF_File">
+<tt class="descclassname">parsearguments.</tt><tt class="descname">PDF_File</tt><big>(</big><em>fname</em><big>)</big><a class="headerlink" href="#parsearguments.PDF_File" title="Permalink to this definition">¶</a></dt>
+<dd><p>If <em>fname</em> ends in PDF extension, returns it. Otherwise an error.</p>
+</dd></dl>
+
+</div>
+</div>
+<span class="target" id="module-plot"></span><div class="section" id="plot-module">
+<h2><tt class="docutils literal"><span class="pre">plot</span></tt> module<a class="headerlink" href="#plot-module" title="Permalink to this headline">¶</a></h2>
+<p>This module uses <tt class="docutils literal"><span class="pre">pylab</span></tt> and <tt class="docutils literal"><span class="pre">matplotlib</span></tt> to make plots. 
+The <tt class="docutils literal"><span class="pre">pdf</span></tt> backend is used for <tt class="docutils literal"><span class="pre">matplotlib</span></tt> / <tt class="docutils literal"><span class="pre">pylab</span></tt>.</p>
+<p>Written by Jesse Bloom.</p>
+<div class="section" id="id5">
+<h3>Functions in this module<a class="headerlink" href="#id5" title="Permalink to this headline">¶</a></h3>
+<p><cite>PlotCorrelation</cite> : plots correlation between two variables.</p>
+<p><cite>Base10Formatter</cite> : formats numbers in base 10</p>
+</div>
+<div class="section" id="id6">
+<h3>Function documentation<a class="headerlink" href="#id6" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="plot.Base10Formatter">
+<tt class="descclassname">plot.</tt><tt class="descname">Base10Formatter</tt><big>(</big><em>number</em>, <em>exp_cutoff</em>, <em>exp_decimal_digits</em>, <em>decimal_digits</em><big>)</big><a class="headerlink" href="#plot.Base10Formatter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts a number into Latex formatting with scientific notation.</p>
+<p>Takes a number and converts it to a string that can be shown
+in LaTex using math mode. It is converted to scientific notation
+if the criteria specified by <cite>exp_cutoff</cite> is met.</p>
+<p><cite>number</cite> : the number to be formatted, should be a float or integer.
+Currently only works for <cite>number &gt;= 0</cite>.</p>
+<p><cite>exp_cutoff</cite> : convert to scientific notation if <tt class="docutils literal"><span class="pre">abs(math.log10(number))</span> 
+<span class="pre">&gt;=</span> <span class="pre">exp_cutoff</span></tt>.</p>
+<p><cite>exp_decimal_digits</cite> : show this many digits after the decimal if number
+is converted to scientific notation.</p>
+<p><cite>decimal_digits</cite> : show this many digits after the decimal if number
+is NOT converted to scientific notation.</p>
+<p>The returned value is a LaTex formatted string. If the number is zero, the
+returned string is simply &#8216;0&#8217;.</p>
+<p>EXAMPLES:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">Base10Formatter</span><span class="p">(</span><span class="mi">103</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="go">&#39;103.0&#39;</span>
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">Base10Formatter</span><span class="p">(</span><span class="mf">103.0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="go">&#39;1.0 \\times 10^{2}&#39;</span>
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">Base10Formatter</span><span class="p">(</span><span class="mf">103.0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="go">&#39;1.03 \\times 10^{2}&#39;</span>
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">Base10Formatter</span><span class="p">(</span><span class="mf">2892.3</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> 
+<span class="go">&#39;2.9 \\times 10^{3}&#39;</span>
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">Base10Formatter</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> 
+<span class="go">&#39;0&#39;</span>
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">Base10Formatter</span><span class="p">(</span><span class="mf">0.012</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="go">&#39;1.2 \\times 10^{-2}&#39;</span>
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">Base10Formatter</span><span class="p">(</span><span class="o">-</span><span class="mf">0.1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="gt">Traceback (most recent call last):</span>
+    <span class="o">...</span>
+<span class="gr">ValueError</span>: <span class="n">number must be &gt;= 0</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="plot.PlotCorrelation">
+<tt class="descclassname">plot.</tt><tt class="descname">PlotCorrelation</tt><big>(</big><em>xs</em>, <em>ys</em>, <em>plotfile</em>, <em>xlabel</em>, <em>ylabel</em>, <em>logx=False</em>, <em>logy=False</em>, <em>corr=None</em>, <em>title=False</em>, <em>alpha=1.0</em>, <em>symmetrize=False</em>, <em>fixaxes=False</em>, <em>additionalxy=</em>, <span class="optional">[</span><span class="optional">]</span><em>bigmargin=0.29</em>, <em>xsize=1.8</em>, <em>r2=False</em><big>)</big><a class="headerlink" href="#plot.PlotCorrelation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plots the correlation between two variables as a scatter plot.</p>
+<p>The data is plotted as a scatter plot.</p>
+<p>This function uses <tt class="docutils literal"><span class="pre">pylab</span></tt> / <tt class="docutils literal"><span class="pre">matplotlib</span></tt>.</p>
+<p>The calling variables use LaTex format for strings. So for
+example, &#8216;$10^5$&#8217; will print the LaTex equivalent of this 
+string. Similarly, certain raw text strings (such as those
+including underscores) will cause problems if you do not
+escape the LaTex format meaning. For instance, &#8216;x_label&#8217;
+will cause a problem since underscore is not valid
+outside of math mode in LaTex, so you would need to use
+&#8216;x_label&#8217; to escape the underscore.</p>
+<p>CALLING VARIABLES:</p>
+<ul class="simple">
+<li><em>xs</em> and <em>ys</em> are lists of numbers, with the lists
+being of the same length. Entry <em>xs[i]</em> is plotted
+on the x-axis against entries <em>ys[i]</em> on the y-axis.</li>
+<li><em>plotfile</em> is a string giving the name of the plot PDF file
+that we create. It should end in the extension <tt class="docutils literal"><span class="pre">.pdf</span></tt>.
+If this plot already exists, it is overwritten.</li>
+<li><em>xlabel</em> is a string giving the label placed on the x-axis.</li>
+<li><em>ylabel</em> is a string giving the label placed on the y-axis.</li>
+<li><em>logx</em> specifies that we log transform the data in <em>xs</em>.
+This is <em>False</em> by default; set to <em>True</em> if you want
+to log transform (base 10 logarithms) the data.</li>
+<li><em>logy</em> is like <em>logx</em>, but for the data in <em>ys</em>.</li>
+<li><em>corr</em> specifies that we include a correlation coefficient on the
+plot. If it has its default value of <em>None</em>, then no correlation
+coefficient is included. Otherwise, <em>corr = (r, p)</em> where <em>r</em> is
+the correlation coefficient (displayed with the label <tt class="docutils literal"><span class="pre">R</span></tt>) and <em>p</em>
+is the P-value (displayed with the label <tt class="docutils literal"><span class="pre">P</span></tt>).</li>
+<li><em>r2</em> : if <em>True</em> and using <em>corr</em>, then display <span class="math">\(R^2\)</span> rather
+than <span class="math">\(R\)</span>.</li>
+<li><em>title</em> is a string giving the title placed above the plot. 
+It can be <em>False</em> if no title is to be used. Otherwise, it should
+be the title string (using LaTex formatting, spaces are allowed).
+Is <em>False</em> by default.</li>
+<li><em>alpha</em> is the transparency of the plotted points. By default
+it is one, which means that there is no transparency. If you make
+the value closer to zero, then the points become partially transparent.
+The rationale is that if you have many overlapping points, making
+them partially transparent helps you better see the density.
+At any position on the plot, the intensity will be saturated
+when there are 1.0 / alpha points plotted. So a reasonable value
+of <em>alpha</em> might be something like 0.1.</li>
+<li><em>symmetrize</em> is an optional argument that is <em>False</em> by default.
+If <em>True</em>, we make the X and Y limits on the plot the same.</li>
+<li><em>fixaxes</em> is an optional argument that is <em>False</em> by default.
+If <em>True</em>, we fix both the X and Y axes to go from 0 to 1, 
+with ticks at 0, 0.5, and 1. If you set this option to <em>True</em>,
+then you must set <em>logx</em> and <em>logy</em> to <em>False</em>.</li>
+<li><em>additionalxy</em> is an optional list. By default, it is an empty list.
+However, you can use it to plot additional data points with a different
+color. The main data (specified by <em>xs</em> and <em>ys</em>) is plotted with
+blue circles. For each addition set of data that you want to plot,
+include a 2-tuple of lists of the form <em>(x2s, y2s)</em> in 
+<em>additionalxy</em>. Currently, only one such 2-tuple is allowed
+(so only one additional data set). These are plotted as red
+triangles, whereas the main data is plotted as blue
+circles. The same <em>alpha</em> value set by the <em>alpha</em> parameter applies
+to these points as well.</li>
+<li><em>bigmargin</em> is an optional argument that is 0.26 by default. It is
+the fraction of the plot width taken up by the larger margin, which
+is the bottom and left. Make larger if you need more space for axis
+labels.</li>
+<li><em>xsize</em> is an optional argument that is the width of the plot in inches.
+It is 1.8 by default.</li>
+</ul>
+</dd></dl>
+
+</div>
+</div>
+<span class="target" id="module-weblogo"></span><div class="section" id="weblogo-module">
+<h2><tt class="docutils literal"><span class="pre">weblogo</span></tt> module<a class="headerlink" href="#weblogo-module" title="Permalink to this headline">¶</a></h2>
+<p>Module for making sequence logos with the <em>weblogolib</em> package distributed with
+<tt class="docutils literal"><span class="pre">weblogo</span></tt> (<a class="reference external" href="http://weblogo.threeplusone.com/">http://weblogo.threeplusone.com/</a>). This module interfaces with the 
+<em>weblogolib</em> API, and so is only known to work with <em>weblogolib</em> version 3.4.</p>
+<p>Written by Jesse Bloom.</p>
+<div class="section" id="id7">
+<h3>Functions in this module<a class="headerlink" href="#id7" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><em>LogoPlot</em> : plots a sequence logo of site-specific preferences or differential preferences.</li>
+<li><em>LogoOverlay</em> : makes logo plot overlays, called by <em>LogoPlot</em>.</li>
+<li><em>KyteDoolittleColorMapping</em> : maps amino-acid hydrophobicities to colors.</li>
+</ul>
+</div>
+<div class="section" id="id8">
+<h3>Function documentation<a class="headerlink" href="#id8" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="weblogo.KyteDoolittleColorMapping">
+<tt class="descclassname">weblogo.</tt><tt class="descname">KyteDoolittleColorMapping</tt><big>(</big><em>maptype='jet'</em>, <em>reverse=True</em><big>)</big><a class="headerlink" href="#weblogo.KyteDoolittleColorMapping" title="Permalink to this definition">¶</a></dt>
+<dd><p>Maps amino-acid hydrophobicities to colors.</p>
+<p>Uses the Kyte-Doolittle hydrophobicity scale defined by:</p>
+<div class="highlight-python"><div class="highlight"><pre>J. Kyte &amp; R. F. Doolittle: 
+&quot;A simple method for displaying the hydropathic character of a protein.&quot; 
+J Mol Biol, 157, 105-132
+</pre></div>
+</div>
+<p>More positive values indicate higher hydrophobicity, while more negative values
+indicate lower hydrophobicity.</p>
+<p>The returned variable is the 3-tuple <em>(cmap, mapping_d, mapper)</em>:</p>
+<blockquote>
+<div><ul class="simple">
+<li><em>cmap</em> is a <tt class="docutils literal"><span class="pre">pylab</span></tt> <em>LinearSegmentedColorMap</em> object.</li>
+<li><em>mapping_d</em> is a dictionary keyed by the one-letter amino-acid
+codes. The values are the colors in CSS2 format (e.g. #FF0000
+for red) for that amino acid. The value for a stop codon 
+(denoted by a <tt class="docutils literal"><span class="pre">*</span></tt> character) is black (#000000).</li>
+<li><em>mapper</em> is the actual <em>pylab.cm.ScalarMappable</em> object.</li>
+</ul>
+</div></blockquote>
+<p>The optional calling argument <em>maptype</em> should specify a valid <tt class="docutils literal"><span class="pre">pylab</span></tt> color map.</p>
+<p>The optional calling argument <em>reverse</em> specifies that we set up the color
+map so that the most hydrophobic residue comes first (in the Kyte-Doolittle
+scale the most hydrophobic comes last as it has the largest value). This option
+is <em>True</em> by default as it seems more intuitive to have charged residues red
+and hydrophobic ones blue.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="weblogo.LogoOverlay">
+<tt class="descclassname">weblogo.</tt><tt class="descname">LogoOverlay</tt><big>(</big><em>sites</em>, <em>overlayfile</em>, <em>overlay</em>, <em>nperline</em>, <em>sitewidth</em>, <em>rmargin</em>, <em>logoheight</em>, <em>barheight</em>, <em>barspacing</em><big>)</big><a class="headerlink" href="#weblogo.LogoOverlay" title="Permalink to this definition">¶</a></dt>
+<dd><p>Makes overlay for <em>LogoPlot</em>.</p>
+<p>This function creates colored bars overlay bars showing up to two
+properties.
+The trick of this function is to create the bars the right
+size so they align when they overlay the logo plot.</p>
+<p>CALLING VARIABLES:</p>
+<ul class="simple">
+<li><em>sites</em> : same as the variable of this name used by <em>LogoPlot</em>.</li>
+<li><em>overlayfile</em> is a string giving the name of created PDF file containing
+the overlay. It must end in the extension <tt class="docutils literal"><span class="pre">.pdf</span></tt>.</li>
+<li><em>overlay</em> : same as the variable of this name used by <em>LogoPlot</em>.</li>
+<li><em>nperline</em> : same as the variable of this name used by <em>LogoPlot</em>.</li>
+<li><em>sitewidth</em> is the width of each site in points.</li>
+<li><em>rmargin</em> is the right margin in points.</li>
+<li><em>logoheight</em> is the total height of each logo row in points.</li>
+<li><em>barheight</em> is the total height of each bar in points.</li>
+<li><em>barspacing</em> is the vertical spacing between bars in points.</li>
+<li><em>cmap</em> is a <tt class="docutils literal"><span class="pre">pylab</span></tt> <em>LinearSegmentedColorMap</em> used for the bar coloring.</li>
+</ul>
+</dd></dl>
+
+<dl class="function">
+<dt id="weblogo.LogoPlot">
+<tt class="descclassname">weblogo.</tt><tt class="descname">LogoPlot</tt><big>(</big><em>sites</em>, <em>datatype</em>, <em>data</em>, <em>plotfile</em>, <em>nperline</em>, <em>numberevery=10</em>, <em>allowunsorted=False</em>, <em>ydatamax=1.01</em>, <em>overlay=None</em><big>)</big><a class="headerlink" href="#weblogo.LogoPlot" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constructs a sequence logo showing amino-acid or nucleotide preferences.</p>
+<p>The heights of each letter is equal to the preference of
+that site for that amino acid or nucleotide.</p>
+<p>Note that stop codons may or may not be included in the logo
+depending on whether they are present in <em>pi_d</em>.</p>
+<p>CALLING VARIABLES:</p>
+<ul>
+<li><p class="first"><em>sites</em> is a list of all of the sites that are being included
+in the logo, as strings or numbers. They must be in natural sort order (as
+is done by <em>dms_tools.utils.NaturalSort</em>) or an error will
+be raised <strong>unless</strong> <em>allowunsorted</em> is <em>True</em>. The sites
+in the plot are ordered in the same arrangement
+listed in <em>sites</em>. These should be <strong>strings</strong>, not integers.</p>
+</li>
+<li><p class="first"><em>datatype</em> should be one of the two following strings depending on whether
+we are making a plot of preferences or differential preferences: 
+&#8216;prefs&#8217; or &#8216;diffprefs&#8217;</p>
+</li>
+<li><p class="first"><em>data</em> is a dictionary that has a key for every entry in
+<em>sites</em>. For every site <em>r</em> in <em>sites</em>, <em>sites[r][x]</em>
+is the preference or differential preference for character <em>x</em>. 
+Preferences must sum to one; differential preferences to zero.
+All sites must have the same set of characters. The characters
+must be the set of nucleotides (<em>dms_tools.nts</em>)
+or the set of amino acids with or without stop codons
+(<em>dms_tools.aminoacids_nostop</em> or <em>dms_tools.aminoacids_withstop</em>).</p>
+</li>
+<li><p class="first"><em>plotfile</em> is a string giving the name of the created PDF file 
+of the logo plot.
+It must end in the extension <tt class="docutils literal"><span class="pre">.pdf</span></tt>.</p>
+</li>
+<li><p class="first"><em>nperline</em> is the number of sites per line. Often 40 to 80 are good values.</p>
+</li>
+<li><p class="first"><em>numberevery</em> is specifies how frequently we put labels for the sites on
+x-axis.</p>
+</li>
+<li><p class="first"><em>allowunsorted</em> : if <em>True</em> then we allow the entries in <em>sites</em> to 
+<strong>not</strong> be sorted. This means that the logo plot will <strong>not</strong> have
+sites in sorted order.</p>
+</li>
+<li><p class="first"><em>ydatamax</em> : meaningful only if <em>datatype</em> is &#8216;diffprefs&#8217;. In this case, it gives
+the maximum that the logo stacks extend in the positive and negative directions.
+Cannot be smaller than the maximum extent of the differential preferences.</p>
+</li>
+<li><p class="first"><em>overlay</em> : this argument allows you to make overlay bars that indicated
+other properties for the sites. By default, this option is <em>None</em>, meaning that
+no overlay is created. If you set it to something else, it must be a list
+giving either one or two properties. Each property is a tuple:
+<em>(prop_d, shortname, longname)</em> where:</p>
+<blockquote>
+<div><ul>
+<li><p class="first"><em>prop_d</em> is a dictionary keyed by site numbers that are in <em>sites</em>.
+For each <em>r</em> in <em>sites</em>, <em>prop_d[r]</em> gives the value of the property,
+or if there is no entry in <em>prop_d</em> for <em>r</em>, then the property
+is undefined and is colored white. Properties can either be:</p>
+<blockquote>
+<div><ul class="simple">
+<li>continuous: in this case, all of the values should be numbers.</li>
+<li>discrete : in this case, all of the values should be strings.
+While in practice, if you have more than a few discrete
+categories (different strings), the plot will be a mess.</li>
+</ul>
+</div></blockquote>
+</li>
+<li><p class="first"><em>shortname</em> : short name for the property; will not format well
+if more than 4 or 5 characters.</p>
+</li>
+<li><p class="first"><em>longname</em> : longer name for property used on axes label. Can be the
+same as <em>shortname</em> if you don&#8217;t need a different long name.</p>
+</li>
+</ul>
+</div></blockquote>
+</li>
+</ul>
+</dd></dl>
+
+</div>
+</div>
+<span class="target" id="module-simulate"></span><div class="section" id="simulate-module">
+<h2><tt class="docutils literal"><span class="pre">simulate</span></tt> module<a class="headerlink" href="#simulate-module" title="Permalink to this headline">¶</a></h2>
+<p>Module for simulating test data for analysis with <tt class="docutils literal"><span class="pre">dms_tools</span></tt>.</p>
+<p>Written by Jesse Bloom.</p>
+<div class="section" id="id9">
+<h3>Functions in this module<a class="headerlink" href="#id9" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><em>SimulateLibraryCounts</em> : simulates counts for testing inference of site-specific preferences.</li>
+<li><em>SimulatedDiffPrefCounts</em> : simulates counts for testing inference of differential preferences.</li>
+</ul>
+</div>
+<div class="section" id="id10">
+<h3>Function documentation<a class="headerlink" href="#id10" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="simulate.SimulateDiffPrefCounts">
+<tt class="descclassname">simulate.</tt><tt class="descname">SimulateDiffPrefCounts</tt><big>(</big><em>depths_outfiles</em>, <em>start_counts</em>, <em>diffprefs_file</em>, <em>avgepsilon</em>, <em>control_concentration=50.0</em>, <em>fracdiffer=0.25</em>, <em>diff_concentration=0.5</em>, <em>epsilon_concentration=300.0</em>, <em>seed=1</em><big>)</big><a class="headerlink" href="#simulate.SimulateDiffPrefCounts" title="Permalink to this definition">¶</a></dt>
+<dd><p>Simulates counts data for testing differential preference inference.</p>
+<p>Use this function if you want to simulate creation of a mutant library with known differential
+preferences and then test how accurately you can infer them.</p>
+<p>This function assumes mutations made at codon level, and that the site-specific preferences
+are at the amino-acid level.</p>
+<p>CALLING VARIABLES:</p>
+<ul>
+<li><p class="first"><em>depths_outfiles</em> : list of 2-tuples <em>(depth, outfile)</em>.</p>
+<blockquote>
+<div><ul>
+<li><p class="first"><em>depth</em> is an integer giving the per-site sequencing depth.</p>
+</li>
+<li><p class="first"><em>outfile</em> is a string giving the prefix for the created
+deep mutational scanning counts file. These files are deleted
+if they already exist, and then re-created. The suffixes are:</p>
+<blockquote>
+<div><ul class="simple">
+<li><tt class="docutils literal"><span class="pre">_start.txt</span></tt> starting library counts</li>
+<li><tt class="docutils literal"><span class="pre">_s1.txt</span></tt> control selection counts</li>
+<li><tt class="docutils literal"><span class="pre">_s2.txt</span></tt> alternate selection counts.</li>
+<li><tt class="docutils literal"><span class="pre">_err.txt</span></tt> error control counts, only created if <em>avgepsilon</em> is not zero.</li>
+</ul>
+</div></blockquote>
+</li>
+</ul>
+</div></blockquote>
+</li>
+<li><p class="first"><em>start_counts</em> : an existing deep mutational scanning counts file; the starting counts are proportional to these.</p>
+</li>
+<li><p class="first"><em>diffprefs_file</em> : created file giving differential preferences used in simulation.</p>
+</li>
+<li><p class="first"><em>avgepsilon</em> : average error rate in sequencing. This is the average
+rate at which each nucleotide is mis-read as some other nucleotide. Set to zero
+if there are no errors.</p>
+</li>
+<li><p class="first"><em>control_concentration</em> : concentration for &#8220;control&#8221; preferences.</p>
+</li>
+<li><p class="first"><em>fracdiffer</em> fraction of sites for which differential preferences are non-zero.</p>
+</li>
+<li><p class="first"><em>diff_concentration</em> : concentration parameter for differential preferences.</p>
+</li>
+<li><p class="first"><em>epsilon_concentration</em> : concentration parameter for errors.</p>
+</li>
+<li><p class="first"><em>seed</em> : random number seed.</p>
+</li>
+</ul>
+<p>RESULT OF THIS FUNCTION:</p>
+<p>The result of this function is creation of the files specified in <em>depths_outfiles</em>.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="simulate.SimulateLibraryCounts">
+<tt class="descclassname">simulate.</tt><tt class="descname">SimulateLibraryCounts</tt><big>(</big><em>depths_outfiles</em>, <em>prefs_file</em>, <em>avgmu</em>, <em>avgepsilon</em>, <em>avgrho</em>, <em>mu_concentration=300.0</em>, <em>epsilon_concentration=300.0</em>, <em>rho_concentration=300.0</em>, <em>seed=1</em><big>)</big><a class="headerlink" href="#simulate.SimulateLibraryCounts" title="Permalink to this definition">¶</a></dt>
+<dd><p>Simulates counts data for deep mutational scanning experiment.</p>
+<p>This function can be used if you want to simulate the creation of a mutant library
+with a set of known site-specific preferences to then test how accurately you can
+infer these preferences.</p>
+<p>This function assumes mutations made at codon level, and that the site-specific preferences
+are at the amino-acid level.</p>
+<p>All random variables are drawn from Dirichlet distributions with the indicated
+concentration parameters.</p>
+<p>CALLING VARIABLES:</p>
+<ul>
+<li><p class="first"><em>depths_outfiles</em> : list of 2-tuples <em>(depth, outfile)</em>.</p>
+<blockquote>
+<div><ul>
+<li><p class="first"><em>depth</em> is an integer giving the per-site sequencing depth.</p>
+</li>
+<li><p class="first"><em>outfile</em> is a string giving the prefix for the created
+deep mutational scanning counts file. These files are deleted
+if they already exist, and then re-created. The suffixes are:</p>
+<blockquote>
+<div><ul class="simple">
+<li><tt class="docutils literal"><span class="pre">_pre.txt</span></tt> for pre-selection counts</li>
+<li><tt class="docutils literal"><span class="pre">_post.txt</span></tt> for post-selection counts</li>
+<li><tt class="docutils literal"><span class="pre">_errpre.txt</span></tt> for pre-selection error-control counts,
+only created if <em>avgepsilon</em> is not zero.</li>
+<li><tt class="docutils literal"><span class="pre">_errpost.txt</span></tt> for post-selection error-control counts,
+only created if <em>avgrho</em> is not zero.</li>
+</ul>
+</div></blockquote>
+</li>
+</ul>
+</div></blockquote>
+</li>
+<li><p class="first"><em>prefs_file</em> : name of an existing file giving the actual site-specific amino-acid
+preferences, either with or without stop codons. Data are simulated using these preferences.
+If stop codons are not specified, the preferences for such codons are set to zero.</p>
+</li>
+<li><p class="first"><em>avgmu</em> : average mutation rate at each site to <strong>any</strong> non-wildtype codon. The actual
+mutation rate to each possible codon is drawn from a Dirichlet.</p>
+</li>
+<li><p class="first"><em>avgepsilon</em> : average error rate in pre-selection library. This is the average
+rate at which each nucleotide is mis-read as some other nucleotide. Set to zero
+if there are no errors.</p>
+</li>
+<li><p class="first"><em>avgrho</em> : average error rate in post-selection library. This is the average
+rate at which each nucleotide is mis-read as some other nucleotide. Set to zero
+if there are no errors.</p>
+</li>
+<li><p class="first"><em>mu_concentration</em> : mutation rates for any given codon drawn
+from Dirichlet with this concentration parameter.</p>
+</li>
+<li><p class="first"><em>epsilon_concentration</em> : concentration parameter for pre-selection error rate.</p>
+</li>
+<li><p class="first"><em>rho_concentration</em> : concentratiion parameter for post-selection error rate.</p>
+</li>
+<li><p class="first"><em>seed</em> is seed for random number generators</p>
+</li>
+</ul>
+<p>RESULT OF THIS FUNCTION:</p>
+<p>The result of this function is creation of the files specified in <em>depths_outfiles</em>.</p>
+</dd></dl>
+
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Python API</a><ul>
+<li><a class="reference internal" href="#dms-tools-package"><tt class="docutils literal"><span class="pre">dms_tools</span></tt> package</a><ul>
+<li><a class="reference internal" href="#modules-in-the-package">Modules in the package</a></li>
+<li><a class="reference internal" href="#package-level-variables">Package-level variables</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#mcmc-module"><tt class="docutils literal"><span class="pre">mcmc</span></tt> module</a><ul>
+<li><a class="reference internal" href="#functions-in-this-module">Functions in this module</a></li>
+<li><a class="reference internal" href="#function-documentation">Function documentation</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#file-io-module"><tt class="docutils literal"><span class="pre">file_io</span></tt> module</a><ul>
+<li><a class="reference internal" href="#id1">Functions in this module</a></li>
+<li><a class="reference internal" href="#id2">Function documentation</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#utils-module"><tt class="docutils literal"><span class="pre">utils</span></tt> module</a><ul>
+<li><a class="reference internal" href="#id3">Functions in this module</a></li>
+<li><a class="reference internal" href="#id4">Function documentation</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#parsearguments-module"><tt class="docutils literal"><span class="pre">parsearguments</span></tt> module</a><ul>
+<li><a class="reference internal" href="#defined-in-this-module">Defined in this module</a></li>
+<li><a class="reference internal" href="#detailed-documentation">Detailed documentation</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#plot-module"><tt class="docutils literal"><span class="pre">plot</span></tt> module</a><ul>
+<li><a class="reference internal" href="#id5">Functions in this module</a></li>
+<li><a class="reference internal" href="#id6">Function documentation</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#weblogo-module"><tt class="docutils literal"><span class="pre">weblogo</span></tt> module</a><ul>
+<li><a class="reference internal" href="#id7">Functions in this module</a></li>
+<li><a class="reference internal" href="#id8">Function documentation</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#simulate-module"><tt class="docutils literal"><span class="pre">simulate</span></tt> module</a><ul>
+<li><a class="reference internal" href="#id9">Functions in this module</a></li>
+<li><a class="reference internal" href="#id10">Function documentation</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="inferdiffprefs_algorithm.html"
+                        title="previous chapter">Algorithm to infer differential preferences</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="citations.html"
+                        title="next chapter">Citations and Acknowledgments</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/pythonapi.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="citations.html" title="Citations and Acknowledgments"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="inferdiffprefs_algorithm.html" title="Algorithm to infer differential preferences"
+             >previous</a> |</li>
+        <li><a href="index.html">dms_tools 1.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2014, Jesse Bloom.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3a0.
+    </div>
+  </body>
+</html>
