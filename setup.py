@@ -7,11 +7,13 @@ Written by Jesse Bloom.
 import sys
 import os
 import re
-from distutils.core import setup
-from distutils.core import Extension
-from distutils.core import Command
+try:
+    from setuptools import setup
+except ImportError:
+    from distutils.core import setup
 
-# get metadata
+
+# get metadata, which is specified in another file
 metadata = {}
 lines = open('src/_metadata.py').readlines()
 for dataname in ['version', 'author', 'author_email', 'url']:
@@ -25,6 +27,7 @@ for dataname in ['version', 'author', 'author_email', 'url']:
                 metadata[dataname] = entries[1].strip()[1 : -1]
     assert dataname in metadata, "Failed to find metadata for %s" % dataname
 
+
 # main setup command
 setup(
     name = 'dms_tools', 
@@ -33,9 +36,20 @@ setup(
     author_email = metadata['author_email'],
     url = metadata['url'],
     description = 'Deep mutational scanning (DMS) analysis tools.',
+    long_description = 'Deep mutational scanning (DMS) analysis tools.',
+    license = 'GPLv3',
+    install_requires = [\
+        'biopython>=1.6',\
+        'scipy>=0.13',\
+        'numpy>=1.8',\
+        'matplotlib>=1.3',\
+        'pystan>=2.5',\
+        'cython>=0.21',\
+        'weblogo==3.4',\
+        'PyPDF2>=1.23',\
+        ],
     classifiers = [
         'Intended Audience :: Science/Research',
-        'License :: GPLv3',
         'Natural Language :: English',
         'Operating System :: Linux (and maybe also Mac OS X)',
         'Programming Language :: Python',

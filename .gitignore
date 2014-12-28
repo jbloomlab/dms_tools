@@ -10,3 +10,5 @@ build/
 *.sbatch
 *.swp
 *.log
+dist/
+dms_tools.egg-info/
