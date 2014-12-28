@@ -12,6 +12,8 @@ try:
 except ImportError:
     from distutils.core import setup
 
+if (sys.version_info[0], sys.version_info[1]) != (2, 7):
+    raise RuntimeError('dms_tools is currently only compatible with Python 2.7.\nYou are using Python %d.%d' % (sys.version_info[0], sys.version_info[1]))
 
 # get metadata, which is specified in another file
 metadata = {}
@@ -53,14 +55,7 @@ setup(
         'weblogo==3.4',\
         'PyPDF2>=1.23',\
         ],
-    classifiers = [
-        'Intended Audience :: Science/Research',
-        'Natural Language :: English',
-        'Operating System :: Linux (and maybe also Mac OS X)',
-        'Programming Language :: Python',
-        'Topic :: Scientific/Engineering :: Bio-Informatics',
-        ],
-    platforms = 'Tested on Linux.',
+    platforms = 'Linux (and maybe also Mac OS X).',
     packages = ['dms_tools'],
     package_dir = {'dms_tools':'src'},
     scripts = [
