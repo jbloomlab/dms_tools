@@ -1,7 +1,3 @@
-========================
-``dms_tools``
-========================
-
 ``dms_tools`` is a `Python`_ package that provides tools for analyzing and visualizing **d**\eep **m**\utational **s**\canning data.
 
 See the `dms_tools documentation`_ for information on how to install and use ``dms_tools``.
