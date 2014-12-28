@@ -28,6 +28,10 @@ for dataname in ['version', 'author', 'author_email', 'url']:
     assert dataname in metadata, "Failed to find metadata for %s" % dataname
 
 
+with open('README.rst') as f:
+    readme = f.read()
+
+
 # main setup command
 setup(
     name = 'dms_tools', 
@@ -35,8 +39,9 @@ setup(
     author = metadata['author'],
     author_email = metadata['author_email'],
     url = metadata['url'],
+    download_url = 'https://github.com/jbloom/dms_tools/tarball/%s' % metadata['version'], # assumes appropriate tagged version is on GitHub
     description = 'Deep mutational scanning (DMS) analysis tools.',
-    long_description = 'Deep mutational scanning (DMS) analysis tools.',
+    long_description = readme,
     license = 'GPLv3',
     install_requires = [\
         'biopython>=1.6',\
