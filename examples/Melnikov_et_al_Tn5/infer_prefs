@@ -11,7 +11,7 @@ dms_inferprefs ./processed_data/input_1_dms_counts.txt ./processed_data/kanamyci
 dms_inferprefs ./processed_data/input_2_dms_counts.txt ./processed_data/kanamycin_2_dms_counts.txt ./processed_data/prefs_2.txt --excludestop --ncpus -1 --chartype aa
 #
 # Compute correlation between preferences of two replicates
-dms_correlate ./processed_data/prefs_1.txt ./processed_data/prefs_2.txt ./processed_data/replicate_pref_corr --name1 "replicate 1" --name 2 "replicate 2" --corr_on_plot
+dms_correlate ./processed_data/prefs_1.txt ./processed_data/prefs_2.txt replicate_pref_corr --name1 "replicate 1" --name2 "replicate 2" --corr_on_plot
 #
 # Use dms_merge to average the inferred preferences from the two replicates
 dms_merge ./processed_data/prefs.txt average ./processed_data/prefs_1.txt ./processed_data/prefs_2.txt
