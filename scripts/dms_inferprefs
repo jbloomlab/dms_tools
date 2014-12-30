@@ -224,7 +224,12 @@ def main():
                         logged[r] = True
                         logger.info('Finished inference for site %s. Here is the summary:\n%s\n' % (r, logstring))
                         if not converged:
+                            logger.error('Failed to converge for site %s. Here is a summary of the attempt:\n%s\n' % (r, logstring))
+                            with open('_debugging_counts_%s.pickle' % r, 'w') as f:
+                                cPickle.dump(counts_r[r], f) # information potentially useful for debugging
                             raise RuntimeError("Preference inference MCMC failed to converge for site %s:\n%s" % (r, logstring))
+                        else:
+                            logger.info('Finished inference for site %s. Here is the summary:\n%s\n' % (r, logstring))
                         pi_means[r] = pi
                         pi_95credint[r] = pi95
         pool.terminate()
