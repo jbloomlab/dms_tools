@@ -65,6 +65,7 @@ def main():
         os.mkdir(simulated_dir)
     start_counts = 'start_counts.txt' # plausible starting counts based on Melnikov et al data
     actual_diff_prefs = './simulated_data/actual_diff_prefs.txt'
+    one_over_mu = 264 # gene length, inverse of mutation rate
 
     # simulate data, then analyze
     simulatedfiles = SimulateCounts(simulated_dir, start_counts, 'simulated', actual_diff_prefs)
@@ -77,10 +78,10 @@ def main():
             depth = float(re.search('_depth_([\d\.eE\+]+)_', outfile).group(1))
             depths.add(depth)
             alphas.add(float(alpha))
-#            subprocess.call(['dms_inferdiffprefs', nstart, ns1, ns2, outfile, '--err', nerr, '--ncpus', '-1', '--alpha_deltapi', alpha])
+            subprocess.call(['dms_inferdiffprefs', nstart, ns1, ns2, outfile, '--err', nerr, '--ncpus', '-1', '--alpha_deltapi', alpha])
             corrprefix = '%s_corr' % os.path.splitext(outfile)[0]
             corr_plots.append((depth, float(alpha), '%s.pdf' % corrprefix))
-#            subprocess.call(['dms_correlate', actual_diff_prefs, outfile, corrprefix, '--name1', 'actual', '--name2', 'inferred', '--corr_on_plot', '--r2'])
+            subprocess.call(['dms_correlate', actual_diff_prefs, outfile, corrprefix, '--name1', 'actual', '--name2', 'inferred', '--corr_on_plot', '--r2'])
 
     # make merged summary PDFs
     depths = list(depths)
@@ -109,11 +110,12 @@ def main():
             iwidth = plotwidth
             if firstcolumn:
                 iwidth += 0.6
+            Nmu = str(int(depth / float(one_over_mu)))
             depth = dms_tools.plot.Base10Formatter(depth, 2, 0, 0)
             if firstcolumn:
-                f.write('\n\\begin{minipage}{%.2fin}\n\centerline{\large \hspace{0.7in}\\bf depth of $\mathbf{%s}$}\n\hspace{0.01in}\n' % (iwidth, depth))
+                f.write('\n\\begin{minipage}{%.2fin}\n\centerline{\large \hspace{0.7in} $N\mu = \mathbf{\\frac{%s}{%d} \\approx %s}$}\n\hspace{0.01in}\n' % (iwidth, depth, one_over_mu, Nmu))
             else:
-                f.write('\n\\begin{minipage}{%.2fin}\n\centerline{\large \hspace{0.4in}\\bf depth of $\mathbf{%s}$}\n\hspace{0.01in}\n' % (iwidth, depth))
+                f.write('\n\\begin{minipage}{%.2fin}\n\centerline{\large \hspace{0.4in}$N\mu = \mathbf{\\frac{%s}{%d} \\approx %s}$}\n\hspace{0.01in}\n' % (iwidth, depth, one_over_mu, Nmu))
             for (ialpha, alpha) in enumerate(alphas):
                 plot = corr_plots[ialpha + len(alphas) * idepth][2]
                 if firstcolumn:
