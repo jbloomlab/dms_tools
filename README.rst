@@ -2,7 +2,8 @@
 
 See the `dms_tools documentation`_ for information on how to install and use ``dms_tools``.
 
-``dms_tools`` is available under an open-source `GPLv3`_ license. 
+``dms_tools`` `source code is on GitHub`_ under an open-source `GPLv3`_ license.  
+
 Please `cite dms_tools appropriately`_ if you use it.
 
 ``dms_tools`` is written by `Jesse Bloom`_.
