@@ -40,7 +40,7 @@ and
 
    0 \le \pi_{r,x}^{s1} + \Delta\pi_{r,x} \le 1.
 
-If there is no difference between the site-specific preferences in selections :math:`s1` and :math:`s2`, then :math:`\Delta\pi_{r,x} = 0`. If :math:`x` at :math:`r` is more preferred in selection :math:`s2` than :math:`s1`, then :math:`\Delta\pi_{r,x} > 0`; conversely if :math:`x` at :math:`r` is more preferred in selection :math:`s1` than :math:`s2`, then `\Delta\pi_{r,x} < 0`. 
+If there is no difference between the site-specific preferences in selections :math:`s1` and :math:`s2`, then :math:`\Delta\pi_{r,x} = 0`. If :math:`x` at :math:`r` is more preferred in selection :math:`s2` than :math:`s1`, then :math:`\Delta\pi_{r,x} > 0`; conversely if :math:`x` at :math:`r` is more preferred in selection :math:`s1` than :math:`s2`, then :math:`\Delta\pi_{r,x} < 0`. 
 
 The experimental data from deep sequencing.
 -------------------------------------------
