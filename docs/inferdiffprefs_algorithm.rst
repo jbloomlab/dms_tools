@@ -71,8 +71,8 @@ The notation below follows that in :ref:`inferprefs_algorithm`, so look there fo
 We define vectors of the character frequencies, preferences, and differential preferences
 at each site :math:`r`:
 :math:`\boldsymbol{\mathbf{f_r^{\textbf{start}}}}= \left(\cdots, f_{r,x}^{\textrm{start}}, \cdots\right)`,
-:math:`\boldsymbol{\mathbf{f_r^{s1}}}= \left(\cdots, f_{r,x}^{\textrm{start}}, \cdots\right)`,
-:math:`\boldsymbol{\mathbf{f_r^{s2}}}= \left(\cdots, f_{r,x}^{\textrm{start}}, \cdots\right)`,
+:math:`\boldsymbol{\mathbf{f_r^{s1}}}= \left(\cdots, f_{r,x}^{\textrm{s1}}, \cdots\right)`,
+:math:`\boldsymbol{\mathbf{f_r^{s2}}}= \left(\cdots, f_{r,x}^{\textrm{s2}}, \cdots\right)`,
 :math:`\boldsymbol{\mathbf{\xi_r}}= \left(\cdots, \xi_{r,x}, \cdots\right)`,
 :math:`\boldsymbol{\mathbf{\pi^{s1}_r}}= \left(\cdots, \pi^{s1}_{r,x}, \cdots\right)`,
 and
