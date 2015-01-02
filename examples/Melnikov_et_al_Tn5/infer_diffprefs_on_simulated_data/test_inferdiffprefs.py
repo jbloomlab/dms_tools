@@ -113,9 +113,9 @@ def main():
             Nmu = str(int(depth / float(one_over_mu)))
             depth = dms_tools.plot.Base10Formatter(depth, 2, 0, 0)
             if firstcolumn:
-                f.write('\n\\begin{minipage}{%.2fin}\n\centerline{\large \hspace{0.7in} $N\mu = \mathbf{\\frac{%s}{%d} \\approx %s}$}\n\hspace{0.01in}\n' % (iwidth, depth, one_over_mu, Nmu))
+                f.write('\n\\begin{minipage}{%.2fin}\n\centerline{\large \hspace{0.7in} $\mathbf{N\overline{\mu} = \\frac{%s}{%d} \\approx %s}$}\n\hspace{0.01in}\n' % (iwidth, depth, one_over_mu, Nmu))
             else:
-                f.write('\n\\begin{minipage}{%.2fin}\n\centerline{\large \hspace{0.4in}$N\mu = \mathbf{\\frac{%s}{%d} \\approx %s}$}\n\hspace{0.01in}\n' % (iwidth, depth, one_over_mu, Nmu))
+                f.write('\n\\begin{minipage}{%.2fin}\n\centerline{\large \hspace{0.4in}$\mathbf{N\overline{\mu} = \\frac{%s}{%d} \\approx %s}$}\n\hspace{0.01in}\n' % (iwidth, depth, one_over_mu, Nmu))
             for (ialpha, alpha) in enumerate(alphas):
                 plot = corr_plots[ialpha + len(alphas) * idepth][2]
                 if firstcolumn:

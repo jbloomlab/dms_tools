@@ -115,7 +115,7 @@ def main():
         for i in range(len(corr_plots) // 4):
             depth = dms_tools.plot.Base10Formatter(corr_plots[4 * i][0], 2, 0, 0)
             Nmu = str(int(corr_plots[4 * i][0] / float(one_over_mu)))
-            f.write('\n\\begin{minipage}{%.2fin}\n\centerline{\large \hspace{0.4in} $\mathbf{N\mu = \\frac{%s}{%d} \\approx %s}$}\n\hspace{0.01in}\n\centerline{\includegraphics[width=%.2fin]{%s}}\n\centerline{\includegraphics[width=%.2fin]{%s}}\n\\vspace{0.2in}\n\n\centerline{\includegraphics[width=%.2fin]{%s}}\n\centerline{\includegraphics[width=%.2fin]{%s}}\n\end{minipage}' % (1.05 * plotwidth, depth, one_over_mu, Nmu, plotwidth, corr_plots[4 * i][1], plotwidth, corr_plots[4 * i + 1][1], plotwidth, corr_plots[4 * i + 2][1], plotwidth, corr_plots[4 * i + 3][1]))
+            f.write('\n\\begin{minipage}{%.2fin}\n\centerline{\large \hspace{0.4in} $\mathbf{N\overline{\mu} = \\frac{%s}{%d} \\approx %s}$}\n\hspace{0.01in}\n\centerline{\includegraphics[width=%.2fin]{%s}}\n\centerline{\includegraphics[width=%.2fin]{%s}}\n\\vspace{0.2in}\n\n\centerline{\includegraphics[width=%.2fin]{%s}}\n\centerline{\includegraphics[width=%.2fin]{%s}}\n\end{minipage}' % (1.05 * plotwidth, depth, one_over_mu, Nmu, plotwidth, corr_plots[4 * i][1], plotwidth, corr_plots[4 * i + 1][1], plotwidth, corr_plots[4 * i + 2][1], plotwidth, corr_plots[4 * i + 3][1]))
         f.write('\n\end{figure}\n\end{document}')
     subprocess.call(['pdflatex', fname])
     for f in glob.glob('%s.*' % os.path.splitext(fname)[0]):
