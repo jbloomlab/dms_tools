@@ -1,0 +1,8 @@
+*synctex.gz
+*.out
+*.cpt
+*.blg
+*.aux
+*.out
+*.bbl
+example*.pdf
