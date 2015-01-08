@@ -72,6 +72,8 @@ Command-line usage
     Larger values correspond to a stronger prior expectation that the differential preference is zero. You might therefore consider using a value :math:`> 1` in order to enforce a prior expectation that there is no difference between the selections.
 
    \-\-chartype
+    Note that the **default** value is "codon_to_aa".
+
     A value of "codon_to_aa" corresponds to using codon characters for the deep sequencing data, but inferring differential preferences for amino acids, as described in :ref:`chartype_codon_to_aa` This would be the sensible approach if you assume that selection is operating on the amino-acid level. Note that the priors over the mutagenesis rates assume that all codon mutations are made at equal frequencies (``NNN`` libraries).
 
     A value of "DNA" corresponds to using DNA characters for both the deep sequencing data and inferred preferences, as described in :ref:`chartype_DNA`
