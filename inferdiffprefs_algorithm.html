@@ -85,7 +85,7 @@
 <p>and</p>
 <div class="math" id="equation-diffprefpluspref">
 <span class="eqno">(4)</span>\[0 \le \pi_{r,x}^{s1} + \Delta\pi_{r,x} \le 1.\]</div>
-<p>If there is no difference between the site-specific preferences in selections <span class="math">\(s1\)</span> and <span class="math">\(s2\)</span>, then <span class="math">\(\Delta\pi_{r,x} = 0\)</span>. If <span class="math">\(x\)</span> at <span class="math">\(r\)</span> is more preferred in selection <span class="math">\(s2\)</span> than <span class="math">\(s1\)</span>, then <span class="math">\(\Delta\pi_{r,x} &gt; 0\)</span>; conversely if <span class="math">\(x\)</span> at <span class="math">\(r\)</span> is more preferred in selection <span class="math">\(s1\)</span> than <span class="math">\(s2\)</span>, then <cite>Deltapi_{r,x} &lt; 0</cite>.</p>
+<p>If there is no difference between the site-specific preferences in selections <span class="math">\(s1\)</span> and <span class="math">\(s2\)</span>, then <span class="math">\(\Delta\pi_{r,x} = 0\)</span>. If <span class="math">\(x\)</span> at <span class="math">\(r\)</span> is more preferred in selection <span class="math">\(s2\)</span> than <span class="math">\(s1\)</span>, then <span class="math">\(\Delta\pi_{r,x} &gt; 0\)</span>; conversely if <span class="math">\(x\)</span> at <span class="math">\(r\)</span> is more preferred in selection <span class="math">\(s1\)</span> than <span class="math">\(s2\)</span>, then <span class="math">\(\Delta\pi_{r,x} &lt; 0\)</span>.</p>
 </div>
 <div class="section" id="the-experimental-data-from-deep-sequencing">
 <h2><a class="toc-backref" href="#id3">The experimental data from deep sequencing.</a><a class="headerlink" href="#the-experimental-data-from-deep-sequencing" title="Permalink to this headline">¶</a></h2>
@@ -113,8 +113,8 @@ and
 <p>We define vectors of the character frequencies, preferences, and differential preferences
 at each site <span class="math">\(r\)</span>:
 <span class="math">\(\boldsymbol{\mathbf{f_r^{\textbf{start}}}}= \left(\cdots, f_{r,x}^{\textrm{start}}, \cdots\right)\)</span>,
-<span class="math">\(\boldsymbol{\mathbf{f_r^{s1}}}= \left(\cdots, f_{r,x}^{\textrm{start}}, \cdots\right)\)</span>,
-<span class="math">\(\boldsymbol{\mathbf{f_r^{s2}}}= \left(\cdots, f_{r,x}^{\textrm{start}}, \cdots\right)\)</span>,
+<span class="math">\(\boldsymbol{\mathbf{f_r^{s1}}}= \left(\cdots, f_{r,x}^{\textrm{s1}}, \cdots\right)\)</span>,
+<span class="math">\(\boldsymbol{\mathbf{f_r^{s2}}}= \left(\cdots, f_{r,x}^{\textrm{s2}}, \cdots\right)\)</span>,
 <span class="math">\(\boldsymbol{\mathbf{\xi_r}}= \left(\cdots, \xi_{r,x}, \cdots\right)\)</span>,
 <span class="math">\(\boldsymbol{\mathbf{\pi^{s1}_r}}= \left(\cdots, \pi^{s1}_{r,x}, \cdots\right)\)</span>,
 and
@@ -130,7 +130,7 @@ around the actual frequencies. So</p>
 <div class="math" id="equation-pr_nrstart">
 <span class="eqno">(7)</span>\[\Pr\left(\mathbf{n_r^{\textbf{start}}}\mid N_r^{\textrm{start}}, \boldsymbol{\mathbf{f_r^{\textbf{start}}}}, \boldsymbol{\mathbf{\xi_r}}\right) = \operatorname{Multinomial}\left(\mathbf{n_r^{\textbf{start}}}; N_r^{\textrm{start}}, \boldsymbol{\mathbf{f_r^{\textbf{start}}}} + \boldsymbol{\mathbf{\xi_r}}- \boldsymbol{\mathbf{\delta_r}}\right)\]</div>
 <div class="math" id="equation-pr_nrerr">
-<span class="eqno">(8)</span>\[\Pr\left(\mathbf{n_r^{\textbf{err}}}\mid N_r^{\textrm{err}}, \boldsymbol{\mathbf{\xi_r}}\right) = \operatorname{Multinomial}\left(\mathbf{n_r^{\textbf{err}}}; N_r^{\textrm{err}}, \boldsymbol{\mathbf{\xi_r}}- \boldsymbol{\mathbf{\delta_r}}\right)\]</div>
+<span class="eqno">(8)</span>\[\Pr\left(\mathbf{n_r^{\textbf{err}}}\mid N_r^{\textrm{err}}, \boldsymbol{\mathbf{\xi_r}}\right) = \operatorname{Multinomial}\left(\mathbf{n_r^{\textbf{err}}}; N_r^{\textrm{err}}, \boldsymbol{\mathbf{\xi_r}} \right)\]</div>
 <div class="math" id="equation-pr_nrs1">
 <span class="eqno">(9)</span>\[\begin{split}\begin{eqnarray}
 \Pr\left(\mathbf{n_r^{s1}}\mid N_r^{s1}, \boldsymbol{\mathbf{f_r^{\textbf{start}}}}, \boldsymbol{\mathbf{\pi_r^{s1}}}, \boldsymbol{\mathbf{\xi_r}}\right) &amp;=&amp; \operatorname{Multinomial}\left(\mathbf{n_r^{s1}}; N_r^{s1}, \boldsymbol{\mathbf{f_r^{s1}}} + \boldsymbol{\mathbf{\xi_r}}- \boldsymbol{\mathbf{\delta_r}}\right) \\

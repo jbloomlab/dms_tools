@@ -40,7 +40,7 @@ and
 
    0 \le \pi_{r,x}^{s1} + \Delta\pi_{r,x} \le 1.
 
-If there is no difference between the site-specific preferences in selections :math:`s1` and :math:`s2`, then :math:`\Delta\pi_{r,x} = 0`. If :math:`x` at :math:`r` is more preferred in selection :math:`s2` than :math:`s1`, then :math:`\Delta\pi_{r,x} > 0`; conversely if :math:`x` at :math:`r` is more preferred in selection :math:`s1` than :math:`s2`, then `\Delta\pi_{r,x} < 0`. 
+If there is no difference between the site-specific preferences in selections :math:`s1` and :math:`s2`, then :math:`\Delta\pi_{r,x} = 0`. If :math:`x` at :math:`r` is more preferred in selection :math:`s2` than :math:`s1`, then :math:`\Delta\pi_{r,x} > 0`; conversely if :math:`x` at :math:`r` is more preferred in selection :math:`s1` than :math:`s2`, then :math:`\Delta\pi_{r,x} < 0`. 
 
 The experimental data from deep sequencing.
 -------------------------------------------
@@ -71,8 +71,8 @@ The notation below follows that in :ref:`inferprefs_algorithm`, so look there fo
 We define vectors of the character frequencies, preferences, and differential preferences
 at each site :math:`r`:
 :math:`\boldsymbol{\mathbf{f_r^{\textbf{start}}}}= \left(\cdots, f_{r,x}^{\textrm{start}}, \cdots\right)`,
-:math:`\boldsymbol{\mathbf{f_r^{s1}}}= \left(\cdots, f_{r,x}^{\textrm{start}}, \cdots\right)`,
-:math:`\boldsymbol{\mathbf{f_r^{s2}}}= \left(\cdots, f_{r,x}^{\textrm{start}}, \cdots\right)`,
+:math:`\boldsymbol{\mathbf{f_r^{s1}}}= \left(\cdots, f_{r,x}^{\textrm{s1}}, \cdots\right)`,
+:math:`\boldsymbol{\mathbf{f_r^{s2}}}= \left(\cdots, f_{r,x}^{\textrm{s2}}, \cdots\right)`,
 :math:`\boldsymbol{\mathbf{\xi_r}}= \left(\cdots, \xi_{r,x}, \cdots\right)`,
 :math:`\boldsymbol{\mathbf{\pi^{s1}_r}}= \left(\cdots, \pi^{s1}_{r,x}, \cdots\right)`,
 and
@@ -102,7 +102,7 @@ around the actual frequencies. So
 .. math::
    :label: pr_nrerr
 
-   \Pr\left(\mathbf{n_r^{\textbf{err}}}\mid N_r^{\textrm{err}}, \boldsymbol{\mathbf{\xi_r}}\right) = \operatorname{Multinomial}\left(\mathbf{n_r^{\textbf{err}}}; N_r^{\textrm{err}}, \boldsymbol{\mathbf{\xi_r}}- \boldsymbol{\mathbf{\delta_r}}\right)
+   \Pr\left(\mathbf{n_r^{\textbf{err}}}\mid N_r^{\textrm{err}}, \boldsymbol{\mathbf{\xi_r}}\right) = \operatorname{Multinomial}\left(\mathbf{n_r^{\textbf{err}}}; N_r^{\textrm{err}}, \boldsymbol{\mathbf{\xi_r}} \right)
 
 
 .. math::
