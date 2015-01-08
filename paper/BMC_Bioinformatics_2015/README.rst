@@ -1,0 +1,1 @@
+This directory contains the ``LaTex`` source used for the ``BMC Bioinformatics`` submission. Note that the ``.pdf`` files are not included. So to compile, you will first need to manually use ``pdflatex`` to build the figure ``.pdf`` files from the ``.tex`` files, and then build the main manuscript.

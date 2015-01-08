@@ -5,4 +5,5 @@
 *.aux
 *.out
 *.bbl
-example*.pdf
+*.pdf
+bmc_template
