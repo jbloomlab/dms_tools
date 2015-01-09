@@ -12,3 +12,5 @@ build/
 *.log
 dist/
 dms_tools.egg-info/
+*(busy)
+CoverLetter.txt

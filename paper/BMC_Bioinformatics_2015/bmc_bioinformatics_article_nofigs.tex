@@ -83,8 +83,8 @@ belowskip=3pt,
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
-%\def\includegraphic{}
-%\def\includegraphics{}
+\def\includegraphic{}
+\def\includegraphics{}
 
 
 
@@ -527,12 +527,12 @@ Thanks to Alec Heckert for assistance in testing \texttt{dms\_tools}, to Erick M
 \section*{Figures}
 
 \begin{figure}[h!]
-\centerline{\includegraphics[clip, trim=0in 0in 5.92in 0in, width=5.5in]{Fig_DeepMutationalScan/Fig_DeepMutationalScan.pdf}}
+%\centerline{\includegraphics[clip, trim=0in 0in 5.92in 0in, width=5.5in]{Fig_DeepMutationalScan/Fig_DeepMutationalScan.pdf}}
 \caption{\label{fig:DeepMutationalScan}{\csentence{A deep mutational scanning experiment.} {\bf (A)} A gene is mutagenized to create a library that contains all single codon mutations. The mutant library is introduced into cells or viruses and subjected to a functional selection that enriches beneficial mutations and depletes deleterious ones. Deep sequencing is used to count mutations in a sample of the variants present pre- and post-selection. Using \texttt{dms\_tools}, the data can be analyzed to infer the ``preference'' of each site for each amino acid; in the visualization, letter heights are proportional to the preference for that amino acid. {\bf (B)} The experiment can be extended by subjecting the library of functional variants to two different selection pressures, and using deep sequencing to assess which variants are favored in one condition versus the other. Using \texttt{dms\_tools}, the data can be analyzed to infer the ``differential preference'' of each site for each amino acid in the alternative selection $s2$ versus the control selection $s1$; in the visualization, letter heights above or below the line are proportional to the differential preference for or against that amino acid.}}
 \end{figure}
 
 \begin{figure}[h!]
-\centerline{\includegraphics[width=6.7in]{Fig_MelnikovPrefs/Fig_MelnikovPrefs.pdf}}
+%\centerline{\includegraphics[width=6.7in]{Fig_MelnikovPrefs/Fig_MelnikovPrefs.pdf}}
 \cprotect \caption{\label{fig:MelnikovPrefs}\csentence{Site-specific preferences from deep mutational scanning of a Tn5 transposon.} Melnikov \textit{et al}~\cite{melnikov2014comprehensive} performed deep mutational scanning on a Tn5 transposon using kanamycin selection, and reported the counts of amino-acid mutations for two biological replicates of the experiment. Here I have used \texttt{dms\_tools} to infer the preferences. {\bf (A)} Visualization of the preferences averaged across the two replicates. {\bf (B)} Correlation between the preferences inferred from each of the two replicates. Given files containing the mutation counts, the plots can be generated as \texttt{logoplot.pdf} and \texttt{corr.pdf} with the following commands:
 \begin{lstlisting} 
 dms_inferprefs pre_counts_1.txt post_counts_1.txt prefs_1.txt --excludestop --ncpus -1 --chartype aa
@@ -545,7 +545,7 @@ dms_logoplot prefs.txt logoplot.pdf --nperline 53 --overlay1 RSAs.txt RSA "relat
 \end{figure}
 
 \begin{figure}[h!]
-\centerline{\includegraphics[width=5.9in]{Fig_ThyagarajanPrefs/Fig_ThyagarajanPrefs.pdf}}
+%\centerline{\includegraphics[width=5.9in]{Fig_ThyagarajanPrefs/Fig_ThyagarajanPrefs.pdf}}
 \cprotect \caption{\label{fig:ThyagarajanPrefs}\csentence{Site-specific preferences from deep mutational scanning of influenza hemagglutinin.} Thyagarajan and Bloom~\cite{thyagarajan2014inherent} performed deep mutational scanning on influenza hemagglutinin, and reported the counts of codon mutations for three biological replicates of the experiment. Here I have used \texttt{dms\_tools} to infer the preferences. {\bf (A)} Visualization of the preferences averaged across the three replicates. {\bf (B)} Correlations between the preferences from each pair of replicates. Given files containing the mutation counts, the plots can be generated as \texttt{logoplot.pdf}, \texttt{corr\_1\_2.pdf}, \texttt{corr\_1\_3.pdf}, and \texttt{corr\_2\_3.pdf} with the following commands:
 \begin{lstlisting} 
 dms_inferprefs mutDNA_1.txt mutvirus_1.txt prefs_1.txt --errpre DNA_1.txt --errpost virus_1.txt --ncpus -1
@@ -562,7 +562,7 @@ Note that unlike in Figure \ref{fig:MelnikovPrefs}, no \texttt{--chartype} optio
 \end{figure}
       
 \begin{figure}[h!]
-\centerline{\includegraphics[width=6.5in]{../../examples/Melnikov_et_al_Tn5/infer_prefs_on_simulated_data/correlations.pdf}}
+%\centerline{\includegraphics[width=6.5in]{../../examples/Melnikov_et_al_Tn5/infer_prefs_on_simulated_data/correlations.pdf}}
 \cprotect\caption{\label{fig:PrefCorrelations}\csentence{Accuracy of preference inference on simulated data.} Deep mutational scanning counts were simulated using the preferences in Figure \ref{fig:MelnikovPrefs}A and realistic parameters for mutation and error rates. The simulations were done {\bf (A)} without or {\bf (B)} with sequencing errors quantified by control libraries. Plots show the correlation between the actual and inferred preferences as a function of the product of the sequencing depth $N$ and the average per-site mutation rate $\overline{\mu}$; real experiments typically have $N\overline{\mu} \sim 1000$ to 2000 depending on the sequencing depth and gene length. Preferences are inferred using the full algorithm in \texttt{dms\_tools} (top panels) or by simply calculating ratios of counts (bottom panels) using Equation \ref{eq:enrichmentcounts} and its logical extension to include errors, both with a pseudocount of one. The \texttt{dms\_tools} inferences are more accurate than the simple ratio estimation, with both methods converging to the actual values with increasing $N\overline{\mu}$. Given files with the mutation counts, the plots in this figure can be generated as \texttt{prefs\_corr.pdf} and \texttt{ratio\_corr.pdf} with commands such as:
 \begin{lstlisting}
 dms_inferprefs pre.txt post.txt inferred_prefs.txt --ncpus -1
@@ -574,7 +574,7 @@ dms_correlate actual_prefs.txt ratio_prefs.txt ratio_corr --name1 "actual" --nam
 \end{figure}
 
 \begin{figure}[h!]
-\centerline{\includegraphics[width=6.5in]{Fig_MelnikovDiffPrefs/Fig_MelnikovDiffPrefs.pdf}}
+%\centerline{\includegraphics[width=6.5in]{Fig_MelnikovDiffPrefs/Fig_MelnikovDiffPrefs.pdf}}
 \cprotect\caption{\label{fig:MelnikovSimulatedDiffPrefs}\csentence{Inference of differential preferences on simulated data.} To illustrate and test the inference of differential preferences, the experiment in Figure \ref{fig:DeepMutationalScan}B was simulated at the codon level starting with the post-selection library that yielded the preferences in Figure \ref{fig:MelnikovPrefs}. In the simulations, 20\% of sites had different preferences between the control and alternative selection. {\bf (A)}, \texttt{dms\_tools} was used to infer the differential preferences from the data simulated at $N = 10^7$, and the resulting inferences were visualized. The overlay bars indicate which sites had non-zero differential preferences in the simulation. {\bf (B)} The correlations between the inferred and actual differential preferences as a function of $N\overline{\mu}$ show that the inferred values converge to the true ones. Given files with the mutation counts, the plots in this figure can be generated as \texttt{logoplot.pdf} and \texttt{corr.pdf} with the following commands:
 \begin{lstlisting}
 dms_inferdiffprefs start.txt s1.txt s2.txt diffprefs.txt --ncpus -1 
@@ -586,7 +586,7 @@ Note that no \texttt{--chartype} option is specified because the default for \te
 \end{figure}
 
 \begin{figure}[h!]
-\centerline{\includegraphics[width=6.5in]{../../examples/Wu_et_al_NS1/diffprefs_logoplot.pdf}}
+%\centerline{\includegraphics[width=6.5in]{../../examples/Wu_et_al_NS1/diffprefs_logoplot.pdf}}
 \cprotect\caption{\label{fig:WuDiffPrefs}\csentence{Differential preferences following selection of influenza NS1 in the presence or absence of interferon.} Wu \textit{et al}~\cite{wu2014ns} generated libraries of influenza viruses carrying nucleotide mutations in the NS segment. They passaged these viruses in the presence or absence of interferon pre-treatment. Here, \texttt{dms\_tools} was used to analyze and visualize the data to identify sites where different nucleotides are preferred in the presence versus the absence of interferon. Because the mutations were made at the nucleotide level, the data must also be analyzed at that level (unlike in Figures \ref{fig:MelnikovPrefs}, \ref{fig:ThyagarajanPrefs}, and \ref{fig:MelnikovSimulatedDiffPrefs}, where codon mutagenesis means that the data can be analyzed at the amino-acid level). The plot can be generated as \texttt{logoplot.pdf} with the following commands:
 \begin{lstlisting}
 dms_inferdiffprefs input.txt control.txt interferon.txt diffprefs.txt --ncpus -1 --chartype DNA
