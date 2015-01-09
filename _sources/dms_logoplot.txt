@@ -17,7 +17,7 @@ Command-line usage
 .. argparse::
    :module: parsearguments
    :func: LogoPlotParser
-   :prog: dms_weblogo
+   :prog: dms_logoplot
 
    infile
     Should be in the formats of a :ref:`preferences_file` or a :ref:`diffpreferences_file`.
