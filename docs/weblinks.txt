@@ -12,7 +12,7 @@
 .. _`MCMC`: http://en.wikipedia.org/wiki/Markov_chain_Monte_Carlo
 .. _`weblogo`: https://code.google.com/p/weblogo/
 .. _`reference for weblogo`: http://genome.cshlp.org/content/14/6/1188
-.. _`Jesse Bloom`: labs.fhcrc.org/bloom
+.. _`Jesse Bloom`: http://labs.fhcrc.org/bloom
 .. _`Wu et al (2014)`: http://jvi.asm.org/content/88/17/10157
 .. _`Thyagarajan and Bloom (2014)`: http://elifesciences.org/content/3/e03300
 .. _`Melnikov et al (2014)`: http://nar.oxfordjournals.org/content/42/14/e112
@@ -31,3 +31,4 @@
 .. _`cython`: http://cython.org/
 .. _`weblogolib`: https://code.google.com/p/weblogo/
 .. _`PyPDF2`: https://pypi.python.org/pypi/PyPDF2
+.. _`Software for the analysis and visualization of deep mutational scanning data (Bloom, 2015)`: http://biorxiv.org/content/early/2015/01/10/013623
