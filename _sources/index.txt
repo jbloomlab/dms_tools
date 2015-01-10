@@ -6,8 +6,10 @@
 Documentation for ``dms_tools``
 =====================================
 
-Overview
-----------
+For a thorough description of `dms_tools`_, see `Software for the analysis and visualization of deep mutational scanning data (Bloom, 2015)`_.
+
+Quick overview
+-----------------
 
 `dms_tools`_ is a software package for analyzing and visualizing **d**\eep **m**\utational **s**\canning data.
 
