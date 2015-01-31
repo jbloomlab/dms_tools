@@ -92,11 +92,11 @@ or globally::
 
     sudo pip install dms_tools --upgrade
 
-A more complicated alternative to ``pip``: install ``dms_tools`` from source code
+Install ``dms_tools`` from source code
 -----------------------------------------------------------------------------------
-You can also install `dms_tools`_ from source code yourself. If you do this, you will have to manually make sure that you have also installed the `Other software required by dms_tools`_.
+You can also install from the `dms_tools source code`_ on GitHub. If you do this, you will have to manually make sure that you have also installed the `Other software required by dms_tools`_.
 
-To install from source, first downalod the `dms_tools source code`_ from GitHub.
+To install from source, first download the `dms_tools source code`_ from GitHub.
 After unpacking the main ``dms_tools`` directory that contains this source, install locally with::
 
     cd dms_tools

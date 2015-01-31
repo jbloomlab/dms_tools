@@ -62,7 +62,7 @@ def main():
             else:
                 characters = dms_tools.aminoacids_withstop
         elif args['chartype'].lower() == 'codon':
-            chartype = 'codons'
+            chartype = 'codon'
             transform_to_aa = False
             countcharacters = characters = dms_tools.codons
             charlength = 3 # length of a codon

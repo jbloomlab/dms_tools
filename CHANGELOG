@@ -1,0 +1,15 @@
+Changelog
+===========
+
+
+1.0.1
+--------
+* Fixed bug in parsing *codon* option in ``dms_infeprefs`` and ``dms_inferdiffprefs``
+
+* Relaxed convergence criterion for cases when *R* is ``nan`` for a few sites in MCMC
+
+* Some minor documentation updates
+
+1.0.0
+--------
+Initial release
