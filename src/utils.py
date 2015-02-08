@@ -32,6 +32,8 @@ Functions in this module
 
 * *AdjustErrorCounts* : adjust error counts so they don't exceed actual counts.
 
+* *CheckReadQuality* : checks quality of pair of reads.
+
 Function documentation
 ---------------------------
 
@@ -42,6 +44,7 @@ import re
 import math
 import copy
 import dms_tools
+import dms_tools.cutils
 
 
 def PrefsToEnrichments(wts, pi_means, include_wt):
@@ -547,6 +550,62 @@ def SumCodonToAA(codondict, includestop=True):
         if aa in aas:
             aadict[aa] += codondict[codon]
     return aadict
+
+
+def CheckReadQuality(r1, r2, q1, q2, minq, maxlowqfrac, barcodelength, use_cutils=True):
+    """Checks quality of reads and replaces low Q nucleotides with ``N``.
+    
+    *r1* and *r2* are strings representing a pair of sequencing reads.
+    
+    *q1* and *q2* are strings giving the Q-scores for the nucleotides in
+    *r1* and *r2*; these Q-scores are assumed to be encoded as the ASCII code
+    for the Q-score + 33.
+
+    *minq* is the minimum allowed Q-score (nucleotides with Q < *minq*)
+    are considered low quality.
+
+    *maxlowqfrac* is the maximum allowable number of ``N`` or low quality
+    nucleotides allowed in each read.
+
+    *barcodelength* is the number of nucleotides at the beginning of each read
+    that are required to be high-quality (Q > *minq* and not an ``N``).
+
+    *use_cutils* specifies that we use the fast C implementation of this
+    function provided by *dms_tools.cutils*.
+
+    This function examines the quality of read *r1* and *r2*. It returns
+    *False* if any of the following are true:
+
+        1) Either read has a low-quality nucleotide or an ``N`` in the first
+        *barcodelength* nucleotides.
+
+        2) Either read has > *maxlowqfrac* of its nucleotides that are either
+        low-quality or are ``N``.
+
+    If neither of those conditions are true, then the return variable
+    is *(r1_new, r2_new)*, which are copies of *r1* and *r2* where all
+    nucleotides are upper case and any low quality nucleotides have been
+    replaced by ``N``.
+    """
+    if use_cutils:
+        return dms_tools.cutils.CheckReadQuality(r1, r2, q1, q2, minq, maxlowqfrac, barcodelength)
+    minqchar = chr(minq + 33)
+    checkedreads = []
+    for (r, q) in [(r1, q1), (r2, q2)]:
+        nlow = 0
+        maxlow = maxlowqfrac * len(r)
+        newr = []
+        for (i, (ri, qi)) in enumerate(zip(r, q)):
+            ri = ri.upper()
+            if (qi < minqchar) or (ri == 'N'):
+                nlow += 1
+                if i < barcodelength or nlow > maxlow:
+                    return False
+                newr.append('N')
+            else:
+                newr.append(ri)
+        checkedreads.append(''.join(newr))
+    return tuple(checkedreads)
 
 
 if __name__ == '__main__':

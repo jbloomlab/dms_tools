@@ -3,14 +3,16 @@
 Written by Jesse Bloom.
 """
 
-
 import sys
 import os
 import re
 try:
     from setuptools import setup
+    from setuptools import Extension
 except ImportError:
     from distutils.core import setup
+    from distutils.core import Extension
+
 
 if (sys.version_info[0], sys.version_info[1]) != (2, 7):
     raise RuntimeError('dms_tools is currently only compatible with Python 2.7.\nYou are using Python %d.%d' % (sys.version_info[0], sys.version_info[1]))
@@ -32,7 +34,6 @@ for dataname in ['version', 'author', 'author_email', 'url']:
 
 with open('README.rst') as f:
     readme = f.read()
-
 
 # main setup command
 setup(
@@ -58,6 +59,7 @@ setup(
     platforms = 'Linux (and maybe also Mac OS X).',
     packages = ['dms_tools'],
     package_dir = {'dms_tools':'src'},
+    ext_modules = [Extension('dms_tools.cutils', ['src/cutils.c'])],
     scripts = [
             'scripts/dms_inferprefs',
             'scripts/dms_inferdiffprefs',
@@ -65,6 +67,7 @@ setup(
             'scripts/dms_correlate',
             'scripts/dms_logoplot',
             'scripts/dms_editsites',
+            'scripts/dms_barcodedsubamplicons',
             ],
     package_data = {'dms_tools':['_weblogo_template.eps']}, # template from weblogo version 3.4
 )

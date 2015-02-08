@@ -1,0 +1,105 @@
+#!python
+
+"""Aligns and counts mutations in barcoded subamplicons.
+
+Written by Jesse Bloom."""
+
+
+import sys
+import os
+import time
+import logging
+import dms_tools.parsearguments
+import dms_tools.file_io
+import dms_tools.utils
+
+
+
+def main():
+    """Main body of script."""
+
+    # Parse command line arguments
+    parser = dms_tools.parsearguments.BarcodedSubampliconsParser()
+    args = vars(parser.parse_args())
+    prog = parser.prog
+
+    # some sanity checking on arguments
+    for (refseqstart, refseqend, r1trim, r2trim) in args['alignspecs']:
+        if args['barcodelength'] >= r1trim:
+            raise ValueError("One of the alignspecs specifies R1TRIM of %d, which doesn't fully trim a barcode of barcodelength %d" % (r1trim, args['barcodelength']))
+        if args['barcodelength'] >= r2trim:
+            raise ValueError("One of the alignspecs specifies R2TRIM of %d, which doesn't fully trim a barcode of barcodelength %d" % (r2trim, args['barcodelength']))
+
+    # set up logging
+    logging.shutdown()
+    logfile = "%s.log" % args['outprefix']
+    if os.path.isfile(logfile):
+        os.remove(logfile)
+    logger = logging.getLogger(prog)
+    logger.setLevel(logging.INFO)
+    logfile_handler = logging.FileHandler(logfile)
+    logger.addHandler(logfile_handler)
+    formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+    logfile_handler.setFormatter(formatter)
+    logger.info("Beginning execution of %s\nProgress will be logged to %s" % (prog, logfile))
+
+    # log in try / except loop
+    try:
+        logger.info('Beginning execution of %s in directory %s\n' % (prog, os.getcwd()))
+        logger.info('Progress is being logged to %s\n' % logfile)
+        versionstring = dms_tools.file_io.Versions() 
+        logger.info(versionstring)
+        logger.info('Parsed the following arguments:\n%s\n' % '\n'.join(['\t%s = %s' % tup for tup in args.iteritems()]))
+
+        # start iterating over the reads in the files
+        assert len(args['r1files']) == len(args['r2files']), "r1files and r2files do not specify the same number of files."
+        if all([os.path.splitext(f)[1].lower() == '.gz' for f in args['r1files'] + args['r2files']]):
+            gzipped = True
+        else:
+            if any([os.path.splitext(f)[1].lower() == '.gz' for f in args['r1files'] + args['r2files']]):
+                raise ValueError("Some but not all of the r1files and r2files are gzipped. Either all or no files can be gzipped.")
+            gzipped = False
+
+        # collect reads by barcode
+        readcategories = ['total', 'filtered', 'low quality']
+        n = dict([(category, 0) for category in readcategories])
+        reads_by_barcode = {}
+        logger.info('\nNow parsing reads from the following:\n\tr1files: %s\n\tr2files: %s' % (' '.join(args['r1files']), ' '.join(args['r2files'])))
+        for read_tup in dms_tools.file_io.IteratePairedFASTQ(args['r1files'], args['r2files'], gzipped, applyfilter=True):
+            n['total'] += 1
+            if read_tup:
+                (name, r1, r2, q1, q2) = read_tup
+                qcheckedreads = dms_tools.utils.CheckReadQuality(r1, r2, q1, q2, args['minq'], args['maxlowqfrac'], args['barcodelength'])
+                if qcheckedreads:
+                    (r1, r2) = qcheckedreads
+                    barcode = r1[ : args['barcodelength']] + r2[ : args['barcodelength']]
+                    if barcode in reads_by_barcode:
+                        reads_by_barcode[barcode].append((r1, r2))
+                    else:
+                        reads_by_barcode[barcode] = [(r1, r2)]
+                else:
+                    n['low quality'] += 1
+            else:
+                n['filtered'] += 1
+            if n['total'] % 1e5 == 0:
+                logger.info('Reads parsed so far:\n%s' % '\n'.join(['\t%s = %d' % (category, n[category]) for category in readcategories]))
+        logger.info('Parsed all reads; here are the totals:\n%s' % '\n'.join(['\t%s = %s' % (category, n[category]) for category in readcategories]))
+        barcode_counts = {}
+        for (barcode, reads) in reads_by_barcode.iteritems():
+            try:
+                barcode_counts[len(reads)] += 1
+            except KeyError:
+                barcode_counts[len(reads)] = 1
+        barcode_counts = barcode_counts.items()
+        barcode_counts.sort()
+        logger.info('Here are the counts of reads per-barcode:\n\t%s' % '\n\t'.join(['%d barcodes are found %d times (this is %.3f of all barcodes)' % (tup[1], tup[0], tup[1] / float(len(reads_by_barcode))) for tup in barcode_counts]))
+    except:
+        logger.exception('Terminating %s at %s with ERROR' % (prog, time.asctime()))
+    else:
+        logger.info('Successful completion of %s at %s' % (prog, time.asctime()))
+    finally:
+        logging.shutdown()
+
+
+if __name__ == '__main__':
+    main() # run the script

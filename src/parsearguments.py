@@ -14,9 +14,17 @@ Defined in this module
 
 * *FloatGreaterThanZero* : parses whether string is float greater than zero.
 
+* *FloatBetweenZeroAndOne* : parses whether is float between 0 and 1.
+
+* *NonNegativeInt* : parses whether string is non-negative integer.
+
 * *ExistingFile* : parses whether string gives an existing file.
 
 * *PDF_File* : parses whether string gives a PDF file name.
+
+* *CommaSeparatedFASTQFiles* : parses list of FASTQ files.
+
+* *AlignSpecs* : parses alignment specs for *BarcodedSubampliconsParser*
 
 * *InferPrefsParser* : parser for ``dms_inferprefs``
 
@@ -30,6 +38,10 @@ Defined in this module
 
 * *LogoPlotParser* : parser for ``dms_logoplot``
 
+* *BarcodedSubampliconsParser* : parser for ``dms_barcodedsubamplicons``
+
+* *SmartHelpFormatter* : new class for formatting argument helps.
+
 
 Detailed documentation
 ----------------------------------
@@ -39,6 +51,7 @@ Detailed documentation
 
 import sys
 import os
+import re
 import argparse
 import dms_tools
 
@@ -50,6 +63,51 @@ class ArgumentParserNoArgHelp(argparse.ArgumentParser):
         sys.stderr.write('error: %s\n\n' % message)
         self.print_help()
         sys.exit(2)
+
+
+class SmartHelpFormatter(argparse.ArgumentDefaultsHelpFormatter):
+    """Raw text for help beginning with ``R|``, *ArgumentDefaultsHelpFormatter* otherwise.
+
+    Based on *SmartFormatter* described at http://stackoverflow.com/questions/3853722/python-argparse-how-to-insert-newline-in-the-help-text.
+
+    This option allows you to specify exact help format by preceding ``R|``.
+    """
+    def _split_lines(self, text, width):
+        if text.startswith('R|'):
+            return text[2:].splitlines()
+        else:
+            return argparse.ArgumentDefaultsHelpFormatter._split_lines(self, text, width)
+
+def NonNegativeInt(n):
+    """If *n* is non-negative integer returns it, otherwise an error.
+
+    >>> print "%d" % NonNegativeInt('8')
+    8
+
+    >>> NonNegativeInt('8.1')
+    Traceback (most recent call last):
+       ...
+    ArgumentTypeError: 8.1 is not an integer
+
+    >>> print "%d" % NonNegativeInt('0')
+    0
+
+    >>> NonNegativeInt('-1')
+    Traceback (most recent call last):
+       ...
+    ArgumentTypeError: -1 is not non-negative
+
+    """
+    if not isinstance(n, str):
+        raise argparse.ArgumentTypeError('%r is not a string' % n)
+    try:
+       n = int(n)
+    except:
+        raise argparse.ArgumentTypeError('%s is not an integer' % n)
+    if n < 0:
+        raise argparse.ArgumentTypeError('%d is not non-negative' % n)
+    else:
+        return n
 
 
 def FloatGreaterThanZero(x):
@@ -76,6 +134,14 @@ def FloatGreaterThanZero(x):
     else:
         raise argparse.ArgumentTypeError("%r not a float greater than zero" % x)
 
+def FloatBetweenZeroAndOne(x):
+    """If *x* is float >= 0 or <= 1, returns it, otherwise error."""
+    x = float(x)
+    if 0 <= x <= 1:
+        return x
+    else:
+        raise argparse.ArgumentTypeError("%r is not a float >= 0 and <= 1" % x)
+
 
 def ExistingFile(fname):
     """If *fname* is name of an existing file return it, otherwise an error.
@@ -94,6 +160,60 @@ def PDF_File(fname):
     else:
         raise argparse.ArgumentTypeError('Not a valid PDF file name; should end in ".pdf":\n%s' % fname)
 
+
+def CommaSeparatedFASTQFiles(files):
+    """Returns name of comma-separated FASTQ files.
+
+    Checks that all files exist. Returns error if files
+    cannot be found or if they are not .fastq or .fastq.gz
+    Otherwise returns list of files."""
+    if re.search('\s', files):
+        raise argparse.ArgumentTypeError("List of FASTQ files contains whitespace: %s" % files)
+    if not files:
+        raise argparse.ArgumentTypeError("Empty list of FASTQ files")
+    files = files.split(',')
+    for f in files:
+        if not os.path.isfile(f):
+            raise argparse.ArgumentTypeError("Cannot find FASTQ file %s" % f)
+        if not (os.path.splitext(f)[1].lower() == '.fastq' or (os.path.splitext(os.path.splitext(f)[0])[1].lower() == '.fastq' and os.path.splitext(f)[1].lower() == '.gz')):
+            raise argparse.ArgumentTypeError("FASTQ file %s does not end in extension .fastq or .fastq.gz")
+    return files
+
+def AlignSpecs(alignspecs):
+    """Parses alignment specs for *BarcodedSubampliconsParser*.
+
+    >>> AlignSpecs('1,300,10,12')
+    (1, 300, 10, 12)
+    """
+    aligntup = alignspecs.split(',')
+    if len(aligntup) != 4:
+        raise argparse.ArgumentTypeError("Failed to find four comma-delimited integers in alignspecs %s" % alignspecs)
+    try:
+        aligntup = [int(n) for n in aligntup]
+    except ValueError:
+        raise argparse.ArgumentTypeError("Non-integer in alignspecs %s" % alignspecs)
+    if not all([n >= 1 for n in aligntup]):
+        raise argparse.ArgumentTypeError('Not all integers >= 1 in alignspecs %s' % alignspecs)
+    if not aligntup[0] < aligntup[1]:
+        raise argparse.ArgumentTypeError("First entry must be less than second in alignspecs %s" % alignspecs)
+    return tuple(aligntup)
+
+
+def BarcodedSubampliconsParser():
+    """Returns *argparse.ArgumentParser* for ``dms_barcodedsubamplicons`` script."""
+    parser = ArgumentParserNoArgHelp(description='Gathers barcoded subamplicons, aligns to reference sequence, and counts mutations. This script is part of %s (version %s) written by %s. Detailed documentation is at %s' % (dms_tools.__name__, dms_tools.__version__, dms_tools.__author__, dms_tools.__url__), formatter_class=SmartHelpFormatter)
+    parser.add_argument('outprefix', help=\
+        'R|Prefix for output file. Suffixes are:\n'\
+        '  ".log" - file that logs progress.')
+    parser.add_argument('refseq', type=ExistingFile, help='Name of existing FASTA file containing the gene sequence to which we are aligning genes, and for which we are counting mutations.')
+    parser.add_argument('r1files', type=CommaSeparatedFASTQFiles, help='A comma-separated list of R1 read FASTQ files (cannot contain spaces). These files can optionally be gzipped (extension .gz).')
+    parser.add_argument('r2files', type=CommaSeparatedFASTQFiles, help='Like "r1files" but R2 read files. Must be same number of comma-separated entries as for "r1files".')
+    parser.add_argument('alignspecs', nargs='+', help='This argument should be repeated to specify each subamplicon alignment with "refseq". Each occurrence consists of four comma-delimited integers (no spaces): "REFSEQSTART,REFSEQEND,R1TRIM,R2TRIM". REFSEQSTART is nucleotide (1, 2, ... numbering) in "refseq" where nucleotide R1TRIM in read R1 aligns. REFSEQEND is nucleotide in "refseq" where nucleotide R2TRIM in read R2 aligns.', type=AlignSpecs)
+    parser.add_argument('--barcodelength', type=NonNegativeInt, default=8, help='Length of the barcodes (NNN... nucleotides) at the beginning of R1 and R2 reads.')
+    parser.add_argument('--chartype', default='codon', choices=['codon'], help='Type of character for which we are counting mutations. Currently "codon" is only allowed value (in the future "nucleotide" might be added). So your library should be constructed with codon-level mutations, and reads must cover full codons.')
+    parser.add_argument('--minq', type=NonNegativeInt, default=15, help='Only consider nucleotides with Q scores >= this number.')
+    parser.add_argument('--maxlowqfrac', default=0.075, type=FloatBetweenZeroAndOne, help='Only retain read pairs if there are no "N" or Q < "minq" nucleotides in barcodes, and the total fraction of such nucleotides in each read is <= this number.')
+    return parser
 
 def LogoPlotParser():
     """Returns *argparse.ArgumentParser* for ``dms_logoplot`` script."""
