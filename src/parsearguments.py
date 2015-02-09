@@ -16,7 +16,11 @@ Defined in this module
 
 * *FloatBetweenZeroAndOne* : parses whether is float between 0 and 1.
 
+* *FloatBetweenHalfAndOne* : parses whether is float > 0.5 and <= 1.
+
 * *NonNegativeInt* : parses whether string is non-negative integer.
+
+* *IntGreaterEqual2* : parses whether string is integer >= 2.
 
 * *ExistingFile* : parses whether string gives an existing file.
 
@@ -77,6 +81,20 @@ class SmartHelpFormatter(argparse.ArgumentDefaultsHelpFormatter):
             return text[2:].splitlines()
         else:
             return argparse.ArgumentDefaultsHelpFormatter._split_lines(self, text, width)
+
+def IntGreaterEqual2(n):
+    """If *n* is integer >= 2 returns it, otherwise an error."""
+    if not isinstance(n, str):
+        raise argparse.ArgumentTypeError('%r is not a string' % n)
+    try:
+        n = int(n)
+    except:
+        raise argparse.ArgumentTypeError('%s is not an integer' % n)
+    if n < 2:
+        raise argparse.ArgumentTypeError('%d is not greater or equal to two' % n)
+    else:
+        return n
+
 
 def NonNegativeInt(n):
     """If *n* is non-negative integer returns it, otherwise an error.
@@ -142,6 +160,13 @@ def FloatBetweenZeroAndOne(x):
     else:
         raise argparse.ArgumentTypeError("%r is not a float >= 0 and <= 1" % x)
 
+def FloatBetweenHalfAndOne(x):
+    """If *x* is float > 0.5 or <= 1, returns it, otherwise error."""
+    x = float(x)
+    if 0.5 < x <= 1:
+        return x
+    else:
+        raise argparse.ArgumentTypeError("%r is not a float > 0.5 and <= 1" % x)
 
 def ExistingFile(fname):
     """If *fname* is name of an existing file return it, otherwise an error.
@@ -210,9 +235,13 @@ def BarcodedSubampliconsParser():
     parser.add_argument('r2files', type=CommaSeparatedFASTQFiles, help='Like "r1files" but R2 read files. Must be same number of comma-separated entries as for "r1files".')
     parser.add_argument('alignspecs', nargs='+', help='This argument should be repeated to specify each subamplicon alignment with "refseq". Each occurrence consists of four comma-delimited integers (no spaces): "REFSEQSTART,REFSEQEND,R1TRIM,R2TRIM". REFSEQSTART is nucleotide (1, 2, ... numbering) in "refseq" where nucleotide R1TRIM in read R1 aligns. REFSEQEND is nucleotide in "refseq" where nucleotide R2TRIM in read R2 aligns.', type=AlignSpecs)
     parser.add_argument('--barcodelength', type=NonNegativeInt, default=8, help='Length of the barcodes (NNN... nucleotides) at the beginning of R1 and R2 reads.')
-    parser.add_argument('--chartype', default='codon', choices=['codon'], help='Type of character for which we are counting mutations. Currently "codon" is only allowed value (in the future "nucleotide" might be added). So your library should be constructed with codon-level mutations, and reads must cover full codons.')
+    parser.add_argument('--chartype', default='codon', choices=['codon'], help='Type of character for which we are counting mutations. Currently "codon" is only allowed value (in the future "nucleotide" might be added).')
     parser.add_argument('--minq', type=NonNegativeInt, default=15, help='Only consider nucleotides with Q scores >= this number.')
     parser.add_argument('--maxlowqfrac', default=0.075, type=FloatBetweenZeroAndOne, help='Only retain read pairs if there are no "N" or Q < "minq" nucleotides in barcodes, and the total fraction of such nucleotides in each read is <= this number.')
+    parser.add_argument ('--minreadsperbarcode', type=IntGreaterEqual2, default=2, help='Retain only barcodes with >= this many reads that align gaplessly with >= "minreadidentity" identical high-quality nucleotides. "minreadsperbarcode" should be >= 2.')
+    parser.add_argument('--minreadidentity', default=0.9, type=FloatBetweenZeroAndOne, help='Retain only barcodes where all reads have >= this fraction of identical high-quality (see "minq") non-ambiguous nucleotides that align gaplessly.')
+    parser.add_argument('--minreadconcurrence', default=0.75, type=FloatBetweenHalfAndOne, help='For retained barcodes, only record nucleotide calls when >= this fraction of reads concur with high-quality calls.')
+    parser.add_argument('--maxreadtrim', type=NonNegativeInt, default=3, help='If R1 or R2 reads for same barcode are not all same length, trim up to this many nucleotides; if still not same length then discard barcode.')
     return parser
 
 def LogoPlotParser():

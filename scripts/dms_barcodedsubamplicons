@@ -35,8 +35,8 @@ def main():
     logfile = "%s.log" % args['outprefix']
     if os.path.isfile(logfile):
         os.remove(logfile)
+    logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s', level=logging.INFO)
     logger = logging.getLogger(prog)
-    logger.setLevel(logging.INFO)
     logfile_handler = logging.FileHandler(logfile)
     logger.addHandler(logfile_handler)
     formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
@@ -61,10 +61,10 @@ def main():
             gzipped = False
 
         # collect reads by barcode
-        readcategories = ['total', 'filtered', 'low quality']
+        readcategories = ['total', 'failed Illumina filter', 'low quality']
         n = dict([(category, 0) for category in readcategories])
-        reads_by_barcode = {}
-        logger.info('\nNow parsing reads from the following:\n\tr1files: %s\n\tr2files: %s' % (' '.join(args['r1files']), ' '.join(args['r2files'])))
+        barcodes = {}
+        logger.info('Now parsing reads from the following:\n\tr1files: %s\n\tr2files: %s' % (' '.join(args['r1files']), ' '.join(args['r2files'])))
         for read_tup in dms_tools.file_io.IteratePairedFASTQ(args['r1files'], args['r2files'], gzipped, applyfilter=True):
             n['total'] += 1
             if read_tup:
@@ -73,26 +73,55 @@ def main():
                 if qcheckedreads:
                     (r1, r2) = qcheckedreads
                     barcode = r1[ : args['barcodelength']] + r2[ : args['barcodelength']]
-                    if barcode in reads_by_barcode:
-                        reads_by_barcode[barcode].append((r1, r2))
+                    if barcode in barcodes:
+                        barcodes[barcode]['reads'].append((r1, r2))
                     else:
-                        reads_by_barcode[barcode] = [(r1, r2)]
+                        barcodes[barcode] = {'reads':[(r1, r2)]}
                 else:
                     n['low quality'] += 1
             else:
-                n['filtered'] += 1
+                n['failed Illumina filter'] += 1
             if n['total'] % 1e5 == 0:
-                logger.info('Reads parsed so far:\n%s' % '\n'.join(['\t%s = %d' % (category, n[category]) for category in readcategories]))
-        logger.info('Parsed all reads; here are the totals:\n%s' % '\n'.join(['\t%s = %s' % (category, n[category]) for category in readcategories]))
-        barcode_counts = {}
-        for (barcode, reads) in reads_by_barcode.iteritems():
+                logger.info('Reads parsed so far: %d' % n['total'])
+
+        logger.info('Finished parsing all %d reads\n' % n['total'])
+
+        # Examine barcodes to see if they pass criteria
+        logger.info('Now examining all %d barcodes to see if reads meet criteria for retention' % len(barcodes))
+        newreadcategories = []
+        retainedkeystring = 'retained barcode(s) with %d read(s)'
+        discardedkeystring = 'discarded barcode(s) with %d read(s)'
+        ibarcode = 0
+        for barcode in list(barcodes.iterkeys()):
+            ibarcode += 1
+            if ibarcode % 1e5 == 0:
+                logger.info('Barcodes examined so far: %s' % ibarcode)
+            nreads = len(barcodes[barcode]['reads'])
+            if nreads < args['minreadsperbarcode']:
+                barcodes[barcode]['retained'] = False
+                barcodes[barcode]['reason'] = 'Too few reads'
+            else:
+                consensus = dms_tools.utils.BuildReadConsensus(barcodes[barcode]['reads'], args['minreadidentity'], args['minreadconcurrence'], args['maxreadtrim'])
+                if consensus:
+                    barcodes[barcode]['retained'] = True
+                    barcodes[barcode]['consensus'] = consensus
+                else:
+                    barcodes[barcode]['retained'] = False
+                    barcodes[barcode]['reason'] = 'Reads not sufficiently identical'
+            keystring = {True:retainedkeystring, False:discardedkeystring}[barcodes[barcode]['retained']] % nreads
             try:
-                barcode_counts[len(reads)] += 1
+                n[keystring] += 1
             except KeyError:
-                barcode_counts[len(reads)] = 1
-        barcode_counts = barcode_counts.items()
-        barcode_counts.sort()
-        logger.info('Here are the counts of reads per-barcode:\n\t%s' % '\n\t'.join(['%d barcodes are found %d times (this is %.3f of all barcodes)' % (tup[1], tup[0], tup[1] / float(len(reads_by_barcode))) for tup in barcode_counts]))
+                n[keystring] = 1
+                newreadcategories.append((nreads, keystring))
+        newreadcategories.sort()
+        readcategories = readcategories + [tup[1] for tup in newreadcategories]
+        assert ibarcode == len(barcodes)
+        logger.info('Finishing examining all %d barcodes\n' % ibarcode)
+
+        # Summarize statistics
+        logger.info('Here are the summary statistics:\n%s' % '\n'.join(['\t%s = %s' % (category, n[category]) for category in readcategories]))
+
     except:
         logger.exception('Terminating %s at %s with ERROR' % (prog, time.asctime()))
     else:

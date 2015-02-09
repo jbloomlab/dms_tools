@@ -34,6 +34,8 @@ Functions in this module
 
 * *CheckReadQuality* : checks quality of pair of reads.
 
+* *BuildReadConsensus* : builds consensus of reads if they are sufficiently similar.
+
 Function documentation
 ---------------------------
 
@@ -606,6 +608,91 @@ def CheckReadQuality(r1, r2, q1, q2, minq, maxlowqfrac, barcodelength, use_cutil
                 newr.append(ri)
         checkedreads.append(''.join(newr))
     return tuple(checkedreads)
+
+
+def BuildReadConsensus(reads, minreadidentity, minreadconcurrence, maxreadtrim, use_cutils=True):
+    """Builds consensus of reads if they are sufficiently identical.
+
+    *reads* : is a list of *(r1, r2)* read pairs, which are assumed to be upper
+    case with ``N`` inserted for ambiguous or low-quality positions (i.e. the
+    reads have passed through *CheckReadQuality*). *reads* must have at
+    least two entries.
+
+    *minreadidentity* : all reads in *reads* are required to have >= this fraction
+    of their nucleotides identical and non-ambiguous (not ``N``) to the
+    first read in *reads*. If this is not the case, return *False*.
+
+    *minreadconcurrence* : among reads that pass 
+    *minreadidentity*, return the consensus identity at a position
+    if >= this fraction; otherwise make that position an ``N``.
+    Must be > 0.5 and <= 1.
+
+    *maxreadtrim* : all R1 reads in *reads* need to be same length. If
+    they aren't initially, trim up to this many nucleotides off the longer
+    ones. If that doesn't make them the same length, then return *False*.
+    The same is done for R2 reads.
+
+    *use_cutils* specifies that we use the fast C implementation of this
+    function provided by *dms_tools.cutils*.
+
+    The return variable will be *False* if reads differ in length
+    after applying *maxreadtrim* or
+    *minreadidentity* is failed; otherwise it will be a 2-tuple
+    *(r1_consensus, r2_consensus)* with each element a string of 
+    the consensus with ``N`` at positions where the read concurrence
+    does not satisfy *minreadconcurrence*.
+    """
+    if use_cutils:
+        return dms_tools.cutils.BuildReadConsensus(reads, minreadidentity, minreadconcurrence, maxreadtrim)
+    assert len(reads) >= 2, "reads must have at least two entries"
+    assert 0.5 < minreadconcurrence <= 1.0
+    r1_lengths = [len(r1) for (r1, r2) in reads]
+    r2_lengths = [len(r2) for (r1, r2) in reads]
+    if (max(r1_lengths) - min(r1_lengths) > maxreadtrim) or (max(r2_lengths) - min(r2_lengths) > maxreadtrim):
+        return False # reads cannot be trimmed to compatible lengths
+    else:
+        len_r1 = min(r1_lengths)
+        len_r2 = min(r2_lengths)
+    (r1_1, r2_1) = reads[0]
+    max_nonidentical = (1.0 - minreadidentity) * (len_r1 + len_r2)
+    counts_r1 = [dict([(nt, 0) for nt in ['A', 'C', 'G', 'T', 'N']]) for i in range(len_r1)]
+    counts_r2 = [dict([(nt, 0) for nt in ['A', 'C', 'G', 'T', 'N']]) for i in range(len_r2)]
+    for i in range(len_r1):
+        counts_r1[i][r1_1[i]] += 1
+    for i in range(len_r2):
+        counts_r2[i][r2_1[i]] += 1
+    for (r1_i, r2_i) in reads[1 : ]:
+        n_nonidentical = 0
+        for i in range(len_r1):
+            if r1_1[i] == 'N' or r1_i[i] == 'N' or r1_1[i] != r1_i[i]:
+                n_nonidentical += 1
+                if n_nonidentical > max_nonidentical:
+                    return False
+                counts_r1[i][r1_i[i]] += 1
+        for i in range(len_r2):
+            if r2_1[i] == 'N' or r2_i[i] == 'N' or r2_1[i] != r2_i[i]:
+                n_nonidentical += 1
+                if n_nonidentical > max_nonidentical:
+                    return False
+                counts_r2[i][r2_i[i]] += 1
+    r1_consensus = []
+    r2_consensus = []
+    min_nt_counts = minreadconcurrence * len(reads) # nt must be found >= this many times
+    for i in range(len_r1):
+        for nt in ['A', 'C', 'G', 'T']:
+            if counts_r1[i][nt] >= min_nt_counts:
+                r1_consensus.append(nt)
+                break
+        else:
+            r1_consensus.append('N')
+    for i in range(len_r2):
+        for nt in ['A', 'C', 'G', 'T']:
+            if counts_r2[i][nt] >= min_nt_counts:
+                r2_consensus.append(nt)
+                break
+        else:
+            r2_consensus.append('N')
+    return (''.join(r1_consensus), ''.join(r2_consensus))
 
 
 if __name__ == '__main__':
