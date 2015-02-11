@@ -36,6 +36,8 @@ Functions in this module
 
 * *BuildReadConsensus* : builds consensus of reads if they are sufficiently similar.
 
+* *AlignSubamplicon* : attempt to align subamplicon at specified position.
+
 Function documentation
 ---------------------------
 
@@ -641,6 +643,14 @@ def BuildReadConsensus(reads, minreadidentity, minreadconcurrence, maxreadtrim, 
     *(r1_consensus, r2_consensus)* with each element a string of 
     the consensus with ``N`` at positions where the read concurrence
     does not satisfy *minreadconcurrence*.
+
+    >>> reads = [('ATGC', 'CGAT'), ('ATGC', 'CGAT')]
+    >>> BuildReadConsensus(reads, 0.75, 0.6, 1)
+    ('ATGC', 'CGAT')
+
+    >>> reads = [('TTGC', 'CGAT'), ('ATGC', 'CGANA')]
+    >>> BuildReadConsensus(reads, 0.75, 0.6, 1)
+    ('NTGC', 'CGAN')
     """
     if use_cutils:
         return dms_tools.cutils.BuildReadConsensus(reads, minreadidentity, minreadconcurrence, maxreadtrim)
@@ -668,13 +678,15 @@ def BuildReadConsensus(reads, minreadidentity, minreadconcurrence, maxreadtrim, 
                 n_nonidentical += 1
                 if n_nonidentical > max_nonidentical:
                     return False
-                counts_r1[i][r1_i[i]] += 1
+                counts_r1[i]['N'] += 1
+            counts_r1[i][r1_i[i]] += 1
         for i in range(len_r2):
             if r2_1[i] == 'N' or r2_i[i] == 'N' or r2_1[i] != r2_i[i]:
                 n_nonidentical += 1
                 if n_nonidentical > max_nonidentical:
                     return False
-                counts_r2[i][r2_i[i]] += 1
+                counts_r2[i]['N'] += 1
+            counts_r2[i][r2_i[i]] += 1
     r1_consensus = []
     r2_consensus = []
     min_nt_counts = minreadconcurrence * len(reads) # nt must be found >= this many times
@@ -693,6 +705,157 @@ def BuildReadConsensus(reads, minreadidentity, minreadconcurrence, maxreadtrim, 
         else:
             r2_consensus.append('N')
     return (''.join(r1_consensus), ''.join(r2_consensus))
+
+
+def AlignSubamplicon(refseq, r1, r2, refseqstart, refseqend, maxmuts, maxN, chartype, counts, use_cutils=True):
+    """Tries to align subamplicon into reference sequence.
+
+    The return value is *(True, nmuts)* if the subamplicon aligns and *False* otherwise.
+    In the case where the subamplicon aligns, *nmuts* is the number of mutations
+    of the type indicated by *chartype*.
+    If the subamplicon aligns, then the character counts in *counts* are updated.
+    A subamplicon is considered to align if there are <= *maxmuts* mutations
+    of *chartype*. Characters that contain ambiguous nucleotides (``N``)
+    are not counted as mutations or recorded as counts. If *r1* and *r2* 
+    overlap, identities are counted as ambiguous unless both reads agree.
+    If *r1* and *r2* do not reach far enough to overlap, and uncalled
+    identities in between are called as ambiguous.
+
+    Note that if using the default fast C implementation (which is done if
+    *use_cutils* is *True*), then there is not much error checking on the validity
+    of the calling variables. Therefore, you could end up with a segmentation
+    fault with invalid calling variables and *use_cutils* of *False*.
+
+    Here are the calling variables:
+
+    * *refseq* : string giving the reference sequencing to which we attempt
+      to align the subamplicon. Assumed uppercase nucleotides.
+
+    * *r1* : string giving the forward read, assumed uppercase nucleotides
+      with ``N`` for ambiguous / low-quality sites. Note that if this read
+      has 5' portions (such as a barcode) that we aren't aligning, they should
+      have been trimmed prior to calling this function.
+
+    * *r2* : like *r1* but for reverse read.
+
+    * *refseqstart* : nucleotide in *refseq* (in 1, 2, ... numbering) where 
+       first nucleotide in *r1* aligns.
+
+    * *refseqend* : nucleotide in *refseq* (in 1, 2, ... numbering) where
+      first nucleotide in *r2* aligns (note that *r2* then reads backwards
+      towards 5' end of *refseq*).
+
+    * *maxmuts* : maximum number of mutations of character type *chartype*
+      that are allowed; subamplicons with more than this many mutations
+      are considered **not** to align and *False* is returned.
+
+    * *maxN* : maximum number of ambiguous nucleotides allowed in the 
+      consensus built up from the two reads (i.e. including the reads
+      and any overlap).
+
+    * *chartype* : type of character for which mutations are counted; currently
+      the only allowable value is the string "codon".
+
+    * *counts* : a dictionary for counting mutations to *refseq* of character
+      type *chartype* in the format used by *dms_tools.utils.WriteDMSCounts*
+      and *dms_tools.utils.ReadDMSCounts*.
+
+    * *use_cutils* : do we use the fast C-implemenation of this function
+      in *dms_tools.cutils*?
+
+    >>> counts = {'1':dict([('WT', 'ATG')] + [(codon, 0) for codon in dms_tools.codons]),
+    ...           '2':dict([('WT', 'GGG')] + [(codon, 0) for codon in dms_tools.codons]),
+    ...           '3':dict([('WT', 'AAA')] + [(codon, 0) for codon in dms_tools.codons])}
+    >>> returntup = AlignSubamplicon('ATGGGGAAA', 'GGGGAA', 'TTTCCC', 3, 9, 1, 1, 'codon', counts)
+    >>> returntup == (True, 0)
+    True
+    >>> all([counts['1'][codon] == 0 for codon in dms_tools.codons])
+    True
+    >>> counts['2']['GGG'] == 1
+    True
+    >>> all([counts['2'][codon] == 0 for codon in dms_tools.codons if codon != 'GGG'])
+    True
+    >>> all([counts['2'][codon] == 0 for codon in dms_tools.codons if codon != 'GGG'])
+    True
+    >>> counts['3']['AAA'] == 1
+    True
+    >>> all([counts['3'][codon] == 0 for codon in dms_tools.codons if codon != 'AAA'])
+    True
+    >>> returntup = AlignSubamplicon('ATGGGGAAA', 'GGGGAA', 'TTTCCC', 1, 9, 1, 1, 'codon', counts)
+    >>> returntup == False
+    True
+    >>> returntup = AlignSubamplicon('ATGGGGAAA', 'GGGGAT', 'TTTCCC', 3, 9, 1, 0, 'codon', counts)
+    >>> returntup == False
+    True
+    >>> returntup = AlignSubamplicon('ATGGGGAAA', 'GGGGAT', 'TTTCCC', 3, 9, 1, 1, 'codon', counts)
+    >>> returntup == (True, 0)
+    True
+    >>> counts['2']['GGG'] == 2
+    True
+    >>> counts['3']['AAA'] == 1
+    True
+    >>> returntup = AlignSubamplicon('ATGGGGAAA', 'GAGGAA', 'TTTCCT', 3, 9, 0, 1, 'codon', counts)
+    >>> returntup == False
+    True
+    >>> returntup = AlignSubamplicon('ATGGGGAAA', 'GAGGAA', 'TTTCCT', 3, 9, 1, 1, 'codon', counts)
+    >>> counts['2']['GGG'] == 2
+    True
+    >>> counts['2']['AGG'] == 1
+    True
+
+    """
+    r2 = dms_tools.cutils.ReverseComplement(r2)
+
+    if use_cutils:
+        pass
+
+    assert refseqstart + len(r1) - 1 <= len(refseq), "R1 extends outside refseq"
+    assert refseqend - len(r1) >= 0, "R2 extends outside refseq"
+
+    # build subamplicon of two reads
+    len_subamplicon = refseqend - refseqstart + 1
+    subamplicon = []
+    for i in range(len_subamplicon):
+        if i < len(r1) and i < len_subamplicon - len(r2):
+            subamplicon.append(r1[i])
+        elif i >= len(r1) and i < len_subamplicon - len(r2):
+            subamplicon.append('N')
+        elif i < len(r1) and i >= len_subamplicon - len(r2):
+            if r1[i] == r2[i - len_subamplicon + len(r2)]:
+                subamplicon.append(r1[i])
+            else:
+                subamplicon.append('N')
+        else:
+            subamplicon.append(r2[i - len_subamplicon + len(r2)])
+    subamplicon = ''.join(subamplicon)
+    if subamplicon.count('N') > maxN:
+        return False # too many ambiguous nucleotides in subamplicon
+
+    if chartype == 'codon':
+        if refseqstart % 3 == 1:
+            startcodon = (refseqstart + 2) // 3
+            codonshift = 0
+        elif refseqstart % 3 == 2:
+            startcodon = (refseqstart + 1) // 3 + 1
+            codonshift = 2
+        elif refseqstart % 3 == 0:
+            startcodon = refseqstart // 3 + 1
+            codonshift = 1
+        nmuts = 0
+        for icodon in range(startcodon, refseqend // 3 + 1):
+            assert counts[str(icodon)]['WT'] == refseq[3 * icodon - 3 : 3 * icodon], "Mismatch at codon %d" % icodon
+            mutcodon = subamplicon[3 * (icodon - startcodon) + codonshift : 3 * (icodon - startcodon) + 3 + codonshift]
+            if 'N' not in mutcodon and mutcodon != refseq[3 * icodon - 3 : 3 * icodon]:
+                nmuts += 1
+                if nmuts > maxmuts:
+                    return False
+        for icodon in range(startcodon, refseqend // 3 + 1):
+            mutcodon = subamplicon[3 * (icodon - startcodon) + codonshift : 3 * (icodon - startcodon) + 3 + codonshift]
+            if 'N' not in mutcodon:
+                counts[str(icodon)][mutcodon] += 1
+        return (True, nmuts)
+    else:
+        raise ValueError("Invalid chartype of %s" % chartype)
 
 
 if __name__ == '__main__':

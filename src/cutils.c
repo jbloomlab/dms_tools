@@ -128,19 +128,19 @@ static PyObject *BuildReadConsensus(PyObject *self, PyObject *args) {
                 if (n_nonidentical > maxnonidentical) {
                     Py_RETURN_FALSE;
                 }
-                switch (r1_i[i]) {
-                    case 'A' : counts_r1_A[i]++;
-                               break;
-                    case 'C' : counts_r1_C[i]++;
-                               break;
-                    case 'G' : counts_r1_G[i]++;
-                               break;
-                    case 'T' : counts_r1_T[i]++;
-                               break;
-                    case 'N' : break;
-                    default : PyErr_SetString(PyExc_ValueError, "Invalid nucleotide");
-                              return NULL;
-                }
+            }
+            switch (r1_i[i]) {
+                case 'A' : counts_r1_A[i]++;
+                           break;
+                case 'C' : counts_r1_C[i]++;
+                           break;
+                case 'G' : counts_r1_G[i]++;
+                           break;
+                case 'T' : counts_r1_T[i]++;
+                           break;
+                case 'N' : break;
+                default : PyErr_SetString(PyExc_ValueError, "Invalid nucleotide");
+                          return NULL;
             }
         }
         for (i = 0; i < len_r2; i++) {
@@ -149,19 +149,19 @@ static PyObject *BuildReadConsensus(PyObject *self, PyObject *args) {
                 if (n_nonidentical > maxnonidentical) {
                     Py_RETURN_FALSE;
                 }
-                switch (r2_i[i]) {
-                    case 'A' : counts_r2_A[i]++;
-                               break;
-                    case 'C' : counts_r2_C[i]++;
-                               break;
-                    case 'G' : counts_r2_G[i]++;
-                               break;
-                    case 'T' : counts_r2_T[i]++;
-                               break;
-                    case 'N' : break;
-                    default : PyErr_SetString(PyExc_ValueError, "Invalid nucleotide");
-                              return NULL;
-                }
+            }
+            switch (r2_i[i]) {
+                case 'A' : counts_r2_A[i]++;
+                           break;
+                case 'C' : counts_r2_C[i]++;
+                           break;
+                case 'G' : counts_r2_G[i]++;
+                           break;
+                case 'T' : counts_r2_T[i]++;
+                           break;
+                case 'N' : break;
+                default : PyErr_SetString(PyExc_ValueError, "Invalid nucleotide");
+                          return NULL;
             }
         }
     }

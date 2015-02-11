@@ -9,6 +9,8 @@ import sys
 import os
 import time
 import logging
+import Bio.SeqIO
+import dms_tools
 import dms_tools.parsearguments
 import dms_tools.file_io
 import dms_tools.utils
@@ -22,13 +24,6 @@ def main():
     parser = dms_tools.parsearguments.BarcodedSubampliconsParser()
     args = vars(parser.parse_args())
     prog = parser.prog
-
-    # some sanity checking on arguments
-    for (refseqstart, refseqend, r1trim, r2trim) in args['alignspecs']:
-        if args['barcodelength'] >= r1trim:
-            raise ValueError("One of the alignspecs specifies R1TRIM of %d, which doesn't fully trim a barcode of barcodelength %d" % (r1trim, args['barcodelength']))
-        if args['barcodelength'] >= r2trim:
-            raise ValueError("One of the alignspecs specifies R2TRIM of %d, which doesn't fully trim a barcode of barcodelength %d" % (r2trim, args['barcodelength']))
 
     # set up logging
     logging.shutdown()
@@ -51,7 +46,31 @@ def main():
         logger.info(versionstring)
         logger.info('Parsed the following arguments:\n%s\n' % '\n'.join(['\t%s = %s' % tup for tup in args.iteritems()]))
 
-        # start iterating over the reads in the files
+        # read refseq
+        refseq = [seq for seq in Bio.SeqIO.parse(open(args['refseq']), 'fasta')]
+        assert len(refseq) == 1, "refseq of %s does not specify exactly one sequence" % args['refseq']
+        refseq = str(refseq[0].seq).upper()
+        if args['chartype'] == 'codon':
+            assert len(refseq) % 3 == 0, "refseq does not specify a sequence of codons since its length of %d nucleotides is not a multiple of 3" % (len(refseq))
+            logger.info('Read a reference sequence of %d codons from %s\n' % (len(refseq) // 3, args['refseq']))
+        else:
+            raise ValueError("Invalid chartype")
+
+        # do some checking on validity of alignspecs
+        for (refseqstart, refseqend, r1start, r2start) in args['alignspecs']:
+            assert refseqend > refseqstart, "REFSEQEND <= REFSEQSTART"
+            if args['barcodelength'] >= r1start:
+                raise ValueError("One of the alignspecs specifies R1START of %d, which doesn't fully trim a barcode of barcodelength %d" % (r1start, args['barcodelength']))
+            if args['barcodelength'] >= r2start:
+                raise ValueError("One of the alignspecs specifies R2START of %d, which doesn't fully trim a barcode of barcodelength %d" % (r2start, args['barcodelength']))
+            if r1start < 1:
+                raise ValueError("R1START must be >= 1; you specified %d" % r1start)
+            if r2start < 1:
+                raise ValueError("R2START must be >= 1; you specified %d" % r2start)
+            if (refseqstart < 0 or refseqend > len(refseq) or refseqstart >= refseqend):
+                raise ValueError("One of the alignspecs specifies REFSEQSTART of %d and REFSEQEND of %d, which are not valid values for a refseq of length %d nucleotides." % (refseqstart, refseqend, len(refseq)))
+
+        # check on read files
         assert len(args['r1files']) == len(args['r2files']), "r1files and r2files do not specify the same number of files."
         if all([os.path.splitext(f)[1].lower() == '.gz' for f in args['r1files'] + args['r2files']]):
             gzipped = True
@@ -60,7 +79,7 @@ def main():
                 raise ValueError("Some but not all of the r1files and r2files are gzipped. Either all or no files can be gzipped.")
             gzipped = False
 
-        # collect reads by barcode
+        # collect reads by barcode while iterating over reads
         readcategories = ['total', 'failed Illumina filter', 'low quality']
         n = dict([(category, 0) for category in readcategories])
         barcodes = {}
@@ -84,13 +103,22 @@ def main():
             if n['total'] % 1e5 == 0:
                 logger.info('Reads parsed so far: %d' % n['total'])
 
-        logger.info('Finished parsing all %d reads\n' % n['total'])
+        logger.info('Finished parsing all %d reads; ended up with %d unique barcodes.\n' % (n['total'], len(barcodes)))
 
-        # Examine barcodes to see if they pass criteria
+        # Examine barcodes to see if they pass criteria, if so align them and record mutation counts
+        # Set up *counts* as dict that will hold mutation counts in format for dms_tools.file_io.WriteDMSCounts
+        counts = {}
+        if args['chartype'] == 'codon':
+            for r in range(1, len(refseq) // 3 + 1):
+                counts[str(r)] = dict([('WT', refseq[3 * r - 3 : 3 * r])] + [(codon, 0) for codon in dms_tools.codons])
+        else:
+            raise ValueError("Invalid chartype %s" % args['chartype'])
+        # Now start looping over barcodes
         logger.info('Now examining all %d barcodes to see if reads meet criteria for retention' % len(barcodes))
         newreadcategories = []
-        retainedkeystring = 'retained barcode(s) with %d read(s)'
-        discardedkeystring = 'discarded barcode(s) with %d read(s)'
+        unalignedkeystring = 'un-alignable barcodes with %d reads'
+        alignedkeystring = 'aligned barcodes with %d reads'
+        discardedkeystring = 'discarded barcodes with %d reads'
         ibarcode = 0
         for barcode in list(barcodes.iterkeys()):
             ibarcode += 1
@@ -99,16 +127,35 @@ def main():
             nreads = len(barcodes[barcode]['reads'])
             if nreads < args['minreadsperbarcode']:
                 barcodes[barcode]['retained'] = False
-                barcodes[barcode]['reason'] = 'Too few reads'
+                barcodes[barcode]['description'] = 'Too few reads'
+                keystring = discardedkeystring % nreads
             else:
                 consensus = dms_tools.utils.BuildReadConsensus(barcodes[barcode]['reads'], args['minreadidentity'], args['minreadconcurrence'], args['maxreadtrim'])
                 if consensus:
-                    barcodes[barcode]['retained'] = True
+                    # try to align subamplicon
                     barcodes[barcode]['consensus'] = consensus
+                    (r1, r2) = consensus
+                    for (refseqstart, refseqend, r1start, r2start) in args['alignspecs']:
+                        assert 0 < r1start < len(r1), "Length of R1 read (%d) is <= R1START (%d) or <= 0" % (len(r1), r1start)
+                        assert 0 < r2start < len(r2), "Length of R2 read (%d) is <= R2START (%d) or <= 0" % (len(r2), r2start)
+                        maxN = int(args['maxlowqfrac'] * min(refseqend - refseqstart + 1, len(r1) + len(r2) - r1start - r2start + 2))
+                        if args['R1_is_sense']:
+                            aligned = dms_tools.utils.AlignSubamplicon(refseq, r1[r1start - 1 : ], r2[r2start - 1 : ], refseqstart, refseqend, args['maxmuts'], maxN, args['chartype'], counts)
+                        else:
+                            aligned = dms_tools.utils.AlignSubamplicon(refseq, r2[r2start - 1 : ], r1[r1start - 1 : ], refseqstart, refseqend, args['maxmuts'], maxN, args['chartype'], counts)
+                        if aligned:
+                            keystring = alignedkeystring % nreads
+                            barcodes[barcode]['retained'] = True
+                            barcodes[barcode]['description'] = 'Aligned from %d to %d with %d %s mutations' % (r1start, r2start, aligned[1], args['chartype'])
+                            break
+                    else:
+                        keystring = unalignedkeystring % nreads
+                        barcodes[barcode]['retained'] = False
+                        barcodes[barcode]['description'] = 'Subamplicon could not be aligned to refseq'
                 else:
                     barcodes[barcode]['retained'] = False
-                    barcodes[barcode]['reason'] = 'Reads not sufficiently identical'
-            keystring = {True:retainedkeystring, False:discardedkeystring}[barcodes[barcode]['retained']] % nreads
+                    barcodes[barcode]['description'] = 'Reads not sufficiently identical'
+                    keystring = discardedkeystring % nreads
             try:
                 n[keystring] += 1
             except KeyError:
@@ -117,7 +164,7 @@ def main():
         newreadcategories.sort()
         readcategories = readcategories + [tup[1] for tup in newreadcategories]
         assert ibarcode == len(barcodes)
-        logger.info('Finishing examining all %d barcodes\n' % ibarcode)
+        logger.info('Finished examining all %d barcodes\n' % ibarcode)
 
         # Summarize statistics
         logger.info('Here are the summary statistics:\n%s' % '\n'.join(['\t%s = %s' % (category, n[category]) for category in readcategories]))
