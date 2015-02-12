@@ -807,10 +807,10 @@ def AlignSubamplicon(refseq, r1, r2, refseqstart, refseqend, maxmuts, maxN, char
     r2 = dms_tools.cutils.ReverseComplement(r2)
 
     if use_cutils:
-        pass
+        return dms_tools.cutils.AlignSubamplicon(refseq, r1, r2, refseqstart, refseqend, float(maxmuts), float(maxN), chartype, counts)
 
     assert refseqstart + len(r1) - 1 <= len(refseq), "R1 extends outside refseq"
-    assert refseqend - len(r1) >= 0, "R2 extends outside refseq"
+    assert refseqend - len(r2) >= 0, "R2 extends outside refseq"
 
     # build subamplicon of two reads
     len_subamplicon = refseqend - refseqstart + 1

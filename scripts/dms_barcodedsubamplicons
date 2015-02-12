@@ -38,6 +38,13 @@ def main():
     logfile_handler.setFormatter(formatter)
     logger.info("Beginning execution of %s\nProgress will be logged to %s" % (prog, logfile))
 
+    # define file names and delete existing files
+    countsfile = "%scounts.txt" % args['outprefix']
+    for f in [countsfile]:
+        if os.path.isfile(f):
+            os.remove(f)
+            logger.info("Removing existing file %s" % f)
+
     # log in try / except loop
     try:
         logger.info('Beginning execution of %s in directory %s\n' % (prog, os.getcwd()))
@@ -165,6 +172,11 @@ def main():
         readcategories = readcategories + [tup[1] for tup in newreadcategories]
         assert ibarcode == len(barcodes)
         logger.info('Finished examining all %d barcodes\n' % ibarcode)
+
+        # Write the counts
+        logger.info('Writing the %s counts to %s' % (args['chartype'], countsfile))
+        with open(countsfile, 'w') as f:
+            dms_tools.file_io.WriteDMSCounts(f, counts)
 
         # Summarize statistics
         logger.info('Here are the summary statistics:\n%s' % '\n'.join(['\t%s = %s' % (category, n[category]) for category in readcategories]))

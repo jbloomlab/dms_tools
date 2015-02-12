@@ -228,7 +228,10 @@ def BarcodedSubampliconsParser():
     """Returns *argparse.ArgumentParser* for ``dms_barcodedsubamplicons`` script."""
     parser = ArgumentParserNoArgHelp(description='Gathers barcoded subamplicons, aligns to reference sequence, and counts mutations. This script is part of %s (version %s) written by %s. Detailed documentation is at %s' % (dms_tools.__name__, dms_tools.__version__, dms_tools.__author__, dms_tools.__url__), formatter_class=SmartHelpFormatter)
     parser.add_argument('outprefix', help=\
-        'R|Prefix for output file. Suffixes of created files:\n'\
+        'R|Prefix for output files.\n' +\
+        'Existing files with these names are removed.\n' +\
+        'The suffixes of the created files are:\n' +\
+        '  "counts.txt" - character counts at each site.\n' +\
         '  ".log" - file that logs progress.')
     parser.add_argument('refseq', type=ExistingFile, help='Existing FASTA file containing gene to which we are aligning subamplicons and counting mutations.')
     parser.add_argument('r1files', type=CommaSeparatedFASTQFiles, help='Comma-separated list of R1 FASTQ files (no spaces). Files can optionally be gzipped (extension .gz).')

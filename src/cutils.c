@@ -8,6 +8,123 @@
 #include <math.h>
 
 
+static char AlignSubamplicon_docs[] = "Fast C implementation of *dms_tools.utils.AlignSubamplicon*.";
+
+static PyObject *AlignSubamplicon(PyObject *self, PyObject *args) {
+    // Calling variables: refseq, r1, r2, refseqstart, refseqend, maxmuts, maxN, chartype, counts
+    char *refseq, *r1, *r2, *chartype;
+    char icodon_str[33]; // will hold string representation of icodon
+    char mutcodon[4]; // will hold string representation of mutcodon
+    Py_ssize_t len_refseq, len_r1, len_r2;
+    double maxmuts, maxN;
+    long refseqstart, refseqend, len_subamplicon, i, n_N, startcodon, codonshift, nmuts, icodon, n, j;
+    PyObject *counts, *n_new, *py_returntuple;
+    // Parse the arguments
+    if (! PyArg_ParseTuple(args, "sssllddsO!", &refseq, &r1, &r2, &refseqstart, &refseqend, &maxmuts, &maxN, &chartype, &PyDict_Type, &counts)) {
+        PyErr_SetString(PyExc_TypeError, "Invalid calling arguments to AlignSubamplicon");
+        return NULL;
+    }
+    len_refseq = strlen(refseq);
+    len_r1 = strlen(r1);
+    len_r2 = strlen(r2);
+    if (refseqstart + len_r1 - 1 > len_refseq) {
+        PyErr_SetString(PyExc_ValueError, "R1 extends outside refseq");
+        return NULL;
+    }
+    if (refseqend - len_r2 < 0) {
+        PyErr_SetString(PyExc_ValueError, "R2 extends outside refseq");
+        return NULL;
+    }
+    // Build subamplicon of two reads
+    len_subamplicon = refseqend - refseqstart + 1;
+    char *subamplicon = PyMem_New(char, len_subamplicon + 1);
+    if (subamplicon == NULL) {
+        return PyErr_NoMemory();
+    }
+    subamplicon[len_subamplicon] = '\0'; // string termination character
+    for (i = 0; i < len_subamplicon; i++) {
+        if ((i < len_r1) && (i < len_subamplicon - len_r2)) {
+            subamplicon[i] = r1[i];
+        } else if ((i >= len_r1) && (i < len_subamplicon - len_r2)) {
+            subamplicon[i] = 'N';
+        } else if ((i < len_r1) && (i >= len_subamplicon - len_r2)) {
+            if (r1[i] == r2[i - len_subamplicon + len_r2]) {
+                subamplicon[i] = r1[i];
+            } else {
+                subamplicon[i] = 'N';
+
+            }
+        } else {
+            subamplicon[i] = r2[i - len_subamplicon + len_r2];
+        }
+    }
+    n_N = 0;
+    for (i = 0; i < len_subamplicon; i++) {
+        if (subamplicon[i] == 'N') {
+            n_N++;
+        }
+    }
+    if (n_N > maxN) {
+        PyMem_Del(subamplicon);
+        Py_RETURN_FALSE;
+    }
+    // Count mutations
+    if (strcmp(chartype, "codon") == 0) {
+        if (refseqstart % 3 == 1) {
+            startcodon = (refseqstart + 2) / 3;
+            codonshift = 0;
+        } else if (refseqstart % 3 == 2) {
+            startcodon = (refseqstart + 1) / 3 + 1;
+            codonshift = 2;
+        } else {
+            startcodon = refseqstart / 3 + 1;
+            codonshift = 1;
+        }
+        nmuts = 0;
+        for (icodon = startcodon; icodon < refseqend / 3 + 1; icodon++) {
+            i = 3 * (icodon - startcodon) + codonshift;
+            if (((subamplicon[i] != 'N') && (subamplicon[i + 1] != 'N') && (subamplicon[i + 2] != 'N')) && ((subamplicon[i] != refseq[3 * icodon - 3]) || (subamplicon[i + 1] != refseq[3 * icodon - 2]) || (subamplicon[i + 2] != refseq[3 * icodon - 1]))) {
+                nmuts++;
+                if (nmuts > maxmuts) {
+                    PyMem_Del(subamplicon);
+                    Py_RETURN_FALSE;
+                }
+            }
+        }
+        for (icodon = startcodon; icodon < refseqend / 3 + 1; icodon++) {
+            i = 3 * (icodon - startcodon) + codonshift;
+            if (((subamplicon[i] != 'N') && (subamplicon[i + 1] != 'N') && (subamplicon[i + 2] != 'N'))) {
+                for (j = 0; j < 3; j++) {
+                    mutcodon[j] = subamplicon[i + j];
+                }
+                mutcodon[3] = '\0'; // string termination character
+                sprintf(icodon_str, "%ld", icodon); // icodon_str is now string for icodon
+                n = PyInt_AsLong(PyDict_GetItemString(PyDict_GetItemString(counts, icodon_str), mutcodon));
+                n_new = PyInt_FromLong(n + 1);
+                PyDict_SetItemString(PyDict_GetItemString(counts, icodon_str), mutcodon, n_new);
+                Py_DECREF(n_new);
+            }
+        }
+        PyMem_Del(subamplicon);
+        //return (True, nmuts) // implement in C
+        py_returntuple = PyTuple_New(2);
+        if (py_returntuple == NULL) {
+            return PyErr_NoMemory();
+        }
+        PyTuple_SetItem(py_returntuple, 0, Py_True);
+        PyTuple_SetItem(py_returntuple, 1, PyInt_FromLong(nmuts));
+        return py_returntuple;
+    } else {
+        PyMem_Del(subamplicon);
+        PyErr_SetString(PyExc_ValueError, "Invalid chartype");
+        return NULL;
+    }
+    PyMem_Del(subamplicon);
+    PyErr_SetString(PyExc_RuntimeError, "Function unexpectedly reached end.");
+    return NULL;
+}
+
+
 static char BuildReadConsensus_docs[] = "Fast C implementation of *dms_tools.utils.BuildReadConsensus*.";
 
 static PyObject *BuildReadConsensus(PyObject *self, PyObject *args) {
@@ -343,12 +460,13 @@ static PyObject *ReverseComplement(PyObject *self, PyObject *args) {
 }
 
 
-static char cutils_docs[] = "Fast implementations of some functions in *dms_tools*.\n\n*ReverseComplement* in this module mimics the same function from *dms_tools.utils*.\n\n*CheckReadQuality* in this module mimics the same function from *dms_tools.utils*.\n\n*BuildReadConsensus* in this module mimics the same function from *dms_tools.utils*.";
+static char cutils_docs[] = "Fast implementations of some functions in *dms_tools*.\n\n*ReverseComplement* in this module mimics the same function from *dms_tools.utils*.\n\n*CheckReadQuality* in this module mimics the same function from *dms_tools.utils*.\n\n*BuildReadConsensus* in this module mimics the same function from *dms_tools.utils*.\n\n*AlignSubamplicon* in this module mimics the same function from *dms_tools.utils*.";
 
 static PyMethodDef cutils_funcs[] = {
     {"ReverseComplement", (PyCFunction) ReverseComplement, METH_VARARGS, ReverseComplement_docs},
     {"CheckReadQuality", (PyCFunction) CheckReadQuality, METH_VARARGS, CheckReadQuality_docs},
     {"BuildReadConsensus", (PyCFunction) BuildReadConsensus, METH_VARARGS, BuildReadConsensus_docs},
+    {"AlignSubamplicon", (PyCFunction) AlignSubamplicon, METH_VARARGS, AlignSubamplicon_docs},
     {NULL}
 };
 
