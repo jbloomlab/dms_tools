@@ -232,7 +232,9 @@ def BarcodedSubampliconsParser():
         'Existing files with these names are removed.\n' +\
         'The suffixes of the created files are:\n' +\
         '  "counts.txt" - character counts at each site.\n' +\
-        '  ".log" - file that logs progress.')
+        '  "summarystats.txt" - barcode summary stats.\n' +\
+        '  ".log" - file that logs progress.\n' +\
+        '  "barcodeinfo.txt.gz" - see "--barcodeinfo".')
     parser.add_argument('refseq', type=ExistingFile, help='Existing FASTA file containing gene to which we are aligning subamplicons and counting mutations.')
     parser.add_argument('r1files', type=CommaSeparatedFASTQFiles, help='Comma-separated list of R1 FASTQ files (no spaces). Files can optionally be gzipped (extension .gz).')
     parser.add_argument('r2files', type=CommaSeparatedFASTQFiles, help='Like "r1files" but R2 files. Must be same number of comma-separated entries as for "r1files".')
@@ -241,13 +243,19 @@ def BarcodedSubampliconsParser():
     parser.add_argument('--chartype', default='codon', choices=['codon'], help='Character for which we are counting mutations. Currently "codon" is only allowed value (in the future "nucleotide" might be added).')
     parser.add_argument('--maxmuts', type=NonNegativeInt, default=4, help='Only align subamplicons (consensus from a barcode) if <= this many mismatches with "refseq" counted in terms of "chartype".')
     parser.add_argument('--minq', type=NonNegativeInt, default=15, help='Only consider nucleotides with Q scores >= this number.')
-    parser.add_argument('--maxlowqfrac', default=0.075, type=FloatBetweenZeroAndOne, help='Only retain read pairs if no "N" or Q < "minq" nucleotides in barcodes, and total fraction of such nucleotides is <= this number in each read invididually and in the eventual subamplicon built from the barcodes.')
+    parser.add_argument('--maxlowqfrac', default=0.075, type=FloatBetweenZeroAndOne, help='Only retain read pairs if no "N" or Q < "minq" nucleotides in barcodes, and total fraction of such nucleotides is <= this number in each read individually and in the eventual subamplicon built from the barcodes.')
     parser.add_argument ('--minreadsperbarcode', type=IntGreaterEqual2, default=2, help='Retain only barcodes with >= this many reads that align gaplessly with >= "minreadidentity" identical high-quality nucleotides; should be >= 2.')
     parser.add_argument('--minreadidentity', default=0.9, type=FloatBetweenZeroAndOne, help='Retain only barcodes where all reads have >= this fraction of identical high-quality nucleotides that align gaplessly.')
     parser.add_argument('--minreadconcurrence', default=0.75, type=FloatBetweenHalfAndOne, help='For retained barcodes, only make mutation calls when >= this fraction of reads concur.')
     parser.add_argument('--maxreadtrim', type=NonNegativeInt, default=3, help='If R1 or R2 reads for same barcode are not all same length, trim up to this many nucleotides; if still not same length then discard.')
-    parser.add_argument('--R1_is_sense', type=bool, default=True, help='Is the R1 read in the sense direction of "refseq" and the R2 read antisense, or vice versa?')
+    parser.add_argument('--R1_is_antisense', dest='R1_is_antisense', action='store_true', help='Is the R1 read in the antisense direction of "refseq"?')
+    parser.set_defaults(R1_is_antisense=False)
+    parser.add_argument('--barcodeinfo', dest='barcodeinfo', action='store_true', help='If you specify this option, create a file with suffix "barcodeinfo.txt.gz" containing information for each barcode. This file is quite large, and its creation will about double the program run time.');
+    parser.add_argument('--purgefrac', type=FloatBetweenZeroAndOne, default=0, help='Randomly purge barcodes with this probability, thereby subsampling the data. You might want a value > 0 to estimate how the results depend on the sequencing depth.')
+    parser.add_argument('--seed', type=int, default=1, help='Random number seed used to select reads for purging when using "--purgefrac".')
+    parser.set_defaults(barcodeinfo=False)
     return parser
+
 
 def LogoPlotParser():
     """Returns *argparse.ArgumentParser* for ``dms_logoplot`` script."""
@@ -258,9 +266,9 @@ def LogoPlotParser():
     parser.add_argument('--numberevery', type=int, default=10, help='Number x-axis ticks for sites at this interval.')
     parser.add_argument('--diffprefheight', type=float, default=1.0, help='This option is only meaningful if "infile" gives differential preferences. In that case, it gives the height of logo stacks (extends from minus this to plus this). Cannot be smaller than the maximum total differential preference range.')
     parser.add_argument('--excludestop', dest='excludestop', action='store_true', help='If we are using amino acids, do we remove stop codons (denoted by "*")? We only remove stop codons if this argument is specified. If this option is used, then data for stop codons is removed by re-normalizing preferences to sum to one, and differential preferences to sum to zero.')
+    parser.set_defaults(excludestop=False)
     parser.add_argument('--overlay1', default=None, nargs=3, metavar=('FILE', 'SHORTNAME', 'LONGNAME'), help='Specify an overlay bar above each line of the logo plot to illustrate a per-residue property such as relative solvent accessibility or secondary structure. Requires three arguments: FILE SHORTNAME LONGNAME. FILE is the name of an existing file. Except for comment lines beginning with "#", each line should have two whitespace delimited columns (additional columns are allowed but ignored). The first column gives the site number (matching that in "infile") and the second column giving the property for this site; properties must either all be non-whitespace strings giving a discrete category (such as secondary structure), or all be numbers (such as relative solvent accessibility). All listed sites must be in "infile", but not all sites in "infile" must be in FILE -- missing sites are assumed to lack a known value for the property and are shown in white. SHORTNAME is a short (3-5 character) name of the property, such as "RSA" for "relative solvent accessibility." LONGNAME is a longer name (such as "relative solvent accessibiity"), or the same as SHORTNAME if you do not have a separate long name.')
     parser.add_argument('--overlay2', default=None, nargs=3, metavar=('FILE', 'SHORTNAME', 'LONGNAME'), help='Specify a second overlay bar. Arguments have the same meaning as for "overlay1".')
-    parser.set_defaults(excludestop=False)
     parser.add_argument('-v', '--version', action='version', version='%(prog)s {version}'.format(version=dms_tools.__version__))
     return parser
 

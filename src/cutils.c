@@ -15,7 +15,7 @@ static PyObject *AlignSubamplicon(PyObject *self, PyObject *args) {
     char *refseq, *r1, *r2, *chartype;
     char icodon_str[33]; // will hold string representation of icodon
     char mutcodon[4]; // will hold string representation of mutcodon
-    Py_ssize_t len_refseq, len_r1, len_r2;
+    long len_refseq, len_r1, len_r2;
     double maxmuts, maxN;
     long refseqstart, refseqend, len_subamplicon, i, n_N, startcodon, codonshift, nmuts, icodon, n, j;
     PyObject *counts, *n_new, *py_returntuple;
@@ -24,9 +24,9 @@ static PyObject *AlignSubamplicon(PyObject *self, PyObject *args) {
         PyErr_SetString(PyExc_TypeError, "Invalid calling arguments to AlignSubamplicon");
         return NULL;
     }
-    len_refseq = strlen(refseq);
-    len_r1 = strlen(r1);
-    len_r2 = strlen(r2);
+    len_refseq = (long) strlen(refseq);
+    len_r1 = (long) strlen(r1);
+    len_r2 = (long) strlen(r2);
     if (refseqstart + len_r1 - 1 > len_refseq) {
         PyErr_SetString(PyExc_ValueError, "R1 extends outside refseq");
         return NULL;
@@ -37,7 +37,7 @@ static PyObject *AlignSubamplicon(PyObject *self, PyObject *args) {
     }
     // Build subamplicon of two reads
     len_subamplicon = refseqend - refseqstart + 1;
-    char *subamplicon = PyMem_New(char, len_subamplicon + 1);
+    char *subamplicon = PyMem_New(char, (size_t) len_subamplicon + 1);
     if (subamplicon == NULL) {
         return PyErr_NoMemory();
     }
@@ -52,7 +52,6 @@ static PyObject *AlignSubamplicon(PyObject *self, PyObject *args) {
                 subamplicon[i] = r1[i];
             } else {
                 subamplicon[i] = 'N';
-
             }
         } else {
             subamplicon[i] = r2[i - len_subamplicon + len_r2];
@@ -106,12 +105,11 @@ static PyObject *AlignSubamplicon(PyObject *self, PyObject *args) {
             }
         }
         PyMem_Del(subamplicon);
-        //return (True, nmuts) // implement in C
         py_returntuple = PyTuple_New(2);
         if (py_returntuple == NULL) {
             return PyErr_NoMemory();
         }
-        PyTuple_SetItem(py_returntuple, 0, Py_True);
+        PyTuple_SetItem(py_returntuple, 0, PyBool_FromLong((long) 1));
         PyTuple_SetItem(py_returntuple, 1, PyInt_FromLong(nmuts));
         return py_returntuple;
     } else {

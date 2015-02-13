@@ -9,6 +9,8 @@ import sys
 import os
 import time
 import logging
+import gzip
+import random
 import Bio.SeqIO
 import dms_tools
 import dms_tools.parsearguments
@@ -25,6 +27,8 @@ def main():
     args = vars(parser.parse_args())
     prog = parser.prog
 
+    random.seed(args['seed'])
+
     # set up logging
     logging.shutdown()
     logfile = "%s.log" % args['outprefix']
@@ -36,21 +40,29 @@ def main():
     logger.addHandler(logfile_handler)
     formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
     logfile_handler.setFormatter(formatter)
-    logger.info("Beginning execution of %s\nProgress will be logged to %s" % (prog, logfile))
+    logger.info("Beginning execution of %s in directory %s\n" % (prog, os.getcwd()))
+    logger.info("Progress will be logged to %s" % logfile)
 
     # define file names and delete existing files
-    countsfile = "%scounts.txt" % args['outprefix']
-    for f in [countsfile]:
+    countsfilename = "%scounts.txt" % args['outprefix']
+    summarystatsfilename = '%ssummarystats.txt' % args['outprefix']
+    barcodeinfofilename = '%sbarcodeinfo.txt.gz' % args['outprefix']
+    outfilenames = [countsfilename, summarystatsfilename, barcodeinfofilename]
+    for f in outfilenames:
         if os.path.isfile(f):
             os.remove(f)
             logger.info("Removing existing file %s" % f)
+    countsfile = open(countsfilename, 'w')
+    summarystatsfile = open(summarystatsfilename, 'w')
+    outfiles = [countsfile, summarystatsfile]
+    if args['barcodeinfo']:
+        barcodeinfofile = gzip.open(barcodeinfofilename, 'w')
+        outfiles.append(barcodeinfofile)
 
     # log in try / except loop
     try:
-        logger.info('Beginning execution of %s in directory %s\n' % (prog, os.getcwd()))
-        logger.info('Progress is being logged to %s\n' % logfile)
         versionstring = dms_tools.file_io.Versions() 
-        logger.info(versionstring)
+        logger.info("%s\n" % versionstring)
         logger.info('Parsed the following arguments:\n%s\n' % '\n'.join(['\t%s = %s' % tup for tup in args.iteritems()]))
 
         # read refseq
@@ -87,12 +99,12 @@ def main():
             gzipped = False
 
         # collect reads by barcode while iterating over reads
-        readcategories = ['total', 'failed Illumina filter', 'low quality']
+        readcategories = ['total read pairs', 'read pairs that fail Illumina filter', 'low quality read pairs']
         n = dict([(category, 0) for category in readcategories])
         barcodes = {}
         logger.info('Now parsing reads from the following:\n\tr1files: %s\n\tr2files: %s' % (' '.join(args['r1files']), ' '.join(args['r2files'])))
         for read_tup in dms_tools.file_io.IteratePairedFASTQ(args['r1files'], args['r2files'], gzipped, applyfilter=True):
-            n['total'] += 1
+            n['total read pairs'] += 1
             if read_tup:
                 (name, r1, r2, q1, q2) = read_tup
                 qcheckedreads = dms_tools.utils.CheckReadQuality(r1, r2, q1, q2, args['minq'], args['maxlowqfrac'], args['barcodelength'])
@@ -100,17 +112,30 @@ def main():
                     (r1, r2) = qcheckedreads
                     barcode = r1[ : args['barcodelength']] + r2[ : args['barcodelength']]
                     if barcode in barcodes:
-                        barcodes[barcode]['reads'].append((r1, r2))
+                        barcodes[barcode].append((r1, r2))
                     else:
-                        barcodes[barcode] = {'reads':[(r1, r2)]}
+                        barcodes[barcode] = [(r1, r2)]
                 else:
-                    n['low quality'] += 1
+                    n['low quality read pairs'] += 1
             else:
-                n['failed Illumina filter'] += 1
-            if n['total'] % 1e5 == 0:
-                logger.info('Reads parsed so far: %d' % n['total'])
+                n['read pairs that fail Illumina filter'] += 1
+            if n['total read pairs'] % 1e5 == 0:
+                logger.info('Reads parsed so far: %d' % n['total read pairs'])
 
-        logger.info('Finished parsing all %d reads; ended up with %d unique barcodes.\n' % (n['total'], len(barcodes)))
+        logger.info('Finished parsing all %d reads; ended up with %d unique barcodes.\n' % (n['total read pairs'], len(barcodes)))
+
+        readcategories.append('barcodes randomly purged')
+        if args['purgefrac']:
+            logger.info('Randomly purging barcodes with probability %.3f to subsample the data.' % args['purgefrac'])
+            npurged = 0
+            for barcode in list(barcodes.iterkeys()):
+                if random.random() < args['purgefrac']:
+                    npurged += 1
+                    del barcodes[barcode]
+            n['barcodes randomly purged'] = npurged
+            logger.info('Randomly purged %d of the %d barcodes (%.1f%%), leaving %d barcodes.\n' % (npurged, len(barcodes) + npurged, 100.0 * npurged / (npurged + len(barcodes)), len(barcodes)))
+        else:
+            n['barcodes randomly purged'] = 0
 
         # Examine barcodes to see if they pass criteria, if so align them and record mutation counts
         # Set up *counts* as dict that will hold mutation counts in format for dms_tools.file_io.WriteDMSCounts
@@ -121,7 +146,7 @@ def main():
         else:
             raise ValueError("Invalid chartype %s" % args['chartype'])
         # Now start looping over barcodes
-        logger.info('Now examining all %d barcodes to see if reads meet criteria for retention' % len(barcodes))
+        logger.info('Now examining the %d barcodes to see if reads meet criteria for retention' % len(barcodes))
         newreadcategories = []
         unalignedkeystring = 'un-alignable barcodes with %d reads'
         alignedkeystring = 'aligned barcodes with %d reads'
@@ -131,61 +156,74 @@ def main():
             ibarcode += 1
             if ibarcode % 1e5 == 0:
                 logger.info('Barcodes examined so far: %s' % ibarcode)
-            nreads = len(barcodes[barcode]['reads'])
+            nreads = len(barcodes[barcode])
             if nreads < args['minreadsperbarcode']:
-                barcodes[barcode]['retained'] = False
-                barcodes[barcode]['description'] = 'Too few reads'
+                if args['barcodeinfo']:
+                    barcodeinfofile.write('BARCODE: %s\nRETAINED: no\nDESCRIPTION: too few reads\nCONSENSUS: none\nREADS:\n\t%s\n\n' % (barcode, '\n\t'.join(['R1 = %s; R2 = %s' % tup for tup in barcodes[barcode]])))
                 keystring = discardedkeystring % nreads
             else:
-                consensus = dms_tools.utils.BuildReadConsensus(barcodes[barcode]['reads'], args['minreadidentity'], args['minreadconcurrence'], args['maxreadtrim'])
+                consensus = dms_tools.utils.BuildReadConsensus(barcodes[barcode], args['minreadidentity'], args['minreadconcurrence'], args['maxreadtrim'], use_cutils=True)
                 if consensus:
                     # try to align subamplicon
-                    barcodes[barcode]['consensus'] = consensus
                     (r1, r2) = consensus
                     for (refseqstart, refseqend, r1start, r2start) in args['alignspecs']:
                         assert 0 < r1start < len(r1), "Length of R1 read (%d) is <= R1START (%d) or <= 0" % (len(r1), r1start)
                         assert 0 < r2start < len(r2), "Length of R2 read (%d) is <= R2START (%d) or <= 0" % (len(r2), r2start)
                         maxN = int(args['maxlowqfrac'] * min(refseqend - refseqstart + 1, len(r1) + len(r2) - r1start - r2start + 2))
-                        if args['R1_is_sense']:
-                            aligned = dms_tools.utils.AlignSubamplicon(refseq, r1[r1start - 1 : ], r2[r2start - 1 : ], refseqstart, refseqend, args['maxmuts'], maxN, args['chartype'], counts)
+                        if not args['R1_is_antisense']:
+                            aligned = dms_tools.utils.AlignSubamplicon(refseq, r1[r1start - 1 : ], r2[r2start - 1 : ], refseqstart, refseqend, args['maxmuts'], maxN, args['chartype'], counts, use_cutils=True)
                         else:
-                            aligned = dms_tools.utils.AlignSubamplicon(refseq, r2[r2start - 1 : ], r1[r1start - 1 : ], refseqstart, refseqend, args['maxmuts'], maxN, args['chartype'], counts)
+                            aligned = dms_tools.utils.AlignSubamplicon(refseq, r2[r2start - 1 : ], r1[r1start - 1 : ], refseqstart, refseqend, args['maxmuts'], maxN, args['chartype'], counts, use_cutils=True)
                         if aligned:
                             keystring = alignedkeystring % nreads
-                            barcodes[barcode]['retained'] = True
-                            barcodes[barcode]['description'] = 'Aligned from %d to %d with %d %s mutations' % (r1start, r2start, aligned[1], args['chartype'])
+                            if args['barcodeinfo']:
+                                barcodeinfofile.write('BARCODE: %s\nRETAINED: yes\nDESCRIPTION: aligned from %d to %d with %d %s mutations\nCONSENSUS: R1 = %s; R2 = %s\nREADS:\n\t%s\n\n' % (barcode, refseqstart, refseqend, aligned[1], args['chartype'], r1, r2, '\n\t'.join(['R1 = %s; R2 = %s' % tup for tup in barcodes[barcode]])))
                             break
                     else:
                         keystring = unalignedkeystring % nreads
-                        barcodes[barcode]['retained'] = False
-                        barcodes[barcode]['description'] = 'Subamplicon could not be aligned to refseq'
+                        if args['barcodeinfo']:
+                            barcodeinfofile.write('BARCODE: %s\nRETAINED: no\nDESCRIPTION: subamplicon could not be aligned to refseq\nCONSENSUS: R1 = %s; R2 = %s\nREADS:\n\t%s\n\n' % (barcode, r1, r2, '\n\t'.join(['R1 = %s; R2 = %s' % tup for tup in barcodes[barcode]])))
                 else:
-                    barcodes[barcode]['retained'] = False
-                    barcodes[barcode]['description'] = 'Reads not sufficiently identical'
+                    if args['barcodeinfo']:
+                        barcodeinfofile.write('BARCODE: %s\nRETAINED: no\nDESCRIPTION: reads not sufficiently identical\nCONSENSUS: none\nREADS:\n\t%s\n\n' % (barcode, '\n\t'.join(['R1 = %s; R2 = %s' % tup for tup in barcodes[barcode]])))
                     keystring = discardedkeystring % nreads
             try:
                 n[keystring] += 1
             except KeyError:
                 n[keystring] = 1
                 newreadcategories.append((nreads, keystring))
+            del barcodes[barcode] # free up memory as we finish with barcodes
         newreadcategories.sort()
         readcategories = readcategories + [tup[1] for tup in newreadcategories]
-        assert ibarcode == len(barcodes)
         logger.info('Finished examining all %d barcodes\n' % ibarcode)
 
         # Write the counts
-        logger.info('Writing the %s counts to %s' % (args['chartype'], countsfile))
-        with open(countsfile, 'w') as f:
-            dms_tools.file_io.WriteDMSCounts(f, counts)
+        logger.info('Writing the %s counts to %s' % (args['chartype'], countsfilename))
+        dms_tools.file_io.WriteDMSCounts(countsfile, counts)
 
         # Summarize statistics
-        logger.info('Here are the summary statistics:\n%s' % '\n'.join(['\t%s = %s' % (category, n[category]) for category in readcategories]))
+        logger.info('Here are the summary statistics (these are also being written to %s):\n%s' % (summarystatsfilename, '\n'.join(['\t%s = %s' % (category, n[category]) for category in readcategories])))
+        summarystatsfile.write('\n'.join(['%s = %s' % (category, n[category]) for category in readcategories]))
 
     except:
         logger.exception('Terminating %s at %s with ERROR' % (prog, time.asctime()))
+        for f in outfiles:
+            try:
+                f.close()
+            except:
+                pass
+        for f in outfilenames:
+            if os.path.isfile(f):
+                os.remove(f)
+                logger.exception('Deleting file %s' % f)
     else:
         logger.info('Successful completion of %s at %s' % (prog, time.asctime()))
     finally:
+        for f in outfiles:
+            try:
+                f.close()
+            except:
+                pass
         logging.shutdown()
 
 
