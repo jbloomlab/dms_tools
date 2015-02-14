@@ -894,18 +894,19 @@ def IteratePairedFASTQ(r1files, r2files, gzipped, applyfilter, usegzip=False):
     * The return variable is `False` if ``applyfilter == True`` and one of the
       reads in the pair failed the Illumina chastity filter. 
     
-    *  Otherwise return variable is the following tuple:
+    * Otherwise return variable is the following tuple:
       `(name, r1, r2, q1, q2)` where:
 
-      `name` : name of the read pair (a string)
+      - `name` : name of the read pair (a string)
 
-      `r1` : sequence of the first read R1 (a string)
+      - `r1` : sequence of the first read R1 (a string)
 
-      `r2` : sequence of the second read R2 (a string)
+      - `r2` : sequence of the second read R2 (a string)
 
-      `q1` : string of Q-scores for the R1 read 
+      - `q1` : string of Q-scores for the R1 read 
 
-      `q2` : string of Q-scores for the R2 read
+      - `q2` : string of Q-scores for the R2 read
+
     """
     hm = re.compile('^\@(?P<name>[\-\w]+\:\d+\:[\w\-]+\:\d+\:\d+\:\d+\:\d+)'\
             + ' (?P<direction>[1,2])\:(?P<filtered>[Y,N])\:\d+\:'\
