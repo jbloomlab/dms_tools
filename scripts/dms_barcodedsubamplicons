@@ -78,9 +78,9 @@ def main():
         # do some checking on validity of alignspecs
         for (refseqstart, refseqend, r1start, r2start) in args['alignspecs']:
             assert refseqend > refseqstart, "REFSEQEND <= REFSEQSTART"
-            if args['barcodelength'] >= r1start:
+            if args['barcodelength'] > r1start:
                 raise ValueError("One of the alignspecs specifies R1START of %d, which doesn't fully trim a barcode of barcodelength %d" % (r1start, args['barcodelength']))
-            if args['barcodelength'] >= r2start:
+            if args['barcodelength'] > r2start:
                 raise ValueError("One of the alignspecs specifies R2START of %d, which doesn't fully trim a barcode of barcodelength %d" % (r2start, args['barcodelength']))
             if r1start < 1:
                 raise ValueError("R1START must be >= 1; you specified %d" % r1start)

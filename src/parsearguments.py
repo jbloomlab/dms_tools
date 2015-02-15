@@ -226,15 +226,15 @@ def AlignSpecs(alignspecs):
 
 def BarcodedSubampliconsParser():
     """Returns *argparse.ArgumentParser* for ``dms_barcodedsubamplicons`` script."""
-    parser = ArgumentParserNoArgHelp(description='Gathers barcoded subamplicons, aligns to reference sequence, and counts mutations. This script is part of %s (version %s) written by %s. Detailed documentation is at %s' % (dms_tools.__name__, dms_tools.__version__, dms_tools.__author__, dms_tools.__url__), formatter_class=SmartHelpFormatter)
+    parser = ArgumentParserNoArgHelp(description='Gathers barcoded subamplicons, aligns to reference sequence, and counts mutations. This script is part of %s (version %s) written by %s. Detailed documentation is at %s' % (dms_tools.__name__, dms_tools.__version__, dms_tools.__author__, dms_tools.__url__), formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('outprefix', help=\
-        'R|Prefix for output files.\n' +\
-        'Existing files with these names are removed.\n' +\
-        'The suffixes of the created files are:\n' +\
-        '  "counts.txt" - character counts at each site.\n' +\
-        '  "summarystats.txt" - barcode summary stats.\n' +\
-        '  ".log" - file that logs progress.\n' +\
-        '  "barcodeinfo.txt.gz" - see "--barcodeinfo".')
+        'Prefix for output files. ' +\
+        'The suffixes of the created files are: ' +\
+        '"counts.txt" - character counts at each site; ' +\
+        '"summarystats.txt" - barcode summary stats; ' +\
+        '".log" - file that logs progress; ' +\
+        '"barcodeinfo.txt.gz" - lists all barcodes if using "--barcodeinfo". '+\
+        'Existing files with these names are removed.')
     parser.add_argument('refseq', type=ExistingFile, help='Existing FASTA file containing gene to which we are aligning subamplicons and counting mutations.')
     parser.add_argument('r1files', type=CommaSeparatedFASTQFiles, help='Comma-separated list of R1 FASTQ files (no spaces). Files can optionally be gzipped (extension .gz).')
     parser.add_argument('r2files', type=CommaSeparatedFASTQFiles, help='Like "r1files" but R2 files. Must be same number of comma-separated entries as for "r1files".')
@@ -247,7 +247,7 @@ def BarcodedSubampliconsParser():
     parser.add_argument ('--minreadsperbarcode', type=IntGreaterEqual2, default=2, help='Retain only barcodes with >= this many reads that align gaplessly with >= "minreadidentity" identical high-quality nucleotides; should be >= 2.')
     parser.add_argument('--minreadidentity', default=0.9, type=FloatBetweenZeroAndOne, help='Retain only barcodes where all reads have >= this fraction of identical high-quality nucleotides that align gaplessly.')
     parser.add_argument('--minreadconcurrence', default=0.75, type=FloatBetweenHalfAndOne, help='For retained barcodes, only make mutation calls when >= this fraction of reads concur.')
-    parser.add_argument('--maxreadtrim', type=NonNegativeInt, default=3, help='If R1 or R2 reads for same barcode are not all same length, trim up to this many nucleotides; if still not same length then discard.')
+    parser.add_argument('--maxreadtrim', type=NonNegativeInt, default=3, help="If R1 or R2 reads for same barcode are not all same length, trim up to this many nucleotides from 3' end; if still not same length then discard.")
     parser.add_argument('--R1_is_antisense', dest='R1_is_antisense', action='store_true', help='Is the R1 read in the antisense direction of "refseq"?')
     parser.set_defaults(R1_is_antisense=False)
     parser.add_argument('--barcodeinfo', dest='barcodeinfo', action='store_true', help='If you specify this option, create a file with suffix "barcodeinfo.txt.gz" containing information for each barcode. This file is quite large, and its creation will about double the program run time.');

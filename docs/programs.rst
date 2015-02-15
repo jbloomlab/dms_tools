@@ -14,6 +14,7 @@ Installation of `dms_tools`_ installs the following programs. These programs can
    dms_merge
    dms_correlate
    dms_editsites
+   dms_barcodedsubamplicons
 
 
 .. include:: weblinks.txt
