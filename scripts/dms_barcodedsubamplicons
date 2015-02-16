@@ -167,10 +167,10 @@ def main():
                     # try to align subamplicon
                     (r1, r2) = consensus
                     for (refseqstart, refseqend, r1start, r2start) in args['alignspecs']:
-                        assert 0 < r1start < len(r1), "Length of R1 read (%d) is <= R1START (%d) or <= 0" % (len(r1), r1start)
-                        assert 0 < r2start < len(r2), "Length of R2 read (%d) is <= R2START (%d) or <= 0" % (len(r2), r2start)
                         maxN = int(args['maxlowqfrac'] * min(refseqend - refseqstart + 1, len(r1) + len(r2) - r1start - r2start + 2))
-                        if not args['R1_is_antisense']:
+                        if r1start >= len(r1) or r2start >= len(r2):
+                            aligned = False # reads too short toa align
+                        elif not args['R1_is_antisense']:
                             aligned = dms_tools.utils.AlignSubamplicon(refseq, r1[r1start - 1 : ], r2[r2start - 1 : ], refseqstart, refseqend, args['maxmuts'], maxN, args['chartype'], counts, use_cutils=True)
                         else:
                             aligned = dms_tools.utils.AlignSubamplicon(refseq, r2[r2start - 1 : ], r1[r1start - 1 : ], refseqstart, refseqend, args['maxmuts'], maxN, args['chartype'], counts, use_cutils=True)
