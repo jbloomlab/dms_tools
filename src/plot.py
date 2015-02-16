@@ -19,6 +19,8 @@ Functions in this module
 
 `PlotMutCountFracs` : plots fraction of mutations that occur >= a given number of times.
 
+`PlotDepth` : plots per-site depth along primary sequence
+
 Function documentation
 -----------------------------
 """
@@ -266,6 +268,62 @@ def PlotCorrelation(xs, ys, plotfile, xlabel, ylabel, logx=False, logy=False,\
     pylab.gca().xaxis.set_major_locator(xticker)
     pylab.gca().get_xaxis().tick_bottom()
     pylab.gca().get_yaxis().tick_left()
+    pylab.savefig(plotfile)
+    pylab.clf()
+    pylab.close()
+
+
+def PlotDepth(codon_counts, names, plotfile):
+    """Plots per-site depth along primary sequence.
+
+    `codon_counts` : a list of dictionaries giving the codon counts for
+    each sample as read by `dms_tools.file_io.ReadDMSCounts`.
+
+    `names` : a list of strings giving the names of the samples
+    corresponding to each entry in `codon_counts`.
+
+    `plotfile` : name of the output plot file created by this method
+    (such as 'plot.pdf'). The extension must be ``.pdf``.
+    """
+    if os.path.splitext(plotfile)[1].lower() != '.pdf':
+        raise ValueError("plotfile must end in .pdf: %s" % plotfile)
+    assert len(codon_counts) == len(names) > 0, "codon_counts and names are not non-empty lists of the same length"
+    matplotlib.rc('text', usetex=True)
+    matplotlib.rc('font', size=10)
+    matplotlib.rc('legend', fontsize=10)
+    sites = list(codon_counts[0].iterkeys())
+    codon_counts = [dms_tools.utils.ClassifyCodonCounts(counts) for counts in codon_counts]
+    xs = list(range(len(sites)))
+    dms_tools.utils.NaturalSort(sites)
+    nlegendcols = 3
+    nlegendrows = int(math.ceil(len(names) / float(nlegendcols)))
+    fig = pylab.figure(figsize=(5.5, 2.16 * (1 + 0.11 * nlegendrows)))
+    (lmargin, rmargin, bmargin, tmargin) = (0.09, 0.02, 0.16, 0.01 + 0.1 * nlegendrows)
+    ax = pylab.axes([lmargin, bmargin, 1 - lmargin - rmargin, 1 - bmargin - tmargin])
+    lines = []
+    for counts in codon_counts:
+        ys = [counts[r]['COUNTS'] for r in sites]
+        line = pylab.plot(xs, ys, lw=1.2)
+        lines.append(line[0])
+    pylab.xlabel('codon position')
+    pylab.ylabel('number of reads')
+    yticker = matplotlib.ticker.MaxNLocator(4)
+    pylab.gca().yaxis.set_major_locator(yticker)
+    yformatter = pylab.ScalarFormatter(useMathText=True)
+    yformatter.set_powerlimits((-3, 3))
+    pylab.gca().yaxis.set_major_formatter(yformatter)
+    pylab.gca().set_xlim([0, len(xs) - 1])
+    if len(xs) <= 250:
+        # xtick every 50
+        xlocator = matplotlib.ticker.FixedLocator(list(range(0, len(xs), 50)))
+        xformatter = matplotlib.ticker.FixedFormatter([sites[i] for i in range(0, len(xs), 50)])
+    else:
+        # xtick every 100
+        xlocator = matplotlib.ticker.FixedLocator(list(range(0, len(xs), 100)))
+        xformatter = matplotlib.ticker.FixedFormatter([sites[i] for i in range(0, len(xs), 100)])
+    pylab.gca().xaxis.set_major_locator(xlocator)
+    pylab.gca().xaxis.set_major_formatter(xformatter)
+    pylab.legend(lines, names, handlelength=2, bbox_to_anchor=(0.53, 1.03 + 0.14 * nlegendrows), loc='upper center', ncol=nlegendcols)
     pylab.savefig(plotfile)
     pylab.clf()
     pylab.close()

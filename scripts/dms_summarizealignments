@@ -33,7 +33,8 @@ def main():
     mutfreqs = '%smutfreqs.pdf' % args['outprefix']
     mutcountsall = '%smutcounts_all.pdf' % args['outprefix']
     mutcountsmulti = '%smutcounts_multi_nt.pdf' % args['outprefix']
-    for f in [mutfreqs, mutcountsall, mutcountsmulti]:
+    depth = '%sdepth.pdf' % args['outprefix']
+    for f in [mutfreqs, mutcountsall, mutcountsmulti, depth]:
         if os.path.isfile(f):
             os.remove(f)
             print "Removing existing file %s" % f
@@ -58,6 +59,7 @@ def main():
                 raise IOError("Failed to find summary stats file %s expected from the specification of the prefix %s" % (statsfile, prefix))
             data[name]['stats'] = dms_tools.file_io.ReadSummaryStats(statsfile)
             (data[name]['all_cumulfracs'], data[name]['all_counts'], data[name]['syn_cumulfracs'], data[name]['syn_counts'], data[name]['multi_nt_all_cumulfracs'], data[name]['multi_nt_all_counts'], data[name]['multi_nt_syn_cumulfracs'], data[name]['multi_nt_syn_counts']) = dms_tools.utils.CodonMutsCumulFracs(data[name]['counts'])
+
         print "\nNow making plots..."
         print "Making %s" % mutfreqs
         dms_tools.plot.PlotPairedMutFracs([data[name]['counts'] for name in names], names, mutfreqs)
@@ -70,6 +72,9 @@ def main():
             [data[name]['multi_nt_all_cumulfracs'][ : args['maxmutcounts'] + 1] for name in names],\
             [data[name]['multi_nt_syn_cumulfracs'][ : args['maxmutcounts'] + 1] for name in names],\
             data[names[0]]['multi_nt_all_counts'], data[names[0]]['multi_nt_syn_counts'], legendloc='right', writecounts=False)
+        print "Making %s" % depth
+        dms_tools.plot.PlotDepth([data[name]['counts'] for name in names], names, depth)
+
     else:
         raise ValueError("Invalid alignment_type of %s" % args['alignment_type'])
 
