@@ -38,7 +38,9 @@ Functions in this module
 
 * *AlignSubamplicon* : attempt to align subamplicon at specified position.
 
-* *ClassifyCodonCounts* : classifies codon mutations
+* *ClassifyCodonCounts* : classifies codon mutations.
+
+* *CodonMutsCumulFracs* : cumulative counts of codon mutations.
 
 Function documentation
 ---------------------------
@@ -952,6 +954,89 @@ def ClassifyCodonCounts(codon_counts):
                 codon_counts['TOTAL_N_%dMUT' % ndiffs] += n
     codon_counts['TOTAL_MUT'] = codon_counts['TOTAL_SYN'] + codon_counts['TOTAL_NS'] + codon_counts['TOTAL_STOP']
     return codon_counts
+
+
+def CodonMutsCumulFracs(codon_counts):
+    """Fraction of codon mutations found >= some number of times.
+
+    *codon_counts* : a dictionary of the type returned by calling
+    *dms_tools.file_io.ReadDMSCounts* with *chartype* of *codon*.
+
+    For all sites in *codon_counts*, this function iterates
+    through all possible codon mutations and counts how many times
+    they occur. These counts are then used to generate the following
+    is the number of codons. It records the number of definitely called
+    (all uppercase nucleotides) occurrences of each of these mutations. It then
+    returns the following tuple:
+    *(all_cumulfracs, all_counts, syn_cumulfracs, syn_counts, multi_nt_all_cumulfracs, multi_nt_all_counts, multi_nt_syn_cumulfracs, multi_nt_syn_counts)*
+
+        * *all_cumulfracs[i]* is the fraction of all of the possible codon mutations
+          that are found >= *i* times.
+          
+        * *all_counts* is the total number of unique codon mutations.
+        
+        * *syn_cumulfracs[i]* is the fraction of all of synonymous codon mutations
+          that are found >= *i* times.
+
+        * *syn_counts* is the total number of unique synonymous codon mutations.
+
+        * The next four elements in the tuple (prefixed with *multi_nt_*)
+          are like the four above but **only** for multi-nucleotide 
+          codon mutations.
+    """
+    sites = list(codon_counts.iterkeys())
+    all_cumulfracs = {}
+    syn_cumulfracs = {}
+    multi_nt_all_cumulfracs = {}
+    multi_nt_syn_cumulfracs = {}
+    all_counts = syn_counts = multi_nt_all_counts = multi_nt_syn_counts = 0
+    for r in sites:
+        wtcodon = codon_counts[r]['WT']
+        wtaa = dms_tools.codon_to_aa[wtcodon]
+        for codon in dms_tools.codons:
+            if codon == wtcodon:
+                continue
+            n = codon_counts[r][codon]
+            aa = dms_tools.codon_to_aa[codon]
+            ndiffs = len([i for i in range(len(codon)) if codon[i] != wtcodon[i]])
+            if n in all_cumulfracs:
+                all_cumulfracs[n] += 1
+            else:
+                all_cumulfracs[n] = 1
+            all_counts += 1
+            if wtaa == aa:
+                # synonymous
+                if n in syn_cumulfracs:
+                    syn_cumulfracs[n] += 1
+                else:
+                    syn_cumulfracs[n] = 1
+                syn_counts += 1
+                if ndiffs > 1:
+                    # synonymous and multi-nucleotide
+                    if n in multi_nt_syn_cumulfracs:
+                        multi_nt_syn_cumulfracs[n] += 1
+                    else:
+                        multi_nt_syn_cumulfracs[n] = 1
+                    multi_nt_syn_counts += 1
+            if ndiffs > 1:
+                # multi-nucleotide
+                if n in multi_nt_all_cumulfracs:
+                    multi_nt_all_cumulfracs[n] += 1
+                else:
+                    multi_nt_all_cumulfracs[n] = 1
+                multi_nt_all_counts += 1
+    maxkey = max(all_cumulfracs.iterkeys())
+    for (d, ntot) in [(all_cumulfracs, all_counts), (syn_cumulfracs, syn_counts), (multi_nt_syn_cumulfracs, multi_nt_syn_counts), (multi_nt_all_cumulfracs, multi_nt_all_counts)]:
+        for n in range(maxkey + 1):
+            if n not in d:
+                d[n] = 0
+        for n in range(maxkey + 1):
+            d[n] = sum([d[i] for i in range(n, maxkey + 1)]) / float(ntot)
+    all_cumulfracs = [all_cumulfracs[n] for n in range(maxkey + 1)]
+    syn_cumulfracs = [syn_cumulfracs[n] for n in range(maxkey + 1)]
+    multi_nt_all_cumulfracs = [multi_nt_all_cumulfracs[n] for n in range(maxkey + 1)]
+    multi_nt_syn_cumulfracs = [multi_nt_syn_cumulfracs[n] for n in range(maxkey + 1)]
+    return (all_cumulfracs, all_counts, syn_cumulfracs, syn_counts, multi_nt_all_cumulfracs, multi_nt_all_counts, multi_nt_syn_cumulfracs, multi_nt_syn_counts)
 
 
 # Test with doctest

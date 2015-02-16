@@ -17,6 +17,8 @@ Functions in this module
 
 `PlotPairedMutFracs` : bar graph of mutation frequencies per sample
 
+`PlotMutCountFracs` : plots fraction of mutations that occur >= a given number of times.
+
 Function documentation
 -----------------------------
 """
@@ -357,6 +359,123 @@ def PlotPairedMutFracs(codon_counts, names, plotfile):
     pylab.legend(barmarks, barlabels, handlelength=1.2,\
             bbox_to_anchor=(0.54, 1.3), loc='upper center', ncol=3)
     pylab.ylabel('fraction', size=10)
+    pylab.savefig(plotfile)
+    pylab.clf()
+    pylab.close()
+
+
+def PlotMutCountFracs(plotfile, title, names, all_cumulfracs, syn_cumulfracs, all_counts, syn_counts, legendloc, writecounts=True):
+    """Plots fraction of mutations with >= a given number of counts.
+
+    Does this for both all mutations and synonymous mutations. The plots
+    are placed side by side.
+
+    The plots show the fractions of mutations
+    that are found >= *n* times for a range of values of *n*.
+
+    CALLING VARIABLES:
+
+    * *plotfile* : string giving name of the created plot file. Must end in
+      the extension ``.pdf``.
+
+    * *title* : string giving the title placed about the plot.
+
+    * *names* : a list of strings giving the names of the samples to
+      plot.
+
+    * *all_cumulfracs* : a list of the same length as *names* giving
+      the cumulative fractions for all mutations. Each entry should be a list, 
+      and all of these lists should be the same length. *cumulfracs[i][n]*
+      gives the fraction of mutations to sample *names[i]* that
+      are found >= *n* times. The x-axis of the created plot
+      will go from 0 to *len(all_cumulfracs[0]) - 1*.
+
+    * *syn_cumulfracs* : a list like *all_cumulfracs* except for synonymous
+      mutations.
+
+    * *all_counts* : integer counts of all mutations (the total number of mutations
+      used for *all_cumulfracs*), used to create plot title.
+
+    * *syn_counts* : like *all_counts* but for synonymous mutations.
+
+    * *legendloc* : specifies the location of the legend. Should be a string.
+      Valid values are:
+
+        - *bottom* : put legend at the bottom of the plot.
+
+        - *right* : put legend at the right of the plot.
+
+    * *writecounts* is a Boolean switch specifying whether we include the counts of all
+      mutations (specified by *all_counts* and *syn_counts*) in the plot title. We do
+      this if *writecounts* is *True*, and do not if it is *False*. 
+    """
+
+    if os.path.splitext(plotfile)[1].lower() != '.pdf':
+        raise ValueError('plotfile must end in .pdf: %s' % plotfile)
+
+    # plot setup stuff
+    matplotlib.rc('text', usetex=True)
+    matplotlib.rc('font', size=11)
+    matplotlib.rc('legend', fontsize=11)
+    if legendloc == 'bottom':
+        ncol = 4 # number of columns
+        legendrowheight = 0.2
+        nrows = math.ceil(len(names) / float(ncol))
+        xlegendmargin = 0.0
+    elif legendloc == 'right':
+        ncol = 1
+        nrows = 0 # we specify by columns
+        legendrowheight = 0
+        xlegendmargin = 1.45
+    else:
+        raise ValueError("Invalid legendloc of %s" % legendloc)
+    (xsize, ysize) = (4.75 + xlegendmargin, legendrowheight * nrows + 2.4)
+    styles = ['k-.', 'y-.', 'b-', 'r:', 'g:', 'c--', 'm--']
+    lmargin = 0.11 * (xsize - xlegendmargin) / xsize # left margin for plot
+    rmargin = 0.01 + xlegendmargin / xsize # right margin for plot
+    centermargin = 0.02 # horizontal space between plots
+    tmargin = 0.16 # top margin
+    bmargin = 0.22 + (legendrowheight * nrows) / ysize # bottom margin
+    plotwidth = (1.0 - lmargin - rmargin - centermargin) / 2.0
+
+    assert 0 < len(syn_cumulfracs) == len(all_cumulfracs) == len(names) <= len(styles), "Must specify equal numbers of fractions and names, and no more than %d" % len(styles)
+
+    # start plotting
+    fig = pylab.figure(figsize=(xsize, ysize))
+    ax_all = pylab.axes([lmargin, bmargin, plotwidth, 1 - bmargin - tmargin])
+    ax_syn = pylab.axes([lmargin + plotwidth + centermargin, bmargin, plotwidth, 1 - bmargin - tmargin])
+    for (cumulfracs, ax, write_ylabel, ax_title) in [(syn_cumulfracs, ax_syn, False, 'synonymous (%d total)' % syn_counts), (all_cumulfracs, ax_all, True, 'all (%d total)' % all_counts)]:
+        if not writecounts:
+            ax_title = ax_title.split()[0]
+        pylab.axes(ax)
+        nmax = max([len(x) for x in cumulfracs])
+        assert nmax, "Length of entries in cumulfracs must be >= 1"
+        lines = []
+        xs = [n for n in range(0, nmax)]
+        for i in range(len(names)):
+            i_cumulfracs = cumulfracs[i] + [0] * (nmax - len(cumulfracs[i]))
+            plotline = pylab.plot(xs, i_cumulfracs, styles[i], lw=1.5)
+            lines.append(plotline[0])
+            pylab.xlabel("Mutation counts", size=11)
+            if write_ylabel:
+                pylab.ylabel("Frac. $\ge$ this many counts", size=11)
+            else:
+                yformatter = matplotlib.ticker.NullFormatter()
+                pylab.gca().yaxis.set_major_formatter(yformatter)
+        pylab.gca().set_ylim([-0.02, 1.02])
+        yticker = matplotlib.ticker.FixedLocator([0.0, 0.5, 1.0])
+        pylab.gca().yaxis.set_major_locator(yticker)
+        pylab.gca().set_xlim([0, nmax - 1])
+        xticker = matplotlib.ticker.MaxNLocator(4)
+        pylab.gca().xaxis.set_major_locator(xticker)
+        pylab.title(ax_title, size=11)
+    pylab.suptitle("{\\bf %s}" % title, size=11)
+    if legendloc == 'bottom':
+        fig.legend(lines, names, handlelength=2.25, handletextpad=0.2, columnspacing=0.8, ncol=ncol, bbox_to_anchor=(0.5, -0.01), loc='lower center')
+    elif legendloc == 'right':
+        fig.legend(lines, names, handlelength=2.25, handletextpad=0.2, columnspacing=0.8, ncol=ncol, bbox_to_anchor=(1.0, 0.52), loc='center right')
+    else:
+        raise ValueError("Invalid legendloc of %s" % legendloc)
     pylab.savefig(plotfile)
     pylab.clf()
     pylab.close()

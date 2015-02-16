@@ -242,10 +242,11 @@ def AlignSpecs(alignspecs):
 def SummarizeAlignmentsParser():
     """Returns *argparse.ArgumentParser* for ``dms_summarizealignments``."""
     parser = ArgumentParserNoArgHelp(description='Makes plots that summarize alignmnents for one or more samples. Designed to be run after you have used another program to make your alignments, and now you want to visualize the results. This script is part of %s (version %s) written by %s. Detailed documentation is at %s' % (dms_tools.__name__, dms_tools.__version__, dms_tools.__author__, dms_tools.__url__), formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    parser.add_argument('outprefix', help="Prefix for the output files. Suffixes are: 'mutfreqs.pdf' - average per-codon mutation frequencies. Any existing files with these names are overwritten.")
+    parser.add_argument('outprefix', help="Prefix for the output files. Suffixes are: 'mutfreqs.pdf' - average per-codon mutation frequencies; 'mutcounts_all.pdf' - distribution of number of times each mutation is counted; 'mutcounts_multi_nt.pdf' - distribution of number of times each multi-nucleotide mutation is counted. Any existing files with these names are overwritten.")
     parser.add_argument('alignment_type', choices=['barcodedsubamplicons'], help="The type of alignments that are being summarized. Use 'barcodedsubamplicons' if the alignments were built with 'dms_barcodedsubamplicons'.")
     parser.add_argument('alignments', nargs='+', help="This argument is repeated to specify each alignment that is being summarized. Each repetition is two comma-delimited strings (no spaces): ALIGNPREFIX,NAME. ALIGNPREFIX is the value of '--outprefix' used when calling the alignment program and NAME is the name assigned to that sample in the summaries. We expect to find all of the alignment output files with ALIGNPREFIX; these are the input data.", type=AlignprefixName)
     parser.add_argument('--chartype', default='codon', choices=['codon'], help='Character type used for the alignments / mutation counting.')
+    parser.add_argument('--maxmutcounts', type=NonNegativeInt, default=30, help="Maximum x-value for 'mutcounts_all.pdf' and 'mutcounts_multi_nt.pdf' plots.")
     parser.add_argument('-v', '--version', action='version', version='%(prog)s {version}'.format(version=dms_tools.__version__))
     return parser
 
