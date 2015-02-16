@@ -38,6 +38,8 @@ Functions in this module
 
 * *AlignSubamplicon* : attempt to align subamplicon at specified position.
 
+* *ClassifyCodonCounts* : classifies codon mutations
+
 Function documentation
 ---------------------------
 
@@ -858,6 +860,101 @@ def AlignSubamplicon(refseq, r1, r2, refseqstart, refseqend, maxmuts, maxN, char
         raise ValueError("Invalid chartype of %s" % chartype)
 
 
+def ClassifyCodonCounts(codon_counts):
+    """Classifies codon mutations.
+
+    CALLING VARIABLES:
+
+    `codon_counts` : dictionary as returned by `dms_tools.file_io.ReadDMSCounts`
+    with *chartype* of *codon*.
+
+    RESULT OF CALLING THIS FUNCTION:
+
+    This function returns a new dictionary that is a copy of *codon_counts*
+    but also has the following new keys for each site:
+
+    'COUNTS' : total number of counts of non-ambiguous codons.
+
+    'N_WT' : total number of called codons 
+    that match 'WT', the wildtpe codon at this position.
+
+    'N_NS' : total number of called codons 
+    that represent non-synonymous mutations from the
+    wildtype codon. Mutations from stop codons to non-stop codons
+    are classified as nonsynonymous. Mutations from non-stop codons
+    to stop codons are not classified as nonsynonymous, instead look
+    under 'N_STOP'.
+
+    'N_SYN' : total number of called codons 
+    that represent synonymous mutations from the wildtype
+    codon. Mutations from stop codons to other stop codons are
+    classified as synonymous.
+
+    'N_1MUT', 'N_2MUT', 'N_3MUT' : the total number of called
+    mutant codons that contain one, two, or
+    three nucleotide mutations relative to the wildtype codon at the site.
+
+    'N_STOP' : total number of definitively called codons (all nucleotides
+    upper case) that encode stop codons. 
+
+    In addition, the following keys are added directly to `codon_counts`, and
+    represent totals over all codon positions:
+
+    'TOTAL_COUNTS' : total number of counts for all codons.
+
+    'TOTAL_NS' : total number of 'N_NS' for all codons.
+
+    'TOTAL_SYN' : total number of 'N_SYN' for all codons.
+
+    'TOTAL_STOP' : total number of 'N_STOP' for all codons.
+
+    'TOTAL_MUT' : sum of 'N_NS' + 'N_SYN' + 'N_STOP', total number of mutations.
+
+    'TOTAL_N_1MUT', 'TOTAL_N_2MUT', 'TOTAL_N_3MUT' : total number of
+    'N_1MUT', N_2MUT', and 'N_3MUT' for all codons.
+    """
+    sites = list(codon_counts.iterkeys())
+    codon_counts = copy.deepcopy(codon_counts)
+    codon_counts['TOTAL_COUNTS'] = 0
+    codon_counts['TOTAL_NS'] = 0
+    codon_counts['TOTAL_SYN'] = 0
+    codon_counts['TOTAL_STOP'] = 0
+    codon_counts['TOTAL_N_1MUT'] = 0
+    codon_counts['TOTAL_N_2MUT'] = 0
+    codon_counts['TOTAL_N_3MUT'] = 0
+    keys = ['COUNTS', 'N_WT', 'N_NS', 'N_SYN', 'N_STOP', 'N_1MUT', 'N_2MUT', 'N_3MUT']
+    for i in sites:
+        di = codon_counts[i]
+        for key in keys:
+            di[key] = 0 # initialize all counts to zero
+        wtcodon = di['WT']
+        assert wtcodon == wtcodon.upper() and len(wtcodon) == 3
+        wtaa = dms_tools.codon_to_aa[wtcodon]
+        for codon in dms_tools.codons:
+            n = di[codon]
+            di['COUNTS'] += n
+            codon_counts['TOTAL_COUNTS'] += n
+            if wtcodon == codon:
+                di['N_WT'] += n
+            else:
+                aa = dms_tools.codon_to_aa[codon]
+                if wtaa == aa:
+                    di['N_SYN'] += n
+                    codon_counts['TOTAL_SYN'] += n
+                elif aa != '*':
+                    di['N_NS'] += n
+                    codon_counts['TOTAL_NS'] += n
+                elif aa == '*':
+                    codon_counts['TOTAL_STOP'] += n
+                    di['N_STOP'] += n
+                ndiffs = len([j for j in range(3) if wtcodon[j] != codon[j]])
+                di['N_%dMUT' % ndiffs] += n
+                codon_counts['TOTAL_N_%dMUT' % ndiffs] += n
+    codon_counts['TOTAL_MUT'] = codon_counts['TOTAL_SYN'] + codon_counts['TOTAL_NS'] + codon_counts['TOTAL_STOP']
+    return codon_counts
+
+
+# Test with doctest
 if __name__ == '__main__':
     import doctest
     doctest.testmod()

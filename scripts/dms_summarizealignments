@@ -1,0 +1,69 @@
+#!python
+
+"""Summarizes alignments with plots.
+
+Written by Jesse Bloom."""
+
+
+import sys
+import os
+import time
+import dms_tools.utils
+import dms_tools.parsearguments
+import dms_tools.file_io
+import dms_tools.plot
+
+
+
+def main():
+    """Main body of script."""
+
+    # Parse command line arguments
+    parser = dms_tools.parsearguments.SummarizeAlignmentsParser()
+    args = vars(parser.parse_args())
+    prog = parser.prog
+
+    # print initial information
+    versionstring = dms_tools.file_io.Versions() 
+    print 'Beginning execution of %s in directory %s\n' % (prog, os.getcwd())
+    print versionstring
+    print 'Parsed the following arguments:\n%s\n' % '\n'.join(['\t%s = %s' % tup for tup in args.iteritems()])
+
+    # define output files and remove if they already exist
+    mutfreqs = '%smutfreqs.pdf' % args['outprefix']
+    for f in [mutfreqs]:
+        if os.path.isfile(f):
+            os.remove(f)
+            print "Removing existing file %s" % f
+
+
+    # make summaries
+    if args['alignment_type'] == 'barcodedsubamplicons':
+        names = []
+        data = {}
+        print "\nNow reading data from %s alignments..." % (args['alignment_type'])
+        for (prefix, name) in args['alignments']:
+            print "Processing data for %s from files with prefix %s" % (name, prefix)
+            assert name not in names, "Duplicate name of %s" % name
+            names.append(name)
+            data[name] = {}
+            countsfile = '%scounts.txt' % prefix
+            if not os.path.isfile(countsfile):
+                raise IOError("Failed to find counts file %s expected from the specification of the prefix %s" % (countsfile, prefix))
+            data[name]['counts'] = dms_tools.file_io.ReadDMSCounts(countsfile, args['chartype'])
+            statsfile = '%ssummarystats.txt' % prefix
+            if not os.path.isfile(statsfile):
+                raise IOError("Failed to find summary stats file %s expected from the specification of the prefix %s" % (statsfile, prefix))
+            data[name]['stats'] = dms_tools.file_io.ReadSummaryStats(statsfile)
+        print "\nNow making plots..."
+        print "Making %s" % mutfreqs
+        dms_tools.plot.PlotPairedMutFracs([data[name]['counts'] for name in names], names, mutfreqs)
+    else:
+        raise ValueError("Invalid alignment_type of %s" % args['alignment_type'])
+
+    print '\nSuccessfully completed %s at %s' % (prog, time.asctime())
+
+
+
+if __name__ == '__main__':
+    main() # run the script

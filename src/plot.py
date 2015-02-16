@@ -15,6 +15,8 @@ Functions in this module
 
 `Base10Formatter` : formats numbers in base 10
 
+`PlotPairedMutFracs` : bar graph of mutation frequencies per sample
+
 Function documentation
 -----------------------------
 """
@@ -25,6 +27,7 @@ import math
 import matplotlib
 matplotlib.use('pdf')
 import pylab
+import dms_tools.file_io
 
 
 
@@ -265,6 +268,98 @@ def PlotCorrelation(xs, ys, plotfile, xlabel, ylabel, logx=False, logy=False,\
     pylab.clf()
     pylab.close()
 
+
+def PlotPairedMutFracs(codon_counts, names, plotfile):
+    """Makes paired bar graph of mutation fractions per codon.
+    
+    For each sample, calculates the fraction of codon counts
+    that represent synonymous / nonsynoymous /
+    stop codons, and one- / two- / three-nucleotide mutations. Makes
+    paired stacked bar graphs showing these fractions. The fractions
+    for all sites in the gene are aggregated together. 
+
+    `codon_counts` : a list of dictionaries giving the codon counts for
+    each sample as read by `dms_tools.file_io.ReadDMSCounts`.
+
+    `names` : a list of strings giving the names of the samples
+    corresponding to each entry in `codon_counts`.
+
+    `plotfile` : name of the output plot file created by this method
+    (such as 'plot.pdf'). The extension must be ``.pdf``.
+    """
+    if os.path.splitext(plotfile)[1].lower() != '.pdf':
+        raise ValueError("plotfile must end in .pdf: %s" % plotfile)
+    names = [name.replace('_', '\_') for name in names]
+    if not (isinstance(codon_counts, list)) and codon_counts:
+        raise ValueError("codon_counts does not specify a non-empty list")
+    if len(codon_counts) != len(names):
+        raise ValueError("codon_counts and names differ in length")
+    bar1 = ['synonymous', 'nonsynonymous', 'stop codon']
+    bar2 = ['1 nucleotide mutation', '2 nucleotide mutations', '3 nucleotide mutations']
+    d = dict([(key, []) for key in bar1 + bar2])
+    for counts in codon_counts:
+        counts = dms_tools.utils.ClassifyCodonCounts(counts)
+        denom = float(counts['TOTAL_COUNTS'])
+        if not denom:
+            raise ValueError("no counts for %s" % infile)
+        for key in bar1 + bar2:
+            if key == 'nonsynonymous':
+                d[key].append(counts['TOTAL_NS'] / denom)
+            elif key == 'synonymous':
+                d[key].append(counts['TOTAL_SYN'] / denom)
+            elif key == 'stop codon':
+                d[key].append(counts['TOTAL_STOP'] / denom)
+            elif key == '1 nucleotide mutation':
+                d[key].append(counts['TOTAL_N_1MUT'] / denom)
+            elif key == '2 nucleotide mutations':
+                d[key].append(counts['TOTAL_N_2MUT'] / denom)
+            elif key == '3 nucleotide mutations':
+                d[key].append(counts['TOTAL_N_3MUT'] / denom)
+            else:
+                raise ValueError("Invalid key of %s" % key)
+    nsamples = len(names)
+    matplotlib.rc('text', usetex=True)
+    matplotlib.rc('font', size=10)
+    matplotlib.rc('legend', fontsize=10)
+    matplotlib.rc('xtick', labelsize=10)
+    matplotlib.rc('patch', linewidth=0.5)
+    # make stacked bar graph
+    fig = pylab.figure(figsize=(6.5, 3.75))
+    (lmargin, rmargin, bmargin, tmargin) = (0.07, 0.01, 0.43, 0.13)
+    ax = pylab.axes([lmargin, bmargin, 1 - lmargin - rmargin, 1 -\
+            bmargin - tmargin])
+    bars = []
+    for (ibar, keys, colors) in [(0, bar1, 'brg'), (1, bar2, 'myc')]:
+        bottoms = [0] * nsamples
+        barwidth = 0.35
+        indices = [i - barwidth + ibar * barwidth for i in range(1, nsamples + 1)]
+        totalheights = [0 for i in range(nsamples)]
+        for (key, color) in zip(keys, colors):
+            totalheights = [totalheights[i] + d[key][i] for i in range(nsamples)]
+            b = pylab.bar(indices, d[key], width=barwidth, bottom=bottoms, color=color)
+            bars.append(b)
+            for i in range(nsamples):
+                bottoms[i] += d[key][i]
+    ymax = max(bottoms)
+    pylab.gca().set_ylim([0, 1.08 * ymax])
+    pylab.xticks([i for i in indices], names, rotation=90)
+    pylab.gca().set_xlim([0.4, nsamples + 0.6])
+    yformatter = pylab.ScalarFormatter(useMathText=True)
+    yformatter.set_powerlimits((-2, 2))
+    pylab.gca().yaxis.set_major_formatter(yformatter)
+    yticker = matplotlib.ticker.MaxNLocator(5)
+    pylab.gca().yaxis.set_major_locator(yticker)
+    barmarks = [b[0] for b in bars]
+    barlabels = bar1 + bar2
+    # reorder bar labels since pylab puts them down columns
+    barmarks = [barmarks[0], barmarks[3], barmarks[1], barmarks[4], barmarks[2], barmarks[5]]
+    barlabels = [barlabels[0], barlabels[3], barlabels[1], barlabels[4], barlabels[2], barlabels[5]]
+    pylab.legend(barmarks, barlabels, handlelength=1.2,\
+            bbox_to_anchor=(0.54, 1.3), loc='upper center', ncol=3)
+    pylab.ylabel('fraction', size=10)
+    pylab.savefig(plotfile)
+    pylab.clf()
+    pylab.close()
 
 
 if __name__ == '__main__':

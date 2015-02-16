@@ -30,6 +30,8 @@ Functions in this module
 
 * *IteratePairedFASTQ* : iterate over paired-read FASTQ files.
 
+* *ReadSummaryStats* : reads alignment summary statistics.
+
 Function documentation
 ---------------------------
 
@@ -983,6 +985,71 @@ def IteratePairedFASTQ(r1files, r2files, gzipped, applyfilter, usegzip=False):
             f1.close()
             f2.close()
             ifile += 1
+
+
+def ReadSummaryStats(f):
+    """Reads alignment summary statistics.
+
+    *f* should be either a readable file-like object or a string giving
+    the name of an existing file that contains alignment summary statistics.
+    For instance, this might be the ``summarystats.txt`` file produced by
+    ``dms_barcodedsubamplicons``. Here is example content from such
+    a file::
+
+        total read pairs = 4580258
+        read pairs that fail Illumina filter = 0
+        low quality read pairs = 915131
+        barcodes randomly purged = 0
+        discarded barcodes with 1 reads = 844768
+        aligned barcodes with 2 reads = 466387
+        discarded barcodes with 2 reads = 6457
+        un-alignable barcodes with 2 reads = 40753
+        aligned barcodes with 3 reads = 262149
+        discarded barcodes with 3 reads = 5426
+        un-alignable barcodes with 3 reads = 24891
+        aligned barcodes with 4 reads = 120828
+        discarded barcodes with 4 reads = 3281
+        un-alignable barcodes with 4 reads = 7675
+        aligned barcodes with 5 reads = 45342
+        discarded barcodes with 5 reads = 1516
+        un-alignable barcodes with 5 reads = 2863
+
+    The return value is the 2-tuple *(keylist, stats)*.
+    *keylist* is a list of all of the keys in *f* (these
+    are the strings before the equals sign) in the same
+    order as they appear in the file. *stats* is a dictionary
+    keyed by each key in *keylist* and with the value being
+    an integer giving the number of counts for that key.
+    The reason for returning *keylist* as well as *stats*
+    is that *keylist* preserves the order of the entries in *f*,
+    whereas the dictionary *stats* will have an arbitrary order.
+
+    Any lines in *f* that begin with ``#`` are treated
+    as comments and are not processed into the return 
+    variables.
+    """
+    if isinstance(f, str):
+        if not os.path.isfile(f):
+            raise IOError("Cannot find file %s" % f)
+        openedfile = True
+        f = open(f)
+    keylist = []
+    stats = {}
+    for line in f:
+        if line and not line.isspace() and line[0] != '#':
+            tup = line.split('=')
+            if len(tup) != 2:
+                raise ValueError("Line does not have expected two entries separated by an equals sign: %s" % line)
+            key = tup[0]
+            try:
+                value = int(tup[1])
+            except ValueError:
+                raise ValueError("Second entry in line is not a valid integer.")
+            keylist.append(key)
+            stats[key] = value
+    if openedfile:
+        f.close()
+    return (keylist, stats)
 
 
 if __name__ == '__main__':

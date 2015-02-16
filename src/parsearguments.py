@@ -30,6 +30,8 @@ Defined in this module
 
 * *AlignSpecs* : parses alignment specs for *BarcodedSubampliconsParser*
 
+* *AlignprefixName* : parses alignment prefixes/names for *SummarizeAlignmentsParser*
+
 * *InferPrefsParser* : parser for ``dms_inferprefs``
 
 * *InferDiffPrefsParser* : parser for ``dms_inferdiffprefs``
@@ -43,6 +45,8 @@ Defined in this module
 * *LogoPlotParser* : parser for ``dms_logoplot``
 
 * *BarcodedSubampliconsParser* : parser for ``dms_barcodedsubamplicons``
+
+* *SummarizeAlignmentsParser* : parser for ``dms_summarizealignments``
 
 * *SmartHelpFormatter* : new class for formatting argument helps.
 
@@ -204,6 +208,17 @@ def CommaSeparatedFASTQFiles(files):
             raise argparse.ArgumentTypeError("FASTQ file %s does not end in extension .fastq or .fastq.gz")
     return files
 
+def AlignprefixName(alignprefixname):
+    """Parses prefix / name for *SummarizeAlignmentsParser*.
+
+    >>> AlignprefixName('replicate_1/replicate_1_mutDNA_,mutDNA')
+    ('replicate_1/replicate_1_mutDNA_', 'mutDNA')
+    """
+    tup = alignprefixname.split(',')
+    if len(tup) != 2:
+        raise argparse.ArgumentTypeError("Failed to find two comma-delimited strings in %s" % alignprefixname)
+    return tuple(tup)
+
 def AlignSpecs(alignspecs):
     """Parses alignment specs for *BarcodedSubampliconsParser*.
 
@@ -222,6 +237,17 @@ def AlignSpecs(alignspecs):
     if not aligntup[0] < aligntup[1]:
         raise argparse.ArgumentTypeError("First entry must be less than second in alignspecs %s" % alignspecs)
     return tuple(aligntup)
+
+
+def SummarizeAlignmentsParser():
+    """Returns *argparse.ArgumentParser* for ``dms_summarizealignments``."""
+    parser = ArgumentParserNoArgHelp(description='Makes plots that summarize alignmnents for one or more samples. Designed to be run after you have used another program to make your alignments, and now you want to visualize the results. This script is part of %s (version %s) written by %s. Detailed documentation is at %s' % (dms_tools.__name__, dms_tools.__version__, dms_tools.__author__, dms_tools.__url__), formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser.add_argument('outprefix', help="Prefix for the output files. Suffixes are: 'mutfreqs.pdf' - average per-codon mutation frequencies. Any existing files with these names are overwritten.")
+    parser.add_argument('alignment_type', choices=['barcodedsubamplicons'], help="The type of alignments that are being summarized. Use 'barcodedsubamplicons' if the alignments were built with 'dms_barcodedsubamplicons'.")
+    parser.add_argument('alignments', nargs='+', help="This argument is repeated to specify each alignment that is being summarized. Each repetition is two comma-delimited strings (no spaces): ALIGNPREFIX,NAME. ALIGNPREFIX is the value of '--outprefix' used when calling the alignment program and NAME is the name assigned to that sample in the summaries. We expect to find all of the alignment output files with ALIGNPREFIX; these are the input data.", type=AlignprefixName)
+    parser.add_argument('--chartype', default='codon', choices=['codon'], help='Character type used for the alignments / mutation counting.')
+    parser.add_argument('-v', '--version', action='version', version='%(prog)s {version}'.format(version=dms_tools.__version__))
+    return parser
 
 
 def BarcodedSubampliconsParser():
@@ -253,6 +279,7 @@ def BarcodedSubampliconsParser():
     parser.add_argument('--barcodeinfo', dest='barcodeinfo', action='store_true', help='If you specify this option, create a file with suffix "barcodeinfo.txt.gz" containing information for each barcode. This file is quite large, and its creation will about double the program run time.');
     parser.add_argument('--purgefrac', type=FloatBetweenZeroAndOne, default=0, help='Randomly purge barcodes with this probability, thereby subsampling the data. You might want a value > 0 to estimate how the results depend on the sequencing depth.')
     parser.add_argument('--seed', type=int, default=1, help='Random number seed used to select reads for purging when using "--purgefrac".')
+    parser.add_argument('-v', '--version', action='version', version='%(prog)s {version}'.format(version=dms_tools.__version__))
     parser.set_defaults(barcodeinfo=False)
     return parser
 
