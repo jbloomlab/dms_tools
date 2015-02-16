@@ -273,7 +273,7 @@ def PlotCorrelation(xs, ys, plotfile, xlabel, ylabel, logx=False, logy=False,\
     pylab.close()
 
 
-def PlotDepth(codon_counts, names, plotfile):
+def PlotDepth(codon_counts, names, plotfile, mutdepth=False):
     """Plots per-site depth along primary sequence.
 
     `codon_counts` : a list of dictionaries giving the codon counts for
@@ -284,6 +284,9 @@ def PlotDepth(codon_counts, names, plotfile):
 
     `plotfile` : name of the output plot file created by this method
     (such as 'plot.pdf'). The extension must be ``.pdf``.
+
+    `mutdepth` : Boolean switch, if *True* then rather than plotting
+    sequencing depth, we plot per-site mutation rate.
     """
     if os.path.splitext(plotfile)[1].lower() != '.pdf':
         raise ValueError("plotfile must end in .pdf: %s" % plotfile)
@@ -298,19 +301,36 @@ def PlotDepth(codon_counts, names, plotfile):
     nlegendcols = 3
     nlegendrows = int(math.ceil(len(names) / float(nlegendcols)))
     fig = pylab.figure(figsize=(5.5, 2.16 * (1 + 0.11 * nlegendrows)))
-    (lmargin, rmargin, bmargin, tmargin) = (0.09, 0.02, 0.16, 0.01 + 0.1 * nlegendrows)
+    (lmargin, rmargin, bmargin, tmargin) = (0.1, 0.02, 0.16, 0.01 + 0.1 * nlegendrows)
     ax = pylab.axes([lmargin, bmargin, 1 - lmargin - rmargin, 1 - bmargin - tmargin])
     lines = []
+    all_ys = []
     for counts in codon_counts:
-        ys = [counts[r]['COUNTS'] for r in sites]
+        if mutdepth:
+            ys = []
+            for r in sites:
+                if counts[r]['COUNTS']:
+                    ys.append((counts[r]['COUNTS'] - counts[r]['N_WT']) / float(counts[r]['COUNTS']))
+                else:
+                    ys.append(0)
+        else:
+            ys = [counts[r]['COUNTS'] for r in sites]
+        all_ys += ys
         line = pylab.plot(xs, ys, lw=1.2)
         lines.append(line[0])
     pylab.xlabel('codon position')
-    pylab.ylabel('number of reads')
+    if mutdepth:
+        pylab.ylabel('mutation frequency')
+    else:
+        pylab.ylabel('number of reads')
+    all_ys.sort()
+    # if the top y value is excessively large, set a small ymax to avoid distorting the y-axis
+    if all_ys[-1] >= 2.5 * all_ys[-len(names) - 1]:
+        pylab.gca().set_ylim([0, 2.5 * all_ys[-len(names) - 1]])
     yticker = matplotlib.ticker.MaxNLocator(4)
     pylab.gca().yaxis.set_major_locator(yticker)
     yformatter = pylab.ScalarFormatter(useMathText=True)
-    yformatter.set_powerlimits((-3, 3))
+    yformatter.set_powerlimits((-2, 3))
     pylab.gca().yaxis.set_major_formatter(yformatter)
     pylab.gca().set_xlim([0, len(xs) - 1])
     if len(xs) <= 250:

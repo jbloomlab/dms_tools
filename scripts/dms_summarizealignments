@@ -34,7 +34,8 @@ def main():
     mutcountsall = '%smutcounts_all.pdf' % args['outprefix']
     mutcountsmulti = '%smutcounts_multi_nt.pdf' % args['outprefix']
     depth = '%sdepth.pdf' % args['outprefix']
-    for f in [mutfreqs, mutcountsall, mutcountsmulti, depth]:
+    mutdepth = '%smutdepth.pdf' % args['outprefix']
+    for f in [mutfreqs, mutcountsall, mutcountsmulti, depth, mutdepth]:
         if os.path.isfile(f):
             os.remove(f)
             print "Removing existing file %s" % f
@@ -74,6 +75,8 @@ def main():
             data[names[0]]['multi_nt_all_counts'], data[names[0]]['multi_nt_syn_counts'], legendloc='right', writecounts=False)
         print "Making %s" % depth
         dms_tools.plot.PlotDepth([data[name]['counts'] for name in names], names, depth)
+        print "Making %s" % mutdepth
+        dms_tools.plot.PlotDepth([data[name]['counts'] for name in names], names, mutdepth, mutdepth=True)
 
     else:
         raise ValueError("Invalid alignment_type of %s" % args['alignment_type'])
