@@ -8,11 +8,82 @@ Written by Jesse Bloom."""
 import sys
 import os
 import time
+import re
 import dms_tools.utils
 import dms_tools.parsearguments
 import dms_tools.file_io
 import dms_tools.plot
 
+
+def ParseBarcodeData(names, stats, maxperbarcode):
+    """Parses data for ``barcodes.pdf`` plot from summary stats.
+
+    *names* is list of sample names.
+
+    *stats* is list of corresponding summary stats.
+
+    *maxperbarcode* : group barcodes with >= this many reads.
+
+    The return value is *(categories, data)*, which are appropriate
+    for use as the same arguments to *dms_tools.plot.PlotSampleBargraphs*.
+    """
+    assert len(names) == len(stats)
+    barcodematch = re.compile('^(?P<fate>discarded|aligned|un-alignable) barcodes with (?P<nreads>\d+) reads$')
+    data = {}
+    categories = set([])
+    for (name, s) in zip(names, stats):
+        data[name] = {}
+        for (key, n) in s.iteritems():
+            if key not in ['total read pairs', 'read pairs that fail Illumina filter', 'low quality read pairs', 'barcodes randomly purged']:
+                m = barcodematch.search(key)
+                if not m:
+                    raise ValueError("Failed to match key:\n%s" % key)
+                nreads = int(m.group('nreads'))
+                if nreads >= maxperbarcode:
+                    category = '$\ge$%d reads, %s' % (maxperbarcode, m.group('fate'))
+                    nreads = maxperbarcode
+                elif nreads > 1:
+                    category = '%d reads, %s' % (nreads, m.group('fate'))
+                else:
+                    category = '%d read, %s' % (nreads, m.group('fate'))
+                categories.add((nreads + {'aligned':0.3, 'un-alignable':0.2, 'discarded':0.1}[m.group('fate')], category))
+                if category in data[name]:
+                    data[name][category] += n
+                else:
+                    data[name][category] = n
+    categories = list(categories)
+    categories.sort()
+    categories.reverse()
+    return ([tup[1] for tup in categories], data)
+
+
+def ParseReadData(names, stats):
+    """Parses data for ``read.pdf`` plot from summary stats.
+
+    *names* is list of sample names.
+
+    *stats* is list of corresponding summary stats.
+
+    The return value is *(categories, data)*, which are appropriate
+    for use as the same arguments to *dms_tools.plot.PlotSampleBargraphs*.
+    """
+    assert len(names) == len(stats)
+    categories = ['failed filter', 'low quality', 'barcoded']
+    data = {}
+    barcodematch = re.compile('^(discarded|aligned|un-alignable) barcodes with (?P<nreads>\d+) reads$')
+    for (name, s) in zip(names, stats):
+        data[name] = {}
+        data[name]['failed filter'] = s['read pairs that fail Illumina filter']
+        data[name]['low quality'] = s['low quality read pairs']
+        data[name]['barcoded'] = 0
+        for (key, n) in s.iteritems():
+            if key not in ['total read pairs', 'read pairs that fail Illumina filter', 'low quality read pairs', 'barcodes randomly purged']:
+                m = barcodematch.search(key)
+                if not m:
+                    raise ValueError("Failed to match key:\n%s" % key)
+                data[name]['barcoded'] += n * int(m.group('nreads'))
+        assert s['total read pairs'] == sum([n for n in data[name].itervalues()]), "Expected total of %d, but got %d" % (s['total read pairs'], sum([n for n in data[name].itervalues()]))
+    return (categories, data)
 
 
 def main():
@@ -35,7 +106,9 @@ def main():
     mutcountsmulti = '%smutcounts_multi_nt.pdf' % args['outprefix']
     depth = '%sdepth.pdf' % args['outprefix']
     mutdepth = '%smutdepth.pdf' % args['outprefix']
-    for f in [mutfreqs, mutcountsall, mutcountsmulti, depth, mutdepth]:
+    reads = '%sreads.pdf' % args['outprefix']
+    barcodes = '%sbarcodes.pdf' % args['outprefix']
+    for f in [mutfreqs, mutcountsall, mutcountsmulti, depth, mutdepth, reads, barcodes]:
         if os.path.isfile(f):
             os.remove(f)
             print "Removing existing file %s" % f
@@ -77,6 +150,12 @@ def main():
         dms_tools.plot.PlotDepth([data[name]['counts'] for name in names], names, depth)
         print "Making %s" % mutdepth
         dms_tools.plot.PlotDepth([data[name]['counts'] for name in names], names, mutdepth, mutdepth=True)
+        print "Making %s" % reads
+        (categories, plotdata) = ParseReadData(names, [data[name]['stats'][1] for name in names])
+        dms_tools.plot.PlotSampleBargraphs(names, categories, plotdata, reads, 'number of read pairs')
+        print "Making %s" % barcodes
+        (categories, plotdata) = ParseBarcodeData(names, [data[name]['stats'][1] for name in names], args['maxperbarcode'])
+        dms_tools.plot.PlotSampleBargraphs(names, categories, plotdata, barcodes, 'number of barcodes')
 
     else:
         raise ValueError("Invalid alignment_type of %s" % args['alignment_type'])

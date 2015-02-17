@@ -21,6 +21,8 @@ Functions in this module
 
 `PlotDepth` : plots per-site depth along primary sequence
 
+`PlotSampleBargraphs` : plots bargraphs of categories for several samples.
+
 Function documentation
 -----------------------------
 """
@@ -435,7 +437,7 @@ def PlotPairedMutFracs(codon_counts, names, plotfile):
     barmarks = [barmarks[0], barmarks[3], barmarks[1], barmarks[4], barmarks[2], barmarks[5]]
     barlabels = [barlabels[0], barlabels[3], barlabels[1], barlabels[4], barlabels[2], barlabels[5]]
     pylab.legend(barmarks, barlabels, handlelength=1.2,\
-            bbox_to_anchor=(0.54, 1.3), loc='upper center', ncol=3)
+            bbox_to_anchor=(0.54, 1.31), loc='upper center', ncol=3)
     pylab.ylabel('fraction', size=10)
     pylab.savefig(plotfile)
     pylab.clf()
@@ -554,6 +556,74 @@ def PlotMutCountFracs(plotfile, title, names, all_cumulfracs, syn_cumulfracs, al
         fig.legend(lines, names, handlelength=2.25, handletextpad=0.2, columnspacing=0.8, ncol=ncol, bbox_to_anchor=(1.0, 0.52), loc='center right')
     else:
         raise ValueError("Invalid legendloc of %s" % legendloc)
+    pylab.savefig(plotfile)
+    pylab.clf()
+    pylab.close()
+
+
+def PlotSampleBargraphs(names, categories, data, plotfile, ylabel, groupbyfirstword=True):
+    """Plots bargraph of counts for different samples.
+
+    *names* is a list of the names of the different samples.
+
+    *categories* is a list of the different categories for each sample.
+
+    *data* is a dictionary keyed by each name in *names*, and that value
+    is in turn a dictionary keyed by each category in *categories*.
+
+    *plotfile* is the name of the PDF file that we are creating.
+
+    *ylabel* is the label placed on the y-axis.
+
+    *groupbyfirstword* is a Boolean switch that specifies whether we group 
+    consecutive categories with the same first word in the string to have
+    the same color.
+    """
+    if os.path.splitext(plotfile)[1].lower() != '.pdf':
+        raise ValueError("plotfile must in in .pdf but got %s" % plotfile)
+    assert len(names) == len(data) > 0, "names and data are not non-empty and of the same length"
+    colors = matplotlib.rcParams['axes.color_cycle']
+    hatches = ['', '//////', '*****', '.....', '*', 'o'] 
+    matplotlib.rc('text', usetex=True)
+    matplotlib.rc('legend', fontsize=10)
+    matplotlib.rc('font', size=10)
+    matplotlib.rc('patch', linewidth=0.75)
+    ncol = 3 # number of legend columns
+    nlegendrows = int(math.ceil(len(categories) / float(ncol)))
+    fig = pylab.figure(figsize=(6, 3.96 * (1.02 + 0.055 * nlegendrows)))
+    (lmargin, rmargin, bmargin, tmargin) = (0.09, 0.01, 0.41, 0.0175 + 0.046 * nlegendrows)
+    ax = pylab.axes([lmargin, bmargin, 1 - lmargin - rmargin, 1 - bmargin - tmargin])
+    bottoms = [0] * len(names)
+    bars = []
+    barwidth = 0.5
+    indices = [i - barwidth / 2. for i in range(1, len(names) + 1)]
+    icolor = ihatch = 0
+    previousfirstword = None
+    for category in categories:
+        if previousfirstword == None:
+            pass
+        elif groupbyfirstword:
+            if previousfirstword == category.split()[0]:
+                ihatch += 1
+            else:
+                ihatch = 0
+                icolor += 1
+        else:
+            icolor += 1
+        previousfirstword = category.split()[0]
+        b = pylab.bar(indices, [data[name][category] for name in names], width=barwidth, bottom=bottoms, color=colors[icolor % len(colors)], hatch=hatches[ihatch % len(hatches)])
+        bars.append(b)
+        for (iname, name) in enumerate(names):
+            bottoms[iname] += data[name][category]
+    ymax = max(bottoms)
+    pylab.gca().set_ylim([0, 1.04 * ymax])
+    pylab.xticks([i + barwidth / 2. for i in indices], names, rotation=90)
+    pylab.gca().set_xlim([0.5, len(names) + 0.5])
+    yformatter = pylab.ScalarFormatter(useMathText=True)
+    yformatter.set_powerlimits((-3, 3))
+    pylab.gca().yaxis.set_major_formatter(yformatter)
+    pylab.legend([b[0] for b in bars], categories, handletextpad=0.3, handlelength=1.3, columnspacing=1.1, bbox_to_anchor=(0.53, 1.037 + 0.11 * nlegendrows), loc='upper center', ncol=ncol)
+    pylab.ylabel(ylabel)
     pylab.savefig(plotfile)
     pylab.clf()
     pylab.close()

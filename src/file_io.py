@@ -1040,7 +1040,7 @@ def ReadSummaryStats(f):
             tup = line.split('=')
             if len(tup) != 2:
                 raise ValueError("Line does not have expected two entries separated by an equals sign: %s" % line)
-            key = tup[0]
+            key = tup[0].strip()
             try:
                 value = int(tup[1])
             except ValueError:
