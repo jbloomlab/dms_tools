@@ -3,8 +3,7 @@ Changelog
 
 1.1
 ------
-* Added ``dms_barcodedsubamplicons`` program
-
+* Added ``dms_barcodedsubamplicons`` and ``dms_summarizealignments` programs
 
 1.0.1
 --------
