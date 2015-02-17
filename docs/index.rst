@@ -13,7 +13,7 @@ Quick overview
 
 The :ref:`programs` installed as part of `dms_tools`_ allow you to easily analyze and visualize deep mutational scanning data; `dms_tools`_ also comes with a :ref:`pythonapi`.
 
-One strength of `dms_tools`_ is that it analyzes deep mutational scanning data using a principled Bayesian framework that avoids the `statistical bias inherent in ratio estimation`_ is that it enables easy construction of logo plots (built via extension of `weblogo`_) that provide a compact and intuitive visualization of the results.
+One strength of `dms_tools`_ is that it analyzes deep mutational scanning data using a principled Bayesian framework that avoids the `statistical bias inherent in ratio estimation`_. Another strength is that it enables easy construction of plots that provide compact and intuitive visualizations of the results.
 
 `dms_tools`_ is suited for the following analyses:
 
