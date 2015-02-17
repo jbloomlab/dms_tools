@@ -1,7 +1,13 @@
 Changelog
 ===========
 
-1.1
+1.1.1
+-------
+* Fixed duplication of logging output by ``dms_inferprefs``
+
+* Some minor documentation updates
+
+1.1.0
 ------
 * Added ``dms_barcodedsubamplicons`` and ``dms_summarizealignments` programs
 

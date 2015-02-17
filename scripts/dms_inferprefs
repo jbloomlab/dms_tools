@@ -222,7 +222,6 @@ def main():
                         del retry[r]
                     else:
                         logged[r] = True
-                        logger.info('Finished inference for site %s. Here is the summary:\n%s\n' % (r, logstring))
                         if not converged:
                             logger.error('Failed to converge for site %s. Here is a summary of the attempt:\n%s\n' % (r, logstring))
                             with open('_debugging_counts_%s.pickle' % r, 'w') as f:
