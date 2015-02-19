@@ -547,7 +547,9 @@ def InferSitePreferences(characterlist, wtchar, error_model, counts, priors, see
           chains and *niter* iterations. If it fails to converge, it then increases
           the number of iterations by a factor of *increasefactor* and tries again,
           and repeats until it converges or until it has tried *increasetries*
-          times to increase the number of iterations.
+          times to increase the number of iterations. Additionally, if
+          the effective sample size exceeds 3 times *neff_min* then we allow
+          R to be *1 + 1.5 (r_min - 1)*.
 
     The return value is: *(converged, pi_means, pi_95credint, logstring)*.
     The entries in this tuple have the following meanings:
@@ -625,7 +627,7 @@ def InferSitePreferences(characterlist, wtchar, error_model, counts, priors, see
         # allow convergence with extra stringent criteria when some sites have Rhat being nan
         # this is because pystan appears to sometimes give Rhat of nan for sites with low preference
         # turns out the pystan Rhat values of nan are a bug according to pystan developers 
-        if ((not rhat_is_nan) and rmean <= r_max and neffmean >= neff_min) or (rhat_is_nan and len(rhat_is_nan) < 0.5 * len(characterlist) and rmean <= r_max and neffmean >= 3.0 * neff_min) or (rhat_is_nan and len(rhat_is_nan) <= 0.75 * len(characterlist) and rmean <= 1.0 + (r_max - 1.0) / 2.0 and neffmean >= 5.0 * neff_min):
+        if ((not rhat_is_nan) and rmean <= r_max and neffmean >= neff_min) or (rhat_is_nan and len(rhat_is_nan) < 0.5 * len(characterlist) and rmean <= r_max and neffmean >= 2.0 * neff_min) or (rhat_is_nan and len(rhat_is_nan) <= 0.75 * len(characterlist) and rmean <= 1.0 + (r_max - 1.0) / 2.0 and neffmean >= 3.0 * neff_min) or (neffmean >= 3.0 * neff_min and rmean <= 1.0 + 1.5 * (r_max - 1.0)):
             # converged
             logstring.append('\tMCMC is deemed to have converged at %s.' % time.asctime())
             meanindex = colnames.index('mean')
@@ -804,7 +806,7 @@ def InferSiteDiffPrefs(characterlist, wtchar, error_model, counts, priors, seed=
         # allow convergence with extra stringent criteria for a few sites with Rhat being nan
         # this is because pystan appears to sometimes give Rhat of nan for sites with low preference
         # turns out the pystan Rhat values of nan are a bug according to pystan developers 
-        if ((not rhat_is_nan) and rmean <= r_max and neffmean >= neff_min) or (rhat_is_nan and len(rhat_is_nan) < 0.5 * len(characterlist) and rmean <= r_max and neffmean >= 3.0 * neff_min) or (rhat_is_nan and len(rhat_is_nan) <= 0.75 * len(characterlist) and rmean <= 1.0 + (r_max - 1.0) / 2.0 and neffmean >= 5.0 * neff_min):
+        if ((not rhat_is_nan) and rmean <= r_max and neffmean >= neff_min) or (rhat_is_nan and len(rhat_is_nan) < 0.5 * len(characterlist) and rmean <= r_max and neffmean >= 2.0 * neff_min) or (rhat_is_nan and len(rhat_is_nan) <= 0.75 * len(characterlist) and rmean <= 1.0 + (r_max - 1.0) / 2.0 and neffmean >= 3.0 * neff_min) or (neffmean >= 3.0 * neff_min and rmean <= 1.0 + 1.5 * (r_max - 1.0)):
             # converged
             logstring.append('\tMCMC is deemed to have converged at %s.' % time.asctime())
             meanindex = colnames.index('mean')

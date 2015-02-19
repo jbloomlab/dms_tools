@@ -5,6 +5,10 @@ Changelog
 -------
 * Fixed duplication of logging output by ``dms_inferprefs``
 
+* Fixed bug in calculation of average mutation rate by ``dms_inferprefs`` when some sites have no counts data
+
+* Allow ``dms_inferprefs`` and ``dms_inferdiffprefs`` to have Rhat as large as 1.15 if N_eff is at least 300
+
 * Some minor documentation updates
 
 1.1.0
