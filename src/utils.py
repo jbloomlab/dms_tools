@@ -493,17 +493,20 @@ def AvgMutRate(counts, chartype):
         epsilon = dict([(m, 0.0) for m in range(2)])
     else:
         raise ValueError("Invalid chartype of %s" % chartype)
-    length = len(counts)
+    length = 0
     for (site, sitecounts) in counts.iteritems():
         wt = sitecounts['WT']
         assert wt in characters, "wildtype of %s not in characters" % wt
         nr = sum([sitecounts[x] for x in characters])
         if not nr:
             continue # no counts for this site, doesn't contribute
-        denom = float(length * nr)
+        denom = float(nr)
+        length += 1
         for x in characters:
             m = len([i for i in range(len(wt)) if wt[i] != x[i]])
             epsilon[m] += sitecounts[x] / denom
+    for m in list(epsilon.iterkeys()):
+        epsilon[m] /= float(length)
     assert abs(sum(epsilon.values()) - 1.0) < 1.0e-5, "Sum of mutrates is not close to one: %g" % (sum(epsilon.values()))
     return epsilon
 
