@@ -624,10 +624,10 @@ def InferSitePreferences(characterlist, wtchar, error_model, counts, priors, see
         logstring.append('\tAfter %d MCMC chains each of %d steps, mean R = %.2f and mean Neff = %d' % (nchains, niter, rmean, neffmean))
         if rhat_is_nan:
             logstring.append('\t\tThere are %d characters where R is nan' % len(rhat_is_nan))
-        # allow convergence with extra stringent criteria when some sites have Rhat being nan
+        # allow convergence with extra stringent criteria when many sites have Rhat being nan
         # this is because pystan appears to sometimes give Rhat of nan for sites with low preference
         # turns out the pystan Rhat values of nan are a bug according to pystan developers 
-        if ((not rhat_is_nan) and rmean <= r_max and neffmean >= neff_min) or (rhat_is_nan and len(rhat_is_nan) < 0.5 * len(characterlist) and rmean <= r_max and neffmean >= 2.0 * neff_min) or (rhat_is_nan and len(rhat_is_nan) <= 0.75 * len(characterlist) and rmean <= 1.0 + (r_max - 1.0) / 2.0 and neffmean >= 3.0 * neff_min) or (neffmean >= 3.0 * neff_min and rmean <= 1.0 + 1.5 * (r_max - 1.0)):
+        if (len(rhat_is_nan) < 0.25 * len(characterlist) and rmean <= r_max and neffmean >= neff_min) or (len(rhat_is_nan) < 0.5 * len(characterlist) and rmean <= r_max and neffmean >= 2.0 * neff_min) or (len(rhat_is_nan) <= 0.75 * len(characterlist) and rmean <= r_max and neffmean >= 3.0 * neff_min) or (neffmean >= 3.0 * neff_min and rmean <= 1.0 + 1.5 * (r_max - 1.0)):
             # converged
             logstring.append('\tMCMC is deemed to have converged at %s.' % time.asctime())
             meanindex = colnames.index('mean')
@@ -806,7 +806,7 @@ def InferSiteDiffPrefs(characterlist, wtchar, error_model, counts, priors, seed=
         # allow convergence with extra stringent criteria for a few sites with Rhat being nan
         # this is because pystan appears to sometimes give Rhat of nan for sites with low preference
         # turns out the pystan Rhat values of nan are a bug according to pystan developers 
-        if ((not rhat_is_nan) and rmean <= r_max and neffmean >= neff_min) or (rhat_is_nan and len(rhat_is_nan) < 0.5 * len(characterlist) and rmean <= r_max and neffmean >= 2.0 * neff_min) or (rhat_is_nan and len(rhat_is_nan) <= 0.75 * len(characterlist) and rmean <= 1.0 + (r_max - 1.0) / 2.0 and neffmean >= 3.0 * neff_min) or (neffmean >= 3.0 * neff_min and rmean <= 1.0 + 1.5 * (r_max - 1.0)):
+        if (len(rhat_is_nan) < 0.25 * len(characterlist) and rmean <= r_max and neffmean >= neff_min) or (len(rhat_is_nan) < 0.5 * len(characterlist) and rmean <= r_max and neffmean >= 2.0 * neff_min) or (len(rhat_is_nan) <= 0.75 * len(characterlist) and rmean <= r_max and neffmean >= 3.0 * neff_min) or (neffmean >= 3.0 * neff_min and rmean <= 1.0 + 1.5 * (r_max - 1.0)):
             # converged
             logstring.append('\tMCMC is deemed to have converged at %s.' % time.asctime())
             meanindex = colnames.index('mean')
