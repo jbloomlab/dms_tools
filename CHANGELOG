@@ -5,9 +5,11 @@ Changelog
 -------
 * Fixed duplication of logging output by ``dms_inferprefs``
 
-* Fixed bug in calculation of average mutation rate by ``dms_inferprefs`` when some sites have no counts data
+* Fixed bug that caused a crash during calculation of average mutation rate by ``dms_inferprefs`` when some sites have no counts data
 
 * Fixed problems in MCMC convergence in ``dms_inferprefs`` and ``dms_inferdiffprefs`` when there are many Rhat values of ``nan`` by being more accommodating on the Rhat criterion if N_eff is sufficiently large
+
+* Added test for ``dms_barcodedsubamplicons`` in ``./tests/``
 
 * Some minor documentation updates
 
