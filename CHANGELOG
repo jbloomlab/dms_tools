@@ -5,6 +5,8 @@ Changelog
 --------
 * Fixed bug in ``dms_summarizealignments`` processing of ``summarystats.txt`` files when ``--purgefracs`` is nonzero.
 
+* Added ``--writemutfreqs`` option to ``dms_summarizealignments``
+
 1.1.1
 -------
 * Fixed duplication of logging output by ``dms_inferprefs``

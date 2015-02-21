@@ -383,7 +383,7 @@ def PlotPairedMutFracs(codon_counts, names, plotfile):
         counts = dms_tools.utils.ClassifyCodonCounts(counts)
         denom = float(counts['TOTAL_COUNTS'])
         if not denom:
-            raise ValueError("no counts for %s" % infile)
+            raise ValueError("no counts for a sample")
         for key in bar1 + bar2:
             if key == 'nonsynonymous':
                 d[key].append(counts['TOTAL_NS'] / denom)

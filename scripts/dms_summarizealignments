@@ -15,6 +15,46 @@ import dms_tools.file_io
 import dms_tools.plot
 
 
+
+def WriteMutFreqs(codon_counts, names, mutfreqstext):
+    """Writes in text format the data plotted by *dms_tools.plot.PairedMutFracs*.
+
+    The first two arguments are the same as to *dms_tools.plot.PairedMutFracs*.
+    *mutfreqstext* is the name of the created text file containing the data.
+    """
+    assert len(codon_counts) == len(names)
+    keys = ['synonymous', 'nonsynonymous', 'stop codon'] + ['1 nucleotide mutation', '2 nucleotide mutations', '3 nucleotide mutations']
+    data = {}
+    for (name, counts) in zip(names, codon_counts):
+        d = {}
+        counts = dms_tools.utils.ClassifyCodonCounts(counts)
+        denom = float(counts['TOTAL_COUNTS'])
+        if not denom:
+            raise ValueError("no counts for a sample")
+        for key in keys:
+            if key == 'nonsynonymous':
+                d[key] = counts['TOTAL_NS'] / denom
+            elif key == 'synonymous':
+                d[key]= counts['TOTAL_SYN'] / denom
+            elif key == 'stop codon':
+                d[key] = counts['TOTAL_STOP'] / denom
+            elif key == '1 nucleotide mutation':
+                d[key] = counts['TOTAL_N_1MUT'] / denom
+            elif key == '2 nucleotide mutations':
+                d[key] = counts['TOTAL_N_2MUT'] / denom
+            elif key == '3 nucleotide mutations':
+                d[key] = counts['TOTAL_N_3MUT'] / denom
+            else:
+                raise ValueError("Invalid key of %s" % key)
+        data[name] = d
+    with open(mutfreqstext, 'w') as f:
+        f.write('#sample %s\n' % ' '.join([key.replace(' ', '_') for key in keys]))
+        for name in names:
+            f.write('%s %s\n' % (name, ' '.join(['%g' % data[name][key] for key in keys])))
+    f.close()
+
+
+
 def ParseBarcodeData(names, stats, maxperbarcode):
     """Parses data for ``barcodes.pdf`` plot from summary stats.
 
@@ -101,13 +141,14 @@ def main():
 
     # define output files and remove if they already exist
     mutfreqs = '%smutfreqs.pdf' % args['outprefix']
+    mutfreqstext = '%smutfreqs.txt' % args['outprefix']
     mutcountsall = '%smutcounts_all.pdf' % args['outprefix']
     mutcountsmulti = '%smutcounts_multi_nt.pdf' % args['outprefix']
     depth = '%sdepth.pdf' % args['outprefix']
     mutdepth = '%smutdepth.pdf' % args['outprefix']
     reads = '%sreads.pdf' % args['outprefix']
     barcodes = '%sbarcodes.pdf' % args['outprefix']
-    for f in [mutfreqs, mutcountsall, mutcountsmulti, depth, mutdepth, reads, barcodes]:
+    for f in [mutfreqs, mutfreqstext, mutcountsall, mutcountsmulti, depth, mutdepth, reads, barcodes]:
         if os.path.isfile(f):
             os.remove(f)
             print "Removing existing file %s" % f
@@ -136,6 +177,9 @@ def main():
         print "\nNow making plots..."
         print "Making %s" % mutfreqs
         dms_tools.plot.PlotPairedMutFracs([data[name]['counts'] for name in names], names, mutfreqs)
+        if args['writemutfreqs']:
+            print "Making %s" % mutfreqstext
+            WriteMutFreqs([data[name]['counts'] for name in names], names, mutfreqstext)
         print "Making %s and %s" % (mutcountsall, mutcountsmulti)
         dms_tools.plot.PlotMutCountFracs(mutcountsall, 'Single and multi-nucleotide codon mutations', names,\
             [data[name]['all_cumulfracs'][ : args['maxmutcounts'] + 1] for name in names],\
