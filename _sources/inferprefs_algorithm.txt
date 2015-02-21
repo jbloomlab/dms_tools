@@ -353,7 +353,7 @@ monitor for convergence of the sampling of the site-specific preferences
  by running four chains, and ensuring that the mean over all :math:`\pi_{r,x}`
 values of the potential scale
 reduction statistic :math:`\hat{R}` of `GelmanRubin1992`_ is :math:`\le 1.1` and that the
-mean effective sample size is :math:`\ge 100`. We repeatedly increase the number of steps 
+mean effective sample size is :math:`\ge 100`, or that :math:`\hat{R} \le 1.15` and the effective sample size is :math:`\ge 300`. We repeatedly increase the number of steps 
 until convergence occurs. The inferred preferences are
 summarized by the posterior mean and median-centered 95% credible
 interval for each :math:`\pi_{r,x}`.

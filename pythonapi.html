@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Python API &mdash; dms_tools 1.1.0 documentation</title>
+    <title>Python API &mdash; dms_tools 1.1.2 documentation</title>
     
     <link rel="stylesheet" href="_static/default.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '1.1.0',
+        VERSION:     '1.1.2',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="dms_tools 1.1.0 documentation" href="index.html" />
+    <link rel="top" title="dms_tools 1.1.2 documentation" href="index.html" />
     <link rel="next" title="Citations and Acknowledgments" href="citations.html" />
     <link rel="prev" title="Algorithm to infer differential preferences" href="inferdiffprefs_algorithm.html" /> 
   </head>
@@ -44,7 +44,7 @@
         <li class="right" >
           <a href="inferdiffprefs_algorithm.html" title="Algorithm to infer differential preferences"
              accesskey="P">previous</a> |</li>
-        <li><a href="index.html">dms_tools 1.1.0 documentation</a> &raquo;</li> 
+        <li><a href="index.html">dms_tools 1.1.2 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -300,7 +300,9 @@ is greater than or equal to <em>neff_min</em>. The MCMC first runs with <em>ncha
 chains and <em>niter</em> iterations. If it fails to converge, it then increases
 the number of iterations by a factor of <em>increasefactor</em> and tries again,
 and repeats until it converges or until it has tried <em>increasetries</em>
-times to increase the number of iterations.</p>
+times to increase the number of iterations. Additionally, if
+the effective sample size exceeds 3 times <em>neff_min</em> then we allow
+R to be <em>1 + 1.5 (r_min - 1)</em>.</p>
 </li>
 </ul>
 </div></blockquote>
@@ -2385,7 +2387,7 @@ from Dirichlet with this concentration parameter.</p>
         <li class="right" >
           <a href="inferdiffprefs_algorithm.html" title="Algorithm to infer differential preferences"
              >previous</a> |</li>
-        <li><a href="index.html">dms_tools 1.1.0 documentation</a> &raquo;</li> 
+        <li><a href="index.html">dms_tools 1.1.2 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
