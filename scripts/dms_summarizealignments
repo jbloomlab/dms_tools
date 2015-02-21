@@ -82,7 +82,6 @@ def ParseReadData(names, stats):
                 if not m:
                     raise ValueError("Failed to match key:\n%s" % key)
                 data[name]['barcoded'] += n * int(m.group('nreads'))
-        assert s['total read pairs'] == sum([n for n in data[name].itervalues()]), "Expected total of %d, but got %d" % (s['total read pairs'], sum([n for n in data[name].itervalues()]))
     return (categories, data)
 
 
