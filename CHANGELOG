@@ -1,6 +1,10 @@
 Changelog
 ===========
 
+1.1.3
+--------
+* Some minor documentation corrections.
+
 1.1.2
 --------
 * Fixed bug in ``dms_summarizealignments`` processing of ``summarystats.txt`` files when ``--purgefracs`` is nonzero.

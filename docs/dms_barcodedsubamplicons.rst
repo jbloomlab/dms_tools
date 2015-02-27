@@ -91,7 +91,7 @@ The algorithm implemented by ``dms_barcodedsubamplicons`` is as follows:
 
     - The reads cannot all be made the same length by trimming no more ``--maxreadtrim`` from the 3' end.
 
-    - Any of the reads fail to have at least ``--maxreadidentity`` identical and high-quality (not ``N``) nucleotides when compared pairwise.
+    - Any of the reads fail to have at least ``--minreadidentity`` identical and high-quality (not ``N``) nucleotides when compared pairwise.
 
 7) For each remaining barcode, we attempt to align the consensus sequence to each of the subamplicons specified by ``alignspecs``. The attempted alignment does **not** accommodate gaps; the consensus sequence for the reads is required to align gaplessly at the position specified by ``alignspecs``. In any region where the reads overlap (which may happen near the center of the subamplicon), if both consensus sequences (R1 and R2) report high quality nucleotides, the identity is considered ambiguous if the sequences disagree. An alignment is considered valid only if the following conditions are met:
 
