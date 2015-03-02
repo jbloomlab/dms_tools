@@ -5,6 +5,8 @@ Changelog
 --------
 * Some minor documentation corrections.
 
+* Fixed minor bug in error handling by ``dms_editsites`` when there is an invalid file name.
+
 1.1.2
 --------
 * Fixed bug in ``dms_summarizealignments`` processing of ``summarystats.txt`` files when ``--purgefracs`` is nonzero.

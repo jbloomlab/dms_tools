@@ -34,8 +34,8 @@ def main():
         print "\nRemoving existing output file of %s" % args['outfile']
         os.remove(args['outfile'])
 
+    f = open(args['outfile'], 'w')
     try:
-        f = open(args['outfile'], 'w')
         if args['edit_method'] == 'renumber':
             with open(args['edit_file']) as f_edit:
                 renumber_d = {}
