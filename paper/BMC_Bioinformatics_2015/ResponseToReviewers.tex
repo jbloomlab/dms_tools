@@ -11,7 +11,8 @@
 \newcommand{\forceindent}{\leavevmode{\parindent=2em\indent}}
 
 \newcounter{response}
-\newenvironment{response}[1][]{\color{blue}\refstepcounter{response}\noindent{{{\bf{Response \arabic{response}.}}}} \normalfont #1}
+%\newenvironment{response}[1][]{\color{blue}\refstepcounter{response}\noindent{{{\bf{Response \arabic{response}.}}}} \normalfont #1}
+\newenvironment{response}[1][]{\color{blue}\refstepcounter{response}\noindent \normalfont #1}
 
 \renewcommand{\theresponse}{{\bf Response \arabic{response}}}
 
@@ -23,6 +24,14 @@
 \begin{document}
 
 \maketitle
+
+\begin{response}
+Thanks to both reviewers for their careful review of the manuscript. I appreciate their attention to the manuscript and the software that it describes, and am glad that both reviewers see this software as useful for researchers using the new technique of deep mutational scanning.
+
+The reviewer comments mostly focused on issues of clarification and questions about why and when certain approaches might be preferred. I have been able to address all of these comments in the revised manuscript, and I believe that the helpful comments and the changes made in response have substantially improved the manuscript.
+
+Below I provide a point-by-point response to the comments.
+\end{response}
 
 \subsection*{Reviewer \#1}Bloom describes a software package for analysis of deep mutational scanning using a novel (for this application) Bayesian/MCMC framework. The general framework appears to be sound and addresses a significant need for these new and highly promising functional assays. The manuscript is well-written and explains the major uses cases of the software in sufficient detail.
 
@@ -56,6 +65,16 @@ Question 1:On page 2, in the second paragraph, a deep mutational scanning study
 Question 3:Related to question 1: How does the author think that lower-quality data, either by experimental design limitations or by the variance in counts between sites, affect the inference and downstream interoperation of site-specific preferences? How sensitive is the algorithm to the prior for different qualities/quantities of data?
 
 Question 4:How robust is the method to the prior assumption that mutagenesis introduces all mutations at equal frequency? The author briefly discusses this issue on page 6, and I think it would be informative to address this question with an additional simulation. Does the present method still outperform the naive ratio method even when data are not generated under the model used in the inference?
+
+\begin{response}
+The reviewer notes that in a real experiment, the per-site per-character mutation ($\mu_{r,x}$) and error rates ($\epsilon_{r,x}$ and $\rho_{r,x}$) will not be completely uniform. However, the prior assumption used by \textsl{dms\_tools} is that the these rates are uniform (although this prior is expressed fairly loosely by a Dirichlet with a relatively modest concentration parameter). The reviewer is therefore rightly pointing out that if the simulations are performed with uniform mutation (and error) rates, then the inference on the simulated data might work better than it would on real data.
+
+Although the original manuscript text was unclear on this point, in fact the simulations were performed with non-uniform mutation and error rates. This was done by drawing the rates from Dirichlet distributions parameterized such that there was substantial variation across sites and characters. The unevenness in the simulated rates is controlled by the concentration parameter of the Dirichlet, and the simulations were performed with a concentration parameter that gave an unevenness roughly comparable to that observed in real codon-mutagenesis experiments. The code implementing this aspect of the simulations is at \url{????}. 
+
+The unevenness in the simulated mutation rates can be grasped in intuitive terms by examining the simulated counts in \url{simulated_errs_depth_2e+06_pre.txt}. This simulation is of a library sequenced at depth $2 \times 10^6$ and has an average per-site codon mutation rate of $\overline{\mu} = \frac{1}{264}$, meaning that the average mutation rate to any given one of the 63 mutant codons at any given site is $\frac{1}{264 \times 63} \approx 6 \times 10^{-5}$. Therefore, with perfectly uniform mutation rates and no sampling error, each mutant codon would be observed $\frac{2 \times 10^6}{264 \times 63} \approx 120$ times. In the simulated data in \url{simulated_errs_depth_2e+06_pre.txt}, the counts for specific mutations range from 0 counts to 1400 counts, with a 10th percentile of 18 counts, a 25th percentile of 43 counts, a 75th percentile of 174 counts, and a 90th percentile of 275 counts. Therefore, the unevenness in the simulated data reasonably reflects that of a real experiment, and so these data already represents a fair test for the inferences.
+
+This issue has been clarified in the text by clearly stating that the simulations were done at uneven mutation and error rates.
+\end{response}
 
 Level of interest: An article whose findings are important to those with closely related research interests
 
