@@ -76,6 +76,10 @@ In addition, \texttt{dms\_inferdiffprefs} also creates text files that give the 
 
 6. The function of \texttt{dms\_merge} isn't explained in the paper. Is it simply averaging the two replicate profiles? Could additional statistical power be gained by explicitly modeling replicates within the Bayesian framework?
 
+\begin{response}
+The revised manuscript now briefly explains \texttt{dms\_merge} and \texttt{dms\_correlate}. To jointly analyze replicates of the same experiment within the Bayesian framework, the counts from the replicates can simply be summed before inputting them to \texttt{dms\_inferprefs}. However, it may sometimes be desirable to analyze replicates individually with \texttt{dms\_inferprefs} and then combine and compare them using \texttt{dms\_merge} and \texttt{dms\_correlate}. The reason is that some of the replicate-to-replicate variability may arise from experimental factors distinct from statistical noise -- such factors are not easily incorporated into the Bayesian framework, since they are due to experimental rather than statistical sources.
+\end{response}
+
 Level of interest: An article of importance in its field
 
 Quality of written English: Acceptable
