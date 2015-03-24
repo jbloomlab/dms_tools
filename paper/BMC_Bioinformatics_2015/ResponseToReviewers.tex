@@ -53,11 +53,18 @@ This is a \emph{hugely} important point! The first paragraph of the subsection i
 
 3. Given the substantial increase in runtime and computational complexity of the Bayesian/MCMC approach relative to the simple ratio approach (hours vs fraction of a second), it might be helpful to provide a bit more intuition about what is gained. Is it simply a ``regularization'' where high ratios obtained from low counts are pushed back towards the prior? If so, does the framework really provide more than what could be obtained with a much simpler regularization heuristic?
 
-4. It’s not clear whether \textsl{dms\_inferprefs} outputs the probability of $\phi_{r,x} < 1$ (or $\phi_{r,x} \ne 0$). This is likely to be a useful feature.
+4. It’s not clear whether \texttt{dms\_inferprefs} outputs the probability of $\phi_{r,x} < 1$ (or $\phi_{r,x} \ne 0$). This is likely to be a useful feature.
 
-5. It’s not clear whether the probability values for $\Delta\pi_{r,x} > 0$ or $< 0$ for \textsl{dms\_inferdiffprefs} should be interpreted as nominal or corrected. Providing false discovery rate estimates might be helpful for interpretation (also applies to 4.).
+5. It's not clear whether the probability values for $\Delta\pi_{r,x} > 0$ or $< 0$ for \texttt{dms\_inferdiffprefs} should be interpreted as nominal or corrected. Providing false discovery rate estimates might be helpful for interpretation (also applies to 4.).
 
-6. The function of \textsl{dms\_merge} isn’t explained in the paper. Is it simply averaging the two replicate profiles? Could additional statistical power be gained by explicitly modeling replicates within the Bayesian framework?
+\begin{response}
+The posterior probabilities $\Pr\left(\Delta\pi_{r,x} > 0 \mid \mbox{data}\right)$ reported by \texttt{dms\_inferdiffprefs} are \emph{not} corrected. However, note that these are Bayesian posterior probabilities, not classical $P$-values. By default, \texttt{dms\_inferdiffprefs} places a prior over the $\Delta\pi_{r,x}$ values that biases them towards zero (see Equation 31 of the manuscript). Therefore, it is not clear that these posterior probabilities need to be corrected -- there are arguments for why Bayesian posterior probabilities inferred with appropriate priors do not need to be corrected (see \url{http://www.stat.columbia.edu/~gelman/research/published/multiple2f.pdf}). Rather than discuss these complex and incompletely resolved statistical questions, we have simply added the following sentence:
+\begin{quote}
+In addition, \texttt{dms\_inferdiffprefs} also creates text files that give the posterior probability that $\Delta\pi_{r,x} > 0$ or $< 0$ (these posterior probabilities are \emph{not} corrected to account for the fact that multiple sites are typically being examined, although be default the inferences are made using the regularizing prior in Equation 31).
+\end{quote}
+\end{response}
+
+6. The function of \textsl{dms\_merge} isn't explained in the paper. Is it simply averaging the two replicate profiles? Could additional statistical power be gained by explicitly modeling replicates within the Bayesian framework?
 
 Level of interest: An article of importance in its field
 
@@ -67,7 +74,7 @@ Statistical review: Yes, and I have assessed the statistics in my report.
 
 \subsection*{Reviewer \#2}
 
-The author describes a Python package, \textsl{dms\_tools}, which is used to infer character preferences using deep mutational scanning data. This software package allows the user to utilize the method described in Bloom 2014 (\textit{Mol Biol Evol}).
+The author describes a Python package, \texttt{dms\_tools}, which is used to infer character preferences using deep mutational scanning data. This software package allows the user to utilize the method described in Bloom 2014 (\textit{Mol Biol Evol}).
 
 I found the paper easy to read and understand, and the algorithm is explained in a clear and logical manner. Simulations show clearly that this method is an improvement over using enrichment ratios to compute site-specific preferences. I have several questions that I would like the authors to comment on, all of which can be considered discretionary revisions:
 
