@@ -16,7 +16,9 @@
 
 \renewcommand{\theresponse}{{\bf Response \arabic{response}}}
 
+\usepackage{hyperref}
 \usepackage{url}
+\usepackage{breakurl}
 
 \title{Response to reviewer comments to the manuscript ``Software for the analysis and visualization of deep mutational scanning data'' submitted to \textit{BMC Bioinformatics}}
 \author{Jesse D. Bloom}
@@ -107,7 +109,15 @@ This is an excellent comment, and is closely related to point (1) made by the fi
 \end{response}
 
 Question 3:
-Related to question 1: How does the author think that lower-quality data, either by experimental design limitations or by the variance in counts between sites, affect the inference and downstream interoperation of site-specific preferences? How sensitive is the algorithm to the prior for different qualities/quantities of data?
+Related to question 1: How does the author think that lower-quality data, either by experimental design limitations or by the variance in counts between sites, affect the inference and downstream interpretation of site-specific preferences? How sensitive is the algorithm to the prior for different qualities/quantities of data?
+
+\begin{response}
+Lower-quality data does slightly degrade the performance of the inference. For instance, comparison of Figure 4A and Figure 4B shows that the presence of background errors in the counts requires the use of greater sequencing depth to make accurate inferences. But an advantage of \texttt{dms\_tools} is that it can correct for these errors (given appropriate controls) -- and so in the presence of errors its improvement over the simpler approach of ratio estimation is greater. Obviously if there are errors that cannot be quantified by proper controls, \texttt{dms\_tools} will be misled as will any inference approach.
+
+The algorithm is not particularly sensitive to the priors used. In developing the software, a variety of concentration parameters for the Dirichlet priors were evaluated. The conclusion was that uniform Dirichlets (i.e. concentration parameters of one) that treat all possible preference vectors as equally probable \textit{a priori} gave the most robust performance over a wide range of parameters. These priors are therefore the ones implemented by default in \texttt{dms\_tools}, and are the ones that were used in the manuscript. The programs do enable the user to try other concentration parameters for the priors by following the instructions detailed in the manual at \url{http://jbloom.github.io/dms_tools/}.
+
+As noted in the response to the reviewers next question, the simulations were performed to match realistic properties of a real experiment.
+\end{response}
 
 Question 4:
 How robust is the method to the prior assumption that mutagenesis introduces all mutations at equal frequency? The author briefly discusses this issue on page 6, and I think it would be informative to address this question with an additional simulation. Does the present method still outperform the naive ratio method even when data are not generated under the model used in the inference?
@@ -115,9 +125,9 @@ How robust is the method to the prior assumption that mutagenesis introduces all
 \begin{response}
 The reviewer notes that in a real experiment, the per-site per-character mutation ($\mu_{r,x}$) and error rates ($\epsilon_{r,x}$ and $\rho_{r,x}$) will not be completely uniform. However, the prior assumption used by \textsl{dms\_tools} is that the these rates are uniform (although this prior is expressed fairly loosely by a Dirichlet with a relatively modest concentration parameter). The reviewer is therefore rightly pointing out that if the simulations are performed with uniform mutation (and error) rates, then the inference on the simulated data might work better than it would on real data.
 
-Although the original manuscript text was unclear on this point, in fact the simulations were performed with non-uniform mutation and error rates. This was done by drawing the rates from Dirichlet distributions parameterized such that there was substantial variation across sites and characters. The unevenness in the simulated rates is controlled by the concentration parameter of the Dirichlet, and the simulations were performed with a concentration parameter that gave an unevenness roughly comparable to that observed in real codon-mutagenesis experiments. The code implementing this aspect of the simulations is at \url{????}. 
+Although the original manuscript text was unclear on this point, in fact the simulations were performed with non-uniform mutation and error rates. This was done by drawing the rates from Dirichlet distributions parameterized such that there was substantial variation across sites and characters. The unevenness in the simulated rates is controlled by the concentration parameter of the Dirichlet, and the simulations were performed with a concentration parameter that gave an unevenness roughly comparable to that observed in real codon-mutagenesis experiments. The code implementing this aspect of the simulations is at \url{https://github.com/jbloom/dms_tools/blob/master/src/simulate.py#L169}. 
 
-The unevenness in the simulated mutation rates can be grasped in intuitive terms by examining the simulated counts in \url{simulated_errs_depth_2e+06_pre.txt}. This simulation is of a library sequenced at depth $2 \times 10^6$ and has an average per-site codon mutation rate of $\overline{\mu} = \frac{1}{264}$, meaning that the average mutation rate to any given one of the 63 mutant codons at any given site is $\frac{1}{264 \times 63} \approx 6 \times 10^{-5}$. Therefore, with perfectly uniform mutation rates and no sampling error, each mutant codon would be observed $\frac{2 \times 10^6}{264 \times 63} \approx 120$ times. In the simulated data in \url{simulated_errs_depth_2e+06_pre.txt}, the counts for specific mutations range from 0 counts to 1400 counts, with a 10th percentile of 18 counts, a 25th percentile of 43 counts, a 75th percentile of 174 counts, and a 90th percentile of 275 counts. Therefore, the unevenness in the simulated data reasonably reflects that of a real experiment, and so these data already represents a fair test for the inferences.
+The unevenness in the simulated mutation rates can be grasped in intuitive terms by examining the simulated counts in \url{https://github.com/jbloom/dms_tools/blob/master/examples/Melnikov_et_al_Tn5/infer_prefs_on_simulated_data/simulated_data/simulated_depth_2e%2B06_pre.txt}. This simulation is of a library sequenced at depth $2 \times 10^6$ and has an average per-site codon mutation rate of $\overline{\mu} = \frac{1}{264}$, meaning that the average mutation rate to any given one of the 63 mutant codons at any given site is $\frac{1}{264 \times 63} \approx 6 \times 10^{-5}$. Therefore, with perfectly uniform mutation rates and no sampling error, each mutant codon would be observed $\frac{2 \times 10^6}{264 \times 63} \approx 120$ times. In the simulated data, the counts for specific mutations range from 0 counts to 1400 counts, with a 10th percentile of 18 counts, a 25th percentile of 43 counts, a 75th percentile of 174 counts, and a 90th percentile of 275 counts. Therefore, the unevenness in the simulated data reasonably reflects that of a real experiment, and so these data already represents a fair test for the inferences.
 
 This issue has been clarified in the text by clearly stating that the simulations were done at uneven mutation and error rates.
 \end{response}
