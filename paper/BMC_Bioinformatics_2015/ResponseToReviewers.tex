@@ -53,6 +53,12 @@ This is a \emph{hugely} important point! The first paragraph of the subsection i
 
 3. Given the substantial increase in runtime and computational complexity of the Bayesian/MCMC approach relative to the simple ratio approach (hours vs fraction of a second), it might be helpful to provide a bit more intuition about what is gained. Is it simply a ``regularization'' where high ratios obtained from low counts are pushed back towards the prior? If so, does the framework really provide more than what could be obtained with a much simpler regularization heuristic?
 
+\begin{response}
+The reviewer asks the eminently reasonable question, ``Is the computational complexity of the Bayesian inference worth it?'' The revised manuscript includes a new subsection entitled \textsl{Is the Bayesian inference worthwhile?} directly after the description of the preference inference on simulated data. The honest answer to this question is equivocal -- the Bayesian inference appears to always perform as well or better than simple ratio calculations, but the improvements are non-negligible only in some situations. Hopefully the discussion in this new subsection provides a fair discussion of this topic.
+
+Note that even when ratio estimation (which is also implemented in \texttt{dms\_tools} via the \texttt{--ratio\_estimation} option) is just as good, the visualization capabilities of \texttt{dms\_tools} will still be useful.
+\end{response}
+
 4. It’s not clear whether \texttt{dms\_inferprefs} outputs the probability of $\phi_{r,x} < 1$ (or $\phi_{r,x} \ne 0$). This is likely to be a useful feature.
 
 5. It's not clear whether the probability values for $\Delta\pi_{r,x} > 0$ or $< 0$ for \texttt{dms\_inferdiffprefs} should be interpreted as nominal or corrected. Providing false discovery rate estimates might be helpful for interpretation (also applies to 4.).
@@ -64,7 +70,7 @@ In addition, \texttt{dms\_inferdiffprefs} also creates text files that give the 
 \end{quote}
 \end{response}
 
-6. The function of \textsl{dms\_merge} isn't explained in the paper. Is it simply averaging the two replicate profiles? Could additional statistical power be gained by explicitly modeling replicates within the Bayesian framework?
+6. The function of \texttt{dms\_merge} isn't explained in the paper. Is it simply averaging the two replicate profiles? Could additional statistical power be gained by explicitly modeling replicates within the Bayesian framework?
 
 Level of interest: An article of importance in its field
 
