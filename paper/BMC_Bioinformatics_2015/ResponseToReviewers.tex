@@ -1,0 +1,146 @@
+\documentclass[11pt]{article}
+\usepackage{geometry}                % See geometry.pdf to learn the layout options. There are lots.
+\geometry{letterpaper}                   % ... or a4paper or a5paper or ... 
+\usepackage[parfill]{parskip}    % Activate to begin paragraphs with an empty line rather than an indent
+\usepackage{graphicx}
+\usepackage{amssymb}
+\usepackage{epstopdf}
+\usepackage{color}
+\DeclareGraphicsRule{.tif}{png}{.png}{`convert #1 `dirname #1`/`basename #1 .tif`.png}
+
+\newcommand{\forceindent}{\leavevmode{\parindent=2em\indent}}
+
+\newcounter{response}
+%\newenvironment{response}[1][]{\color{blue}\refstepcounter{response}\noindent{{{\bf{Response \arabic{response}.}}}} \normalfont #1}
+\newenvironment{response}[1][]{\color{blue}\refstepcounter{response}\noindent \normalfont #1}
+
+\renewcommand{\theresponse}{{\bf Response \arabic{response}}}
+
+\usepackage{hyperref}
+\usepackage{url}
+\usepackage{breakurl}
+
+\title{Response to reviewer comments to the manuscript ``Software for the analysis and visualization of deep mutational scanning data'' submitted to \textit{BMC Bioinformatics}}
+\author{Jesse D. Bloom}
+
+\begin{document}
+
+\maketitle
+
+\begin{response}
+Thanks to both reviewers for their careful review of the manuscript. I appreciate their attention, and am glad that both reviewers see this software as useful for researchers using the new technique of deep mutational scanning.
+
+The reviewers mostly focused on issues of clarification and questions about why and when certain approaches might be preferred. I have addressed all of their comments in the revised manuscript, and the helpful comments have substantially improved the manuscript.
+
+Below I provide a point-by-point response that details the changes to the revised manuscript.
+\end{response}
+
+\subsection*{Reviewer \#1}
+
+Bloom describes a software package for analysis of deep mutational scanning using a novel (for this application) Bayesian/MCMC framework. The general framework appears to be sound and addresses a significant need for these new and highly promising functional assays. The manuscript is well-written and explains the major uses cases of the software in sufficient detail.
+
+Minor comments/suggestions:
+
+1. The notion that differences based on larger absolute counts provide more certainty than those based on small absolute counts is obviously true, but only up to a point. Since deep mutational scanning experiments typically involves exponential amplification of a finite number of selected molecules prior to sequencing, there will be a saturation point (or region) beyond which higher absolute counts no longer provide additional information. This effect might not be negligible in experiments that involve typical cultures of $10^6$ to $10^8$ independently transformed or transduced cells. I would encourage the author to note these effects and perhaps add features or provide guidance to software users for how to estimate or detect the saturation point.
+
+\begin{response}
+This is an excellent point. The text has been revised to emphasize that increasing deep-sequencing counts stop being meaningful once the typical number of counts per site becomes on the order of the number of unique molecules that were originally in the experiment. For most shotgun sequencing experiments, the typical counts per site ($\sim 10^5$ to $10^6$) still tend to be less than the typical number of unique molecules ($\sim 10^6$ to $10^8$), but this may not always be true. The revised text suggests that the experiments should be done in a way that ensures that the sequencing depth is not saturating the number of unique molecules (i.e. by quantifying the number of molecules carefully). It suggests that one way that this issue can be examined during \textit{post hoc} computational analyses is by randomly subsampling the deep sequencing data (when generating the mutation counts files used as input to inference programs in \textsl{dms\_tools}), and then seeing if this reduced depth alters the results. 
+\end{response}
+
+2. On pg 2 – the notion of a mutation being ``beneficial'' is generally taken to be relative to the fitness of the wild-type (non-mutated) gene. Eq (1) is such that $\phi_{r,x} > 1$ does not imply that $x$ is beneficial in this sense. Consider the trivial example of a two site gene with two characters. The input library has one member with a neutral mutation at site 1, one member with a deleterious mutation at site 2 and one WT member. Post-selection $\phi$ for the non-WT character at site 1 will be $\frac{1/1}{1/2} > 1$ even though the non-WT character at site 1 is not beneficial. This should be clarified.
+
+\begin{response}
+This is a \emph{hugely} important point that was not adequately covered in the original manuscript! The original manuscript failed to describe caveats related to cases such as the one raised by the reviewer.
+
+In the revised manuscript, the first paragraph of the subsection in \textsl{Background} entitled \textsl{The goal: inferring site-specific amino-acid preferences} now discusses this issue in detail. Essentially, assuming the length $L$ of the gene is $\gg 1$ (which is the case for any reasonable gene), then if the mutant library contains a Poisson distribution of the number of mutations per gene (as is often the case), the problem noted by the reviewer will not arise in practice. The reason is that for such genes, knowing that there is a mutation at site $r$ does not appreciably change the marginal distribution of the number of mutations at other sites (it only changes it by a factor of $\frac{L - 1}{L}$, which in general will be very small). On the other hand, if the mutant library is created such that it contains genes with exactly one mutation per gene (which is now sometimes done), then the problem noted by the reviewer will arise even for realistic genes with $L \gg 1$. The subsection \textsl{The goal: inferring site-specific amino-acid preferences} discusses this issue, and how the problem can be corrected by appropriately defining the frequencies for the wildtype character.
+\end{response}
+
+3. Given the substantial increase in runtime and computational complexity of the Bayesian/MCMC approach relative to the simple ratio approach (hours vs fraction of a second), it might be helpful to provide a bit more intuition about what is gained. Is it simply a ``regularization'' where high ratios obtained from low counts are pushed back towards the prior? If so, does the framework really provide more than what could be obtained with a much simpler regularization heuristic?
+
+\begin{response}
+The reviewer asks the eminently reasonable question, ``Is the computational complexity of the Bayesian inference worth it?'' The revised manuscript includes a new subsection entitled \textsl{Is the Bayesian inference worthwhile?} directly after the description of the preference inference on simulated data. The honest answer to this question is equivocal -- the Bayesian inference always performs as well or better than simple ratio calculations that are regularized by the addition of pseudocounts, but the improvements are non-negligible only in some situations. The new subsection provides a fair discussion of this topic.
+
+Note that even when ratio estimation (which is also implemented in \texttt{dms\_tools} via the \texttt{--ratio\_estimation} option) performs just as well as the Bayesian inference, the visualization capabilities of \texttt{dms\_tools} will still be useful.
+\end{response}
+
+4. It’s not clear whether \texttt{dms\_inferprefs} outputs the probability of $\phi_{r,x} < 1$ (or $\phi_{r,x} \ne 1$). This is likely to be a useful feature.
+
+\begin{response}
+The \texttt{dms\_inferprefs} program does not output the posterior probability of $\phi_{r,x} \ne 1$ (or $< 1$), but it does output the 95\% credible interval for each $\pi_{r,x}$ value. The reason for not outputting the posterior probabilities of $\phi_{r,x} \ne 1$ is that the hypothesis that all amino acids have equal preferences at a given site does not represent a realistic view of proteins, as it is doubtful that there is any site in any protein where all 20 amino acids are equally preferred. Therefore, rather than providing a posterior probability that such an unrealistic hypothesis is true (or false), it is more informative to simply output the credible interval of the preference for each amino acid at each site. This situation differs for the differential preferences discussed in the reviewer's next point -- for the differential preferences, it \emph{is} a plausible hypothesis that most preferences will be equal under two selection pressures, so computing posterior probabilities about this hypothesis is potentially useful.
+
+This issue is discussed in the manuscript in the first paragraph of the subsection \textsl{Algorithm to infer differential preferences.}
+\end{response}
+
+5. It's not clear whether the probability values for $\Delta\pi_{r,x} > 0$ or $< 0$ for \texttt{dms\_inferdiffprefs} should be interpreted as nominal or corrected. Providing false discovery rate estimates might be helpful for interpretation (also applies to 4.).
+
+\begin{response}
+The posterior probabilities $\Pr\left(\Delta\pi_{r,x} > 0 \mid \mbox{data}\right)$ reported by \texttt{dms\_inferdiffprefs} are \emph{not} corrected. However, note that these are Bayesian posterior probabilities, \emph{not} classical $P$-values. By default, \texttt{dms\_inferdiffprefs} places a prior over the $\Delta\pi_{r,x}$ values that biases them towards zero (see Equation 31 of the manuscript). Therefore, it is not clear that these posterior probabilities need to be corrected -- there are arguments for why Bayesian posterior probabilities inferred with appropriate priors do not need to be corrected (see \url{http://www.stat.columbia.edu/~gelman/research/published/multiple2f.pdf}). Rather than discuss these complex and incompletely resolved statistical questions, we have simply added the following sentences:
+\begin{quote}
+In addition, \texttt{dms\_inferdiffprefs} creates text files that give the posterior probability that $\Delta\pi_{r,x} > 0$ or $< 0$. These posterior probabilities are \emph{not} corrected to account for the fact that multiple sites are typically being examined, although be default the inferences are made using the regularizing prior in Equation 31.
+\end{quote}
+\end{response}
+
+6. The function of \texttt{dms\_merge} isn't explained in the paper. Is it simply averaging the two replicate profiles? Could additional statistical power be gained by explicitly modeling replicates within the Bayesian framework?
+
+\begin{response}
+The revised manuscript now briefly explains \texttt{dms\_merge} and \texttt{dms\_correlate}. To jointly analyze replicates of the same experiment within the Bayesian framework, the counts from the replicates can simply be summed before inputting them to \texttt{dms\_inferprefs}. However, it may sometimes be desirable to analyze replicates individually with \texttt{dms\_inferprefs} and then combine and compare them using \texttt{dms\_merge} and \texttt{dms\_correlate}. The reason is that some of the replicate-to-replicate variability may arise from experimental factors distinct from statistical noise -- such factors are not easily incorporated into the Bayesian framework, since they are due to experimental rather than statistical sources.
+\end{response}
+
+Level of interest: An article of importance in its field
+
+Quality of written English: Acceptable
+
+Statistical review: Yes, and I have assessed the statistics in my report.
+
+\subsection*{Reviewer \#2}
+
+The author describes a Python package, \texttt{dms\_tools}, which is used to infer character preferences using deep mutational scanning data. This software package allows the user to utilize the method described in Bloom 2014 (\textit{Mol Biol Evol}).
+
+I found the paper easy to read and understand, and the algorithm is explained in a clear and logical manner. Simulations show clearly that this method is an improvement over using enrichment ratios to compute site-specific preferences. I have several questions that I would like the authors to comment on, all of which can be considered discretionary revisions:
+
+Question 1:
+On page 2, in the second paragraph, a deep mutational scanning study is described. The average mutation rate is $\mu=1/L$, where $L$ is the length of the gene. It is unclear to me why this is so -- intuitively one might think that a longer gene may have more mutations, given that mutation is a random process. More generally, could the author provide more details on the range of data one would expect from typical deep mutational scanning experiments?
+
+\begin{response}
+In principle, a deep mutational scanning experiment could introduce any number of mutations per gene. But typically, experimentalists tend to introduce an average of $\approx$1 mutation per gene when they create the codon-mutant libraries. The reason is that having genes with $\gg$1 mutations makes it hard to attribute the selection on any given gene variant to any specific mutation. For this reason, published deep mutational scanning experiments have generally targeted $\overline{\mu} \sim 1/L$. This is an important distinction between deep mutational scanning and naturally occurring mutations -- naturally occurring mutations will be more common in longer genes, since typically the per-site mutation rate is approximately uniform and longer genes have more sites. The revised text now clarifies this point.
+\end{response}
+
+Question 2:
+The author states that for a depth of $10^6$, we expect about 2000 counts of non-wild type codons for the average gene. The author arrived at this number by multiplying the total number of reads by the probability of a mutation. This is reasonable if each read comes from a different DNA fragment, each with probability $\mu$ of mutating. However, if multiple reads all cover the same DNA fragment, would this relationship still hold? The author should comment on whether this situation is likely to occur in practice and, if so, how it affects the method.
+
+\begin{response}
+This is an excellent comment, and is closely related to point (1) made by the first reviewer. The calculation of the counts to which the reviewer refers, and indeed much of the statistical framework described in the manuscript, is made under the assumption that the number of unique DNA fragments in the library substantially exceeds the number of sequencing reads, such that the deep-sequencing reads can be viewed as subsampling a very large number of DNA fragments. This issue has been clarified in the text as described in the response to point (1) made by the first reviewer.
+\end{response}
+
+Question 3:
+Related to question 1: How does the author think that lower-quality data, either by experimental design limitations or by the variance in counts between sites, affect the inference and downstream interpretation of site-specific preferences? How sensitive is the algorithm to the prior for different qualities/quantities of data?
+
+\begin{response}
+Lower-quality data does slightly degrade the performance of the inference. For instance, comparison of Figure 4A and Figure 4B shows that the presence of background errors in the counts requires the use of greater sequencing depth to make accurate inferences. But an advantage of \texttt{dms\_tools} is that it can correct for these errors (given appropriate controls) -- and so in the presence of errors its improvement over the simpler approach of ratio estimation is greater. Obviously if there are errors that cannot be quantified by proper controls, \texttt{dms\_tools} will be misled as will any inference approach.
+
+The algorithm is not particularly sensitive to the priors used. In developing the software, a variety of concentration parameters for the Dirichlet priors were evaluated. The conclusion was that uniform Dirichlets (i.e. concentration parameters of one) that treat all possible preference vectors as equally probable \textit{a priori} gave the most robust performance over a wide range of parameters. These priors are therefore the ones implemented by default in \texttt{dms\_tools}, and are the ones that were used in the manuscript. The programs do enable the user to try other concentration parameters for the priors by following the instructions detailed in the manual at \url{http://jbloom.github.io/dms_tools/}.
+
+As noted in the response to the reviewers next question, the simulations were performed to match realistic properties of a real experiment.
+\end{response}
+
+Question 4:
+How robust is the method to the prior assumption that mutagenesis introduces all mutations at equal frequency? The author briefly discusses this issue on page 6, and I think it would be informative to address this question with an additional simulation. Does the present method still outperform the naive ratio method even when data are not generated under the model used in the inference?
+
+\begin{response}
+The reviewer notes that in a real experiment, the per-site per-character mutation ($\mu_{r,x}$) and error rates ($\epsilon_{r,x}$ and $\rho_{r,x}$) will not be completely uniform. However, the prior assumption used by \texttt{dms\_tools} is that each rate is equal to the mean (although this prior is expressed only loosely by a Dirichlet with a modest concentration parameter). The reviewer is therefore rightly pointing out that if the simulations are performed with uniform mutation (and error) rates, then the inference on the simulated data might work better than it would on real data.
+
+Although the original manuscript text was unclear on this point, in fact the simulations were performed with non-uniform mutation and error rates. This was done by drawing the rates from Dirichlet distributions parameterized such that there was substantial variation across sites and characters. The unevenness in the simulated rates is controlled by the concentration parameter of the Dirichlet, and the simulations were performed with a concentration parameter that gave an unevenness roughly comparable to that observed in real codon-mutagenesis experiments. The code implementing this aspect of the simulations is at \url{https://github.com/jbloom/dms_tools/blob/master/src/simulate.py#L169}. 
+
+The unevenness in the simulated mutation rates can be grasped in intuitive terms by examining the simulated counts in \url{https://github.com/jbloom/dms_tools/blob/master/examples/Melnikov_et_al_Tn5/infer_prefs_on_simulated_data/simulated_data/simulated_depth_2e%2B06_pre.txt}. This simulation is of a library sequenced at depth $2 \times 10^6$ and has an average per-site codon mutation rate of $\overline{\mu} = \frac{1}{264}$, meaning that the average mutation rate to any given one of the 63 mutant codons at any given site is $\frac{1}{264 \times 63} \approx 6 \times 10^{-5}$. Therefore, with perfectly uniform mutation rates and no sampling error, each mutant codon would be observed $\frac{2 \times 10^6}{264 \times 63} \approx 120$ times. In the simulated data, the counts for specific mutations range from 0 counts to 1400 counts, with a 10th percentile of 18 counts, a 25th percentile of 43 counts, a 75th percentile of 174 counts, and a 90th percentile of 275 counts. Therefore, the unevenness in the simulated data reasonably reflects that of a real experiment, and so these data already represent a fair test for the inferences.
+
+This issue has been clarified in the text by clearly stating that the simulations were done at uneven mutation and error rates.
+\end{response}
+
+Level of interest: An article whose findings are important to those with closely related research interests
+
+Quality of written English: Acceptable
+
+Statistical review: No, the manuscript does not need to be seen by a statistician.
+
+
+\end{document}  
