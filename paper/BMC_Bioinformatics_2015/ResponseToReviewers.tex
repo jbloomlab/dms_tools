@@ -67,6 +67,8 @@ Note that even when ratio estimation (which is also implemented in \texttt{dms\_
 
 \begin{response}
 The \texttt{dms\_inferprefs} program does not output the posterior probability of $\phi_{r,x} \ne 1$ (or $< 1$), but it does output the 95\% credible interval for each $\pi_{r,x}$ value. The reason for not outputting the posterior probabilities of $\phi_{r,x} \ne 1$ is that the hypothesis that all amino acids have equal preferences at a given site does not represent a realistic view of proteins, as it is doubtful that there is any site in any protein where all 20 amino acids are equally preferred. Therefore, rather than providing a posterior probability that such an unrealistic hypothesis is true (or false), it is more informative to simply output the credible interval of the preference for each amino acid at each site. This situation differs for the differential preferences discussed in the reviewer's next point -- for the differential preferences, it \emph{is} a plausible hypothesis that most preferences will be equal under two selection pressures, so computing posterior probabilities about this hypothesis is potentially useful.
+
+This issue is discussed in the manuscript in the first paragraph of the subsection \textsl{Algorithm to infer differential preferences.}
 \end{response}
 
 5. It's not clear whether the probability values for $\Delta\pi_{r,x} > 0$ or $< 0$ for \texttt{dms\_inferdiffprefs} should be interpreted as nominal or corrected. Providing false discovery rate estimates might be helpful for interpretation (also applies to 4.).
