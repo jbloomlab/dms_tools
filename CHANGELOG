@@ -7,6 +7,8 @@ Changelog
 
 * Fixed minor bug in error handling by ``dms_editsites`` when there is an invalid file name.
 
+* Added more detailed error message for invalid ``ydatamax`` in ``dms_logoplot``
+
 1.1.2
 --------
 * Fixed bug in ``dms_summarizealignments`` processing of ``summarystats.txt`` files when ``--purgefracs`` is nonzero.

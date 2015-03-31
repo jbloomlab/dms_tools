@@ -241,7 +241,7 @@ def LogoPlot(sites, datatype, data, plotfile, nperline, numberevery=10, allowuns
                 if abs(positivesum + negativesum) > 1.0e-3:
                     raise ValueError("Differential preferences sum of %s is not close to zero for site %s" % (positivesum + negativesum, r))
                 if 2.0 * positivesum > ydatamax:
-                    raise ValueError("You need to increase ydatamax: the total differential preferences sum to more than the y-axis limits.")
+                    raise ValueError("You need to increase ydatamax: the total differential preferences sum to more than the y-axis limits. Right now, ydatamax is %.3f while the total differential preferences are %.3f" % (ydatamax, 2.0 * positivesum))
                 f.write('%s' % r)
                 deltapi_r = []
                 for x in characters:
