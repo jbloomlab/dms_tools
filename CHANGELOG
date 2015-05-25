@@ -3,7 +3,7 @@ Changelog
 
 1.1.3
 --------
-* Some minor documentation corrections.
+* Some minor documentation corrections; added BMC Bioinformatics (2015) citation
 
 * Fixed minor bug in error handling by ``dms_editsites`` when there is an invalid file name.
 
