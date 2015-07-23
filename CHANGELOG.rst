@@ -1,6 +1,10 @@
 Changelog
 ===========
 
+1.2.0
+-------------
+* Added ``dms_subassemble`` program
+
 1.1.4
 ----------
 * Some minor documentation updates

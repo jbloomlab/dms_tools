@@ -1,5 +1,5 @@
 include LICENSE.txt
-include CHANGELOG
+include CHANGELOG.rst
 include src/_weblogo_template.eps
 include tests/README.rst
 include tests/*.py
