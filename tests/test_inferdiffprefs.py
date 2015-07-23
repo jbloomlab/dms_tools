@@ -31,7 +31,7 @@ class TestInferDiffPrefs(unittest.TestCase):
         self.inferred = '%s/inferred_diffprefs.txt' % self.subdir
         self.ratioinferred = '%s/ratio_inferred_diffprefs.txt' % self.subdir
         self.corr = '%s/inferred_to_actual_corr.txt' % self.subdir
-        self.ratiocorr = '%s/inferred_to_actual_corr.txt' % self.subdir
+        self.ratiocorr = '%s/ratio_inferred_to_actual_corr.txt' % self.subdir
         for f in [self.inferred, self.ratioinferred, self.ratiocorr]:
             if os.path.isfile(f):
                 os.remove(f)
