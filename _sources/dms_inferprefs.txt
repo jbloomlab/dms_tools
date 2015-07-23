@@ -72,7 +72,9 @@ Command-line usage
     By default, when using ``--chartype codon_to_aa`` or ``--chartype aa``, we infer preferences for 21 amino acids, with stop codons (denoted by ``*``) one of the possibilities. If you specify the ``--excludestop`` option, then we constrain the preference for stop codons to be zero regardless of whether or not there are counts for these codons in the data, and so only infer preferences for the 20 non-stop amino acids.
 
    \-\-ratio_estimation
-    A reasonable value for *pseudocounts* is 1.
+    Reasonable values for *pseudocounts* are probably in the range from 1 to 5. In general,
+    a larger value of *pseudocounts* conceptually corresponds to a stronger prior favoring 
+    all preferences being equal.
 
     For each character :math:`x`, we calculate the enrichment ratio relative to the wildtype
     character :math:`\rm{wt}` at this site as

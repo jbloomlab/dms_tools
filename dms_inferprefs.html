@@ -79,7 +79,7 @@
 </div>
 <div class="section" id="command-line-usage">
 <h2><a class="toc-backref" href="#id4">Command-line usage</a><a class="headerlink" href="#command-line-usage" title="Permalink to this headline">¶</a></h2>
-<p>Infer site-specific preferences for amino acids, nucleotides, or codons. This script is part of dms_tools (version 1.1.3) written by Jesse D. Bloom. Detailed documentation is at http://jbloom.github.io/dms_tools/</p>
+<p>Infer site-specific preferences for amino acids, nucleotides, or codons. This script is part of dms_tools (version 1.1.4) written by Jesse D. Bloom. Detailed documentation is at http://jbloom.github.io/dms_tools/</p>
 <pre class="literal-block">
 usage: dms_inferprefs [-h] [--chartype {codon_to_aa,DNA,codon,aa}]
                       [--errpre ERRPRE] [--errpost ERRPOST] [--excludestop]
@@ -185,7 +185,9 @@ usage: dms_inferprefs [-h] [--chartype {codon_to_aa,DNA,codon,aa}]
 <kbd><span class="option">--ratio_estimation</span></kbd></td>
 </tr>
 <tr><td>&nbsp;</td><td><p class="first">Rather than use MCMC to estimate the preferences using a statistical model, we simply compute by calculating enrichment ratios relative to wildtype post- and pre-selection, and then normalizing these ratios to sum to one at each site. The single argument for this option is PSEUDOCOUNTS, which is a number &gt; 0 that specifies the pseudocount added to each count to avoiding estimating ratios of zero or infinity.</p>
-<p>A reasonable value for <em>pseudocounts</em> is 1.</p>
+<p>Reasonable values for <em>pseudocounts</em> are probably in the range from 1 to 5. In general,
+a larger value of <em>pseudocounts</em> conceptually corresponds to a stronger prior favoring
+all preferences being equal.</p>
 <p>For each character <span class="math">\(x\)</span>, we calculate the enrichment ratio relative to the wildtype
 character <span class="math">\(\rm{wt}\)</span> at this site as</p>
 <div class="math">
