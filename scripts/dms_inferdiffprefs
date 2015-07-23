@@ -112,10 +112,15 @@ def main():
         if not 0 < avgfstart < 1:
             raise ValueError("Average mutation frequency in starting library of %g is not > 0 and < 1. Perhaps there are no mutations or the error control has a higher mutation rate than the starting library. Either one is an irresolvable problem." % avgfstart)
 
-        # begin inferring preferences, using a multiprocessing pool to enable multiple CPUs
-        logger.info('Compiling PyStan model...')
-        pystan_error_model = pystan_error_model()
-        logger.info('Completed compiling PyStan model.\n')
+        if args['ratio_estimation']:
+            logger.info('\nDifferential preferences will be computed from enrichment ratios rather than MCMC. Each count will be augmented by a pseudocount of %g.\n' % args['ratio_estimation'])
+            pystan_error_model = error_model
+        else:
+            logger.info('Compiling PyStan model...')
+            pystan_error_model = pystan_error_model()
+            logger.info('Completed compiling PyStan model.\n')
+
+        # begin inferring differential preferences, using a multiprocessing pool to enable multiple CPUs
         if args['ncpus'] == -1:
             nprocesses = None
         else:
@@ -163,8 +168,11 @@ def main():
             priors['pirs1_prior_params'] = dict([(x, args['alpha_pis1']) for x in characters])
             priors['deltapi_concentration'] = args['alpha_deltapi']
             logged[r] = False
-            niter = {'none':1500, 'same':8000}[error_model]
-            results[r] = pool.apply_async(dms_tools.mcmc.InferSiteDiffPrefs, (characters, wts[r], pystan_error_model, rcounts, priors, args['seed'], niter))
+            if args['ratio_estimation']:
+                results[r] = pool.apply_async(dms_tools.mcmc.InferSiteDiffPreferencesFromEnrichmentRatios, (characters, wts[r], pystan_error_model, rcounts, args['ratio_estimation'])) 
+            else:
+                niter = {'none':1500, 'same':8000}[error_model]
+                results[r] = pool.apply_async(dms_tools.mcmc.InferSiteDiffPrefs, (characters, wts[r], pystan_error_model, rcounts, priors, args['seed'], niter))
         while not all([logged[r] for r in sites]):
             time.sleep(1) # wait a bit before polling again
             for r in sites:

@@ -664,17 +664,17 @@ def WriteDiffPrefs(f, sites, wts, deltapi_means, pr_deltapi_lt0, pr_deltapi_gt0)
         i = characters.index('*')
         characters = characters[ : i] + characters[i + 1 : ] + ['*']
     f.write('# POSITION WT RMS_dPI %s' % ' '.join(['dPI_%s' % x for x in characters]))
-    if pr_deltapi_gt0 and pr_deltapi_lt0:
-        f.write(' %s\n' % ' '.join(['Pr_dPI_%s_lt0 Pr_dPI_%s_gt0' % (x, x) for x in characters]))
-    elif (not pr_deltapi_gt0) and (not pr_deltapi_lt0):
+    if all([not x for x in pr_deltapi_gt0.values()]) and (all([not x for x in pr_deltapi_lt0.values()])):
+        posterior_probs = False
         f.write('\n')
     else:
-        raise ValueError('Either BOTH pr_deltapi_gt0 and pr_deltapi_lt0 must be None, or BOTH must not be None')
+        f.write(' %s\n' % ' '.join(['Pr_dPI_%s_lt0 Pr_dPI_%s_gt0' % (x, x) for x in characters]))
+        posterior_probs = True
     for r in sites:
         rms = dms_tools.utils.RMS([deltapi_means[r][x] for x in characters])
         f.write('%s %s %g ' % (r, wts[r], rms))
         f.write('%s' % ' '.join(['%g' % deltapi_means[r][x] for x in characters]))
-        if pr_deltapi_lt0:
+        if posterior_probs:
             pr_lt0 = [pr_deltapi_lt0[r][x] for x in characters]
             pr_gt0 = [pr_deltapi_gt0[r][x] for x in characters]
             for (lt0, gt0) in zip(pr_lt0, pr_gt0):

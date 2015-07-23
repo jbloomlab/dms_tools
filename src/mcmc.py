@@ -16,6 +16,8 @@ Functions in this module
 
 * *InferSitePreferencesFromEnrichmentRatios* :infers site-specific preferences directly from enrichment ratios.
 
+* *InferSiteDiffPreferencesFromEnrichmentRatios* :infers site-specific differential preferences directly from enrichment ratios.
+
 * *InferSiteDiffPrefs* : use MCMC to infer site-specific differential preferences.
 
 * *StanModelNoneErr* : ``pystan`` model used by *InferSitePreferences*.
@@ -437,6 +439,50 @@ def InferSitePreferencesFromEnrichmentRatios(characterlist, wtchar, error_model,
     denom = sum(psi.values())
     pi = dict([(x, psi[x] / float(denom)) for x in characterlist])
     return (True, pi, None, logstring)
+
+
+def InferSiteDiffPreferencesFromEnrichmentRatios(characterlist, wtchar, error_model, counts, pseudocounts=1):
+    """Infers site-specific differential preferences from enrichment ratios.
+
+    This function mirrors the operations performed by *InferSiteDiffPrefs*, expect the preferences
+    are calculated directly from enrichment ratios. 
+
+    *characterlist*, *wtchar*, *error_model*, and *counts* have the same meaning as for *InferSitePreferences*.
+
+    *pseudocounts* is a number > 0 giving the pseudocounts added to each count in *counts*.
+    
+    The return value is: 
+    *(converged, deltapi_means, pr_deltapi_gt0, pr_deltapi_lt0, logstring)*, where the tuple
+    entries have the same meaning as for *InferSiteDiffPrefs* except that *pr_deltapi_gt0* 
+    and *pr_deltapi_lt0* are *None* since they cannot
+    be estimated from direct enrichment ratio calculation
+    as it is not a statistical model, and *converged* is *True* since this calculation
+    always converges.
+    """
+    assert pseudocounts > 0, "pseudocounts must be greater than zero, invalid value of %g" % pseudocounts
+    assert wtchar in characterlist, "wtchar %s not in characterlist %s" % (wtchar, str(characterlist))
+    logstring = '\tComputed differential preferences directly from enrichment ratios.'
+    psi_s1 = {}
+    psi_s2 = {}
+    for x in characterlist:
+        if error_model == 'none':
+            nrerr = nrerrwt = 0.0
+        elif error_model == 'same':
+            nrerr = counts['nrerr'][x]
+            nrerrwt = counts['nrerr'][wtchar]
+        else:
+            raise ValueError("Invalid error_model of %s" % error_model)
+        s1_ratio = max(pseudocounts, counts['nrs1'][x] - nrerr + pseudocounts) / float(max(pseudocounts, counts['nrs1'][wtchar] - nrerrwt + pseudocounts))
+        s2_ratio = max(pseudocounts, counts['nrs2'][x] - nrerr + pseudocounts) / float(max(pseudocounts, counts['nrs2'][wtchar] - nrerrwt + pseudocounts))
+        start_ratio = max(pseudocounts, counts['nrstart'][x] - nrerr + pseudocounts) / float(max(pseudocounts, counts['nrstart'][wtchar] - nrerrwt + pseudocounts))
+        psi_s1[x] = s1_ratio / start_ratio
+        psi_s2[x] = s2_ratio / start_ratio
+    assert abs(psi_s1[wtchar] - 1) < 1.0e-5, "wtchar does not have s1 enrichment ratio of one: %g" % psi_s1[wtchar]
+    assert abs(psi_s2[wtchar] - 1) < 1.0e-5, "wtchar does not have s2 enrichment ratio of one: %g" % psi_s2[wtchar]
+    denom_s1 = sum(psi_s1.values())
+    denom_s2 = sum(psi_s2.values())
+    deltapi = dict([(x, psi_s2[x] / float(denom_s2) - psi_s1[x] / float(denom_s1)) for x in characterlist])
+    return (True, deltapi, None, None, logstring)
 
 
 

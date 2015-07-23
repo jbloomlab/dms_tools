@@ -1,6 +1,12 @@
 Changelog
 ===========
 
+1.1.4
+----------
+* Some minor documentation updates
+
+* Added ``--ratio_estimation`` option to ``dms_inferdiffprefs``
+
 1.1.3
 --------
 * Some minor documentation corrections; added BMC Bioinformatics (2015) citation

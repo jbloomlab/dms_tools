@@ -13,8 +13,6 @@ Quick overview
 
 The :ref:`programs` installed as part of `dms_tools`_ allow you to easily analyze and visualize deep mutational scanning data; `dms_tools`_ also comes with a :ref:`pythonapi`.
 
-One strength of `dms_tools`_ is that it analyzes deep mutational scanning data using a principled Bayesian framework that avoids the `statistical bias inherent in ratio estimation`_. Another strength is that it enables easy construction of plots that provide compact and intuitive visualizations of the results.
-
 `dms_tools`_ is suited for the following analyses:
 
     1) You have measured the effects of all single codon (or amino-acid or nucleotide) mutations to a gene, and wish to quantify the *preference* of each site for each identity. You can do this using :ref:`dms_inferprefs`, and visualize the results using :ref:`dms_logoplot`.
@@ -24,6 +22,8 @@ One strength of `dms_tools`_ is that it analyzes deep mutational scanning data u
     3) You have performed several `biological replicates`_ of deep mutational scanning, and wish to compare and combine the results. You can do this using :ref:`dms_correlate` and :ref:`dms_merge`.
 
     4) You have performed deep mutational scanning using barcoded subamplicons, and wish to process the FASTQ files to count mutations. You can do this using :ref:`dms_barcodedsubamplicons`, and summarize the results for multiple samples with :ref:`dms_summarizealignments`.
+
+The `dms_tools source code`_ is freely available on GitHub; however, you will probably have an easier time you just follow the :ref:`installation` instructions rather than building from this source.
 
 Contents
 ------------------------
