@@ -86,6 +86,47 @@ Command-line usage
    \-\-excludestop
     By default, when using ``--chartype codon_to_aa`` or ``--chartype aa``, we infer differential preferences for 21 amino acids, with stop codons (denoted by ``*``) one of the possibilities. If you specify the ``--excludestop`` option, then we constrain the differential preference for stop codons to be zero regardless of whether or not there are counts for these codons in the data, and so only infer differential preferences for the 20 non-stop amino acids.
 
+   \-\-ratio_estimation
+    A reasonable value for *pseudocounts* is 1.
+
+    For each character :math:`x`, we calculate the enrichment ratios relative to the wildtype
+    character :math:`\rm{wt}` at this site for the two selections :math:`s1` and :math:`s2` as:
+
+        .. math::
+
+            \phi_{x}^{s1} = \frac{\left(\frac{\max\left(\mathcal{P}, n_x^{s1} - n_x^{\rm{err}} + \mathcal{P}\right)}{\max\left(\mathcal{P}, n_{\rm{wt}}^{s1} - n_{\rm{wt}}^{\rm{err}} + \mathcal{P}\right)}\right)}{\left(\frac{\max\left(\mathcal{P}, n_x^{\rm{start}} - n_x^{\rm{err}} + \mathcal{P}\right)}{\max\left(\mathcal{P}, n_{\rm{wt}}^{\rm{start}} - n_{\rm{wt}}^{\rm{err}} + \mathcal{P}\right)}\right)}
+
+    and
+
+        .. math::
+
+            \phi_{x}^{s2} = \frac{\left(\frac{\max\left(\mathcal{P}, n_x^{s2} - n_x^{\rm{err}} + \mathcal{P}\right)}{\max\left(\mathcal{P}, n_{\rm{wt}}^{s2} - n_{\rm{wt}}^{\rm{err}} + \mathcal{P}\right)}\right)}{\left(\frac{\max\left(\mathcal{P}, n_x^{\rm{start}} - n_x^{\rm{err}} + \mathcal{P}\right)}{\max\left(\mathcal{P}, n_{\rm{wt}}^{\rm{start}} - n_{\rm{wt}}^{\rm{err}} + \mathcal{P}\right)}\right)}
+
+    where :math:`\mathcal{P}` is the value of *pseudocounts*. When ``--err`` is *none*, then 
+    :math:`0 = n_x^{\rm{err}}` and the above equations reduce to simple ratios
+    of post- and pre-selection. With :math:`\mathcal{P} > 0`, these ratios are always :math:`> 0` and 
+    :math:`< \infty`.
+
+    To compute the differential preferences by ratio estimation, we then compute preferences
+    as normalized enrichment ratios:
+
+        .. math::
+
+            \pi_{x}^{s1} = \frac{\phi_x^{s1}}{\sum_y \phi_y^{s1}}
+
+    and
+
+        .. math::
+
+            \pi_{x}^{s2} = \frac{\phi_x^{s2}}{\sum_y \phi_y^{s2}}
+
+    and finally calculate the differential preference as 
+
+        .. math::
+
+            \Delta\pi_{x} = \pi_{x}^{s2} - \pi_{x}^{s1}
+    
+
 Output
 ----------
 The inferred differential preferences are in the :ref:`diffpreferences_file` specified by ``outfile``. A summary of the progress is in the file specified by ``logfile``. In addition, some information will be written to standard output. `Do not worry about Informational Messages`_.
@@ -111,6 +152,7 @@ Because ``dms_inferdiffprefs`` uses `MCMC`_ to infer the preferences as describe
 
 The program automatically checks for `MCMC`_ convergence using the criteria described in :ref:`MCMC_inference` The program will terminate with an error if it fails to converge; otherwise it converged properly.
 
+You can make the program run dramatically faster by using the ``--ratio_estimation`` option. This option forgoes the Bayesian estimation and regularizing prior over the differential preferences, but will still be reasonably accurate if you have a fairly large number of counts.
 
 Examples
 -----------

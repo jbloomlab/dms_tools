@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Python API &mdash; dms_tools 1.1.3 documentation</title>
+    <title>Python API &mdash; dms_tools 1.1.4 documentation</title>
     
     <link rel="stylesheet" href="_static/default.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '1.1.3',
+        VERSION:     '1.1.4',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="dms_tools 1.1.3 documentation" href="index.html" />
+    <link rel="top" title="dms_tools 1.1.4 documentation" href="index.html" />
     <link rel="next" title="Citations and Acknowledgments" href="citations.html" />
     <link rel="prev" title="Algorithm to infer differential preferences" href="inferdiffprefs_algorithm.html" /> 
   </head>
@@ -44,7 +44,7 @@
         <li class="right" >
           <a href="inferdiffprefs_algorithm.html" title="Algorithm to infer differential preferences"
              accesskey="P">previous</a> |</li>
-        <li><a href="index.html">dms_tools 1.1.3 documentation</a> &raquo;</li> 
+        <li><a href="index.html">dms_tools 1.1.4 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -98,6 +98,7 @@ it also provides the following Python API.</p>
 <ul class="simple">
 <li><em>InferSitePreferences</em> : use MCMC to infer site-specific preferences.</li>
 <li><em>InferSitePreferencesFromEnrichmentRatios</em> :infers site-specific preferences directly from enrichment ratios.</li>
+<li><em>InferSiteDiffPreferencesFromEnrichmentRatios</em> :infers site-specific differential preferences directly from enrichment ratios.</li>
 <li><em>InferSiteDiffPrefs</em> : use MCMC to infer site-specific differential preferences.</li>
 <li><em>StanModelNoneErr</em> : <tt class="docutils literal"><span class="pre">pystan</span></tt> model used by <em>InferSitePreferences</em>.</li>
 <li><em>StanModelSameErr</em> : <tt class="docutils literal"><span class="pre">pystan</span></tt> model used by <em>InferSitePreferences</em>.</li>
@@ -108,6 +109,23 @@ it also provides the following Python API.</p>
 </div>
 <div class="section" id="function-documentation">
 <h3>Function documentation<a class="headerlink" href="#function-documentation" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="mcmc.InferSiteDiffPreferencesFromEnrichmentRatios">
+<tt class="descclassname">mcmc.</tt><tt class="descname">InferSiteDiffPreferencesFromEnrichmentRatios</tt><big>(</big><em>characterlist</em>, <em>wtchar</em>, <em>error_model</em>, <em>counts</em>, <em>pseudocounts=1</em><big>)</big><a class="headerlink" href="#mcmc.InferSiteDiffPreferencesFromEnrichmentRatios" title="Permalink to this definition">¶</a></dt>
+<dd><p>Infers site-specific differential preferences from enrichment ratios.</p>
+<p>This function mirrors the operations performed by <em>InferSiteDiffPrefs</em>, expect the preferences
+are calculated directly from enrichment ratios.</p>
+<p><em>characterlist</em>, <em>wtchar</em>, <em>error_model</em>, and <em>counts</em> have the same meaning as for <em>InferSitePreferences</em>.</p>
+<p><em>pseudocounts</em> is a number &gt; 0 giving the pseudocounts added to each count in <em>counts</em>.</p>
+<p>The return value is: 
+<em>(converged, deltapi_means, pr_deltapi_gt0, pr_deltapi_lt0, logstring)</em>, where the tuple
+entries have the same meaning as for <em>InferSiteDiffPrefs</em> except that <em>pr_deltapi_gt0</em> 
+and <em>pr_deltapi_lt0</em> are <em>None</em> since they cannot
+be estimated from direct enrichment ratio calculation
+as it is not a statistical model, and <em>converged</em> is <em>True</em> since this calculation
+always converges.</p>
+</dd></dl>
+
 <dl class="function">
 <dt id="mcmc.InferSiteDiffPrefs">
 <tt class="descclassname">mcmc.</tt><tt class="descname">InferSiteDiffPrefs</tt><big>(</big><em>characterlist</em>, <em>wtchar</em>, <em>error_model</em>, <em>counts</em>, <em>priors</em>, <em>seed=1</em>, <em>niter=10000</em>, <em>n_jobs=1</em>, <em>r_max=1.1</em>, <em>neff_min=100</em>, <em>nchains=4</em>, <em>increasefactor=2</em>, <em>increasetries=6</em><big>)</big><a class="headerlink" href="#mcmc.InferSiteDiffPrefs" title="Permalink to this definition">¶</a></dt>
@@ -2387,7 +2405,7 @@ from Dirichlet with this concentration parameter.</p>
         <li class="right" >
           <a href="inferdiffprefs_algorithm.html" title="Algorithm to infer differential preferences"
              >previous</a> |</li>
-        <li><a href="index.html">dms_tools 1.1.3 documentation</a> &raquo;</li> 
+        <li><a href="index.html">dms_tools 1.1.4 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">

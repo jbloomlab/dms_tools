@@ -72,6 +72,8 @@ Command-line usage
     By default, when using ``--chartype codon_to_aa`` or ``--chartype aa``, we infer preferences for 21 amino acids, with stop codons (denoted by ``*``) one of the possibilities. If you specify the ``--excludestop`` option, then we constrain the preference for stop codons to be zero regardless of whether or not there are counts for these codons in the data, and so only infer preferences for the 20 non-stop amino acids.
 
    \-\-ratio_estimation
+    A reasonable value for *pseudocounts* is 1.
+
     For each character :math:`x`, we calculate the enrichment ratio relative to the wildtype
     character :math:`\rm{wt}` at this site as
 
@@ -79,8 +81,8 @@ Command-line usage
     
         \phi_{x} = \frac{\left(\frac{\max\left(\mathcal{P}, n_x^{\rm{post}} - n_x^{\rm{err,post}} + \mathcal{P}\right)}{\max\left(\mathcal{P}, n_{\rm{wt}}^{\rm{post}} - n_{\rm{wt}}^{\rm{err,post}} + \mathcal{P}\right)}\right)}{\left(\frac{\max\left(\mathcal{P}, n_x^{\rm{pre}} - n_x^{\rm{err,pre}} + \mathcal{P}\right)}{\max\left(\mathcal{P}, n_{\rm{wt}}^{\rm{pre}} - n_{\rm{wt}}^{\rm{err,pre}} + \mathcal{P}\right)}\right)}
 
-    where :math:`\mathcal{P}` is the value of *pseudocounts*. When *error_model* is *none*, then 
-    :math:`0 = n_x^{\rm{post}} = n_x^{\rm{pre}}` and the above equation reduces to a simple ratio
+    where :math:`\mathcal{P}` is the value of *pseudocounts*. When ``--errpre`` and ``--errpost`` are *none*, then 
+    :math:`0 = n_x^{\rm{err,post}} = n_x^{\rm{err,pre}}` and the above equation reduces to a simple ratio
     of post- and pre-selection. With :math:`\mathcal{P} > 0`, this enrichment is always :math:`> 0` and 
     :math:`< \infty`.
 
@@ -114,6 +116,8 @@ Runtime and convergence
 Because ``dms_inferprefs`` uses `MCMC`_ to infer the preferences as described in :ref:`inferprefs_algorithm`, it may take the program a while to run. The program will run fastest if you use multiple CPUs (such as by using the option ``--ncpus -1`` to use all available CPUs). It should take anywhere from a few minutes to a few hours to complete on a multi-processor machine, depending on the size of the protein, which characters are being used (nucleotides are fastest, codons are slowest), and whether error controls are being included in the analysis (via ``--errpre`` and ``--errpost``).
 
 The program automatically checks for `MCMC`_ convergence using the criteria described in :ref:`MCMC_inference` The program will terminate with an error if it fails to converge; otherwise it converged properly.
+
+If the program is taking too long, you can also just use the ``--ratio_estimation`` option to speed things up dramatically. This method is somewhat less accurate when the sequencing counts are fairly low (see `Software for the analysis and visualization of deep mutational scanning data (Bloom, 2015)`_), however it still should give fairly good results.
 
 Examples
 -----------
