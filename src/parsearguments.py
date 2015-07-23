@@ -30,6 +30,8 @@ Defined in this module
 
 * *AlignSpecs* : parses alignment specs for *BarcodedSubampliconsParser*
 
+* *R2AlignSpecs* : parses alignment specs for *SubassembleParser*
+
 * *AlignprefixName* : parses alignment prefixes/names for *SummarizeAlignmentsParser*
 
 * *InferPrefsParser* : parser for ``dms_inferprefs``
@@ -45,6 +47,8 @@ Defined in this module
 * *LogoPlotParser* : parser for ``dms_logoplot``
 
 * *BarcodedSubampliconsParser* : parser for ``dms_barcodedsubamplicons``
+
+* *SubassembleParser* : parser for ``dms_subassemble``
 
 * *SummarizeAlignmentsParser* : parser for ``dms_summarizealignments``
 
@@ -219,6 +223,7 @@ def AlignprefixName(alignprefixname):
         raise argparse.ArgumentTypeError("Failed to find two comma-delimited strings in %s" % alignprefixname)
     return tuple(tup)
 
+
 def AlignSpecs(alignspecs):
     """Parses alignment specs for *BarcodedSubampliconsParser*.
 
@@ -239,6 +244,24 @@ def AlignSpecs(alignspecs):
     return tuple(aligntup)
 
 
+def R2AlignSpecs(alignspecs):
+    """Parses alignment specs for *SubasssembleParser*.
+
+    >>> R2AlignSpecs('1,300')
+    (1, 300)
+    """
+    aligntup = alignspecs.split(',')
+    if len(aligntup) != 2:
+        raise argparse.ArgumentTypeError("Failed to find two comma-delimited integers in alignspecs %s" % alignspecs)
+    try:
+        aligntup = [int(n) for n in aligntup]
+    except ValueError:
+        raise argparse.ArgumentTypeError("Non-integer in alignspecs %s" % alignspecs)
+    if not all([n >= 1 for n in aligntup]):
+        raise argparse.ArgumentTypeError('Not all integers >= 1 in alignspecs %s' % alignspecs)
+    return tuple(aligntup)
+
+
 def SummarizeAlignmentsParser():
     """Returns *argparse.ArgumentParser* for ``dms_summarizealignments``."""
     parser = ArgumentParserNoArgHelp(description='Makes plots that summarize alignmnents for one or more samples. Designed to be run after you have used another program to make your alignments, and now you want to visualize the results. This script is part of %s (version %s) written by %s. Detailed documentation is at %s' % (dms_tools.__name__, dms_tools.__version__, dms_tools.__author__, dms_tools.__url__), formatter_class=argparse.ArgumentDefaultsHelpFormatter)
@@ -250,6 +273,28 @@ def SummarizeAlignmentsParser():
     parser.add_argument('--maxperbarcode', type=NonNegativeInt, default=3, help="In 'barcodes.pdf' plot, group all barcodes with >= this many reads.")
     parser.add_argument('--writemutfreqs', dest='writemutfreqs', action='store_true', help="Write a file 'mutfreqs.txt' that gives the numerical values plotted in 'mutfreqs.pdf'?")
     parser.set_defaults(writemutfreqs=False)
+    parser.add_argument('-v', '--version', action='version', version='%(prog)s {version}'.format(version=dms_tools.__version__))
+    return parser
+
+
+def SubassembleParser():
+    """Returns *argparse.ArgumentParser* for ``dms_subassemble``."""
+    parser = ArgumentParserNoArgHelp(description='Subassemble barcoded variants with linkage from short-read sequences. This script is part of %s (version %s) written by %s. Detailed documentation is at %s' % (dms_tools.__name__, dms_tools.__version__, dms_tools.__author__, dms_tools.__url__), formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser.add_argument('outprefix', help='Prefix for output files.')
+    parser.add_argument('refseq', type=ExistingFile, help='Existing FASTA file containing wildtype gene we are subassembling.')
+    parser.add_argument('r1files', type=CommaSeparatedFASTQFiles, help='Comma-separated list of R1 FASTQ files (no spaces). Files can optionally be gzipped (extension .gz).')
+    parser.add_argument('r2files', type=CommaSeparatedFASTQFiles, help="Like 'r1files' but for R2. Must be same number of comma-separated entires as for 'r1files'.")
+    parser.add_argument('alignspecs', nargs='+', help="This argument is repeated to specify each possible alignment location for R2. Each specification is two comma-delimited integers (no spaces): 'REFSEQSTART,R2START'. REFSEQSTART is nucleotide (1, 2, ... numbering) in 'refseq' where nucleotide R2START in R2 aligns.", type=R2AlignSpecs)
+    parser.add_argument('--minq', type=NonNegativeInt, default=15, help='Nucleotides with Q scores < this number are converted to N.')
+    parser.add_argument('--barcodelength', type=NonNegativeInt, default=18, help='Length of barcode (NNN...) which starts at beginning of R1.')
+    parser.add_argument('--trimR2', type=NonNegativeInt, default=0, help="Trim this many nucleotides of the 3' end of R2")
+    parser.add_argument('--maxlowqfrac', default=0.05, type=FloatBetweenZeroAndOne, help='Only retain trimmed reads if total fraction of N nucleotides is <= this.')
+    parser.add_argument('--chartype', default='codon', choices=['codon'], help='Character for which we are counting mutations. Currently "codon" is only allowed value (in the future "nucleotide" might be added).')
+    parser.add_argument('--maxmuts', type=NonNegativeInt, default=4, help='Only align read if <= this many mismatches with "refseq" counted in terms of "chartype".')
+    parser.add_argument('--minreadspersite', default=2, type=IntGreaterEqual2, help='Call site only barcodes when >= this many reads give it a non-ambiguous identity.')
+    parser.add_argument('--minreadconcurrence', default=0.75, type=FloatBetweenHalfAndOne, help="For sites that pass '--minreadspersite', only make calls when >= this fraction of reads concur.")
+    parser.set_defaults(no_write_unaligned=False)
+    parser.add_argument('--no_write_unaligned', dest='no_write_unaligned', action='store_true', help='Do we write the unaligned reads to a file?')
     parser.add_argument('-v', '--version', action='version', version='%(prog)s {version}'.format(version=dms_tools.__version__))
     return parser
 
