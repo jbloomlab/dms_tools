@@ -44,7 +44,7 @@ def main():
 
     # define file names and delete existing files
     unalignedfilename = "%s_unaligned_R2_reads.txt" % args['outprefix']
-    readsperbarcodefilename = "%s_readsperbarcode.txt" % args['outprefix']
+    readsperbarcodefilename = "%s_alignablereadsperbarcode.txt" % args['outprefix']
     outfilenames = [unalignedfilename, readsperbarcodefilename]
     for f in outfilenames:
         if os.path.isfile(f):
@@ -120,112 +120,36 @@ def main():
         if not args['no_write_unaligned']:
             logger.info('Unalignable reads will be written to %s' % unalignedfilename)
             f_unaligned = open(unalignedfilename, 'w')
-        nwithalignableread = 0
+        nwithalignableread = 0 # number of barcodes with at least one alignable reads
+        nreads_per_barcode = {}
         for (ibarcode, barcode) in enumerate(list(barcodes.keys())):
-            alignedaread = False
+            nalignedreads = 0 # number of alignable reads for this barcode
             counts = dict([(site, {}) for site in sites])
             if ibarcode % 1e5 == 0:
                 logger.info('Have attempted to subassemble %d barcodes; %d have had at least one alignable read.' % (ibarcode, nwithalignableread))
             for read in barcodes[barcode]:
                 for (refseqstart, r2start) in args['alignspecs']:
                     if dms_tools.utils.AlignRead(refseq, read[r2start - 1 : ], refseqstart, args['maxmuts'], counts, args['chartype']):
-                        if not alignedaread:
-                            alignedaread = True
+                        if not nalignedreads:
                             nwithalignableread += 1
+                        nalignedreads += 1
                         break # aligned, go to next read
                 else:
                     n['unalignable read pairs'] += 1
                     if not args['no_write_unaligned']:
                         f_unaligned.write('%s\n' % read)
+            if nalignedreads:
+                try:
+                    nreads_per_barcode[nalignedreads] += 1
+                except KeyError:
+                    nreads_per_barcode[nalignedreads] = 1
             del barcodes[barcode] # frees some memory
+        logger.info('Overall, found at least %d barcodes with at least one alignable read.' % nwithalignableread)
         if not args['no_write_unaligned']:
             f_unaligned.close()
-
-        sys.exit() # only progressed up to here
-
-        nreads_per_barcode = {}
-        for barcode in barcodes:
-            nreads = len(barcodes[barcode])
-            if nreads in nreads_per_barcode:
-                nreads_per_barcode[nreads] += 1
-            else:
-                nreads_per_barcode[nreads] = 1
-        nreadslist = [i for i in range(1, max(nreads_per_barcode.keys()) + 1)]
-        for nreads in nreadslist:
-            if nreads not in nreads_per_barcode:
-                nreads_per_barcode[nreads] = 0
-        logger.info('Here are the number of barcodes with each number of reads (also writing this information to %s):\n\tnreads\tnbarcodes\n\t%s\n' % (readsperbarcodefilename, '\n\t'.join(['%d\t%d' % tup for tup in nreads_per_barcode.items()])))
+        logger.info('Here are the number of barcodes with each number of alignable reads (also writing to %s):\n\tnreads\tnbarcodes\n\t%s\n' % (readsperbarcodefilename, '\n\t'.join(['%d\t%d' % tup for tup in nreads_per_barcode.items()])))
         with open(readsperbarcodefilename, 'w') as f:
             f.write('nreads\tnbarcodes\n%s' % '\n'.join(['%d\t%d' % tup for tup in nreads_per_barcode.items()]))
-
-
-
-        # Examine barcodes to see if they pass criteria, if so align them and record mutation counts
-        # Set up *counts* as dict that will hold mutation counts in format for dms_tools.file_io.WriteDMSCounts
-        counts = {}
-        if args['chartype'] == 'codon':
-            for r in range(1, len(refseq) // 3 + 1):
-                counts[str(r)] = dict([('WT', refseq[3 * r - 3 : 3 * r])] + [(codon, 0) for codon in dms_tools.codons])
-        else:
-            raise ValueError("Invalid chartype %s" % args['chartype'])
-        # Now start looping over barcodes
-        logger.info('Now examining the %d barcodes to see if reads meet criteria for retention' % len(barcodes))
-        newreadcategories = []
-        unalignedkeystring = 'un-alignable barcodes with %d reads'
-        alignedkeystring = 'aligned barcodes with %d reads'
-        discardedkeystring = 'discarded barcodes with %d reads'
-        ibarcode = 0
-        for barcode in list(barcodes.iterkeys()):
-            if ibarcode % 1e5 == 0:
-                logger.info('Barcodes examined so far: %s' % ibarcode)
-            nreads = len(barcodes[barcode])
-            if nreads < args['minreadsperbarcode']:
-                if args['barcodeinfo']:
-                    barcodeinfofile.write('BARCODE: %s\nRETAINED: no\nDESCRIPTION: too few reads\nCONSENSUS: none\nREADS:\n\t%s\n\n' % (barcode, '\n\t'.join(['R1 = %s; R2 = %s' % tup for tup in barcodes[barcode]])))
-                keystring = discardedkeystring % nreads
-            else:
-                consensus = dms_tools.utils.BuildReadConsensus(barcodes[barcode], args['minreadidentity'], args['minreadconcurrence'], args['maxreadtrim'], use_cutils=True)
-                if consensus:
-                    # try to align subamplicon
-                    (r1, r2) = consensus
-                    for (refseqstart, refseqend, r1start, r2start) in args['alignspecs']:
-                        maxN = int(args['maxlowqfrac'] * min(refseqend - refseqstart + 1, len(r1) + len(r2) - r1start - r2start + 2))
-                        if r1start >= len(r1) or r2start >= len(r2):
-                            aligned = False # reads too short toa align
-                        elif not args['R1_is_antisense']:
-                            aligned = dms_tools.utils.AlignSubamplicon(refseq, r1[r1start - 1 : ], r2[r2start - 1 : ], refseqstart, refseqend, args['maxmuts'], maxN, args['chartype'], counts, use_cutils=True)
-                        else:
-                            aligned = dms_tools.utils.AlignSubamplicon(refseq, r2[r2start - 1 : ], r1[r1start - 1 : ], refseqstart, refseqend, args['maxmuts'], maxN, args['chartype'], counts, use_cutils=True)
-                        if aligned:
-                            keystring = alignedkeystring % nreads
-                            if args['barcodeinfo']:
-                                barcodeinfofile.write('BARCODE: %s\nRETAINED: yes\nDESCRIPTION: aligned from %d to %d with %d %s mutations\nCONSENSUS: R1 = %s; R2 = %s\nREADS:\n\t%s\n\n' % (barcode, refseqstart, refseqend, aligned[1], args['chartype'], r1, r2, '\n\t'.join(['R1 = %s; R2 = %s' % tup for tup in barcodes[barcode]])))
-                            break
-                    else:
-                        keystring = unalignedkeystring % nreads
-                        if args['barcodeinfo']:
-                            barcodeinfofile.write('BARCODE: %s\nRETAINED: no\nDESCRIPTION: subamplicon could not be aligned to refseq\nCONSENSUS: R1 = %s; R2 = %s\nREADS:\n\t%s\n\n' % (barcode, r1, r2, '\n\t'.join(['R1 = %s; R2 = %s' % tup for tup in barcodes[barcode]])))
-                else:
-                    if args['barcodeinfo']:
-                        barcodeinfofile.write('BARCODE: %s\nRETAINED: no\nDESCRIPTION: reads not sufficiently identical\nCONSENSUS: none\nREADS:\n\t%s\n\n' % (barcode, '\n\t'.join(['R1 = %s; R2 = %s' % tup for tup in barcodes[barcode]])))
-                    keystring = discardedkeystring % nreads
-            try:
-                n[keystring] += 1
-            except KeyError:
-                n[keystring] = 1
-                newreadcategories.append((nreads, keystring))
-            del barcodes[barcode] # free up memory as we finish with barcodes
-        newreadcategories.sort()
-        readcategories = readcategories + [tup[1] for tup in newreadcategories]
-        logger.info('Finished examining all %d barcodes\n' % ibarcode)
-
-        # Write the counts
-        logger.info('Writing the %s counts to %s' % (args['chartype'], countsfilename))
-        dms_tools.file_io.WriteDMSCounts(countsfile, counts)
-
-        # Summarize statistics
-        logger.info('Here are the summary statistics (these are also being written to %s):\n%s' % (summarystatsfilename, '\n'.join(['\t%s = %s' % (category, n[category]) for category in readcategories])))
-        summarystatsfile.write('\n'.join(['%s = %s' % (category, n[category]) for category in readcategories]))
 
     except:
         logger.exception('Terminating %s at %s with ERROR' % (prog, time.asctime()))
