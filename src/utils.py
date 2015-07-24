@@ -38,6 +38,8 @@ Functions in this module
 
 * *AlignSubamplicon* : attempt to align subamplicon at specified position.
 
+* *AlignRead* : attempt to align a read at a specified position
+
 * *ClassifyCodonCounts* : classifies codon mutations.
 
 * *CodonMutsCumulFracs* : cumulative counts of codon mutations.
@@ -712,6 +714,70 @@ def BuildReadConsensus(reads, minreadidentity, minreadconcurrence, maxreadtrim, 
         else:
             r2_consensus.append('N')
     return (''.join(r1_consensus), ''.join(r2_consensus))
+
+
+def AlignRead(refseq, read, refseqstart, maxmuts, counts, chartype):
+    """Attempt to gaplessly align a read at a specific location.
+
+    *refseq* and *read* are strings, assumed to be upper case. 
+
+    Tries to align *refseq* starting at position *refseqstart* (in 1, 2, ... numbering),
+    counting the number of mutations. If the read aligns with :math:`\le` *maxmuts*
+    mutations, then returns *True* and updates *counts* as described below; otherwise returns
+    *False* and does nothing to *counts*.
+
+    *chartype* is the type of character for which we are counting mutation. Allowable values:
+
+        - 'codon' : this requires *refseq* to be an in-frame gene, and only counts identities
+          when codon is fully spanned.
+
+    *counts* is a dictionary that should be keyed by every site of *chartype* in *refseq* using
+    1, 2, ... numbering. *refseq[isite][char]* is incremented (creating entry for *char* if not already
+    present) if the read aligns with a character of *char* at *isite*.
+
+    >>> refseq = 'ATGGGACCC'
+    >>> read = 'GGGAC'
+    >>> counts = {1:{}, 2:{}, 3:{}}
+    >>> AlignRead(refseq, read, 3, 0, counts, 'codon')
+    True
+    >>> counts[1] == {} and counts[2] == {'GGA':1} and counts[3] == {}
+    True
+    >>> read2 = 'GGTAC'
+    >>> AlignRead(refseq, read2, 3, 0, counts, 'codon')
+    False
+    >>> AlignRead(refseq, read2, 3, 1, counts, 'codon')
+    True
+    >>> counts[1] == {} and counts[2] == {'GGA':1, 'GTA':1} and counts[3] == {}
+    True
+    >>> AlignRead(refseq, read2, 3, 1, counts, 'codon')
+    True
+    >>> counts[1] == {} and counts[2] == {'GGA':1, 'GTA':2} and counts[3] == {}
+    True
+    """
+    if chartype == 'codon':
+        nmuts = 0
+        codonstart = int(math.ceil((refseqstart - 1) / 3.0)) # 0, 1, 2, ... numbering
+        read = read[{0:0, 1:2, 2:1}[(refseqstart - 1) % 3]  : ] # part of read that should align at codonstart
+        ncodons = min(len(read) // 3, len(refseq) // 3 - codonstart) # number of codons spanned by read
+        charlist = []
+        for icodon in range(ncodons):
+            readcodon = read[3 * icodon : 3 * icodon + 3]
+            if readcodon != refseq[3 * (codonstart + icodon) : 3 * (codonstart + icodon + 1)]:
+                nmuts += 1
+                if nmuts > maxmuts:
+                    return False
+            charlist.append(readcodon)
+        # if we made it here, read aligned
+        for (icodon, readcodon) in enumerate(charlist):
+            codon_number = icodon + codonstart + 1
+            try:
+                counts[codon_number][readcodon] += 1
+            except KeyError:
+                assert codon_number in counts, "Invalid codon number of %d; not in counts" % codon_number
+                counts[codon_number][readcodon] = 1
+        return True
+    else:
+        raise ValueError("Invalid chartype of %s" % chartype)
 
 
 def AlignSubamplicon(refseq, r1, r2, refseqstart, refseqend, maxmuts, maxN, chartype, counts, use_cutils=True):

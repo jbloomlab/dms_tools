@@ -279,7 +279,7 @@ def SummarizeAlignmentsParser():
 
 def SubassembleParser():
     """Returns *argparse.ArgumentParser* for ``dms_subassemble``."""
-    parser = ArgumentParserNoArgHelp(description='Subassemble barcoded variants with linkage from short-read sequences. This script is part of %s (version %s) written by %s. Detailed documentation is at %s' % (dms_tools.__name__, dms_tools.__version__, dms_tools.__author__, dms_tools.__url__), formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser = ArgumentParserNoArgHelp(description='Subassemble barcoded variants with linkage from short-read sequences. R1 has the barcode, R2 has the sequence fragment. This script is part of %s (version %s) written by %s. Detailed documentation is at %s' % (dms_tools.__name__, dms_tools.__version__, dms_tools.__author__, dms_tools.__url__), formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('outprefix', help='Prefix for output files.')
     parser.add_argument('refseq', type=ExistingFile, help='Existing FASTA file containing wildtype gene we are subassembling.')
     parser.add_argument('r1files', type=CommaSeparatedFASTQFiles, help='Comma-separated list of R1 FASTQ files (no spaces). Files can optionally be gzipped (extension .gz).')
@@ -294,7 +294,8 @@ def SubassembleParser():
     parser.add_argument('--minreadspersite', default=2, type=IntGreaterEqual2, help='Call site only barcodes when >= this many reads give it a non-ambiguous identity.')
     parser.add_argument('--minreadconcurrence', default=0.75, type=FloatBetweenHalfAndOne, help="For sites that pass '--minreadspersite', only make calls when >= this fraction of reads concur.")
     parser.set_defaults(no_write_unaligned=False)
-    parser.add_argument('--no_write_unaligned', dest='no_write_unaligned', action='store_true', help='Do we write the unaligned reads to a file?')
+    parser.add_argument('--no_write_unaligned', dest='no_write_unaligned', action='store_true', help='Do we write the unaligned R2 reads to a file?')
+    parser.add_argument('--purgefrac', type=FloatBetweenZeroAndOne, default=0, help='Randomly purge reads with this probability (subsample the data).')
     parser.add_argument('-v', '--version', action='version', version='%(prog)s {version}'.format(version=dms_tools.__version__))
     return parser
 

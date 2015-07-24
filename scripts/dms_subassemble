@@ -21,13 +21,12 @@ import dms_tools.utils
 
 def main():
     """Main body of script."""
+    random.seed(1)
 
     # Parse command line arguments
     parser = dms_tools.parsearguments.SubassembleParser()
     args = vars(parser.parse_args())
     prog = parser.prog
-
-    random.seed(args['seed'])
 
     # set up logging
     logging.shutdown()
@@ -43,23 +42,14 @@ def main():
     logger.info("Beginning execution of %s in directory %s\n" % (prog, os.getcwd()))
     logger.info("Progress will be logged to %s" % logfile)
 
-    sys.exit()
-
     # define file names and delete existing files
-    countsfilename = "%scounts.txt" % args['outprefix']
-    summarystatsfilename = '%ssummarystats.txt' % args['outprefix']
-    barcodeinfofilename = '%sbarcodeinfo.txt.gz' % args['outprefix']
-    outfilenames = [countsfilename, summarystatsfilename, barcodeinfofilename]
+    unalignedfilename = "%s_unaligned_R2_reads.txt" % args['outprefix']
+    readsperbarcodefilename = "%s_readsperbarcode.txt" % args['outprefix']
+    outfilenames = [unalignedfilename, readsperbarcodefilename]
     for f in outfilenames:
         if os.path.isfile(f):
             os.remove(f)
             logger.info("Removing existing file %s" % f)
-    countsfile = open(countsfilename, 'w')
-    summarystatsfile = open(summarystatsfilename, 'w')
-    outfiles = [countsfile, summarystatsfile]
-    if args['barcodeinfo']:
-        barcodeinfofile = gzip.open(barcodeinfofilename, 'w')
-        outfiles.append(barcodeinfofile)
 
     # log in try / except loop
     try:
@@ -73,23 +63,17 @@ def main():
         refseq = str(refseq[0].seq).upper()
         if args['chartype'] == 'codon':
             assert len(refseq) % 3 == 0, "refseq does not specify a sequence of codons since its length of %d nucleotides is not a multiple of 3" % (len(refseq))
+            sites = [i + 1 for i in range(len(refseq) // 3)]
             logger.info('Read a reference sequence of %d codons from %s\n' % (len(refseq) // 3, args['refseq']))
         else:
             raise ValueError("Invalid chartype")
 
         # do some checking on validity of alignspecs
-        for (refseqstart, refseqend, r1start, r2start) in args['alignspecs']:
-            assert refseqend > refseqstart, "REFSEQEND <= REFSEQSTART"
-            if args['barcodelength'] > r1start:
-                raise ValueError("One of the alignspecs specifies R1START of %d, which doesn't fully trim a barcode of barcodelength %d" % (r1start, args['barcodelength']))
-            if args['barcodelength'] > r2start:
-                raise ValueError("One of the alignspecs specifies R2START of %d, which doesn't fully trim a barcode of barcodelength %d" % (r2start, args['barcodelength']))
-            if r1start < 1:
-                raise ValueError("R1START must be >= 1; you specified %d" % r1start)
+        for (refseqstart, r2start) in args['alignspecs']:
             if r2start < 1:
                 raise ValueError("R2START must be >= 1; you specified %d" % r2start)
-            if (refseqstart < 0 or refseqend > len(refseq) or refseqstart >= refseqend):
-                raise ValueError("One of the alignspecs specifies REFSEQSTART of %d and REFSEQEND of %d, which are not valid values for a refseq of length %d nucleotides." % (refseqstart, refseqend, len(refseq)))
+            if (refseqstart < 0 or refseqstart > len(refseq)):
+                raise ValueError("One of the alignspecs specifies REFSEQSTART of %d, which is not valid for a refseq of length %d nucleotides." % (refseqstart, len(refseq)))
 
         # check on read files
         assert len(args['r1files']) == len(args['r2files']), "r1files and r2files do not specify the same number of files."
@@ -100,44 +84,81 @@ def main():
                 raise ValueError("Some but not all of the r1files and r2files are gzipped. Either all or no files can be gzipped.")
             gzipped = False
 
-        # collect reads by barcode while iterating over reads
-        readcategories = ['total read pairs', 'read pairs that fail Illumina filter', 'low quality read pairs']
+        # collect 3' trimmed R2 reads by barcode while filtering low quality reads
+        readcategories = ['total read pairs', 'read pairs that fail Illumina filter', 'low quality read pairs', 'unalignable read pairs']
+        if args['purgefrac']:
+            readcategories.append('randomly purged read pairs')
         n = dict([(category, 0) for category in readcategories])
-        barcodes = {}
+        barcodes = {} # keyed bar barcode, values are lists of 3'-trimmed R2 reads
         logger.info('Now parsing reads from the following:\n\tr1files: %s\n\tr2files: %s' % (' '.join(args['r1files']), ' '.join(args['r2files'])))
         for read_tup in dms_tools.file_io.IteratePairedFASTQ(args['r1files'], args['r2files'], gzipped, applyfilter=True):
             n['total read pairs'] += 1
-            if read_tup:
+            if args['purgefrac'] and args['purgefrac'] > random.random():
+                n['randomly purged read pairs'] += 1
+            elif read_tup:
                 (name, r1, r2, q1, q2) = read_tup
-                qcheckedreads = dms_tools.utils.CheckReadQuality(r1, r2, q1, q2, args['minq'], args['maxlowqfrac'], args['barcodelength'])
-                if qcheckedreads:
-                    (r1, r2) = qcheckedreads
-                    barcode = r1[ : args['barcodelength']] + r2[ : args['barcodelength']]
-                    if barcode in barcodes:
-                        barcodes[barcode].append((r1, r2))
-                    else:
-                        barcodes[barcode] = [(r1, r2)]
-                else:
+                (r1, r2) = dms_tools.utils.CheckReadQuality(r1, r2, q1, q2, args['minq'], 1, 0) # convert low quality to N
+                assert len(r1) >= args['barcodelength'], "R1 isn't as long as the required barcodelength"
+                barcode = r1[ : args['barcodelength']]
+                if args['trimR2']:
+                    r2 = r2[ : -args['trimR2']]
+                if ('N' in barcode) or (r2.count('N') > args['maxlowqfrac'] * len(r2)):
                     n['low quality read pairs'] += 1
+                else:
+                    if barcode in barcodes:
+                        barcodes[barcode].append(r2)
+                    else:
+                        barcodes[barcode] = [r2]
             else:
                 n['read pairs that fail Illumina filter'] += 1
             if n['total read pairs'] % 1e5 == 0:
                 logger.info('Reads parsed so far: %d' % n['total read pairs'])
-
         logger.info('Finished parsing all %d reads; ended up with %d unique barcodes.\n' % (n['total read pairs'], len(barcodes)))
 
-        readcategories.append('barcodes randomly purged')
-        if args['purgefrac']:
-            logger.info('Randomly purging barcodes with probability %.3f to subsample the data.' % args['purgefrac'])
-            npurged = 0
-            for barcode in list(barcodes.iterkeys()):
-                if random.random() < args['purgefrac']:
-                    npurged += 1
-                    del barcodes[barcode]
-            n['barcodes randomly purged'] = npurged
-            logger.info('Randomly purged %d of the %d barcodes (%.1f%%), leaving %d barcodes.\n' % (npurged, len(barcodes) + npurged, 100.0 * npurged / (npurged + len(barcodes)), len(barcodes)))
-        else:
-            n['barcodes randomly purged'] = 0
+        # now align reads to subassemble gene
+        logger.info('Now subassembling barcodes by aligning reads...')
+        if not args['no_write_unaligned']:
+            logger.info('Unalignable reads will be written to %s' % unalignedfilename)
+            f_unaligned = open(unalignedfilename, 'w')
+        nwithalignableread = 0
+        for (ibarcode, barcode) in enumerate(list(barcodes.keys())):
+            alignedaread = False
+            counts = dict([(site, {}) for site in sites])
+            if ibarcode % 1e5 == 0:
+                logger.info('Have attempted to subassemble %d barcodes; %d have had at least one alignable read.' % (ibarcode, nwithalignableread))
+            for read in barcodes[barcode]:
+                for (refseqstart, r2start) in args['alignspecs']:
+                    if dms_tools.utils.AlignRead(refseq, read[r2start - 1 : ], refseqstart, args['maxmuts'], counts, args['chartype']):
+                        if not alignedaread:
+                            alignedaread = True
+                            nwithalignableread += 1
+                        break # aligned, go to next read
+                else:
+                    n['unalignable read pairs'] += 1
+                    if not args['no_write_unaligned']:
+                        f_unaligned.write('%s\n' % read)
+            del barcodes[barcode] # frees some memory
+        if not args['no_write_unaligned']:
+            f_unaligned.close()
+
+        sys.exit() # only progressed up to here
+
+        nreads_per_barcode = {}
+        for barcode in barcodes:
+            nreads = len(barcodes[barcode])
+            if nreads in nreads_per_barcode:
+                nreads_per_barcode[nreads] += 1
+            else:
+                nreads_per_barcode[nreads] = 1
+        nreadslist = [i for i in range(1, max(nreads_per_barcode.keys()) + 1)]
+        for nreads in nreadslist:
+            if nreads not in nreads_per_barcode:
+                nreads_per_barcode[nreads] = 0
+        logger.info('Here are the number of barcodes with each number of reads (also writing this information to %s):\n\tnreads\tnbarcodes\n\t%s\n' % (readsperbarcodefilename, '\n\t'.join(['%d\t%d' % tup for tup in nreads_per_barcode.items()])))
+        with open(readsperbarcodefilename, 'w') as f:
+            f.write('nreads\tnbarcodes\n%s' % '\n'.join(['%d\t%d' % tup for tup in nreads_per_barcode.items()]))
+
+
 
         # Examine barcodes to see if they pass criteria, if so align them and record mutation counts
         # Set up *counts* as dict that will hold mutation counts in format for dms_tools.file_io.WriteDMSCounts
@@ -155,7 +176,6 @@ def main():
         discardedkeystring = 'discarded barcodes with %d reads'
         ibarcode = 0
         for barcode in list(barcodes.iterkeys()):
-            ibarcode += 1
             if ibarcode % 1e5 == 0:
                 logger.info('Barcodes examined so far: %s' % ibarcode)
             nreads = len(barcodes[barcode])
@@ -209,23 +229,14 @@ def main():
 
     except:
         logger.exception('Terminating %s at %s with ERROR' % (prog, time.asctime()))
-        for f in outfiles:
-            try:
-                f.close()
-            except:
-                pass
         for f in outfilenames:
             if os.path.isfile(f):
                 os.remove(f)
                 logger.exception('Deleting file %s' % f)
+        raise
     else:
         logger.info('Successful completion of %s at %s' % (prog, time.asctime()))
     finally:
-        for f in outfiles:
-            try:
-                f.close()
-            except:
-                pass
         logging.shutdown()
 
 
