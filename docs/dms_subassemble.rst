@@ -38,7 +38,16 @@ In order to subassemble the gene, it is necessary to generate appropriately size
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       Rnd1R: 3’-TCTAGCCTTCTCGCAGCACATCCCTTTCTCACA-5’
 
 
-After these subamplicons are generated in the Round 1 PCR, a second round of PCR is used to add the remaining Illumina adapter sequences and Illumina indices for multiplexing.  
+After these subamplicons are generated in the Round 1 PCR, a second round of PCR is used to add the remaining Illumina adapter sequences and TruSeq index sequences for multiplexing. For example, here are two primers used in the Round 2 PCR reactions::
+
+	>Rnd2IndexF: forward primer for the Round 2 PCR that adds the Illumina adaptor (uppercase) and a TruSeq index, shown here as 6 “n” nucleotides 
+	5’-CAAGCAGAAGACGGCATACGAGATnnnnnngtgactggagttcagacgtgtgctcttcc-3’ 
+
+	>Rnd2R: reverse primer for the Round 2 PCR that adds the Illumina adaptor (uppercase) 
+	5’-AATGATACGGCGACCACCGAGATCTacactctttccctacacgacgctcttccgatct-3’ 
+
+
+The products of the Round 2 PCR are sequenced with asymmetric paired-end reads with Read1 sequencing the barcode (:math:`\ge 18` nucleotides), and with Read2 of sufficient length to overlap with the next subamplicon (:math:`\ge 200` nucleotides). The sequencing data are analyzed with the standard Illumina pipeline to generate FASTQ files containing the R1 and R2 reads.
 
 Subassembly algorithm
 -----------------------
