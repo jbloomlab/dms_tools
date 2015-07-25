@@ -45,6 +45,7 @@ def main():
     # define file names and delete existing files
     unalignedfilename = "%s_unaligned_R2_reads.txt" % args['outprefix']
     readsperbarcodefilename = "%s_alignablereadsperbarcode.txt" % args['outprefix']
+    refseqstartsfilename = '%s_refseqstarts.txt' % args['outprefix']
     outfilenames = [unalignedfilename, readsperbarcodefilename]
     for f in outfilenames:
         if os.path.isfile(f):
@@ -113,7 +114,7 @@ def main():
                 n['read pairs that fail Illumina filter'] += 1
             if n['total read pairs'] % 1e5 == 0:
                 logger.info('Reads parsed so far: %d' % n['total read pairs'])
-        logger.info('Finished parsing all %d reads; ended up with %d unique barcodes.\n' % (n['total read pairs'], len(barcodes)))
+        logger.info('Finished parsing all %d reads; ended up with %d unique barcodes that passed the quality filters.\n' % (n['total read pairs'], len(barcodes)))
 
         # now align reads to subassemble gene
         logger.info('Now subassembling barcodes by aligning reads...')
@@ -122,6 +123,7 @@ def main():
             f_unaligned = open(unalignedfilename, 'w')
         nwithalignableread = 0 # number of barcodes with at least one alignable reads
         nreads_per_barcode = {}
+        refseqstarts = dict([(refseqstart, 0) for (refseqstart, r2start) in args['alignspecs']])
         for (ibarcode, barcode) in enumerate(list(barcodes.keys())):
             nalignedreads = 0 # number of alignable reads for this barcode
             counts = dict([(site, {}) for site in sites])
@@ -133,6 +135,7 @@ def main():
                         if not nalignedreads:
                             nwithalignableread += 1
                         nalignedreads += 1
+                        refseqstarts[refseqstart] += 1
                         break # aligned, go to next read
                 else:
                     n['unalignable read pairs'] += 1
@@ -144,12 +147,17 @@ def main():
                 except KeyError:
                     nreads_per_barcode[nalignedreads] = 1
             del barcodes[barcode] # frees some memory
-        logger.info('Overall, found at least %d barcodes with at least one alignable read.' % nwithalignableread)
+        logger.info('Overall, found at least %d barcodes with at least one alignable read.\n' % nwithalignableread)
         if not args['no_write_unaligned']:
             f_unaligned.close()
-        logger.info('Here are the number of barcodes with each number of alignable reads (also writing to %s):\n\tnreads\tnbarcodes\n\t%s\n' % (readsperbarcodefilename, '\n\t'.join(['%d\t%d' % tup for tup in nreads_per_barcode.items()])))
+        nreads_per_barcode_keys = nreads_per_barcode.keys()
+        nreads_per_barcode_keys.sort()
+        logger.info('Here are the number of barcodes with each number of alignable reads (also writing to %s):\n\tnreads\tnbarcodes\n\t%s\n' % (readsperbarcodefilename, '\n\t'.join(['%d\t%d' % (i, nreads_per_barcode[i]) for i in nreads_per_barcode_keys])))
         with open(readsperbarcodefilename, 'w') as f:
-            f.write('nreads\tnbarcodes\n%s' % '\n'.join(['%d\t%d' % tup for tup in nreads_per_barcode.items()]))
+            f.write('nreads\tnbarcodes\n%s' % '\n'.join(['%d\t%d' % (i, nreads_per_barcode[i]) for i in nreads_per_barcode_keys]))
+        logger.info('Here are the distribution of positions where alignable reads began (also writing to %s):\n\trefseqstart\tnreads\n\t%s\n' % (refseqstartsfilename, '\n\t'.join(['%d\t%d' % (refseqstart, refseqstarts[refseqstart]) for (refseqstart, r2start) in args['alignspecs']])))
+        with open(refseqstartsfilename, 'w') as f:
+            f.write('refseqstart\tnreads\n%s' % '\n'.join(['%d\t%d' % (refseqstart, refseqstarts[refseqstart]) for (refseqstart, r2start) in args['alignspecs']]))
 
     except:
         logger.exception('Terminating %s at %s with ERROR' % (prog, time.asctime()))
