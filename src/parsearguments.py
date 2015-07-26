@@ -20,6 +20,8 @@ Defined in this module
 
 * *NonNegativeInt* : parses whether string is non-negative integer.
 
+* *IntGreaterEqual1* : parses whether string is integer >= 1.
+
 * *IntGreaterEqual2* : parses whether string is integer >= 2.
 
 * *ExistingFile* : parses whether string gives an existing file.
@@ -100,6 +102,20 @@ def IntGreaterEqual2(n):
         raise argparse.ArgumentTypeError('%s is not an integer' % n)
     if n < 2:
         raise argparse.ArgumentTypeError('%d is not greater or equal to two' % n)
+    else:
+        return n
+
+
+def IntGreaterEqual1(n):
+    """If *n* is integer >= 1 returns it, otherwise an error."""
+    if not isinstance(n, str):
+        raise argparse.ArgumentTypeError('%r is not a string' % n)
+    try:
+        n = int(n)
+    except:
+        raise argparse.ArgumentTypeError('%s is not an integer' % n)
+    if n < 1:
+        raise argparse.ArgumentTypeError('%d is not greater or equal to one' % n)
     else:
         return n
 
@@ -285,16 +301,16 @@ def SubassembleParser():
     parser.add_argument('r1files', type=CommaSeparatedFASTQFiles, help='Comma-separated list of R1 FASTQ files (no spaces). Files can optionally be gzipped (extension .gz).')
     parser.add_argument('r2files', type=CommaSeparatedFASTQFiles, help="Like 'r1files' but for R2. Must be same number of comma-separated entires as for 'r1files'.")
     parser.add_argument('alignspecs', nargs='+', help="This argument is repeated to specify each possible alignment location for R2. Each specification is two comma-delimited integers (no spaces): 'REFSEQSTART,R2START'. REFSEQSTART is nucleotide (1, 2, ... numbering) in 'refseq' where nucleotide R2START in R2 aligns.", type=R2AlignSpecs)
-    parser.add_argument('--minq', type=NonNegativeInt, default=15, help='Nucleotides with Q scores < this number are converted to N.')
     parser.add_argument('--barcodelength', type=NonNegativeInt, default=18, help='Length of barcode (NNN...) which starts at beginning of R1.')
-    parser.add_argument('--trimR2', type=NonNegativeInt, default=0, help="Trim this many nucleotides of the 3' end of R2")
-    parser.add_argument('--maxlowqfrac', default=0.05, type=FloatBetweenZeroAndOne, help='Only retain trimmed reads if total fraction of N nucleotides is <= this.')
-    parser.add_argument('--chartype', default='codon', choices=['codon'], help='Character for which we are counting mutations. Currently "codon" is only allowed value (in the future "nucleotide" might be added).')
+    parser.add_argument('--trimR2', type=NonNegativeInt, help="Trim R2 read from 3' end until it is no longer than this.")
+    parser.add_argument('--minq', type=NonNegativeInt, default=15, help='Nucleotides with Q scores < this number are converted to N.')
+    parser.add_argument('--maxlowqfrac', default=0.05, type=FloatBetweenZeroAndOne, help='Only retain trimmed R2 reads if total fraction of N nucleotides is <= this.')
     parser.add_argument('--maxmuts', type=NonNegativeInt, default=4, help='Only align read if <= this many mismatches with "refseq" counted in terms of "chartype".')
-    parser.add_argument('--minreadspersite', default=2, type=IntGreaterEqual2, help='Call site only barcodes when >= this many reads give it a non-ambiguous identity.')
-    parser.add_argument('--minreadconcurrence', default=0.75, type=FloatBetweenHalfAndOne, help="For sites that pass '--minreadspersite', only make calls when >= this fraction of reads concur.")
-    parser.set_defaults(no_write_unaligned=False)
-    parser.add_argument('--no_write_unaligned', dest='no_write_unaligned', action='store_true', help='Do we write the unaligned R2 reads to a file?')
+    parser.add_argument('--minreadspersite', default=2, type=IntGreaterEqual1, help='Call site only barcodes when >= this many reads give it a non-ambiguous identity.')
+    parser.add_argument('--minreadconcurrence', default=0.75, type=FloatBetweenHalfAndOne, help="Only call sites when >= this fraction of reads concur.")
+    parser.add_argument('--chartype', default='codon', choices=['codon'], help='Character for which we are counting mutations. Currently "codon" is only allowed value (in the future "nucleotide" might be added).')
+    parser.set_defaults(no_write_barcode_reads=False)
+    parser.add_argument('--no_write_barcode_reads', dest='no_write_barcode_reads', action='store_true', help="Don't write all barcodes and assigned reads to a file (saves space/time to not do this).")
     parser.add_argument('--purgefrac', type=FloatBetweenZeroAndOne, default=0, help='Randomly purge reads with this probability (subsample the data).')
     parser.add_argument('-v', '--version', action='version', version='%(prog)s {version}'.format(version=dms_tools.__version__))
     return parser

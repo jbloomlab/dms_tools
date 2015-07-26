@@ -40,6 +40,8 @@ Functions in this module
 
 * *AlignRead* : attempt to align a read at a specified position
 
+* *Subassemble* : subassembles a read from per site counts
+
 * *ClassifyCodonCounts* : classifies codon mutations.
 
 * *CodonMutsCumulFracs* : cumulative counts of codon mutations.
@@ -723,16 +725,21 @@ def AlignRead(refseq, read, refseqstart, maxmuts, counts, chartype):
 
     Tries to align *refseq* starting at position *refseqstart* (in 1, 2, ... numbering),
     counting the number of mutations. If the read aligns with :math:`\le` *maxmuts*
-    mutations, then returns *True* and updates *counts* as described below; otherwise returns
-    *False* and does nothing to *counts*.
+    mutations, then returns *True* and updates *counts* as described below; otherwise 
+    returns *False* and does nothing to *counts*. Note that characters with
+    ambiguous nucleotides (``N``) nucleotides are ignored, and not counted as mutations
+    but also not recorded as counts.
 
-    *chartype* is the type of character for which we are counting mutation. Allowable values:
+    *chartype* is the type of character for which we count mutations. Allowable values:
 
-        - 'codon' : this requires *refseq* to be an in-frame gene, and only counts identities
-          when codon is fully spanned.
+        - 'codon' : this requires *refseq* to be an in-frame gene, and only counts
+          identities when codon is fully spanned.
 
-    *counts* is a dictionary that should be keyed by every site of *chartype* in *refseq* using
-    1, 2, ... numbering. *refseq[isite][char]* is incremented (creating entry for *char* if not already
+    *counts* is a dictionary that keyed by every site of *chartype* in *refseq* using
+    1, 2, ... numbering. 
+    
+    This functions modifies *counts* as follows: *counts[isite][char]* is 
+    incremented (creating entry for *char* if not already
     present) if the read aligns with a character of *char* at *isite*.
 
     >>> refseq = 'ATGGGACCC'
@@ -753,6 +760,11 @@ def AlignRead(refseq, read, refseqstart, maxmuts, counts, chartype):
     True
     >>> counts[1] == {} and counts[2] == {'GGA':1, 'GTA':2} and counts[3] == {}
     True
+    >>> read3 = 'GGNAC'
+    >>> AlignRead(refseq, read3, 3, 1, counts, 'codon')
+    True
+    >>> counts[1] == {} and counts[2] == {'GGA':1, 'GTA':2} and counts[3] == {}
+    True
     """
     if chartype == 'codon':
         nmuts = 0
@@ -762,6 +774,8 @@ def AlignRead(refseq, read, refseqstart, maxmuts, counts, chartype):
         charlist = []
         for icodon in range(ncodons):
             readcodon = read[3 * icodon : 3 * icodon + 3]
+            if 'N' in readcodon:
+                continue
             if readcodon != refseq[3 * (codonstart + icodon) : 3 * (codonstart + icodon + 1)]:
                 nmuts += 1
                 if nmuts > maxmuts:
@@ -778,6 +792,48 @@ def AlignRead(refseq, read, refseqstart, maxmuts, counts, chartype):
         return True
     else:
         raise ValueError("Invalid chartype of %s" % chartype)
+
+
+def Subassemble(counts, minpersite, minconcurrence):
+    """Subassembles sequence if possible.
+
+    *counts* is keyed by all site numbers (1, 2, ... numbering) in the 
+    sequence. *counts[r][x]* is the number of counts for character *x*
+    at site *r*. 
+
+    A read is subassembled if there are >= *minpersite* counts at each 
+    site, and >= *minconcurrence* of these counts agree on the identity
+    at that site. *minconcurrence* must be > 0.5 to ensure a unique
+    subassembly. *minpersite* must be >= 1.
+
+    If the read can be subassembled, returns the resulting sequence.
+    If it cannot be subassembled, returns *False*.
+
+    >>> counts = {1:{'ATG':2}, 2:{'GGA':4, 'AGA':1}}
+    >>> Subassemble(counts, 2, 0.8)
+    'ATGGGA'
+    >>> Subassemble(counts, 3, 0.8)
+    False
+    >>> Subassemble(counts, 2, 0.9)
+    False
+    """
+    sites = counts.keys()
+    assert minpersite >= 1, "minpersite is not >= 1: %f" % minpersite
+    assert 0.5 < minconcurrence <= 1.0, "minconcurrence is not > 0.5 and <= 1: %f" % minconcurrence
+    assert sites and min(sites) == 1 and max(sites) - min(sites) == len(sites) - 1 and len(sites) == len(set(sites)), "counts does not specify a list of consecutive site numbers starting at one: %s" % str(sites)
+    seq = []
+    for site in sites:
+        if not counts[site]:
+            return False # no counts for site
+        else:
+            sitecounts = sum(counts[site].values())
+            countsortedchars = [(count, char) for (char, count) in counts[site].items()]
+            countsortedchars.sort()
+            if countsortedchars[-1][0] >= minpersite and countsortedchars[-1][0] / float(sitecounts) >= minconcurrence:
+                seq.append(countsortedchars[-1][1])
+            else:
+                return False
+    return ''.join(seq)
 
 
 def AlignSubamplicon(refseq, r1, r2, refseqstart, refseqend, maxmuts, maxN, chartype, counts, use_cutils=True):

@@ -43,10 +43,12 @@ def main():
     logger.info("Progress will be logged to %s" % logfile)
 
     # define file names and delete existing files
-    unalignedfilename = "%s_unaligned_R2_reads.txt" % args['outprefix']
+    summarystatsfilename = '%s_summarystats.txt' % args['outprefix']
+    subassembledfilename = '%s_subassembled_variants.txt' % args['outprefix']
     readsperbarcodefilename = "%s_alignablereadsperbarcode.txt" % args['outprefix']
     refseqstartsfilename = '%s_refseqstarts.txt' % args['outprefix']
-    outfilenames = [unalignedfilename, readsperbarcodefilename]
+    barcodereadsfilename = '%s_all_reads_by_barcode.txt' % args['outprefix']
+    outfilenames = [barcodereadsfilename, refseqstartsfilename, readsperbarcodefilename, subassembledfilename, summarystatsfilename]
     for f in outfilenames:
         if os.path.isfile(f):
             os.remove(f)
@@ -86,25 +88,25 @@ def main():
             gzipped = False
 
         # collect 3' trimmed R2 reads by barcode while filtering low quality reads
-        readcategories = ['total read pairs', 'read pairs that fail Illumina filter', 'low quality read pairs', 'unalignable read pairs']
+        readcategories = ['read pairs (total)', 'read pairs that fail Illumina filter', 'read pairs purged due to low quality', 'read pairs that are unalignable', 'read pairs that are alignable and map to a subassembled barcode', 'read pairs that are alignable']
         if args['purgefrac']:
-            readcategories.append('randomly purged read pairs')
+            readcategories.append('read pairs randomly purged')
         n = dict([(category, 0) for category in readcategories])
         barcodes = {} # keyed bar barcode, values are lists of 3'-trimmed R2 reads
         logger.info('Now parsing reads from the following:\n\tr1files: %s\n\tr2files: %s' % (' '.join(args['r1files']), ' '.join(args['r2files'])))
         for read_tup in dms_tools.file_io.IteratePairedFASTQ(args['r1files'], args['r2files'], gzipped, applyfilter=True):
-            n['total read pairs'] += 1
+            n['read pairs (total)'] += 1
             if args['purgefrac'] and args['purgefrac'] > random.random():
-                n['randomly purged read pairs'] += 1
+                n['read pairs randomly purged'] += 1
             elif read_tup:
                 (name, r1, r2, q1, q2) = read_tup
                 (r1, r2) = dms_tools.utils.CheckReadQuality(r1, r2, q1, q2, args['minq'], 1, 0) # convert low quality to N
                 assert len(r1) >= args['barcodelength'], "R1 isn't as long as the required barcodelength"
                 barcode = r1[ : args['barcodelength']]
-                if args['trimR2']:
-                    r2 = r2[ : -args['trimR2']]
+                if args['trimR2'] and args['trimR2'] < len(r2):
+                    r2 = r2[ : args['trimR2']]
                 if ('N' in barcode) or (r2.count('N') > args['maxlowqfrac'] * len(r2)):
-                    n['low quality read pairs'] += 1
+                    n['read pairs purged due to low quality'] += 1
                 else:
                     if barcode in barcodes:
                         barcodes[barcode].append(r2)
@@ -112,23 +114,26 @@ def main():
                         barcodes[barcode] = [r2]
             else:
                 n['read pairs that fail Illumina filter'] += 1
-            if n['total read pairs'] % 1e5 == 0:
-                logger.info('Reads parsed so far: %d' % n['total read pairs'])
-        logger.info('Finished parsing all %d reads; ended up with %d unique barcodes that passed the quality filters.\n' % (n['total read pairs'], len(barcodes)))
+            if n['read pairs (total)'] % 1e5 == 0:
+                logger.info('Reads parsed so far: %d' % n['read pairs (total)'])
+        logger.info('Finished parsing all %d reads; ended up with %d unique barcodes that passed the quality filters.\n' % (n['read pairs (total)'], len(barcodes)))
 
         # now align reads to subassemble gene
         logger.info('Now subassembling barcodes by aligning reads...')
-        if not args['no_write_unaligned']:
-            logger.info('Unalignable reads will be written to %s' % unalignedfilename)
-            f_unaligned = open(unalignedfilename, 'w')
+        if not args['no_write_barcode_reads']:
+            logger.info('All reads for each barcode will be written to %s' % barcodereadsfilename)
+            f_barcodereads = open(barcodereadsfilename, 'w')
         nwithalignableread = 0 # number of barcodes with at least one alignable reads
         nreads_per_barcode = {}
+        subassembled_barcodes = {}
         refseqstarts = dict([(refseqstart, 0) for (refseqstart, r2start) in args['alignspecs']])
+        aligntypes = ['aligned at site %d' % refseqstart for (refseqstart, r2start) in args['alignspecs']] + ['unaligned']
         for (ibarcode, barcode) in enumerate(list(barcodes.keys())):
+            readalignments = dict([(aligntype, []) for aligntype in aligntypes])
             nalignedreads = 0 # number of alignable reads for this barcode
             counts = dict([(site, {}) for site in sites])
             if ibarcode % 1e5 == 0:
-                logger.info('Have attempted to subassemble %d barcodes; %d have had at least one alignable read.' % (ibarcode, nwithalignableread))
+                logger.info('Processed %d barcodes; %d have at least one alignable read; %d successfully subassembled.' % (ibarcode, nwithalignableread, len(subassembled_barcodes)))
             for read in barcodes[barcode]:
                 for (refseqstart, r2start) in args['alignspecs']:
                     if dms_tools.utils.AlignRead(refseq, read[r2start - 1 : ], refseqstart, args['maxmuts'], counts, args['chartype']):
@@ -136,20 +141,42 @@ def main():
                             nwithalignableread += 1
                         nalignedreads += 1
                         refseqstarts[refseqstart] += 1
+                        if not args['no_write_barcode_reads']:
+                            readalignments['aligned at site %d' % refseqstart].append(read)
                         break # aligned, go to next read
                 else:
-                    n['unalignable read pairs'] += 1
-                    if not args['no_write_unaligned']:
-                        f_unaligned.write('%s\n' % read)
-            if nalignedreads:
-                try:
-                    nreads_per_barcode[nalignedreads] += 1
-                except KeyError:
-                    nreads_per_barcode[nalignedreads] = 1
+                    n['read pairs that are unalignable'] += 1
+                    if not args['no_write_barcode_reads']:
+                        readalignments['unaligned'].append(read)
+            try:
+                nreads_per_barcode[nalignedreads] += 1
+            except KeyError:
+                nreads_per_barcode[nalignedreads] = 1
+            n['read pairs that are alignable'] += nalignedreads
+            seq = dms_tools.utils.Subassemble(counts, args['minreadspersite'], args['minreadconcurrence'])
+            if seq:
+                assert 'N' not in seq
+                subassembled_barcodes[barcode] = seq
+                n['read pairs that are alignable and map to a subassembled barcode'] += nalignedreads
+            if not args['no_write_barcode_reads']:
+                f_barcodereads.write('barcode = %s\nsuccessfully subassembled = %r\ntotal reads = %d\nalignable reads = %d\n' % (barcode, bool(seq), len(barcodes[barcode]), nalignedreads))
+                if seq:
+                    f_barcodereads.write('subassembled sequence = %s\n' % seq)
+                for aligntype in aligntypes:
+                    if readalignments[aligntype]:
+                        f_barcodereads.write('%s: %d reads\n\t%s\n' % (aligntype, len(readalignments[aligntype]), '\n\t'.join([read for read in readalignments[aligntype]])))
+                    else:
+                        f_barcodereads.write('%s: 0 reads\n' % aligntype)
+                f_barcodereads.write('\n')
             del barcodes[barcode] # frees some memory
-        logger.info('Overall, found at least %d barcodes with at least one alignable read.\n' % nwithalignableread)
-        if not args['no_write_unaligned']:
-            f_unaligned.close()
+        for (refseqstart, nrefseqstart) in refseqstarts.items():
+            n['read pairs aligned at site %d' % refseqstart] = nrefseqstart
+        logger.info('Overall, processed %d barcodes. Of these, %d barcodes had at least one alignable read and %d could be successfully subassembled.\n' % (ibarcode + 1, nwithalignableread, len(subassembled_barcodes)))
+        n['barcodes (total)'] = ibarcode + 1
+        n['barcodes with at least one alignable read'] = nwithalignableread
+        n['barcodes successfully subassembled'] = len(subassembled_barcodes)
+        if not args['no_write_barcode_reads']:
+            f_barcodereads.close()
         nreads_per_barcode_keys = nreads_per_barcode.keys()
         nreads_per_barcode_keys.sort()
         logger.info('Here are the number of barcodes with each number of alignable reads (also writing to %s):\n\tnreads\tnbarcodes\n\t%s\n' % (readsperbarcodefilename, '\n\t'.join(['%d\t%d' % (i, nreads_per_barcode[i]) for i in nreads_per_barcode_keys])))
@@ -158,6 +185,15 @@ def main():
         logger.info('Here are the distribution of positions where alignable reads began (also writing to %s):\n\trefseqstart\tnreads\n\t%s\n' % (refseqstartsfilename, '\n\t'.join(['%d\t%d' % (refseqstart, refseqstarts[refseqstart]) for (refseqstart, r2start) in args['alignspecs']])))
         with open(refseqstartsfilename, 'w') as f:
             f.write('refseqstart\tnreads\n%s' % '\n'.join(['%d\t%d' % (refseqstart, refseqstarts[refseqstart]) for (refseqstart, r2start) in args['alignspecs']]))
+        logger.info('Writing all of the %d subassembled variants to %s\n' % (len(subassembled_barcodes), subassembledfilename))
+        with open(subassembledfilename, 'w') as f:
+            for (barcode, variant) in subassembled_barcodes.items():
+                f.write('%s %s\n' % (barcode, variant))
+        summarycategories = n.keys()
+        summarycategories.sort()
+        logger.info('Here are summary stats for the reads and barcodes (also writing to %s):\n\t%s\n' % (summarystatsfilename, '\n\t'.join(["%s = %d" % (x, n[x]) for x in summarycategories])))
+        with open(summarystatsfilename, 'w') as f:
+            f.write('\n'.join(["%s = %d" % (x, n[x]) for x in summarycategories]))
 
     except:
         logger.exception('Terminating %s at %s with ERROR' % (prog, time.asctime()))
