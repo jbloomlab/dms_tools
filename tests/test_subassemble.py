@@ -40,7 +40,7 @@ class TestSubasssemble(unittest.TestCase):
         with open(self.correctsubassembly) as f:
             correct = dict([line.split() for line in f if not line.isspace()])
         with open(self.results) as f:
-            results = dict([line.split() for line in f if not line.isspace()])
+            results = dict([line.split()[ : 2] for line in f if not line.isspace()])
         barcodes_correct = set(correct.keys())
         barcodes_results = set(results.keys())
         self.assertFalse(barcodes_correct - barcodes_results, "Failed to subassemble all the expected barcodes. Did not get the following expected ones: %s" % ', '.join(barcodes_correct - barcodes_results))

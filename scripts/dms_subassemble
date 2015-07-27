@@ -45,6 +45,7 @@ def main():
     # define file names and delete existing files
     summarystatsfilename = '%s_summarystats.txt' % args['outprefix']
     subassembledfilename = '%s_subassembled_variants.txt' % args['outprefix']
+    nmutsfilename = '%s_nmuts_among_subassembled.txt' % args['outprefix']
     readsperbarcodefilename = "%s_alignablereadsperbarcode.txt" % args['outprefix']
     refseqstartsfilename = '%s_refseqstarts.txt' % args['outprefix']
     barcodereadsfilename = '%s_all_reads_by_barcode.txt' % args['outprefix']
@@ -172,13 +173,20 @@ def main():
                 (subassembled, seq) = (False, 'N' * len(refseq))
             if subassembled:
                 assert 'N' not in seq
-                subassembled_barcodes[barcode] = seq
+                assert len(seq) == len(refseq)
+                if args['chartype'] == 'codon':
+                    diffs = ['%s%d%s' % (refseq[3 * icodon : 3 * icodon + 3], icodon + 1, seq[3 * icodon : 3 * icodon + 3]) for icodon in range(len(refseq) // 3) if refseq[3 * icodon : 3 * icodon + 3] != seq[3 * icodon : 3 * icodon + 3]]
+                else:
+                    raise ValueError("Invalid codon type of %s" % args['chartype;'])
+                subassembled_barcodes[barcode] = (seq, diffs)
                 n['read pairs that are alignable and map to a subassembled barcode'] += nalignedreads
             if not args['no_write_barcode_reads']:
                 if failurestring:
                     assert not subassembled
                     failurestring = '\nreasons subassembly failed: %s' % failurestring
                 f_barcodereads.write('barcode = %s\nsuccessfully subassembled = %r%s\ntotal reads = %d\nalignable reads = %d\n' % (barcode, subassembled, failurestring, len(barcodes[barcode]), nalignedreads))
+                if subassembled:
+                    f_barcodereads.write('number of %s mutations = %d\nlist of %s mutations = %s\n' % (args['chartype'], len(diffs), args['chartype'], ', '.join(diffs)))
                 f_barcodereads.write('%ssubassembled sequence = %s\n' % ({True:'', False:'incompletely '}[subassembled], seq))
                 for aligntype in aligntypes:
                     if readalignments[aligntype]:
@@ -205,13 +213,26 @@ def main():
             f.write('refseqstart\tnreads\n%s' % '\n'.join(['%d\t%d' % (refseqstart, refseqstarts[refseqstart]) for (refseqstart, r2start) in args['alignspecs']]))
         logger.info('Writing all of the %d subassembled variants to %s\n' % (len(subassembled_barcodes), subassembledfilename))
         with open(subassembledfilename, 'w') as f:
-            for (barcode, variant) in subassembled_barcodes.items():
-                f.write('%s %s\n' % (barcode, variant))
+            for (barcode, (variant, diffs)) in subassembled_barcodes.items():
+                f.write('%s %s %s\n' % (barcode, variant, ','.join(diffs)))
         summarycategories = n.keys()
         summarycategories.sort()
         logger.info('Here are summary stats for the reads and barcodes (also writing to %s):\n\t%s\n' % (summarystatsfilename, '\n\t'.join(["%s = %d" % (x, n[x]) for x in summarycategories])))
         with open(summarystatsfilename, 'w') as f:
             f.write('\n'.join(["%s = %d" % (x, n[x]) for x in summarycategories]))
+
+        # count mutations among subassembled
+        mutcounts = {}
+        for (barcode, (variant, diffs)) in subassembled_barcodes.items():
+            try:
+                mutcounts[len(diffs)] += 1
+            except:
+                mutcounts[len(diffs)] = 1
+        mutcountkeys = mutcounts.keys()
+        mutcountkeys.sort()
+        logger.info('Here are the counts of %s mutations per gene among subassembled variants (also writing to %s):\n\tnmuts\tnvariants\n\t%s\n' % (args['chartype'], nmutsfilename, '\n\t'.join(['%d\t%d' % (m, mutcounts[m]) for m in mutcountkeys])))
+        with open(nmutsfilename, 'w') as f:
+            f.write('nmuts\tnvariants\n%s' % '\n'.join(['%d\t%d' % (m, mutcounts[m]) for m in mutcountkeys]))
 
     except:
         logger.exception('Terminating %s at %s with ERROR' % (prog, time.asctime()))
