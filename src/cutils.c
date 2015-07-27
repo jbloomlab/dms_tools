@@ -7,6 +7,78 @@
 #include <string.h>
 #include <math.h>
 
+static char AlignRead_docs[] = "Fast C implementation of *dms_tools.utils.AlignRead*.";
+
+static PyObject *AlignRead(PyObject *self, PyObject *args) {
+    PyErr_SetString(PyExc_ValueError, "Although this function appears to work correctly, it has a memory leak and does not improve performance. Use the pure Python implementation instead");
+    return NULL;
+    // Calling variables: refseq, read, refseqstart, maxmuts, counts, chartype
+    char *refseq, *read, *chartype, readcodon[4];
+    long refseqstart, maxmuts, nmuts, codonstart, readshift, ncodons, i, arrayindex, icodon, oldcount;
+    int has_N;
+    PyObject *counts;
+    PyObject *charlist = PyList_New(0);
+    PyObject *icharlist = PyList_New(0);
+    // Parse arguments
+    if (! PyArg_ParseTuple(args, "ssllO!s", &refseq, &read, &refseqstart, &maxmuts, &PyDict_Type, &counts, &chartype)) {
+        PyErr_SetString(PyExc_TypeError, "Invalid calling arguments to AlignRead");
+        return NULL;
+    }
+    if (strcmp(chartype, "codon") == 0) {
+        nmuts = 0;
+        codonstart = (long) (ceil((refseqstart - 1) / 3.0));
+        if (((refseqstart - 1) % 3) == 1) {
+            readshift = 2;
+        } else if (((refseqstart - 1) % 3) == 2) {
+            readshift = 1;
+        } else {
+            readshift = 0;
+        }
+        if (((strlen(read) - readshift) / 3) < (strlen(refseq) / 3 - codonstart)) {
+            ncodons = (strlen(read) - readshift) / 3;
+        } else {
+            ncodons = strlen(refseq) / 3 - codonstart;
+        }
+        arrayindex = 0;
+        for (icodon = 0; icodon < ncodons; icodon++) {
+            has_N = 0;
+            for (i = 0; i < 3; i++) {
+                readcodon[i] = read[readshift + 3 * icodon + i];
+                if (readcodon[i] == 'N') {
+                    has_N = 1;
+                }
+            }
+            readcodon[3] = '\0';
+            if (! has_N) {
+                if ((readcodon[0] != refseq[3 * (codonstart + icodon)]) || (readcodon[1] != refseq[3 * (codonstart + icodon) + 1]) || (readcodon[2] != refseq[3 * (codonstart + icodon) + 2])) {
+                    nmuts++;
+                    if (nmuts > maxmuts) {
+                        Py_RETURN_FALSE;
+                    }
+                }
+                PyList_Append(icharlist, PyInt_FromLong(icodon));
+                PyList_Append(charlist, PyString_FromString(readcodon));
+                arrayindex++;
+            }
+        }
+        for (i = 0; i < arrayindex; i++) {
+            PyObject *codon_number = PyInt_FromLong(PyInt_AsLong(PyList_GetItem(icharlist, i)) + codonstart + 1);
+            PyObject *idict = PyDict_GetItem(counts, codon_number);
+            PyObject *ipycodon = PyList_GetItem(charlist, i);
+            if (PyDict_Contains(idict, ipycodon)) {
+                oldcount = PyInt_AsLong(PyDict_GetItem(idict, ipycodon));
+                PyDict_SetItem(idict, ipycodon, PyInt_FromLong(1 + oldcount));
+            } else {
+                PyDict_SetItem(idict, ipycodon, PyInt_FromLong(1));
+            }
+        }
+        Py_RETURN_TRUE;
+    } else {
+        PyErr_SetString(PyExc_ValueError, "Invalid chartype");
+        return NULL;
+    }
+}
+
 
 static char AlignSubamplicon_docs[] = "Fast C implementation of *dms_tools.utils.AlignSubamplicon*.";
 
@@ -465,6 +537,7 @@ static PyMethodDef cutils_funcs[] = {
     {"CheckReadQuality", (PyCFunction) CheckReadQuality, METH_VARARGS, CheckReadQuality_docs},
     {"BuildReadConsensus", (PyCFunction) BuildReadConsensus, METH_VARARGS, BuildReadConsensus_docs},
     {"AlignSubamplicon", (PyCFunction) AlignSubamplicon, METH_VARARGS, AlignSubamplicon_docs},
+    {"AlignRead", (PyCFunction) AlignRead, METH_VARARGS, AlignRead_docs},
     {NULL}
 };
 

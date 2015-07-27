@@ -21,7 +21,6 @@ class TestSubasssemble(unittest.TestCase):
         self.r2 = '%s/R2.fastq' % self.subdir
         self.alignspecs = '1,3 61,1'
         self.barcodelength = 6
-        self.maxmuts = 3
         self.correctsubassembly = '%s/actual_barcoded_variants.txt' % self.subdir
         for f in [self.refseq, self.r1, self.r2, self.correctsubassembly]:
             self.assertTrue(os.path.isfile(f), 'Cannot find required file %s' % f)
@@ -33,7 +32,7 @@ class TestSubasssemble(unittest.TestCase):
 
     def test_Subassemble(self):
         """Runs ``dms_subassemble``."""
-        cmds = ['dms_subassemble', self.prefix, self.refseq, self.r1, self.r2, self.alignspecs, '--barcodelength', str(self.barcodelength), '--maxmuts', str(self.maxmuts)]
+        cmds = ['dms_subassemble', self.prefix, self.refseq, self.r1, self.r2, self.alignspecs, '--barcodelength', str(self.barcodelength)]
         self.assertFalse(os.path.isfile(self.results), '%s already exists' % self.results)
         sys.stderr.write('\nRunning the following command:\n%s\n' % ' '.join(cmds))
         os.system(' '.join(cmds))

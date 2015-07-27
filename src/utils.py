@@ -737,7 +737,7 @@ def AlignRead(refseq, read, refseqstart, maxmuts, counts, chartype):
 
     *counts* is a dictionary that keyed by every site of *chartype* in *refseq* using
     1, 2, ... numbering. 
-    
+
     This functions modifies *counts* as follows: *counts[isite][char]* is 
     incremented (creating entry for *char* if not already
     present) if the read aligns with a character of *char* at *isite*.
@@ -765,6 +765,19 @@ def AlignRead(refseq, read, refseqstart, maxmuts, counts, chartype):
     True
     >>> counts[1] == {} and counts[2] == {'GGA':1, 'GTA':2} and counts[3] == {}
     True
+
+    >>> refseq = 'ATGGGACCC'
+    >>> read = 'GGACCC'
+    >>> counts = {1:{}, 2:{}, 3:{}}
+    >>> AlignRead(refseq, read, 4, 1, counts, 'codon')
+    True
+    >>> counts[1] == {} and counts[2] == {'GGA':1} and counts[3] == {'CCC':1}
+    True
+    >>> read = 'NGACCC'
+    >>> AlignRead(refseq, read, 4, 1, counts, 'codon')
+    True
+    >>> counts[1] == {} and counts[2] == {'GGA':1} and counts[3] == {'CCC':2}
+    True
     """
     if chartype == 'codon':
         nmuts = 0
@@ -780,9 +793,9 @@ def AlignRead(refseq, read, refseqstart, maxmuts, counts, chartype):
                 nmuts += 1
                 if nmuts > maxmuts:
                     return False
-            charlist.append(readcodon)
+            charlist.append((icodon, readcodon))
         # if we made it here, read aligned
-        for (icodon, readcodon) in enumerate(charlist):
+        for (icodon, readcodon) in charlist:
             codon_number = icodon + codonstart + 1
             try:
                 counts[codon_number][readcodon] += 1
@@ -806,34 +819,57 @@ def Subassemble(counts, minpersite, minconcurrence):
     at that site. *minconcurrence* must be > 0.5 to ensure a unique
     subassembly. *minpersite* must be >= 1.
 
-    If the read can be subassembled, returns the resulting sequence.
-    If it cannot be subassembled, returns *False*.
+    The return variable is the 3-tuple *(subassembled, seq, failurestring)*.
+    *subassembled* is *True* if the subassembly is successful at all sites,
+    and *False* otherwise. *seq* is the subassembled sequence; at sites
+    that cannot be successfully subassembled there is an ``N`` (for nucleotide
+    characters) or a ``NNN`` (for codon characters). *failurestring* is a string
+    given the reason subassembly failed (or '') if subassembly succeeded.
 
     >>> counts = {1:{'ATG':2}, 2:{'GGA':4, 'AGA':1}}
     >>> Subassemble(counts, 2, 0.8)
-    'ATGGGA'
+    (True, 'ATGGGA', '')
     >>> Subassemble(counts, 3, 0.8)
-    False
+    (False, 'NNNGGA', 'insufficient counts at 1')
     >>> Subassemble(counts, 2, 0.9)
-    False
+    (False, 'ATGNNN', 'insufficient concurrence at 2')
+
+    >>> counts = {1:{}, 2:{'GGA':4, 'AGA':1}}
+    >>> Subassemble(counts, 2, 0.8)
+    (False, 'NNNGGA', 'no counts at 1')
     """
     sites = counts.keys()
+    site_with_counts = [counts[site] for site in sites if counts[site]]
+    assert site_with_counts, "No counts for any sites: %s" % str(counts)
+    charlength = len(site_with_counts[0].keys()[0])
     assert minpersite >= 1, "minpersite is not >= 1: %f" % minpersite
     assert 0.5 < minconcurrence <= 1.0, "minconcurrence is not > 0.5 and <= 1: %f" % minconcurrence
     assert sites and min(sites) == 1 and max(sites) - min(sites) == len(sites) - 1 and len(sites) == len(set(sites)), "counts does not specify a list of consecutive site numbers starting at one: %s" % str(sites)
     seq = []
+    subassembled = True
+    reasons = ['no counts', 'insufficient counts', 'insufficient concurrence']
+    failure_reasons = dict([(reason, []) for reason in reasons])
     for site in sites:
         if not counts[site]:
-            return False # no counts for site
+            subassembled = False
+            seq.append('N' * charlength) # no counts for site
+            failure_reasons['no counts'].append(str(site))
         else:
             sitecounts = sum(counts[site].values())
             countsortedchars = [(count, char) for (char, count) in counts[site].items()]
             countsortedchars.sort()
-            if countsortedchars[-1][0] >= minpersite and countsortedchars[-1][0] / float(sitecounts) >= minconcurrence:
-                seq.append(countsortedchars[-1][1])
+            if countsortedchars[-1][0] < minpersite:
+                seq.append('N' * len(countsortedchars[-1][1]))
+                failure_reasons['insufficient counts'].append(str(site))
+                subassembled = False
+            elif countsortedchars[-1][0] / float(sitecounts) < minconcurrence:
+                seq.append('N' * len(countsortedchars[-1][1]))
+                failure_reasons['insufficient concurrence'].append(str(site))
+                subassembled = False
             else:
-                return False
-    return ''.join(seq)
+                seq.append(countsortedchars[-1][1])
+    failurestring = '; '.join(["%s at %s" % (reason, ', '.join(failure_reasons[reason])) for reason in reasons if failure_reasons[reason]])
+    return (subassembled, ''.join(seq), failurestring)
 
 
 def AlignSubamplicon(refseq, r1, r2, refseqstart, refseqend, maxmuts, maxN, chartype, counts, use_cutils=True):

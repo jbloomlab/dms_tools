@@ -55,13 +55,13 @@ Subassembly algorithm
 
 #. The paired *R1* and *R2* reads are read from ``r1files`` and ``r2files``, and any nucleotide that has a Q score < ``--minq`` is converted to an ``N`` (e.g. considered ambiguous).
 
-#. The *R1* read is only processed to extract the barcode (the first ``--barcodelength`` nucleotides) and any remaining nucleotides in *R1* are discarded. The *R2* read is trimmed from its 3' end as specified by ``--trimR2``. The read pair is then discarded if:
+#. The *R1* read is only processed to extract the barcode (the first ``--barcodelength`` nucleotides) and any remaining nucleotides in *R1* are discarded. The read pair is then discarded if:
 
     * There are any ``N`` nucleotides in the barcode.
     
     * The fraction of ``N`` nucleotides in the trimmed *R2* read is > ``--maxlowqfrac``.
 
-#. An attempt is made to gaplessly align the trimmed *R2* read at each site specified by ``alignspecs``. Briefly, ``alignspecs`` specifies pairs of numbers *REFSEQSTART* and *R2START*. For each trimmed *R2* read, we try to align the read starting at nucleotide *R2START* (1, 2, ... numbering) at nucleotide *REFSEQSTART* in ``refseq``. If the read gaplessly aligns with no more than ``--maxmuts`` mutations of character type ``--chartype``, the alignment is considered successful. Read that fail to align are written ``<outprefix>_unaligned.txt`` depending on the value of ``--no_write_unaligned`` and then discarded. Otherwise, reads are retained.
+#. An attempt is made to gaplessly align the trimmed *R2* read at each site specified by ``alignspecs``. Briefly, ``alignspecs`` specifies pairs of numbers *REFSEQSTART* and *R2START*. For *R2* read, we try to align the read starting at nucleotide *R2START* (1, 2, ... numbering) at nucleotide *REFSEQSTART* in ``refseq``. If ``--trimR2`` has its default value of *auto*, we only try to align up to where the next subamplicon would be (effectively trimming the unneeded part of *R2* from its 3' end). If the read gaplessly aligns with no more than ``--maxmuts`` mutations of character type ``--chartype``, the alignment is considered successful. Read that fail to align are written ``<outprefix>_unaligned.txt`` depending on the value of ``--no_write_unaligned`` and then discarded. Otherwise, reads are retained.
 
 #. After collecting all alignable trimmed *R2* reads for a barcode, we then see if we have enough coverage to subassemble the gene. We call identities in the gene only if the character (which may be a codon character rather than a nucleotide character, see ``--chartype``) has at least ``--minreadspersite`` non-ambiguous (not ``N``) reads covering it and :math:`\ge` ``--minreadconcurrence`` of this reads concur on its identity.
 

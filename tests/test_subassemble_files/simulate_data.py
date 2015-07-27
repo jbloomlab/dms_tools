@@ -25,7 +25,7 @@ def main():
     nts = 'ATCG'
     ncodons = 40
     alignspecs = [(1, 3), (61, 1)]
-    readlength = 70
+    readlength = 60
     refseq = ''.join([random.choice(nts) for i in range(ncodons * 3)])
     with open('refseq.fasta', 'w') as f:
         f.write(">refseq\n%s" % refseq)
@@ -33,7 +33,7 @@ def main():
     nvariants = 8
     mutrate = 1.0 / ncodons
     errorrate = 1.0 / ncodons / 3.0
-    nreadspersubamplicon = 20
+    nreadspersubamplicon = 40
     qscore = '9'
     r1header = '@M03100:54:000000000-AH22W:1:1101:15279:2347 1:N:0:1'
     r2header = '@M03100:54:000000000-AH22W:1:1101:15279:2347 2:N:0:1'
@@ -58,7 +58,7 @@ def main():
             for iread in range(nreadspersubamplicon):
                 r1 = barcode + refseq[-2 : ]
                 r1 = NTMutate(r1, errorrate)
-                r2 = ''.join([random.choice(nts) for i in range(r2start - 1)]) + NTMutate(variant[refseqstart - 1 : readlength + refseqstart - 1], errorrate)
+                r2 = ''.join([random.choice(nts) for i in range(r2start - 1)]) + NTMutate(variant[refseqstart - 1 : readlength + refseqstart - 1], errorrate) + ''.join([random.choice(nts) for i in range(7)])
                 r1file.write('%s\n%s\n+\n%s\n' % (r1header, r1, qscore * len(r1)))
                 r2file.write('%s\n%s\n+\n%s\n' % (r2header, r2, qscore * len(r2)))
     barcodefile.close()
