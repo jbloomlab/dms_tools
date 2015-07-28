@@ -303,7 +303,7 @@ def SubassembleParser():
     parser.add_argument('alignspecs', nargs='+', help="This argument is repeated to specify each possible alignment location for R2. Each specification is two comma-delimited integers (no spaces): 'REFSEQSTART,R2START'. REFSEQSTART is nucleotide (1, 2, ... numbering) in 'refseq' where nucleotide R2START in R2 aligns.", type=R2AlignSpecs)
     parser.add_argument('--barcodelength', type=NonNegativeInt, default=18, help='Length of barcode (NNN...) which starts at beginning of R1.')
     parser.add_argument('--trimR2', choices=['auto', 'none'], default='auto', help="Trim R2 read? If 'auto', trim until start of next subamplicon specified by 'alignspecs'; if 'none' no trimming.")
-    parser.add_argument('--minq', type=NonNegativeInt, default=15, help='Nucleotides with Q scores < this number are converted to N.')
+    parser.add_argument('--minq', type=NonNegativeInt, default=25, help='Nucleotides with Q scores < this number are converted to N.')
     parser.add_argument('--maxlowqfrac', default=0.15, type=FloatBetweenZeroAndOne, help='Only retain if fraction of N nucleotides in R2 read <= this.')
     parser.add_argument('--maxmuts', type=NonNegativeInt, default=4, help='Only align read if <= this many mismatches with "refseq" counted in terms of "chartype".')
     parser.add_argument('--minreadspersite', default=2, type=IntGreaterEqual1, help='Call site only barcodes when >= this many reads give it a non-ambiguous identity.')
