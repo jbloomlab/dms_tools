@@ -304,7 +304,7 @@ def SubassembleParser():
     parser.add_argument('--barcodelength', type=NonNegativeInt, default=18, help='Length of barcode (NNN...) which starts at beginning of R1.')
     parser.add_argument('--trimR2', choices=['auto', 'none'], default='auto', help="Trim R2 read? If 'auto', trim until start of next subamplicon specified by 'alignspecs'; if 'none' no trimming.")
     parser.add_argument('--minq', type=NonNegativeInt, default=15, help='Nucleotides with Q scores < this number are converted to N.')
-    parser.add_argument('--maxlowqfrac', default=0.05, type=FloatBetweenZeroAndOne, help='Only retain if fraction of N nucleotides in R2 read <= this.')
+    parser.add_argument('--maxlowqfrac', default=0.15, type=FloatBetweenZeroAndOne, help='Only retain if fraction of N nucleotides in R2 read <= this.')
     parser.add_argument('--maxmuts', type=NonNegativeInt, default=4, help='Only align read if <= this many mismatches with "refseq" counted in terms of "chartype".')
     parser.add_argument('--minreadspersite', default=2, type=IntGreaterEqual1, help='Call site only barcodes when >= this many reads give it a non-ambiguous identity.')
     parser.add_argument('--minreadconcurrence', default=0.75, type=FloatBetweenHalfAndOne, help="Only call sites when >= this fraction of reads concur.")

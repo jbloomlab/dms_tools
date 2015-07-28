@@ -807,12 +807,15 @@ def AlignRead(refseq, read, refseqstart, maxmuts, counts, chartype):
         raise ValueError("Invalid chartype of %s" % chartype)
 
 
-def Subassemble(counts, minpersite, minconcurrence):
+def Subassemble(counts, minpersite, minconcurrence, refseq_chars):
     """Subassembles sequence if possible.
 
     *counts* is keyed by all site numbers (1, 2, ... numbering) in the 
     sequence. *counts[r][x]* is the number of counts for character *x*
     at site *r*. 
+
+    *refseq_chars* is keyed by all site numbers, and the value is
+    the wildtype (reference sequence) character at that site.
 
     A read is subassembled if there are >= *minpersite* counts at each 
     site, and >= *minconcurrence* of these counts agree on the identity
@@ -827,18 +830,24 @@ def Subassemble(counts, minpersite, minconcurrence):
     given the reason subassembly failed (or '') if subassembly succeeded.
 
     >>> counts = {1:{'ATG':2}, 2:{'GGA':4, 'AGA':1}}
-    >>> Subassemble(counts, 2, 0.8)
+    >>> refseq_chars = {1:'ATG', 2:'AGA'}
+    >>> Subassemble(counts, 2, 0.8, refseq_chars)
     (True, 'ATGGGA', '')
-    >>> Subassemble(counts, 3, 0.8)
+    >>> Subassemble(counts, 3, 0.8, refseq_chars)
     (False, 'NNNGGA', 'insufficient counts at 1')
-    >>> Subassemble(counts, 2, 0.9)
-    (False, 'ATGNNN', 'insufficient concurrence at 2')
+    >>> Subassemble(counts, 2, 0.9, refseq_chars)
+    (False, 'ATGNNN', 'insufficient concurrence between mutant and wildtype identity at 2')
+    >>> refseq_chars = {1:'ATG', 2:'TGA'}
+    >>> Subassemble(counts, 2, 0.9, refseq_chars)
+    (False, 'ATGNNN', 'insufficient concurrence between two mutant identities at 2')
 
     >>> counts = {1:{}, 2:{'GGA':4, 'AGA':1}}
-    >>> Subassemble(counts, 2, 0.8)
+    >>> refseq_chars = {1:'ATG', 2:'AGA'}
+    >>> Subassemble(counts, 2, 0.8, refseq_chars)
     (False, 'NNNGGA', 'no counts at 1')
     """
     sites = counts.keys()
+    assert set(sites) == set(refseq_chars.keys()), "counts and refseq_chars do not have same sites"
     site_with_counts = [counts[site] for site in sites if counts[site]]
     assert site_with_counts, "No counts for any sites: %s" % str(counts)
     charlength = len(site_with_counts[0].keys()[0])
@@ -847,7 +856,7 @@ def Subassemble(counts, minpersite, minconcurrence):
     assert sites and min(sites) == 1 and max(sites) - min(sites) == len(sites) - 1 and len(sites) == len(set(sites)), "counts does not specify a list of consecutive site numbers starting at one: %s" % str(sites)
     seq = []
     subassembled = True
-    reasons = ['no counts', 'insufficient counts', 'insufficient concurrence']
+    reasons = ['no counts', 'insufficient counts', 'insufficient concurrence between mutant and wildtype identity', 'insufficient concurrence between two mutant identities']
     failure_reasons = dict([(reason, []) for reason in reasons])
     for site in sites:
         if not counts[site]:
@@ -864,8 +873,11 @@ def Subassemble(counts, minpersite, minconcurrence):
                 subassembled = False
             elif countsortedchars[-1][0] / float(sitecounts) < minconcurrence:
                 seq.append('N' * len(countsortedchars[-1][1]))
-                failure_reasons['insufficient concurrence'].append(str(site))
                 subassembled = False
+                if countsortedchars[-2][1] == refseq_chars[site]:
+                    failure_reasons['insufficient concurrence between mutant and wildtype identity'].append(str(site))
+                else:
+                    failure_reasons['insufficient concurrence between two mutant identities'].append(str(site))
             else:
                 seq.append(countsortedchars[-1][1])
     failurestring = '; '.join(["%s at %s" % (reason, ', '.join(failure_reasons[reason])) for reason in reasons if failure_reasons[reason]])

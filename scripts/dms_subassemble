@@ -7,6 +7,7 @@ Written by Jesse Bloom."""
 
 import sys
 import os
+import re
 import time
 import logging
 import gzip
@@ -55,6 +56,9 @@ def main():
             os.remove(f)
             logger.info("Removing existing file %s" % f)
 
+    mutwtconcurrencematch = re.compile('insufficient concurrence between mutant and wildtype identity at (?P<sites>[ ,\d]+)')
+    mutmutconcurrencematch = re.compile('insufficient concurrence between two mutant identities at (?P<sites>[ ,\d]+)')
+
     # log in try / except loop
     try:
         versionstring = dms_tools.file_io.Versions() 
@@ -68,6 +72,7 @@ def main():
         if args['chartype'] == 'codon':
             assert len(refseq) % 3 == 0, "refseq does not specify a sequence of codons since its length of %d nucleotides is not a multiple of 3" % (len(refseq))
             sites = [i + 1 for i in range(len(refseq) // 3)]
+            refseq_chars = dict([(site, refseq[3 * site - 3 : 3 * site]) for site in sites]) # keyed by sites, values are char at that site
             logger.info('Read a reference sequence of %d codons from %s\n' % (len(refseq) // 3, args['refseq']))
         else:
             raise ValueError("Invalid chartype")
@@ -89,7 +94,7 @@ def main():
             gzipped = False
 
         # collect 3' trimmed R2 reads by barcode while filtering low quality reads
-        readcategories = ['read pairs (total)', 'read pairs that fail Illumina filter', 'read pairs purged due to low quality', 'read pairs that are unalignable', 'read pairs that are alignable and map to a subassembled barcode', 'read pairs that are alignable']
+        readcategories = ['read pairs (total)', 'read pairs that fail Illumina filter', 'read pairs purged due to low quality', 'read pairs that are unalignable', 'read pairs that are alignable and map to a subassembled barcode', 'read pairs that are alignable', 'sites with insufficient concurrence due to mismatch between two mutant characters', 'sites with insufficient concurrence due to mismatch between mutant and wildtype characters']
         if args['purgefrac']:
             readcategories.append('read pairs randomly purged')
         n = dict([(category, 0) for category in readcategories])
@@ -168,18 +173,24 @@ def main():
                 nreads_per_barcode[nalignedreads] = 1
             n['read pairs that are alignable'] += nalignedreads
             if nalignedreads:
-                (subassembled, seq, failurestring) = dms_tools.utils.Subassemble(counts, args['minreadspersite'], args['minreadconcurrence'])
+                (subassembled, seq, failurestring) = dms_tools.utils.Subassemble(counts, args['minreadspersite'], args['minreadconcurrence'], refseq_chars)
             else:
                 (subassembled, seq) = (False, 'N' * len(refseq))
             if subassembled:
                 assert 'N' not in seq
                 assert len(seq) == len(refseq)
                 if args['chartype'] == 'codon':
-                    diffs = ['%s%d%s' % (refseq[3 * icodon : 3 * icodon + 3], icodon + 1, seq[3 * icodon : 3 * icodon + 3]) for icodon in range(len(refseq) // 3) if refseq[3 * icodon : 3 * icodon + 3] != seq[3 * icodon : 3 * icodon + 3]]
+                    diffs = ['%s%d%s' % (refseq_chars[icodon], icodon, seq[3 * icodon - 3 : 3 * icodon]) for icodon in sites if refseq_chars[icodon] != seq[3 * icodon - 3 : 3 * icodon]]
                 else:
                     raise ValueError("Invalid codon type of %s" % args['chartype;'])
                 subassembled_barcodes[barcode] = (seq, diffs)
                 n['read pairs that are alignable and map to a subassembled barcode'] += nalignedreads
+            elif nalignedreads:
+                # keep track of how many mismatches are mutant-mutant versus mutant-wildtype
+                for (key, match) in [('sites with insufficient concurrence due to mismatch between two mutant characters', mutmutconcurrencematch), ('sites with insufficient concurrence due to mismatch between mutant and wildtype characters', mutwtconcurrencematch)]:
+                    m = match.search(failurestring)
+                    if m:
+                        n[key] += len(m.group('sites').split(','))
             if not args['no_write_barcode_reads']:
                 if failurestring:
                     assert not subassembled
