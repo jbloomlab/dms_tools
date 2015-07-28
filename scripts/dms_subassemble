@@ -49,7 +49,7 @@ def main():
     readsperbarcodefilename = "%s_alignablereadsperbarcode.txt" % args['outprefix']
     refseqstartsfilename = '%s_refseqstarts.txt' % args['outprefix']
     barcodereadsfilename = '%s_all_reads_by_barcode.txt' % args['outprefix']
-    outfilenames = [barcodereadsfilename, refseqstartsfilename, readsperbarcodefilename, subassembledfilename, summarystatsfilename]
+    outfilenames = [barcodereadsfilename, refseqstartsfilename, readsperbarcodefilename, subassembledfilename, summarystatsfilename, nmutsfilename]
     for f in outfilenames:
         if os.path.isfile(f):
             os.remove(f)
@@ -230,9 +230,10 @@ def main():
                 mutcounts[len(diffs)] = 1
         mutcountkeys = mutcounts.keys()
         mutcountkeys.sort()
-        logger.info('Here are the counts of %s mutations per gene among subassembled variants (also writing to %s):\n\tnmuts\tnvariants\n\t%s\n' % (args['chartype'], nmutsfilename, '\n\t'.join(['%d\t%d' % (m, mutcounts[m]) for m in mutcountkeys])))
+        logger.info('Here are the counts of %s mutations per gene among subassembled variants (also writing to %s):\n\tnmuts\tnvariants\n\t%s' % (args['chartype'], nmutsfilename, '\n\t'.join(['%d\t%d' % (m, mutcounts[m]) for m in mutcountkeys])))
         with open(nmutsfilename, 'w') as f:
             f.write('nmuts\tnvariants\n%s' % '\n'.join(['%d\t%d' % (m, mutcounts[m]) for m in mutcountkeys]))
+        logger.info('The overall average mutation rate is %.3f\n' % sum([x * float(m) / float(sum(mutcounts.values())) for (x, m) in mutcounts.items()]))
 
     except:
         logger.exception('Terminating %s at %s with ERROR' % (prog, time.asctime()))
