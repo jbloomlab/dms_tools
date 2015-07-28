@@ -34,7 +34,7 @@ def main():
     mutrate = 1.0 / ncodons
     errorrate = 1.0 / ncodons / 3.0
     nreadspersubamplicon = 40
-    qscore = '9'
+    qscore = 'G'
     r1header = '@M03100:54:000000000-AH22W:1:1101:15279:2347 1:N:0:1'
     r2header = '@M03100:54:000000000-AH22W:1:1101:15279:2347 2:N:0:1'
     r1file = open('R1.fastq', 'w')

@@ -143,6 +143,7 @@ def main():
                 r2_3trim[refseqstart] = 3 * (first_codon_next_subamplicon - 1) - refseqstart + r2start
             else:
                 raise ValueError("Invalid chartype of %s" % args['chartype'])
+        ibarcode = 0
         for (ibarcode, barcode) in enumerate(list(barcodes.keys())):
             readalignments = dict([(aligntype, []) for aligntype in aligntypes])
             nalignedreads = 0 # number of alignable reads for this barcode
@@ -225,7 +226,10 @@ def main():
         logger.info('Writing all of the %d subassembled variants to %s\n' % (len(subassembled_barcodes), subassembledfilename))
         with open(subassembledfilename, 'w') as f:
             for (barcode, (variant, diffs)) in subassembled_barcodes.items():
-                f.write('%s %s %s\n' % (barcode, variant, ','.join(diffs)))
+                if diffs:
+                    f.write('%s %s %s\n' % (barcode, variant, ','.join(diffs)))
+                else:
+                    f.write('%s %s no_mutations\n' % (barcode, variant))
         summarycategories = n.keys()
         summarycategories.sort()
         logger.info('Here are summary stats for the reads and barcodes (also writing to %s):\n\t%s\n' % (summarystatsfilename, '\n\t'.join(["%s = %d" % (x, n[x]) for x in summarycategories])))
