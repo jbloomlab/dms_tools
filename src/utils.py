@@ -845,6 +845,11 @@ def Subassemble(counts, minpersite, minconcurrence, refseq_chars):
     >>> refseq_chars = {1:'ATG', 2:'AGA'}
     >>> Subassemble(counts, 2, 0.8, refseq_chars)
     (False, 'NNNGGA', 'no counts at 1')
+
+    >>> counts = {1:{'GGA':1}, 2:{'AGA':1}}
+    >>> refseq_chars = {1:'ATG', 2:'AGA'}
+    >>> Subassemble(counts, 1, 0.75, refseq_chars)
+    (True, 'GGAAGA', '')
     """
     sites = counts.keys()
     assert set(sites) == set(refseq_chars.keys()), "counts and refseq_chars do not have same sites"

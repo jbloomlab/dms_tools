@@ -93,7 +93,7 @@ def main():
                 raise ValueError("Some but not all of the r1files and r2files are gzipped. Either all or no files can be gzipped.")
             gzipped = False
 
-        # collect 3' trimmed R2 reads by barcode while filtering low quality reads
+        # collect reads by barcode while filtering low quality reads
         readcategories = ['read pairs (total)', 'read pairs that fail Illumina filter', 'read pairs purged due to low quality', 'read pairs that are unalignable', 'read pairs that are alignable and map to a subassembled barcode', 'read pairs that are alignable', 'sites with insufficient concurrence due to mismatch between two mutant characters', 'sites with insufficient concurrence due to mismatch between mutant and wildtype characters']
         if args['purgefrac']:
             readcategories.append('read pairs randomly purged')
