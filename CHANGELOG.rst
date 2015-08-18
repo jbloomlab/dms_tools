@@ -5,6 +5,10 @@ Changelog
 -------------
 * Added ``dms_subassemble`` program
 
+1.1.5
+---------
+* Added additional options for logo plots showing preferences and differential preferences 
+
 1.1.4
 ----------
 * Some minor documentation updates
@@ -39,7 +43,7 @@ Changelog
 
 1.1.0
 ------
-* Added ``dms_barcodedsubamplicons`` and ``dms_summarizealignments` programs
+* Added ``dms_barcodedsubamplicons`` and ``dms_summarizealignments`` programs
 
 1.0.1
 --------
