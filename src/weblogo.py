@@ -95,7 +95,7 @@ def KyteDoolittleColorMapping(maptype='jet', reverse=True):
 
 
 
-def LogoPlot(sites, datatype, data, plotfile, nperline, numberevery=10, allowunsorted=False, ydatamax=1.01, overlay=None):
+def LogoPlot(sites, datatype, data, plotfile, nperline, numberevery=10, allowunsorted=False, ydatamax=1.01, overlay=None, fix_limits={}, fixlongname=False, overlay_cmap=None):
     """Constructs a sequence logo showing amino-acid or nucleotide preferences.
 
     The heights of each letter is equal to the preference of
@@ -107,7 +107,7 @@ def LogoPlot(sites, datatype, data, plotfile, nperline, numberevery=10, allowuns
     CALLING VARIABLES:
 
     * *sites* is a list of all of the sites that are being included
-      in the logo, as strings or numbers. They must be in natural sort order (as
+      in the logo, as strings. They must be in natural sort order (as
       is done by *dms_tools.utils.NaturalSort*) or an error will
       be raised **unless** *allowunsorted* is *True*. The sites
       in the plot are ordered in the same arrangement
@@ -166,6 +166,20 @@ def LogoPlot(sites, datatype, data, plotfile, nperline, numberevery=10, allowuns
         - *longname* : longer name for property used on axes label. Can be the
           same as *shortname* if you don't need a different long name.
 
+    * *fix_limits* is only meaningful if *overlay* is being used. In this case, for any
+      *shortname* in *overlay* that also keys and entry in *fix_limits*, we use
+      *fix_limits[shortname]* to set the limits for *shortname*. Specifically,
+      *fix_limits[shortname]* should be the 2-tuple *(ticks, ticknames)*. *ticks*
+      should be a list of tick locations (numbers) and *ticknames* should be a list of
+      the corresponding tick label for that tick.
+
+    * If *fixlongname* is *True*, then we use the *longname* in *overlay* exactly as written;
+      otherwise we add a parenthesis indicating the *shortname* for which this *longname*
+      stands.
+
+    * *overlay_cmap* can be the name of a valid *matplotlib.colors.Colormap*, such as the
+      string *jet* or *bwr*. Otherwise, it can be *None* and a (hopefully) good choice will 
+      be made for you.
     """
     assert datatype in ['prefs', 'diffprefs']
 
@@ -312,7 +326,7 @@ def LogoPlot(sites, datatype, data, plotfile, nperline, numberevery=10, allowuns
             foverlay = os.fdopen(fdoverlay, 'wb')
             foverlay.close() # close, but we still have the path overlayfile...
             fmerged = os.fdopen(fdmerged, 'wb')
-            LogoOverlay(sites, overlayfile, overlay, nperline, sitewidth=stackwidth, rmargin=rmargin, logoheight=stackwidth * stackaspectratio + stackheightmargin, barheight=barheight, barspacing=barspacing)
+            LogoOverlay(sites, overlayfile, overlay, nperline, sitewidth=stackwidth, rmargin=rmargin, logoheight=stackwidth * stackaspectratio + stackheightmargin, barheight=barheight, barspacing=barspacing, fix_limits=fix_limits, fixlongname=fixlongname, overlay_cmap=overlay_cmap)
             plotfile_f = open(plotfile, 'rb')
             plot = PyPDF2.PdfFileReader(plotfile_f).getPage(0)
             overlayfile_f = open(overlayfile, 'rb')
@@ -718,7 +732,7 @@ class _my_Motif(corebio.matrix.AlphabeticArray) :
 #==============================================================
 
 
-def LogoOverlay(sites, overlayfile, overlay, nperline, sitewidth, rmargin, logoheight, barheight, barspacing):
+def LogoOverlay(sites, overlayfile, overlay, nperline, sitewidth, rmargin, logoheight, barheight, barspacing, fix_limits={}, fixlongname=False, overlay_cmap=None):
     """Makes overlay for *LogoPlot*.
 
     This function creates colored bars overlay bars showing up to two
@@ -747,13 +761,21 @@ def LogoOverlay(sites, overlayfile, overlay, nperline, sitewidth, rmargin, logoh
 
     * *barspacing* is the vertical spacing between bars in points.
 
-    * *cmap* is a ``pylab`` *LinearSegmentedColorMap* used for the bar coloring.
+    * *fix_limits* has the same meaning of the variable of this name used by *LogoPlot*.
+
+    * *fixlongname* has the same meaning of the variable of this name used by *LogoPlot*.
+
+    * *overlay_cmap* has the same meaning of the variable of this name used by *LogoPlot*.
     """
     if not pylab.get_backend().lower() == 'pdf':
         raise ValueError("You cannot use this function without first setting the matplotlib / pylab backend to 'pdf'. Do this with: matplotlib.use('pdf')")
     if os.path.splitext(overlayfile)[1] != '.pdf':
         raise ValueError("overlayfile must end in .pdf: %s" % overlayfile)
-    (cmap, mapping_d, mapper) = KyteDoolittleColorMapping()
+    if not overlay_cmap:
+        (cmap, mapping_d, mapper) = KyteDoolittleColorMapping()
+    else:
+        mapper = pylab.cm.ScalarMappable(cmap=overlay_cmap)
+        cmap = mapper.get_cmap()
     pts_per_inch = 72.0 # to convert between points and inches
     # some general properties of the plot
     matplotlib.rc('text', usetex=True)
@@ -793,6 +815,9 @@ def LogoOverlay(sites, overlayfile, overlay, nperline, sitewidth, rmargin, logoh
                     vmax = 1.0
         else:
             raise ValueError("Property %s is neither continuous or discrete. Values are:\n%s" % (shortname, str(prop_d.items())))
+        if shortname in fix_limits:
+            (vmin, vmax) = (min(fix_limits[shortname][0]), max(fix_limits[shortname][0]))
+        assert vmin < vmax, "vmin >= vmax, did you incorrectly use fix_vmin and fix_vmax?"
         prop_types[shortname] = (proptype, vmin, vmax, propcategories)
     assert len(prop_types) == len(overlay), "Not as many property types as overlays. Did you give the same name (shortname) to multiple properties in the overlay?"
     # loop over each line of the multi-lined plot
@@ -839,7 +864,9 @@ def LogoOverlay(sites, overlayfile, overlay, nperline, sitewidth, rmargin, logoh
     for (icolorbar, (prop_d, shortname, longname)) in enumerate(overlay):
         (proptype, vmin, vmax, propcategories) = prop_types[shortname]
         if shortname == longname or not longname:
-            propame = shortname
+            propname = shortname
+        elif fixlongname:
+            propname = longname
         else:
             propname = "%s (%s)" % (longname, shortname)
 #        colorbar_ax = pylab.axes([colorbarspacingwidth * 0.5 + icolorbar * (colorbarwidth + colorbarspacingwidth), 1.0 - (colorbar_tmargin + barheight) / figwidth, colorbarwidth, barheight / figwidth], frameon=True)
@@ -855,12 +882,21 @@ def LogoOverlay(sites, overlayfile, overlay, nperline, sitewidth, rmargin, logoh
             if -0.1 <= vmin <= 0 and 1.0 <= vmax <= 1.15:
                 cb.set_ticks([0, 0.5, 1])
                 cb.set_ticklabels(['0', '0.5', '1'])
+            # if it seems plausible, set integer ticks
+            if 4 < (vmax - vmin) <= 11:
+                fixedticks = [itick for itick in range(int(vmin), int(vmax) + 1)]
+                cb.set_ticks(fixedticks)
+                cb.set_ticklabels([str(itick) for itick in fixedticks])
         elif proptype == 'discrete':
             cb = pylab.colorbar(prop_image[shortname], cax=colorbar_ax, orientation='horizontal', boundaries=[i for i in range(len(propcategories) + 1)], values=[i for i in range(len(propcategories))])
             cb.set_ticks([i + 0.5 for i in range(len(propcategories))])
             cb.set_ticklabels(propcategories)
         else:
             raise ValueError("Invalid proptype")
+        if shortname in fix_limits:
+            (ticklocs, ticknames) = fix_limits[shortname]
+            cb.set_ticks(ticklocs)
+            cb.set_ticklabels(ticknames)
     # save the plot
     pylab.savefig(overlayfile, transparent=True)
 

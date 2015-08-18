@@ -1,4 +1,4 @@
-__version__ = '1.1.4'
+__version__ = '1.1.5'
 __author__ = 'Jesse D. Bloom'
 __url__ = 'http://jbloom.github.io/dms_tools/'
 __author_email__ = 'jbloom@fredhutch.org'

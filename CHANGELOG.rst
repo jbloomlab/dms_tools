@@ -1,6 +1,10 @@
 Changelog
 ===========
 
+1.1.5
+---------
+* Added additional options for logo plots showing preferences and differential preferences 
+
 1.1.4
 ----------
 * Some minor documentation updates
