@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Python API &mdash; dms_tools 1.1.4 documentation</title>
+    <title>Python API &mdash; dms_tools 1.1.5 documentation</title>
     
     <link rel="stylesheet" href="_static/default.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '1.1.4',
+        VERSION:     '1.1.5',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="dms_tools 1.1.4 documentation" href="index.html" />
+    <link rel="top" title="dms_tools 1.1.5 documentation" href="index.html" />
     <link rel="next" title="Citations and Acknowledgments" href="citations.html" />
     <link rel="prev" title="Algorithm to infer differential preferences" href="inferdiffprefs_algorithm.html" /> 
   </head>
@@ -44,7 +44,7 @@
         <li class="right" >
           <a href="inferdiffprefs_algorithm.html" title="Algorithm to infer differential preferences"
              accesskey="P">previous</a> |</li>
-        <li><a href="index.html">dms_tools 1.1.4 documentation</a> &raquo;</li> 
+        <li><a href="index.html">dms_tools 1.1.5 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -2070,7 +2070,7 @@ and hydrophobic ones blue.</p>
 
 <dl class="function">
 <dt id="weblogo.LogoOverlay">
-<tt class="descclassname">weblogo.</tt><tt class="descname">LogoOverlay</tt><big>(</big><em>sites</em>, <em>overlayfile</em>, <em>overlay</em>, <em>nperline</em>, <em>sitewidth</em>, <em>rmargin</em>, <em>logoheight</em>, <em>barheight</em>, <em>barspacing</em><big>)</big><a class="headerlink" href="#weblogo.LogoOverlay" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">weblogo.</tt><tt class="descname">LogoOverlay</tt><big>(</big><em>sites</em>, <em>overlayfile</em>, <em>overlay</em>, <em>nperline</em>, <em>sitewidth</em>, <em>rmargin</em>, <em>logoheight</em>, <em>barheight</em>, <em>barspacing</em>, <em>fix_limits={}</em>, <em>fixlongname=False</em>, <em>overlay_cmap=None</em><big>)</big><a class="headerlink" href="#weblogo.LogoOverlay" title="Permalink to this definition">¶</a></dt>
 <dd><p>Makes overlay for <em>LogoPlot</em>.</p>
 <p>This function creates colored bars overlay bars showing up to two
 properties.
@@ -2088,13 +2088,15 @@ the overlay. It must end in the extension <tt class="docutils literal"><span cla
 <li><em>logoheight</em> is the total height of each logo row in points.</li>
 <li><em>barheight</em> is the total height of each bar in points.</li>
 <li><em>barspacing</em> is the vertical spacing between bars in points.</li>
-<li><em>cmap</em> is a <tt class="docutils literal"><span class="pre">pylab</span></tt> <em>LinearSegmentedColorMap</em> used for the bar coloring.</li>
+<li><em>fix_limits</em> has the same meaning of the variable of this name used by <em>LogoPlot</em>.</li>
+<li><em>fixlongname</em> has the same meaning of the variable of this name used by <em>LogoPlot</em>.</li>
+<li><em>overlay_cmap</em> has the same meaning of the variable of this name used by <em>LogoPlot</em>.</li>
 </ul>
 </dd></dl>
 
 <dl class="function">
 <dt id="weblogo.LogoPlot">
-<tt class="descclassname">weblogo.</tt><tt class="descname">LogoPlot</tt><big>(</big><em>sites</em>, <em>datatype</em>, <em>data</em>, <em>plotfile</em>, <em>nperline</em>, <em>numberevery=10</em>, <em>allowunsorted=False</em>, <em>ydatamax=1.01</em>, <em>overlay=None</em><big>)</big><a class="headerlink" href="#weblogo.LogoPlot" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">weblogo.</tt><tt class="descname">LogoPlot</tt><big>(</big><em>sites</em>, <em>datatype</em>, <em>data</em>, <em>plotfile</em>, <em>nperline</em>, <em>numberevery=10</em>, <em>allowunsorted=False</em>, <em>ydatamax=1.01</em>, <em>overlay=None</em>, <em>fix_limits={}</em>, <em>fixlongname=False</em>, <em>overlay_cmap=None</em><big>)</big><a class="headerlink" href="#weblogo.LogoPlot" title="Permalink to this definition">¶</a></dt>
 <dd><p>Constructs a sequence logo showing amino-acid or nucleotide preferences.</p>
 <p>The heights of each letter is equal to the preference of
 that site for that amino acid or nucleotide.</p>
@@ -2103,7 +2105,7 @@ depending on whether they are present in <em>pi_d</em>.</p>
 <p>CALLING VARIABLES:</p>
 <ul>
 <li><p class="first"><em>sites</em> is a list of all of the sites that are being included
-in the logo, as strings or numbers. They must be in natural sort order (as
+in the logo, as strings. They must be in natural sort order (as
 is done by <em>dms_tools.utils.NaturalSort</em>) or an error will
 be raised <strong>unless</strong> <em>allowunsorted</em> is <em>True</em>. The sites
 in the plot are ordered in the same arrangement
@@ -2167,6 +2169,21 @@ same as <em>shortname</em> if you don&#8217;t need a different long name.</p>
 </li>
 </ul>
 </div></blockquote>
+</li>
+<li><p class="first"><em>fix_limits</em> is only meaningful if <em>overlay</em> is being used. In this case, for any
+<em>shortname</em> in <em>overlay</em> that also keys and entry in <em>fix_limits</em>, we use
+<em>fix_limits[shortname]</em> to set the limits for <em>shortname</em>. Specifically,
+<em>fix_limits[shortname]</em> should be the 2-tuple <em>(ticks, ticknames)</em>. <em>ticks</em>
+should be a list of tick locations (numbers) and <em>ticknames</em> should be a list of
+the corresponding tick label for that tick.</p>
+</li>
+<li><p class="first">If <em>fixlongname</em> is <em>True</em>, then we use the <em>longname</em> in <em>overlay</em> exactly as written;
+otherwise we add a parenthesis indicating the <em>shortname</em> for which this <em>longname</em>
+stands.</p>
+</li>
+<li><p class="first"><em>overlay_cmap</em> can be the name of a valid <em>matplotlib.colors.Colormap</em>, such as the
+string <em>jet</em> or <em>bwr</em>. Otherwise, it can be <em>None</em> and a (hopefully) good choice will 
+be made for you.</p>
 </li>
 </ul>
 </dd></dl>
@@ -2405,7 +2422,7 @@ from Dirichlet with this concentration parameter.</p>
         <li class="right" >
           <a href="inferdiffprefs_algorithm.html" title="Algorithm to infer differential preferences"
              >previous</a> |</li>
-        <li><a href="index.html">dms_tools 1.1.4 documentation</a> &raquo;</li> 
+        <li><a href="index.html">dms_tools 1.1.5 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
