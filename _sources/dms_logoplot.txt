@@ -25,6 +25,9 @@ Command-line usage
    logoplot
     See `Examples`_ for images of the types of plots that are created.
 
+   \-\-stringencyparameter
+    Use this option if you have fit a stringency parameter :math:`\beta` and want to rescale the visualization of the preferences using this parameter. The preferences are rescaled so that each preference is proportional to :math:`\left(\pi_{r,a}\right)^{\beta}`, so values > 1 increase the weight of the preferences and values < 1 flatten them.
+
    \-\-overlay1
     For instance, contents of an example file specifying relative solvent accessibility for residues 2, 3, 4, and 6 is shown below. In the created ``logoplot``, residue 5 (assuming it exists in ``infile``) will not have any relative solvent accessibility shown::
 
