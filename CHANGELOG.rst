@@ -5,6 +5,10 @@ Changelog
 -------------
 * Added ``dms_subassemble`` program
 
+1.1.6
+-------
+* Added ``--stringencyparameter`` option to ``dms_logoplot``.
+
 1.1.5
 ---------
 * Added additional options for logo plots showing preferences and differential preferences 

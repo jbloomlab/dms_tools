@@ -77,9 +77,16 @@ def main():
     if 'preferences' == dms_tools.utils.Pref_or_DiffPref(data):
         print "%s specifies preferences" % args['infile']
         datatype = 'prefs'
+        if args['stringencyparameter']:
+            print "\nRescaling preferences with stringency parameter %s" % args['stringencyparameter']
+            for r in list(data.keys()):
+                data[r] = dict([(aa, pi**args['stringencyparameter']) for (aa, pi) in data[r].items()])
+                normsum = float(sum(data[r].values()))
+                data[r] = dict([(aa, pi / normsum) for (aa, pi) in data[r].items()])
     elif 'diffprefs' == dms_tools.utils.Pref_or_DiffPref(data):
         print "%s specifies differential preferences" % args['infile']
         datatype = 'diffprefs'
+        assert not args['stringencyparameter'], "Cannot use --stringencyparameter with differential preferences, only with preferences."
     else:
         raise ValueError("infile %s does not either valid preferences or valid differential preferences" % args['infile'])
 
