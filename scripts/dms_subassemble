@@ -176,7 +176,7 @@ def main():
             if nalignedreads:
                 (subassembled, seq, failurestring) = dms_tools.utils.Subassemble(counts, args['minreadspersite'], args['minreadconcurrence'], refseq_chars)
             else:
-                (subassembled, seq) = (False, 'N' * len(refseq))
+                (subassembled, seq, failurestring) = (False, 'N' * len(refseq), 'no aligned reads')
             if subassembled:
                 assert 'N' not in seq
                 assert len(seq) == len(refseq)
