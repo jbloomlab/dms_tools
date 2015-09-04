@@ -1,6 +1,10 @@
 Changelog
 ===========
 
+1.1.7
+--------
+* ``dms_logoplot`` can now handle sites numbers that don't go sequentially starting with one or zero.
+
 1.1.6
 -------
 Added ``--stringencyparameter`` option to ``dms_logoplot``.
