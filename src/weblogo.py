@@ -241,7 +241,7 @@ def LogoPlot(sites, datatype, data, plotfile, nperline, numberevery=10, allowuns
             chars_for_string = characters
             f.write('ID ID\nBF BF\nP0 %s\n' % ' '.join(chars_for_string))
             for (isite, r) in enumerate(sites):
-                f.write('%s %s\n' % (r, ' '.join([str(data[r][x]) for x in characters])))
+                f.write('%d %s\n' % (isite, ' '.join([str(data[r][x]) for x in characters])))
                 pi_r = [(data[r][x], x) for x in characters]
                 pi_r.sort()
                 ordered_alphabets[isite] = [tup[1] for tup in pi_r] # order from smallest to biggest
@@ -256,7 +256,7 @@ def LogoPlot(sites, datatype, data, plotfile, nperline, numberevery=10, allowuns
                     raise ValueError("Differential preferences sum of %s is not close to zero for site %s" % (positivesum + negativesum, r))
                 if 2.0 * positivesum > ydatamax:
                     raise ValueError("You need to increase ydatamax: the total differential preferences sum to more than the y-axis limits. Right now, ydatamax is %.3f while the total differential preferences are %.3f" % (ydatamax, 2.0 * positivesum))
-                f.write('%s' % r)
+                f.write('%d' % isite)
                 deltapi_r = []
                 for x in characters:
                     deltapi_r.append((data[r][x], x))

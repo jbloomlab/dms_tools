@@ -759,7 +759,7 @@ def ReadDiffPrefs(f):
 
 
 
-def ReadMultiPrefOrDiffPref(infiles, removestop=False):
+def ReadMultiPrefOrDiffPref(infiles, removestop=False, sortsites=True):
     """Reads multiple preferences or differential preferences files.
 
     *infiles* is a list of preferences or differential preferences files in
@@ -784,6 +784,9 @@ def ReadMultiPrefOrDiffPref(infiles, removestop=False):
     this is done, all preferences are renormalized to sum to one by scaling
     them, and all differential preferences are renormalized to sum to zero
     by adding or subtracting a fixed amount to each.
+
+    *sortsites* specifies that we do a natural sort on the site numbers
+    in *infiles* rather than keeping them in their original order.
 
     The return value is as follows: 
     *(sites, characters, wts, databyfile)*. In this tuple:
@@ -820,7 +823,8 @@ def ReadMultiPrefOrDiffPref(infiles, removestop=False):
                     data = dms_tools.utils.RemoveStopFromDiffPrefs(data)
             except:
                 raise IOError("infile %s is neither a valid preferences or differential preferences file" % infile)
-        dms_tools.utils.NaturalSort(isites)
+        if sortsites:
+            dms_tools.utils.NaturalSort(isites)
         if firstfileread:
             if isites != sites:
                 raise ValueError("infile %s does not specify the same set of sites as at least one other file in: %s" % (infile, ', '.join(infiles)))
