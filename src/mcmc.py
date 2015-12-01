@@ -381,7 +381,7 @@ def _InitialValuePreferences(error_model, nchains, iwtchar, nchars):
 
 
 def InferSitePreferencesFromEnrichmentRatios(characterlist, wtchar, error_model, counts, pseudocounts=1):
-    """Infers site-specific preferences from enrichment ratios.
+    r"""Infers site-specific preferences from enrichment ratios.
 
     This function mirrors the operations performed by *InferSitePreferences*, expect the preferences
     are calculated directly from enrichment ratios. 
@@ -391,22 +391,33 @@ def InferSitePreferencesFromEnrichmentRatios(characterlist, wtchar, error_model,
     *pseudocounts* is a number > 0 giving the pseudocounts added to each count in *counts*.
 
     Briefly, for each character :math:`x`, we calculate the enrichment relative to the wildtype
-    character :math:`\\rm{wt}` at this site as
+    character :math:`\rm{wt}` at this site as
 
     .. math::
+       
+        \phi_{x} = 
+        \frac{
+          \left(\frac{
+            \max\left(\frac{\mathcal{P}}{N_r^{\rm{post}}}, \frac{n_{r,x}^{\rm{post}}}{N_r^{\rm{post}}} - \frac{n_{r,x}^{\rm{errpost}}}{N_r^{\rm{errpost}}}\right)
+          }{
+            \frac{n_{r,\rm{wt}}^{\rm{post}}}{N_r^{\rm{post}}} + \delta - \frac{n_{r,\rm{wt}}^{\rm{errpost}}}{N_r^{\rm{errpost}}}
+          }\right)
+        }
+        {
+          \left(\frac{
+            \max\left(\frac{\mathcal{P}}{N_r^{\rm{pre}}}, \frac{n_{r,x}^{\rm{pre}}}{N_r^{\rm{pre}}} - \frac{n_{r,x}^{\rm{errpre}}}{N_r^{\rm{errpre}}}\right)
+          }{
+            \frac{n_{r,\rm{wt}}^{\rm{pre}}}{N_r^{\rm{pre}}} + \delta - \frac{n_{r,\rm{wt}}^{\rm{errpre}}}{N_r^{\rm{errpre}}}
+          }\right)
+        }
 
-        \phi_{x} = \\frac{\left(\\frac{\max\left(\mathcal{P}, n_x^{\\rm{post}} - n_x^{\\rm{err,post}} + \mathcal{P}\\right)}{\max\left(\mathcal{P}, n_{\\rm{wt}}^{\\rm{post}} - n_{\\rm{wt}}^{\\rm{err,post}} + \mathcal{P}\\right)}\\right)}{\left(\\frac{\max\left(\mathcal{P}, n_x^{\\rm{pre}} - n_x^{\\rm{err,pre}} + \mathcal{P}\\right)}{\max\left(\mathcal{P}, n_{\\rm{wt}}^{\\rm{pre}} - n_{\\rm{wt}}^{\\rm{err,pre}} + \mathcal{P}\\right)}\\right)}
-
-    where :math:`\mathcal{P}` is the value of *pseudocounts*. When *error_model* is *none*, then 
-    :math:`0 = n_x^{\\rm{post}} = n_x^{\\rm{pre}}` and the above equation reduces to a simple ratio
-    of post- and pre-selection. With :math:`\mathcal{P} > 0`, this enrichment is always :math:`> 0` and 
-    :math:`< \infty`.
+    where :math:`\mathcal{P}` is the value of *pseudocounts*. When *error_model* is *none*, then all terms involving the error corrections (with superscript *err*) are ignored and :math:`\delta` is set to zero; otherwise :math:`\delta` is one.
 
     We then calculate the preference as
 
     .. math::
 
-        \pi_x = \\frac{\phi_x}{\sum_y \phi_y}.
+        \pi_x = \frac{\phi_x}{\sum_y \phi_y}.
 
     The return value is: *(converged, pi_means, pi_95credint, logstring)*, where the tuple
     entries have the same meaning as for *InferSitePreferences* except that *pi_95credint* is
