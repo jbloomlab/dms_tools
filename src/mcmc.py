@@ -390,8 +390,13 @@ def InferSitePreferencesFromEnrichmentRatios(characterlist, wtchar, error_model,
 
     *pseudocounts* is a number > 0 giving the pseudocounts added to each count in *counts*.
 
-    Briefly, for each character :math:`x`, we calculate the enrichment relative to the wildtype
-    character :math:`\rm{wt}` at this site as
+    Briefly, we set the enrichment ratio of the wildtype character :math:`\rm{wt}` at this site equal to one
+    
+    .. math::
+       
+        \phi_{wt} = 1
+    
+    Then, for each non-wildtype character :math:`x`, we calculate the enrichment relative to :math:`\rm{wt}` as
 
     .. math::
        
@@ -413,7 +418,7 @@ def InferSitePreferencesFromEnrichmentRatios(characterlist, wtchar, error_model,
 
     where :math:`\mathcal{P}` is the value of *pseudocounts*. When *error_model* is *none*, then all terms involving the error corrections (with superscript *err*) are ignored and :math:`\delta` is set to zero; otherwise :math:`\delta` is one.
 
-    We then calculate the preference as
+    Next, for each character :math:`x`, including :math:`\rm{wt}`, we calculate the preference for :math:`x` as
 
     .. math::
 
@@ -424,33 +429,92 @@ def InferSitePreferencesFromEnrichmentRatios(characterlist, wtchar, error_model,
     *None* since no credible intervals can be estimated from direct enrichment ratio calculation
     as it is not a statistical model, and *converged* is *True* since this calculation
     always converges.
+
+    For testing the code using doctest:
+    
+    >>> # Hypothetical data for a site
+    >>> characterlist = ['A', 'T', 'G', 'C']
+    >>> wtchar = 'A'
+    >>> counts = {}
+    >>> counts['nrpost'] = {'A':310923, 'T':13, 'C':0, 'G':37}
+    >>> counts['nrerrpost'] = {'A':310818, 'T':0, 'C':0, 'G':40}
+    >>> counts['nrerr'] = {'A':310818, 'T':0, 'C':0, 'G':40} # Same as 'nrerrpost'
+    >>> counts['nrpre'] = {'A':390818, 'T':50, 'C':0, 'G':80}
+    >>> counts['nrerrpre'] = {'A':390292, 'T':0, 'C':5, 'G':9}
+
+    >>> # Using error_model = 'none'
+    >>> (converged, pi, pi95, logstring) = InferSitePreferencesFromEnrichmentRatios(characterlist, wtchar, 'none', counts, pseudocounts=1)
+    >>> [round(pi[x], 9) for x in characterlist]
+    [0.315944301, 0.10325369, 0.18367243, 0.397129578]
+
+    >>> # Using error_model = 'same'
+    >>> (converged, pi, pi95, logstring) = InferSitePreferencesFromEnrichmentRatios(characterlist, wtchar, 'same', counts, pseudocounts=1)
+    >>> [round(pi[x], 9) for x in characterlist]
+    [0.380792732, 0.124446795, 0.016118953, 0.47864152]
+
+    >>> # Using error_model = 'different'
+    >>> (converged, pi, pi95, logstring) = InferSitePreferencesFromEnrichmentRatios(characterlist, wtchar, 'different', counts, pseudocounts=1)
+    >>> [round(pi[x], 9) for x in characterlist]
+    [0.384418849, 0.125620184, 0.006806413, 0.483154554]
     """
+    
     assert pseudocounts > 0, "pseudocounts must be greater than zero, invalid value of %g" % pseudocounts
     assert wtchar in characterlist, "wtchar %s not in characterlist %s" % (wtchar, str(characterlist))
     logstring = '\tComputed preferences directly from enrichment ratios.'
+
+    Nrpost = 0.0
+    Nrpre = 0.0
+    Nrerrpost = 0.0
+    Nrerrpre = 0.0
+    for y in characterlist:
+        Nrpost += counts['nrpost'][y]
+        Nrpre += counts['nrpre'][y]     
+        if error_model == 'same':
+            Nrerrpost += counts['nrerr'][y]
+            Nrerrpre += counts['nrerr'][y]
+        elif error_model == 'different':
+            Nrerrpost += counts['nrerrpost'][y]
+            Nrerrpre += counts['nrerrpre'][y]
+        elif error_model != 'none':
+            raise ValueError("Invalid error_model of %s" % error_model)
+    
     psi = {}
     for x in characterlist:
+        nrpost = counts['nrpost'][x]
+        nrpostwt = counts['nrpost'][wtchar]
+        nrpre = counts['nrpre'][x]
+        nrprewt = counts['nrpre'][wtchar]
         if error_model == 'none':
             nrerrpre = nrerrpost = 0.0
             nrerrprewt = nrerrpostwt = 0.0
+            Nrerrpre = Nrerrpost = 1.0 # Set equal to pseudocount of 1.0 to avoid dividing by zero; however, the psuedocount will make no difference in the end since all fractions with these variables will end up equalling zero anyways.
+            delta = 0.0
         elif error_model == 'same':
             nrerrpre = nrerrpost = counts['nrerr'][x]
             nrerrprewt = nrerrpostwt = counts['nrerr'][wtchar]
+            assert Nrerrpost == Nrerrpre
+            delta = 1.0
         elif error_model == 'different':
             nrerrpre = counts['nrerrpre'][x]
             nrerrpost = counts['nrerrpost'][x]
             nrerrprewt = counts['nrerrpre'][wtchar]
             nrerrpostwt = counts['nrerrpost'][wtchar]
+            delta = 1.0
         else:
             raise ValueError("Invalid error_model of %s" % error_model)
-        postratio = max(pseudocounts, counts['nrpost'][x] - nrerrpost + pseudocounts) / float(max(pseudocounts, counts['nrpost'][wtchar] - nrerrpostwt + pseudocounts))
-        preratio = max(pseudocounts, counts['nrpre'][x] - nrerrpre + pseudocounts) / float(max(pseudocounts, counts['nrpre'][wtchar] - nrerrprewt + pseudocounts))
-        psi[x] = postratio / preratio
-    assert abs(psi[wtchar] - 1) < 1.0e-5, "wtchar does not have enrichment ratio of one: %g" % psi[wtchar]
+        
+        if x != wtchar:
+            postratio = max(pseudocounts/Nrpost, (nrpost/Nrpost)-(nrerrpost/Nrerrpost))/((nrpostwt/Nrpost)+delta-(nrerrpostwt/Nrerrpost))
+            preratio = max(pseudocounts/Nrpre, (nrpre/Nrpre)-(nrerrpre/Nrerrpre))/((nrprewt/Nrpre)+delta-(nrerrprewt/Nrerrpre))
+            psi[x] = postratio / preratio
+
+        psi[wtchar] = 1.0
+    
+    assert abs(psi[wtchar] - 1) < 1.0e-5, "wtchar does not have enrichment ratio of one: %g" % (psi[wtchar])
     denom = sum(psi.values())
     pi = dict([(x, psi[x] / float(denom)) for x in characterlist])
     return (True, pi, None, logstring)
-
+    
 
 def InferSiteDiffPreferencesFromEnrichmentRatios(characterlist, wtchar, error_model, counts, pseudocounts=1):
     """Infers site-specific differential preferences from enrichment ratios.
