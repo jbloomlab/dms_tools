@@ -478,12 +478,14 @@ def InferSitePreferencesFromEnrichmentRatios(characterlist, wtchar, error_model,
         elif error_model != 'none':
             raise ValueError("Invalid error_model of %s" % error_model)
     
-    psi = {}
+    psi = {wtchar:1.0}
+    nrpostwt = counts['nrpost'][wtchar]
+    nrprewt = counts['nrpre'][wtchar]
     for x in characterlist:
+        if x == wtchar:
+            continue
         nrpost = counts['nrpost'][x]
-        nrpostwt = counts['nrpost'][wtchar]
         nrpre = counts['nrpre'][x]
-        nrprewt = counts['nrpre'][wtchar]
         if error_model == 'none':
             nrerrpre = nrerrpost = 0.0
             nrerrprewt = nrerrpostwt = 0.0
@@ -502,13 +504,9 @@ def InferSitePreferencesFromEnrichmentRatios(characterlist, wtchar, error_model,
             delta = 1.0
         else:
             raise ValueError("Invalid error_model of %s" % error_model)
-        
-        if x != wtchar:
-            postratio = max(pseudocounts/Nrpost, (nrpost/Nrpost)-(nrerrpost/Nrerrpost))/((nrpostwt/Nrpost)+delta-(nrerrpostwt/Nrerrpost))
-            preratio = max(pseudocounts/Nrpre, (nrpre/Nrpre)-(nrerrpre/Nrerrpre))/((nrprewt/Nrpre)+delta-(nrerrprewt/Nrerrpre))
-            psi[x] = postratio / preratio
-
-        psi[wtchar] = 1.0
+        postratio = max(pseudocounts/Nrpost, (nrpost/Nrpost)-(nrerrpost/Nrerrpost))/((nrpostwt/Nrpost)+delta-(nrerrpostwt/Nrerrpost))
+        preratio = max(pseudocounts/Nrpre, (nrpre/Nrpre)-(nrerrpre/Nrerrpre))/((nrprewt/Nrpre)+delta-(nrerrprewt/Nrerrpre))
+        psi[x] = postratio / preratio
     
     assert abs(psi[wtchar] - 1) < 1.0e-5, "wtchar does not have enrichment ratio of one: %g" % (psi[wtchar])
     denom = sum(psi.values())
