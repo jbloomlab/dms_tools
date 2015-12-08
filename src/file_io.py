@@ -664,7 +664,7 @@ def WriteDiffPrefs(f, sites, wts, deltapi_means, pr_deltapi_lt0, pr_deltapi_gt0)
         i = characters.index('*')
         characters = characters[ : i] + characters[i + 1 : ] + ['*']
     f.write('# POSITION WT RMS_dPI %s' % ' '.join(['dPI_%s' % x for x in characters]))
-    if all([not x for x in pr_deltapi_gt0.values()]) and (all([not x for x in pr_deltapi_lt0.values()])):
+    if (not pr_deltapi_gt0 and not pr_deltapi_lt0) or all([not x for x in pr_deltapi_gt0.values()]) and (all([not x for x in pr_deltapi_lt0.values()])):
         posterior_probs = False
         f.write('\n')
     else:
