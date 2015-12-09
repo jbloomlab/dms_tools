@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Python API &mdash; dms_tools 1.1.7 documentation</title>
+    <title>Python API &mdash; dms_tools 1.1.8 documentation</title>
     
     <link rel="stylesheet" href="_static/default.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '1.1.7',
+        VERSION:     '1.1.8',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="dms_tools 1.1.7 documentation" href="index.html" />
+    <link rel="top" title="dms_tools 1.1.8 documentation" href="index.html" />
     <link rel="next" title="Citations and Acknowledgments" href="citations.html" />
     <link rel="prev" title="Algorithm to infer differential preferences" href="inferdiffprefs_algorithm.html" /> 
   </head>
@@ -44,7 +44,7 @@
         <li class="right" >
           <a href="inferdiffprefs_algorithm.html" title="Algorithm to infer differential preferences"
              accesskey="P">previous</a> |</li>
-        <li><a href="index.html">dms_tools 1.1.7 documentation</a> &raquo;</li> 
+        <li><a href="index.html">dms_tools 1.1.8 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -114,7 +114,8 @@ it also provides the following Python API.</p>
 <tt class="descclassname">mcmc.</tt><tt class="descname">InferSiteDiffPreferencesFromEnrichmentRatios</tt><big>(</big><em>characterlist</em>, <em>wtchar</em>, <em>error_model</em>, <em>counts</em>, <em>pseudocounts=1</em><big>)</big><a class="headerlink" href="#mcmc.InferSiteDiffPreferencesFromEnrichmentRatios" title="Permalink to this definition">¶</a></dt>
 <dd><p>Infers site-specific differential preferences from enrichment ratios.</p>
 <p>This function mirrors the operations performed by <em>InferSiteDiffPrefs</em>, expect the preferences
-are calculated directly from enrichment ratios.</p>
+are calculated directly from enrichment ratios. Enrichment ratios are computed using the
+same algorithm as in the function InferSitePreferencesFromEnrichmentRatios.</p>
 <p><em>characterlist</em>, <em>wtchar</em>, <em>error_model</em>, and <em>counts</em> have the same meaning as for <em>InferSitePreferences</em>.</p>
 <p><em>pseudocounts</em> is a number &gt; 0 giving the pseudocounts added to each count in <em>counts</em>.</p>
 <p>The return value is: 
@@ -124,6 +125,83 @@ and <em>pr_deltapi_lt0</em> are <em>None</em> since they cannot
 be estimated from direct enrichment ratio calculation
 as it is not a statistical model, and <em>converged</em> is <em>True</em> since this calculation
 always converges.</p>
+<p>Differential preferences are computed using ratio estimation as follows. For each site, we set the enrichment ratio of the wildtype character <span class="math">\(\rm{wt}\)</span> equal to one. We do this for each of the two selections <span class="math">\(s1\)</span> and <span class="math">\(s2\)</span>:</p>
+<div class="math">
+\[\phi_{wt}^{\rm{s1}} = \phi_{wt}^{\rm{s2}} = 1\]</div>
+<p>Next, for each non-wildtype character <span class="math">\(x\)</span>, we calculate the enrichment ratio relative to <span class="math">\(\rm{wt}\)</span> for <span class="math">\(s1\)</span> and <span class="math">\(s2\)</span> as:</p>
+<div class="math">
+\[\phi_{x}^{s1} = 
+\frac{
+  \left(\frac{
+    \max\left(\frac{\mathcal{P}}{N_r^{\rm{s1}}}, \frac{n_{r,x}^{\rm{s1}}}{N_r^{\rm{s1}}} - \frac{n_{r,x}^{\rm{err}}}{N_r^{\rm{err}}}\right)
+  }{
+    \frac{n_{r,\rm{wt}}^{\rm{s1}}}{N_r^{\rm{s1}}} + \delta - \frac{n_{r,\rm{wt}}^{\rm{err}}}{N_r^{\rm{err}}}
+  }\right)
+}
+{
+  \left(\frac{
+    \max\left(\frac{\mathcal{P}}{N_r^{\rm{pre}}}, \frac{n_{r,x}^{\rm{pre}}}{N_r^{\rm{pre}}} - \frac{n_{r,x}^{\rm{err}}}{N_r^{\rm{err}}}\right)
+  }{
+    \frac{n_{r,\rm{wt}}^{\rm{pre}}}{N_r^{\rm{pre}}} + \delta - \frac{n_{r,\rm{wt}}^{\rm{err}}}{N_r^{\rm{err}}}
+  }\right)
+}\]</div>
+<p>and</p>
+<div class="math">
+\[\phi_{x}^{s2} = 
+\frac{
+  \left(\frac{
+    \max\left(\frac{\mathcal{P}}{N_r^{\rm{s2}}}, \frac{n_{r,x}^{\rm{s2}}}{N_r^{\rm{s2}}} - \frac{n_{r,x}^{\rm{err}}}{N_r^{\rm{err}}}\right)
+  }{
+    \frac{n_{r,\rm{wt}}^{\rm{s2}}}{N_r^{\rm{s2}}} + \delta - \frac{n_{r,\rm{wt}}^{\rm{err}}}{N_r^{\rm{err}}}
+  }\right)
+}
+{
+  \left(\frac{
+    \max\left(\frac{\mathcal{P}}{N_r^{\rm{pre}}}, \frac{n_{r,x}^{\rm{pre}}}{N_r^{\rm{pre}}} - \frac{n_{r,x}^{\rm{err}}}{N_r^{\rm{err}}}\right)
+  }{
+    \frac{n_{r,\rm{wt}}^{\rm{pre}}}{N_r^{\rm{pre}}} + \delta - \frac{n_{r,\rm{wt}}^{\rm{err}}}{N_r^{\rm{err}}}
+  }\right)
+}\]</div>
+<p>where <span class="math">\(\mathcal{P}\)</span> is the value of <em>mincounts</em>. When <em>error_model</em> is <em>none</em>, then all terms involving the error corrections (with superscript <em>err</em>) are ignored and <span class="math">\(\delta\)</span> is set to zero; otherwise <span class="math">\(\delta\)</span> is one.</p>
+<p>Next, for each character <span class="math">\(x\)</span>, including <span class="math">\(\rm{wt}\)</span>, we compute the preferences
+as normalized enrichment ratios for both <span class="math">\(s1\)</span> and <span class="math">\(s2\)</span> as:</p>
+<blockquote>
+<div><div class="math">
+\[\pi_{x}^{s1} = \frac{\phi_x^{s1}}{\sum_y \phi_y^{s1}}\]</div>
+</div></blockquote>
+<p>and</p>
+<blockquote>
+<div><div class="math">
+\[\pi_{x}^{s2} = \frac{\phi_x^{s2}}{\sum_y \phi_y^{s2}}\]</div>
+</div></blockquote>
+<p>and finally calculate the differential preference as</p>
+<blockquote>
+<div><div class="math">
+\[\Delta\pi_{x} = \pi_{x}^{s2} - \pi_{x}^{s1}\]</div>
+</div></blockquote>
+<p>For testing the code using doctest:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="c"># Hypothetical data for a site</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">characterlist</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;A&#39;</span><span class="p">,</span> <span class="s">&#39;T&#39;</span><span class="p">,</span> <span class="s">&#39;G&#39;</span><span class="p">,</span> <span class="s">&#39;C&#39;</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">wtchar</span> <span class="o">=</span> <span class="s">&#39;A&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">counts</span> <span class="o">=</span> <span class="p">{}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">counts</span><span class="p">[</span><span class="s">&#39;nrs1&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;A&#39;</span><span class="p">:</span><span class="mi">310923</span><span class="p">,</span> <span class="s">&#39;T&#39;</span><span class="p">:</span><span class="mi">13</span><span class="p">,</span> <span class="s">&#39;C&#39;</span><span class="p">:</span><span class="mi">0</span><span class="p">,</span> <span class="s">&#39;G&#39;</span><span class="p">:</span><span class="mi">37</span><span class="p">}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">counts</span><span class="p">[</span><span class="s">&#39;nrs2&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;A&#39;</span><span class="p">:</span><span class="mi">328715</span><span class="p">,</span> <span class="s">&#39;T&#39;</span><span class="p">:</span><span class="mi">0</span><span class="p">,</span> <span class="s">&#39;C&#39;</span><span class="p">:</span><span class="mi">30</span><span class="p">,</span> <span class="s">&#39;G&#39;</span><span class="p">:</span><span class="mi">55</span><span class="p">}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">counts</span><span class="p">[</span><span class="s">&#39;nrstart&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;A&#39;</span><span class="p">:</span><span class="mi">390818</span><span class="p">,</span> <span class="s">&#39;T&#39;</span><span class="p">:</span><span class="mi">50</span><span class="p">,</span> <span class="s">&#39;C&#39;</span><span class="p">:</span><span class="mi">0</span><span class="p">,</span> <span class="s">&#39;G&#39;</span><span class="p">:</span><span class="mi">80</span><span class="p">}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">counts</span><span class="p">[</span><span class="s">&#39;nrerr&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;A&#39;</span><span class="p">:</span><span class="mi">310818</span><span class="p">,</span> <span class="s">&#39;T&#39;</span><span class="p">:</span><span class="mi">0</span><span class="p">,</span> <span class="s">&#39;C&#39;</span><span class="p">:</span><span class="mi">0</span><span class="p">,</span> <span class="s">&#39;G&#39;</span><span class="p">:</span><span class="mi">40</span><span class="p">}</span>
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="c"># Using error_model = &#39;none&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="p">(</span><span class="n">converged</span><span class="p">,</span> <span class="n">deltapi_means</span><span class="p">,</span> <span class="n">pr_deltapi_gt0</span><span class="p">,</span> <span class="n">pr_deltapi_lt0</span><span class="p">,</span> <span class="n">logstring</span><span class="p">)</span> <span class="o">=</span> <span class="n">InferSiteDiffPreferencesFromEnrichmentRatios</span><span class="p">(</span><span class="n">characterlist</span><span class="p">,</span> <span class="n">wtchar</span><span class="p">,</span> <span class="s">&#39;none&#39;</span><span class="p">,</span> <span class="n">counts</span><span class="p">,</span> <span class="n">pseudocounts</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="p">[</span><span class="nb">round</span><span class="p">(</span><span class="n">deltapi_means</span><span class="p">[</span><span class="n">x</span><span class="p">],</span> <span class="mi">9</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">characterlist</span><span class="p">]</span>
+<span class="go">[-0.289284007, -0.102619748, -0.161880651, 0.553784406]</span>
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="c"># Using error_model = &#39;same&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="p">(</span><span class="n">converged</span><span class="p">,</span> <span class="n">deltapi_means</span><span class="p">,</span> <span class="n">pr_deltapi_gt0</span><span class="p">,</span> <span class="n">pr_deltapi_lt0</span><span class="p">,</span> <span class="n">logstring</span><span class="p">)</span> <span class="o">=</span> <span class="n">InferSiteDiffPreferencesFromEnrichmentRatios</span><span class="p">(</span><span class="n">characterlist</span><span class="p">,</span> <span class="n">wtchar</span><span class="p">,</span> <span class="s">&#39;same&#39;</span><span class="p">,</span> <span class="n">counts</span><span class="p">,</span> <span class="n">pseudocounts</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="p">[</span><span class="nb">round</span><span class="p">(</span><span class="n">deltapi_means</span><span class="p">[</span><span class="n">x</span><span class="p">],</span> <span class="mi">9</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">characterlist</span><span class="p">]</span>
+<span class="go">[-0.35391081, -0.123807582, -0.002459048, 0.48017744]</span>
+</pre></div>
+</div>
 </dd></dl>
 
 <dl class="function">
@@ -347,16 +425,29 @@ about the MCMC run and its convergence.</li>
 <p>This function mirrors the operations performed by <em>InferSitePreferences</em>, expect the preferences
 are calculated directly from enrichment ratios.</p>
 <p><em>characterlist</em>, <em>wtchar</em>, <em>error_model</em>, and <em>counts</em> have the same meaning as for <em>InferSitePreferences</em>.</p>
-<p><em>pseudocounts</em> is a number &gt; 0 giving the pseudocounts added to each count in <em>counts</em>.</p>
-<p>Briefly, for each character <span class="math">\(x\)</span>, we calculate the enrichment relative to the wildtype
-character <span class="math">\(\rm{wt}\)</span> at this site as</p>
+<p><em>pseudocounts</em> is a number &gt; 0. If the counts for a character are less than <em>pseudocounts</em>, either due to low counts or error correction, then the counts for that character are changed to <em>pseudocounts</em> to avoid estimating ratios of zero, less than zero, or infinity.</p>
+<p>Briefly, we set the enrichment ratio of the wildtype character <span class="math">\(\rm{wt}\)</span> at this site equal to one</p>
 <div class="math">
-\[\phi_{x} = \frac{\left(\frac{\max\left(\mathcal{P}, n_x^{\rm{post}} - n_x^{\rm{err,post}} + \mathcal{P}\right)}{\max\left(\mathcal{P}, n_{\rm{wt}}^{\rm{post}} - n_{\rm{wt}}^{\rm{err,post}} + \mathcal{P}\right)}\right)}{\left(\frac{\max\left(\mathcal{P}, n_x^{\rm{pre}} - n_x^{\rm{err,pre}} + \mathcal{P}\right)}{\max\left(\mathcal{P}, n_{\rm{wt}}^{\rm{pre}} - n_{\rm{wt}}^{\rm{err,pre}} + \mathcal{P}\right)}\right)}\]</div>
-<p>where <span class="math">\(\mathcal{P}\)</span> is the value of <em>pseudocounts</em>. When <em>error_model</em> is <em>none</em>, then 
-<span class="math">\(0 = n_x^{\rm{post}} = n_x^{\rm{pre}}\)</span> and the above equation reduces to a simple ratio
-of post- and pre-selection. With <span class="math">\(\mathcal{P} &gt; 0\)</span>, this enrichment is always <span class="math">\(&gt; 0\)</span> and 
-<span class="math">\(&lt; \infty\)</span>.</p>
-<p>We then calculate the preference as</p>
+\[\phi_{wt} = 1\]</div>
+<p>Then, for each non-wildtype character <span class="math">\(x\)</span>, we calculate the enrichment relative to <span class="math">\(\rm{wt}\)</span> as</p>
+<div class="math">
+\[\phi_{x} = 
+\frac{
+  \left(\frac{
+    \max\left(\frac{\mathcal{P}}{N_r^{\rm{post}}}, \frac{n_{r,x}^{\rm{post}}}{N_r^{\rm{post}}} - \frac{n_{r,x}^{\rm{errpost}}}{N_r^{\rm{errpost}}}\right)
+  }{
+    \frac{n_{r,\rm{wt}}^{\rm{post}}}{N_r^{\rm{post}}} + \delta - \frac{n_{r,\rm{wt}}^{\rm{errpost}}}{N_r^{\rm{errpost}}}
+  }\right)
+}
+{
+  \left(\frac{
+    \max\left(\frac{\mathcal{P}}{N_r^{\rm{pre}}}, \frac{n_{r,x}^{\rm{pre}}}{N_r^{\rm{pre}}} - \frac{n_{r,x}^{\rm{errpre}}}{N_r^{\rm{errpre}}}\right)
+  }{
+    \frac{n_{r,\rm{wt}}^{\rm{pre}}}{N_r^{\rm{pre}}} + \delta - \frac{n_{r,\rm{wt}}^{\rm{errpre}}}{N_r^{\rm{errpre}}}
+  }\right)
+}\]</div>
+<p>where <span class="math">\(\mathcal{P}\)</span> is the value of <em>pseudocounts</em>. When <em>error_model</em> is <em>none</em>, then all terms involving the error corrections (with superscript <em>err</em>) are ignored and <span class="math">\(\delta\)</span> is set to zero; otherwise <span class="math">\(\delta\)</span> is one.</p>
+<p>Next, for each character <span class="math">\(x\)</span>, including <span class="math">\(\rm{wt}\)</span>, we calculate the preference for <span class="math">\(x\)</span> as</p>
 <div class="math">
 \[\pi_x = \frac{\phi_x}{\sum_y \phi_y}.\]</div>
 <p>The return value is: <em>(converged, pi_means, pi_95credint, logstring)</em>, where the tuple
@@ -364,6 +455,36 @@ entries have the same meaning as for <em>InferSitePreferences</em> except that <
 <em>None</em> since no credible intervals can be estimated from direct enrichment ratio calculation
 as it is not a statistical model, and <em>converged</em> is <em>True</em> since this calculation
 always converges.</p>
+<p>For testing the code using doctest:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="c"># Hypothetical data for a site</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">characterlist</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;A&#39;</span><span class="p">,</span> <span class="s">&#39;T&#39;</span><span class="p">,</span> <span class="s">&#39;G&#39;</span><span class="p">,</span> <span class="s">&#39;C&#39;</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">wtchar</span> <span class="o">=</span> <span class="s">&#39;A&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">counts</span> <span class="o">=</span> <span class="p">{}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">counts</span><span class="p">[</span><span class="s">&#39;nrpost&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;A&#39;</span><span class="p">:</span><span class="mi">310923</span><span class="p">,</span> <span class="s">&#39;T&#39;</span><span class="p">:</span><span class="mi">13</span><span class="p">,</span> <span class="s">&#39;C&#39;</span><span class="p">:</span><span class="mi">0</span><span class="p">,</span> <span class="s">&#39;G&#39;</span><span class="p">:</span><span class="mi">37</span><span class="p">}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">counts</span><span class="p">[</span><span class="s">&#39;nrerrpost&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;A&#39;</span><span class="p">:</span><span class="mi">310818</span><span class="p">,</span> <span class="s">&#39;T&#39;</span><span class="p">:</span><span class="mi">0</span><span class="p">,</span> <span class="s">&#39;C&#39;</span><span class="p">:</span><span class="mi">0</span><span class="p">,</span> <span class="s">&#39;G&#39;</span><span class="p">:</span><span class="mi">40</span><span class="p">}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">counts</span><span class="p">[</span><span class="s">&#39;nrerr&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;A&#39;</span><span class="p">:</span><span class="mi">310818</span><span class="p">,</span> <span class="s">&#39;T&#39;</span><span class="p">:</span><span class="mi">0</span><span class="p">,</span> <span class="s">&#39;C&#39;</span><span class="p">:</span><span class="mi">0</span><span class="p">,</span> <span class="s">&#39;G&#39;</span><span class="p">:</span><span class="mi">40</span><span class="p">}</span> <span class="c"># Same as &#39;nrerrpost&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">counts</span><span class="p">[</span><span class="s">&#39;nrpre&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;A&#39;</span><span class="p">:</span><span class="mi">390818</span><span class="p">,</span> <span class="s">&#39;T&#39;</span><span class="p">:</span><span class="mi">50</span><span class="p">,</span> <span class="s">&#39;C&#39;</span><span class="p">:</span><span class="mi">0</span><span class="p">,</span> <span class="s">&#39;G&#39;</span><span class="p">:</span><span class="mi">80</span><span class="p">}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">counts</span><span class="p">[</span><span class="s">&#39;nrerrpre&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;A&#39;</span><span class="p">:</span><span class="mi">390292</span><span class="p">,</span> <span class="s">&#39;T&#39;</span><span class="p">:</span><span class="mi">0</span><span class="p">,</span> <span class="s">&#39;C&#39;</span><span class="p">:</span><span class="mi">5</span><span class="p">,</span> <span class="s">&#39;G&#39;</span><span class="p">:</span><span class="mi">9</span><span class="p">}</span>
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="c"># Using error_model = &#39;none&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="p">(</span><span class="n">converged</span><span class="p">,</span> <span class="n">pi</span><span class="p">,</span> <span class="n">pi95</span><span class="p">,</span> <span class="n">logstring</span><span class="p">)</span> <span class="o">=</span> <span class="n">InferSitePreferencesFromEnrichmentRatios</span><span class="p">(</span><span class="n">characterlist</span><span class="p">,</span> <span class="n">wtchar</span><span class="p">,</span> <span class="s">&#39;none&#39;</span><span class="p">,</span> <span class="n">counts</span><span class="p">,</span> <span class="n">pseudocounts</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="p">[</span><span class="nb">round</span><span class="p">(</span><span class="n">pi</span><span class="p">[</span><span class="n">x</span><span class="p">],</span> <span class="mi">9</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">characterlist</span><span class="p">]</span>
+<span class="go">[0.315944301, 0.10325369, 0.18367243, 0.397129578]</span>
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="c"># Using error_model = &#39;same&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="p">(</span><span class="n">converged</span><span class="p">,</span> <span class="n">pi</span><span class="p">,</span> <span class="n">pi95</span><span class="p">,</span> <span class="n">logstring</span><span class="p">)</span> <span class="o">=</span> <span class="n">InferSitePreferencesFromEnrichmentRatios</span><span class="p">(</span><span class="n">characterlist</span><span class="p">,</span> <span class="n">wtchar</span><span class="p">,</span> <span class="s">&#39;same&#39;</span><span class="p">,</span> <span class="n">counts</span><span class="p">,</span> <span class="n">pseudocounts</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="p">[</span><span class="nb">round</span><span class="p">(</span><span class="n">pi</span><span class="p">[</span><span class="n">x</span><span class="p">],</span> <span class="mi">9</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">characterlist</span><span class="p">]</span>
+<span class="go">[0.380792732, 0.124446795, 0.016118953, 0.47864152]</span>
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="c"># Using error_model = &#39;different&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="p">(</span><span class="n">converged</span><span class="p">,</span> <span class="n">pi</span><span class="p">,</span> <span class="n">pi95</span><span class="p">,</span> <span class="n">logstring</span><span class="p">)</span> <span class="o">=</span> <span class="n">InferSitePreferencesFromEnrichmentRatios</span><span class="p">(</span><span class="n">characterlist</span><span class="p">,</span> <span class="n">wtchar</span><span class="p">,</span> <span class="s">&#39;different&#39;</span><span class="p">,</span> <span class="n">counts</span><span class="p">,</span> <span class="n">pseudocounts</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="p">[</span><span class="nb">round</span><span class="p">(</span><span class="n">pi</span><span class="p">[</span><span class="n">x</span><span class="p">],</span> <span class="mi">9</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">characterlist</span><span class="p">]</span>
+<span class="go">[0.384418849, 0.125620184, 0.006806413, 0.483154554]</span>
+</pre></div>
+</div>
 </dd></dl>
 
 <dl class="class">
@@ -2424,7 +2545,7 @@ from Dirichlet with this concentration parameter.</p>
         <li class="right" >
           <a href="inferdiffprefs_algorithm.html" title="Algorithm to infer differential preferences"
              >previous</a> |</li>
-        <li><a href="index.html">dms_tools 1.1.7 documentation</a> &raquo;</li> 
+        <li><a href="index.html">dms_tools 1.1.8 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
