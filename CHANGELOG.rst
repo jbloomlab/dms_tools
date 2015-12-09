@@ -5,6 +5,12 @@ Changelog
 -------------
 * Added ``dms_subassemble`` program
 
+1.1.8
+--------
+* Fixed algorithm to estimate preferences and differential preferences using the ``--ratio_estimation`` option for both ``dms_inferprefs`` and ``dms_inferdiffprefs``.
+
+* Fixed small bug in *dms_tools.file_io.WriteDiffPrefs* and in test suite.
+
 1.1.7
 --------
 * ``dms_logoplot`` can now handle sites numbers that don't go sequentially starting with one or zero.

@@ -87,30 +87,58 @@ Command-line usage
     By default, when using ``--chartype codon_to_aa`` or ``--chartype aa``, we infer differential preferences for 21 amino acids, with stop codons (denoted by ``*``) one of the possibilities. If you specify the ``--excludestop`` option, then we constrain the differential preference for stop codons to be zero regardless of whether or not there are counts for these codons in the data, and so only infer differential preferences for the 20 non-stop amino acids.
 
    \-\-ratio_estimation
-    Reasonable values for *pseudocounts* are probably in the range from 1 to 5. In general,
-    a larger value of *pseudocounts* conceptually corresponds to a stronger prior favoring     
-    all differential preferences being zero.
+    A suggested value for *mincounts* is one. In general, larger values of *mincounts* conceptually corresponds to a stronger prior favoring all differential preferences being zero.
+    
+    Differential preferences are computed using ratio estimation as follows. For each site, we set the enrichment ratio of the wildtype character :math:`\rm{wt}` equal to one. We do this for each of the two selections :math:`s1` and :math:`s2`:
+    
+    .. math::
+       
+        \phi_{wt}^{\rm{s1}} = \phi_{wt}^{\rm{s2}} = 1
+    
+    Next, for each non-wildtype character :math:`x`, we calculate the enrichment ratio relative to :math:`\rm{wt}` for :math:`s1` and :math:`s2` as:
 
-    For each character :math:`x`, we calculate the enrichment ratios relative to the wildtype
-    character :math:`\rm{wt}` at this site for the two selections :math:`s1` and :math:`s2` as:
-
-        .. math::
-
-            \phi_{x}^{s1} = \frac{\left(\frac{\max\left(\mathcal{P}, n_x^{s1} - n_x^{\rm{err}} + \mathcal{P}\right)}{\max\left(\mathcal{P}, n_{\rm{wt}}^{s1} - n_{\rm{wt}}^{\rm{err}} + \mathcal{P}\right)}\right)}{\left(\frac{\max\left(\mathcal{P}, n_x^{\rm{start}} - n_x^{\rm{err}} + \mathcal{P}\right)}{\max\left(\mathcal{P}, n_{\rm{wt}}^{\rm{start}} - n_{\rm{wt}}^{\rm{err}} + \mathcal{P}\right)}\right)}
+    .. math::
+       
+        \phi_{x}^{s1} = 
+        \frac{
+          \left(\frac{
+            \max\left(\frac{\mathcal{P}}{N_r^{\rm{s1}}}, \frac{n_{r,x}^{\rm{s1}}}{N_r^{\rm{s1}}} - \frac{n_{r,x}^{\rm{err}}}{N_r^{\rm{err}}}\right)
+          }{
+            \frac{n_{r,\rm{wt}}^{\rm{s1}}}{N_r^{\rm{s1}}} + \delta - \frac{n_{r,\rm{wt}}^{\rm{err}}}{N_r^{\rm{err}}}
+          }\right)
+        }
+        {
+          \left(\frac{
+            \max\left(\frac{\mathcal{P}}{N_r^{\rm{pre}}}, \frac{n_{r,x}^{\rm{pre}}}{N_r^{\rm{pre}}} - \frac{n_{r,x}^{\rm{err}}}{N_r^{\rm{err}}}\right)
+          }{
+            \frac{n_{r,\rm{wt}}^{\rm{pre}}}{N_r^{\rm{pre}}} + \delta - \frac{n_{r,\rm{wt}}^{\rm{err}}}{N_r^{\rm{err}}}
+          }\right)
+        }
 
     and
+    
+    .. math::
+       
+        \phi_{x}^{s2} = 
+        \frac{
+          \left(\frac{
+            \max\left(\frac{\mathcal{P}}{N_r^{\rm{s2}}}, \frac{n_{r,x}^{\rm{s2}}}{N_r^{\rm{s2}}} - \frac{n_{r,x}^{\rm{err}}}{N_r^{\rm{err}}}\right)
+          }{
+            \frac{n_{r,\rm{wt}}^{\rm{s2}}}{N_r^{\rm{s2}}} + \delta - \frac{n_{r,\rm{wt}}^{\rm{err}}}{N_r^{\rm{err}}}
+          }\right)
+        }
+        {
+          \left(\frac{
+            \max\left(\frac{\mathcal{P}}{N_r^{\rm{pre}}}, \frac{n_{r,x}^{\rm{pre}}}{N_r^{\rm{pre}}} - \frac{n_{r,x}^{\rm{err}}}{N_r^{\rm{err}}}\right)
+          }{
+            \frac{n_{r,\rm{wt}}^{\rm{pre}}}{N_r^{\rm{pre}}} + \delta - \frac{n_{r,\rm{wt}}^{\rm{err}}}{N_r^{\rm{err}}}
+          }\right)
+        }
 
-        .. math::
+    where :math:`\mathcal{P}` is the value of *mincounts*. When *error_model* is *none*, then all terms involving the error corrections (with superscript *err*) are ignored and :math:`\delta` is set to zero; otherwise :math:`\delta` is one.
 
-            \phi_{x}^{s2} = \frac{\left(\frac{\max\left(\mathcal{P}, n_x^{s2} - n_x^{\rm{err}} + \mathcal{P}\right)}{\max\left(\mathcal{P}, n_{\rm{wt}}^{s2} - n_{\rm{wt}}^{\rm{err}} + \mathcal{P}\right)}\right)}{\left(\frac{\max\left(\mathcal{P}, n_x^{\rm{start}} - n_x^{\rm{err}} + \mathcal{P}\right)}{\max\left(\mathcal{P}, n_{\rm{wt}}^{\rm{start}} - n_{\rm{wt}}^{\rm{err}} + \mathcal{P}\right)}\right)}
-
-    where :math:`\mathcal{P}` is the value of *pseudocounts*. When ``--err`` is *none*, then 
-    :math:`0 = n_x^{\rm{err}}` and the above equations reduce to simple ratios
-    of post- and pre-selection. With :math:`\mathcal{P} > 0`, these ratios are always :math:`> 0` and 
-    :math:`< \infty`.
-
-    To compute the differential preferences by ratio estimation, we then compute preferences
-    as normalized enrichment ratios:
+    Next, for each character :math:`x`, including :math:`\rm{wt}`, we compute the preferences
+    as normalized enrichment ratios for both :math:`s1` and :math:`s2` as:
 
         .. math::
 

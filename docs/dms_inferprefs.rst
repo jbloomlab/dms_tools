@@ -72,27 +72,42 @@ Command-line usage
     By default, when using ``--chartype codon_to_aa`` or ``--chartype aa``, we infer preferences for 21 amino acids, with stop codons (denoted by ``*``) one of the possibilities. If you specify the ``--excludestop`` option, then we constrain the preference for stop codons to be zero regardless of whether or not there are counts for these codons in the data, and so only infer preferences for the 20 non-stop amino acids.
 
    \-\-ratio_estimation
-    Reasonable values for *pseudocounts* are probably in the range from 1 to 5. In general,
-    a larger value of *pseudocounts* conceptually corresponds to a stronger prior favoring 
-    all preferences being equal.
-
-    For each character :math:`x`, we calculate the enrichment ratio relative to the wildtype
-    character :math:`\rm{wt}` at this site as
+    A suggested value for *mincounts* is one. In general, larger values of *mincounts* conceptually corresponds to a stronger prior favoring all preferences being equal.    
+    
+    Preferences are computed using ratio estimation as follows. For each site, we set the enrichment ratio of the wildtype character :math:`\rm{wt}` equal to one
+    
+    .. math::
+       
+        \phi_{wt} = 1
+    
+    Next, for each non-wildtype character :math:`x`, we calculate the enrichment ratio relative to :math:`\rm{wt}` as
 
     .. math::
-    
-        \phi_{x} = \frac{\left(\frac{\max\left(\mathcal{P}, n_x^{\rm{post}} - n_x^{\rm{err,post}} + \mathcal{P}\right)}{\max\left(\mathcal{P}, n_{\rm{wt}}^{\rm{post}} - n_{\rm{wt}}^{\rm{err,post}} + \mathcal{P}\right)}\right)}{\left(\frac{\max\left(\mathcal{P}, n_x^{\rm{pre}} - n_x^{\rm{err,pre}} + \mathcal{P}\right)}{\max\left(\mathcal{P}, n_{\rm{wt}}^{\rm{pre}} - n_{\rm{wt}}^{\rm{err,pre}} + \mathcal{P}\right)}\right)}
+       
+        \phi_{x} = 
+        \frac{
+          \left(\frac{
+            \max\left(\frac{\mathcal{P}}{N_r^{\rm{post}}}, \frac{n_{r,x}^{\rm{post}}}{N_r^{\rm{post}}} - \frac{n_{r,x}^{\rm{errpost}}}{N_r^{\rm{errpost}}}\right)
+          }{
+            \frac{n_{r,\rm{wt}}^{\rm{post}}}{N_r^{\rm{post}}} + \delta - \frac{n_{r,\rm{wt}}^{\rm{errpost}}}{N_r^{\rm{errpost}}}
+          }\right)
+        }
+        {
+          \left(\frac{
+            \max\left(\frac{\mathcal{P}}{N_r^{\rm{pre}}}, \frac{n_{r,x}^{\rm{pre}}}{N_r^{\rm{pre}}} - \frac{n_{r,x}^{\rm{errpre}}}{N_r^{\rm{errpre}}}\right)
+          }{
+            \frac{n_{r,\rm{wt}}^{\rm{pre}}}{N_r^{\rm{pre}}} + \delta - \frac{n_{r,\rm{wt}}^{\rm{errpre}}}{N_r^{\rm{errpre}}}
+          }\right)
+        }
 
-    where :math:`\mathcal{P}` is the value of *pseudocounts*. When ``--errpre`` and ``--errpost`` are *none*, then 
-    :math:`0 = n_x^{\rm{err,post}} = n_x^{\rm{err,pre}}` and the above equation reduces to a simple ratio
-    of post- and pre-selection. With :math:`\mathcal{P} > 0`, this enrichment is always :math:`> 0` and 
-    :math:`< \infty`.
+    where :math:`\mathcal{P}` is the value of *mincounts*. When *error_model* is *none*, then all terms involving the error corrections (with superscript *err*) are ignored and :math:`\delta` is set to zero; otherwise :math:`\delta` is one.
 
-    We then calculate the preference as proportional to the enrichment ratio:
+    Next, for each character :math:`x`, including :math:`\rm{wt}`, we calculate the preference for :math:`x` as
 
     .. math::
 
         \pi_x = \frac{\phi_x}{\sum_y \phi_y}.
+
 
 Output
 ----------
