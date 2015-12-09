@@ -523,7 +523,7 @@ def InferSiteDiffPreferencesFromEnrichmentRatios(characterlist, wtchar, error_mo
 
     *characterlist*, *wtchar*, *error_model*, and *counts* have the same meaning as for *InferSitePreferences*.
 
-    *pseudocounts* is a number > 0 giving the pseudocounts added to each count in *counts*.
+    *pseudocounts* is a number > 0. If the counts for a character are less than *pseudocounts*, either due to low counts or error correction, then the counts for that character are changed to *pseudocounts* to avoid estimating ratios of zero, less than zero, or infinity.
     
     The return value is: 
     *(converged, deltapi_means, pr_deltapi_gt0, pr_deltapi_lt0, logstring)*, where the tuple
