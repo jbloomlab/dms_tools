@@ -388,7 +388,7 @@ def InferSitePreferencesFromEnrichmentRatios(characterlist, wtchar, error_model,
 
     *characterlist*, *wtchar*, *error_model*, and *counts* have the same meaning as for *InferSitePreferences*.
 
-    *pseudocounts* is a number > 0 giving the pseudocounts added to each count in *counts*.
+    *pseudocounts* is a number > 0. If the counts for a character are less than *pseudocounts*, either due to low counts or error correction, then the counts for that character are changed to *pseudocounts* to avoid estimating ratios of zero, less than zero, or infinity.
 
     Briefly, we set the enrichment ratio of the wildtype character :math:`\rm{wt}` at this site equal to one
     
@@ -515,10 +515,11 @@ def InferSitePreferencesFromEnrichmentRatios(characterlist, wtchar, error_model,
     
 
 def InferSiteDiffPreferencesFromEnrichmentRatios(characterlist, wtchar, error_model, counts, pseudocounts=1):
-    """Infers site-specific differential preferences from enrichment ratios.
+    r"""Infers site-specific differential preferences from enrichment ratios.
 
     This function mirrors the operations performed by *InferSiteDiffPrefs*, expect the preferences
-    are calculated directly from enrichment ratios. 
+    are calculated directly from enrichment ratios. Enrichment ratios are computed using the
+    same algorithm as in the function InferSitePreferencesFromEnrichmentRatios.
 
     *characterlist*, *wtchar*, *error_model*, and *counts* have the same meaning as for *InferSitePreferences*.
 
@@ -531,23 +532,135 @@ def InferSiteDiffPreferencesFromEnrichmentRatios(characterlist, wtchar, error_mo
     be estimated from direct enrichment ratio calculation
     as it is not a statistical model, and *converged* is *True* since this calculation
     always converges.
+    
+    Differential preferences are computed using ratio estimation as follows. For each site, we set the enrichment ratio of the wildtype character :math:`\rm{wt}` equal to one. We do this for each of the two selections :math:`s1` and :math:`s2`:
+    
+    .. math::
+       
+        \phi_{wt}^{\rm{s1}} = \phi_{wt}^{\rm{s2}} = 1
+    
+    Next, for each non-wildtype character :math:`x`, we calculate the enrichment ratio relative to :math:`\rm{wt}` for :math:`s1` and :math:`s2` as:
+
+    .. math::
+       
+        \phi_{x}^{s1} = 
+        \frac{
+          \left(\frac{
+            \max\left(\frac{\mathcal{P}}{N_r^{\rm{s1}}}, \frac{n_{r,x}^{\rm{s1}}}{N_r^{\rm{s1}}} - \frac{n_{r,x}^{\rm{err}}}{N_r^{\rm{err}}}\right)
+          }{
+            \frac{n_{r,\rm{wt}}^{\rm{s1}}}{N_r^{\rm{s1}}} + \delta - \frac{n_{r,\rm{wt}}^{\rm{err}}}{N_r^{\rm{err}}}
+          }\right)
+        }
+        {
+          \left(\frac{
+            \max\left(\frac{\mathcal{P}}{N_r^{\rm{pre}}}, \frac{n_{r,x}^{\rm{pre}}}{N_r^{\rm{pre}}} - \frac{n_{r,x}^{\rm{err}}}{N_r^{\rm{err}}}\right)
+          }{
+            \frac{n_{r,\rm{wt}}^{\rm{pre}}}{N_r^{\rm{pre}}} + \delta - \frac{n_{r,\rm{wt}}^{\rm{err}}}{N_r^{\rm{err}}}
+          }\right)
+        }
+
+    and
+    
+    .. math::
+       
+        \phi_{x}^{s2} = 
+        \frac{
+          \left(\frac{
+            \max\left(\frac{\mathcal{P}}{N_r^{\rm{s2}}}, \frac{n_{r,x}^{\rm{s2}}}{N_r^{\rm{s2}}} - \frac{n_{r,x}^{\rm{err}}}{N_r^{\rm{err}}}\right)
+          }{
+            \frac{n_{r,\rm{wt}}^{\rm{s2}}}{N_r^{\rm{s2}}} + \delta - \frac{n_{r,\rm{wt}}^{\rm{err}}}{N_r^{\rm{err}}}
+          }\right)
+        }
+        {
+          \left(\frac{
+            \max\left(\frac{\mathcal{P}}{N_r^{\rm{pre}}}, \frac{n_{r,x}^{\rm{pre}}}{N_r^{\rm{pre}}} - \frac{n_{r,x}^{\rm{err}}}{N_r^{\rm{err}}}\right)
+          }{
+            \frac{n_{r,\rm{wt}}^{\rm{pre}}}{N_r^{\rm{pre}}} + \delta - \frac{n_{r,\rm{wt}}^{\rm{err}}}{N_r^{\rm{err}}}
+          }\right)
+        }
+
+    where :math:`\mathcal{P}` is the value of *mincounts*. When *error_model* is *none*, then all terms involving the error corrections (with superscript *err*) are ignored and :math:`\delta` is set to zero; otherwise :math:`\delta` is one.
+
+    Next, for each character :math:`x`, including :math:`\rm{wt}`, we compute the preferences
+    as normalized enrichment ratios for both :math:`s1` and :math:`s2` as:
+
+        .. math::
+
+            \pi_{x}^{s1} = \frac{\phi_x^{s1}}{\sum_y \phi_y^{s1}}
+
+    and
+
+        .. math::
+
+            \pi_{x}^{s2} = \frac{\phi_x^{s2}}{\sum_y \phi_y^{s2}}
+
+    and finally calculate the differential preference as 
+
+        .. math::
+
+            \Delta\pi_{x} = \pi_{x}^{s2} - \pi_{x}^{s1}
+    
+    For testing the code using doctest:
+    
+    >>> # Hypothetical data for a site
+    >>> characterlist = ['A', 'T', 'G', 'C']
+    >>> wtchar = 'A'
+    >>> counts = {}
+    >>> counts['nrs1'] = {'A':310923, 'T':13, 'C':0, 'G':37}
+    >>> counts['nrs2'] = {'A':328715, 'T':0, 'C':30, 'G':55}
+    >>> counts['nrstart'] = {'A':390818, 'T':50, 'C':0, 'G':80}
+    >>> counts['nrerr'] = {'A':310818, 'T':0, 'C':0, 'G':40}
+
+    >>> # Using error_model = 'none'
+    >>> (converged, deltapi_means, pr_deltapi_gt0, pr_deltapi_lt0, logstring) = InferSiteDiffPreferencesFromEnrichmentRatios(characterlist, wtchar, 'none', counts, pseudocounts=1)
+    >>> [round(deltapi_means[x], 9) for x in characterlist]
+    [-0.289284007, -0.102619748, -0.161880651, 0.553784406]
+
+    >>> # Using error_model = 'same'
+    >>> (converged, deltapi_means, pr_deltapi_gt0, pr_deltapi_lt0, logstring) = InferSiteDiffPreferencesFromEnrichmentRatios(characterlist, wtchar, 'same', counts, pseudocounts=1)
+    >>> [round(deltapi_means[x], 9) for x in characterlist]
+    [-0.35391081, -0.123807582, -0.002459048, 0.48017744]
     """
     assert pseudocounts > 0, "pseudocounts must be greater than zero, invalid value of %g" % pseudocounts
     assert wtchar in characterlist, "wtchar %s not in characterlist %s" % (wtchar, str(characterlist))
     logstring = '\tComputed differential preferences directly from enrichment ratios.'
-    psi_s1 = {}
-    psi_s2 = {}
+    
+    Nr_s1 = Nr_s2 = 0.0
+    Nrpre = 0.0
+    Nrerr = 0.0
+    for y in characterlist:
+        Nr_s1 += counts['nrs1'][y]
+        Nr_s2 += counts['nrs2'][y]
+        Nrpre += counts['nrstart'][y]     
+        if error_model == 'same':
+            Nrerr += counts['nrerr'][y]
+        elif error_model != 'none':
+            raise ValueError("Invalid error_model of %s" % error_model)
+    
+    psi_s1 = {wtchar:1.0}
+    psi_s2 = {wtchar:1.0}
+    nrwt_s1 = counts['nrs1'][wtchar]
+    nrwt_s2 = counts['nrs2'][wtchar]
+    nrprewt = counts['nrstart'][wtchar]
     for x in characterlist:
+        if x == wtchar:
+            continue
+        nr_s1 = counts['nrs1'][x]
+        nr_s2 = counts['nrs2'][x]
+        nrpre = counts['nrstart'][x]
         if error_model == 'none':
+            Nrerr = 1.0 # Set equal to pseudocount of 1.0 to avoid dividing by zero; however, the psuedocount will make no difference in the end since all fractions with these variables will end up equalling zero anyways.
             nrerr = nrerrwt = 0.0
+            delta = 0.0
         elif error_model == 'same':
             nrerr = counts['nrerr'][x]
             nrerrwt = counts['nrerr'][wtchar]
-        else:
-            raise ValueError("Invalid error_model of %s" % error_model)
-        s1_ratio = max(pseudocounts, counts['nrs1'][x] - nrerr + pseudocounts) / float(max(pseudocounts, counts['nrs1'][wtchar] - nrerrwt + pseudocounts))
-        s2_ratio = max(pseudocounts, counts['nrs2'][x] - nrerr + pseudocounts) / float(max(pseudocounts, counts['nrs2'][wtchar] - nrerrwt + pseudocounts))
-        start_ratio = max(pseudocounts, counts['nrstart'][x] - nrerr + pseudocounts) / float(max(pseudocounts, counts['nrstart'][wtchar] - nrerrwt + pseudocounts))
+            delta = 1.0
+
+        s1_ratio = max(pseudocounts/Nr_s1, (nr_s1/Nr_s1)-(nrerr/Nrerr))/((nrwt_s1/Nr_s1)+delta-(nrerrwt/Nrerr))
+        s2_ratio = max(pseudocounts/Nr_s2, (nr_s2/Nr_s2)-(nrerr/Nrerr))/((nrwt_s2/Nr_s2)+delta-(nrerrwt/Nrerr))
+        start_ratio = max(pseudocounts/Nrpre, (nrpre/Nrpre)-(nrerr/Nrerr))/((nrprewt/Nrpre)+delta-(nrerrwt/Nrerr))
+        
         psi_s1[x] = s1_ratio / start_ratio
         psi_s2[x] = s2_ratio / start_ratio
     assert abs(psi_s1[wtchar] - 1) < 1.0e-5, "wtchar does not have s1 enrichment ratio of one: %g" % psi_s1[wtchar]
@@ -556,7 +669,6 @@ def InferSiteDiffPreferencesFromEnrichmentRatios(characterlist, wtchar, error_mo
     denom_s2 = sum(psi_s2.values())
     deltapi = dict([(x, psi_s2[x] / float(denom_s2) - psi_s1[x] / float(denom_s1)) for x in characterlist])
     return (True, deltapi, None, None, logstring)
-
 
 
 def InferSitePreferences(characterlist, wtchar, error_model, counts, priors, seed=1, niter=10000, increasetries=6, n_jobs=1, r_max=1.1, neff_min=100, nchains=4, increasefactor=2):
