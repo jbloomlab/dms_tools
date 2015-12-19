@@ -52,6 +52,8 @@ Defined in this module
 
 * *SubassembleParser* : parser for ``dms_subassemble``
 
+* *MatchSubassembledBarcodesParser* : parser for ``dms_matchsubassembledbarcodes``
+
 * *SummarizeAlignmentsParser* : parser for ``dms_summarizealignments``
 
 * *SmartHelpFormatter* : new class for formatting argument helps.
@@ -290,6 +292,17 @@ def SummarizeAlignmentsParser():
     parser.add_argument('--writemutfreqs', dest='writemutfreqs', action='store_true', help="Write a file 'mutfreqs.txt' that gives the numerical values plotted in 'mutfreqs.pdf'?")
     parser.set_defaults(writemutfreqs=False)
     parser.add_argument('-v', '--version', action='version', version='%(prog)s {version}'.format(version=dms_tools.__version__))
+    return parser
+
+
+def MatchSubassembledBarcodesParser():
+    """Returns *argparse.ArgumentParser* for ``dms_matchsubassembledbarcodes``."""
+    parser = ArgumentParserNoArgHelp(description='Match barcodes to subassembled variants, write variant counts files, make summary plots. This script is part of %s (version %s) written by %s. Detailed documentation is at %s' % (dms_tools.__name__, dms_tools.__version__, dms_tools.__author__, dms_tools.__url__), formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser.add_argument('outprefix', help='Prefix for output files.')
+    parser.add_argument('subassembled', type=ExistingFile, help="File output by 'dms_subassemble' that contains the barcodes and subassembled variants.")
+    parser.add_argument('r1files', type=CommaSeparatedFASTQFiles, help='Comma-separated list of R1 FASTQ files (no spaces) containing barcodes. Files can optionally be gzipped (extension .gz).')
+    parser.add_argument('r2files', type=CommaSeparatedFASTQFiles, help="Like 'r1files' but for R2 read.")
+    parser.add_argument('--minquality', type=int, default=25, help="ADD VARIABLE DESCRIPTION")
     return parser
 
 

@@ -1,108 +1,110 @@
+#!python
+
+"""Matches barcodes to subassembled variants, makes count files and plots.
+
+Written by Danny Lawrence and Jesse Bloom."""
+
 import time
 import os
+import dms_tools.parsearguments
 from dms_tools import file_io
 from Bio import SeqIO
-
-
-start_time = time.time()
-localtime = time.asctime()
-print "Start time: %s" % localtime
 
 
 # Takes a DNA sequence and quality scores as strings and returns strings of the reverse complement and 
 # the respective quality scores
 def reverse_comp(seq, quals):
-	assert len(seq) == len(quals), "Sequence length does not match quality scores length."
-	rc_dict = {'A':'T', 'T':'A', 'G':'C', 'C':'G', 'N':'N'}
-	new_seq = ""
-	new_quals = ""
-	
-	rc_list = list(reversed(range(len(seq))))
-	for i in rc_list:
-		nuc = seq[i]
-		new_seq += rc_dict[nuc]
-		new_quals += quals[i]
-	return(new_seq, new_quals)
+    assert len(seq) == len(quals), "Sequence length does not match quality scores length."
+    rc_dict = {'A':'T', 'T':'A', 'G':'C', 'C':'G', 'N':'N'}
+    new_seq = ""
+    new_quals = ""
+    
+    rc_list = list(reversed(range(len(seq))))
+    for i in rc_list:
+        nuc = seq[i]
+        new_seq += rc_dict[nuc]
+        new_quals += quals[i]
+    return(new_seq, new_quals)
 
 
 # Reads Illumina sequences in fastq format from Read1 and Read2 gzipped files and returns a list of barcode 
 # sequences that pass the quality standards, and writes them to a new fastq file. 
 def parse_barcodes(read1_file, read2_file, min_quality, out_prefix):
-	
-	q_dict = {
-				"!":0, '"':1, "#":2, "$":3, "%":4, "&":5, "'":6, "(":7, ")":8, "*":9, "+":10, 
-				",":11, "-":12, ".":13, "/":14, "0":15, "1":16, "2":17, "3":18, "4":19, "5":20, 
-				"6":21, "7":22, "8":23, "9":24, ":":25, ";":26, "<":27, "=":28, ">":29, "?":30, 
-				"@":31, "A":32, "B":33, "C":34, "D":35, "E":36, "F":37, "G":38, "H":39, "I":40, 
-				"J":41, "K":42, "L":43, "M":44, "N":45, "O":46, "P":47, "Q":48, "R":49, "S":50
-				}
+    
+    q_dict = {
+                "!":0, '"':1, "#":2, "$":3, "%":4, "&":5, "'":6, "(":7, ")":8, "*":9, "+":10, 
+                ",":11, "-":12, ".":13, "/":14, "0":15, "1":16, "2":17, "3":18, "4":19, "5":20, 
+                "6":21, "7":22, "8":23, "9":24, ":":25, ";":26, "<":27, "=":28, ">":29, "?":30, 
+                "@":31, "A":32, "B":33, "C":34, "D":35, "E":36, "F":37, "G":38, "H":39, "I":40, 
+                "J":41, "K":42, "L":43, "M":44, "N":45, "O":46, "P":47, "Q":48, "R":49, "S":50
+                }
 
-	gzipped = True
-	bc_dict = {}
-	total_seqs = 0
-	bc_count = 0
-	bc_list = []
-	barcodes_file = 'barcodes_'+out_prefix+'.fastq'
-	if os.path.isfile(barcodes_file):
-		os.remove(barcodes_file)
-	barcodes = open(barcodes_file, 'w')
-	
+    gzipped = True
+    bc_dict = {}
+    total_seqs = 0
+    bc_count = 0
+    bc_list = []
+    barcodes_file = 'barcodes_'+out_prefix+'.fastq'
+    if os.path.isfile(barcodes_file):
+        os.remove(barcodes_file)
+    barcodes = open(barcodes_file, 'w')
+    
 
-	read1 = read1_file
-	read2 = read2_file
-	print "\nWriting barcode sequences to: %s" % (barcodes_file)
-	for read_tup in file_io.IteratePairedFASTQ(read1, read2, gzipped, applyfilter=True):
-		if read_tup:
-			(name, r1, r2, q1, q2) = read_tup
-			total_seqs += 1
-			new_r2s = reverse_comp(r2, q2)
-			new_r2_seq = new_r2s[0]
-			new_r2_qual = new_r2s[1]
-			bc1 = r1[:18]
-			bcq1 = q1[:18]
-			bc2 = new_r2_seq[:18]
-			bcq2 = new_r2_qual[:18]
-			assert len(bc1) == len(bc2), "Read1 barcode not the same length as Read2 barcode."
-			bc = ""
-			bcq = ""
-			for j in range(len(bc1)):
-				if bc1[j] == bc2[j] and (q_dict[bcq1[j]] >= min_quality or q_dict[bcq2[j]] >= min_quality):
-					bc += bc1[j]
-					if q_dict[bcq1[j]] >= q_dict[bcq2[j]]:
-						bcq += bcq1[j]
-					else:
-						bcq += bcq2[j]
-				elif bc2[j] == 'N' and bc1[j] != 'N' and (q_dict[bcq1[j]] >= min_quality):
-					bc += bc1[j]
-					bcq += bcq1[j]
-				elif bc1[j] == 'N' and bc2[j] != 'N' and (q_dict[bcq2[j]] >= min_quality):
-					bc += bc2[j]
-					bcq += bcq2[j]
-				elif bc1[j] != bc2[j]:
-					if q_dict[bcq1[j]] >= q_dict[bcq2[j]] and (q_dict[bcq1[j]] >= min_quality):
-						bc += bc1[j]
-						bcq += bcq1[j]
-					elif q_dict[bcq2[j]] >= q_dict[bcq1[j]] and (q_dict[bcq2[j]] >= min_quality):
-						bc += bc2[j]
-						bcq += bcq2[j]
-				else:
-					break
-			if len(bc) == len(bcq) == 18:
-				barcodes.write('@'+name+'\n'+bc+'\n+\n'+bcq+'\n')
-				bc_list.append(bc)
-				bc_count += 1
-				#if bc not in bc_dict:
-				#	bc_dict[bc] = 1
-				#else:
-				#	bc_dict[bc] += 1
-	
-	
-	return bc_list
-	
-	#num_bcs = len(bc_dict)
-	print "Among %d total sequences:" % (total_seqs)
-	print "%f percent of sequences passed quality standards." % (float(bc_count)/float(total_seqs))
-	print "--------------------------------------------------------"
+    read1 = read1_file
+    read2 = read2_file
+    print "\nWriting barcode sequences to: %s" % (barcodes_file)
+    for read_tup in file_io.IteratePairedFASTQ(read1, read2, gzipped, applyfilter=True):
+        if read_tup:
+            (name, r1, r2, q1, q2) = read_tup
+            total_seqs += 1
+            new_r2s = reverse_comp(r2, q2)
+            new_r2_seq = new_r2s[0]
+            new_r2_qual = new_r2s[1]
+            bc1 = r1[:18]
+            bcq1 = q1[:18]
+            bc2 = new_r2_seq[:18]
+            bcq2 = new_r2_qual[:18]
+            assert len(bc1) == len(bc2), "Read1 barcode not the same length as Read2 barcode."
+            bc = ""
+            bcq = ""
+            for j in range(len(bc1)):
+                if bc1[j] == bc2[j] and (q_dict[bcq1[j]] >= min_quality or q_dict[bcq2[j]] >= min_quality):
+                    bc += bc1[j]
+                    if q_dict[bcq1[j]] >= q_dict[bcq2[j]]:
+                        bcq += bcq1[j]
+                    else:
+                        bcq += bcq2[j]
+                elif bc2[j] == 'N' and bc1[j] != 'N' and (q_dict[bcq1[j]] >= min_quality):
+                    bc += bc1[j]
+                    bcq += bcq1[j]
+                elif bc1[j] == 'N' and bc2[j] != 'N' and (q_dict[bcq2[j]] >= min_quality):
+                    bc += bc2[j]
+                    bcq += bcq2[j]
+                elif bc1[j] != bc2[j]:
+                    if q_dict[bcq1[j]] >= q_dict[bcq2[j]] and (q_dict[bcq1[j]] >= min_quality):
+                        bc += bc1[j]
+                        bcq += bcq1[j]
+                    elif q_dict[bcq2[j]] >= q_dict[bcq1[j]] and (q_dict[bcq2[j]] >= min_quality):
+                        bc += bc2[j]
+                        bcq += bcq2[j]
+                else:
+                    break
+            if len(bc) == len(bcq) == 18:
+                barcodes.write('@'+name+'\n'+bc+'\n+\n'+bcq+'\n')
+                bc_list.append(bc)
+                bc_count += 1
+                #if bc not in bc_dict:
+                #   bc_dict[bc] = 1
+                #else:
+                #   bc_dict[bc] += 1
+    
+    
+    return bc_list
+    
+    #num_bcs = len(bc_dict)
+    print "Among %d total sequences:" % (total_seqs)
+    print "%f percent of sequences passed quality standards." % (float(bc_count)/float(total_seqs))
+    print "--------------------------------------------------------"
 
 
 # Reads subassembled_variants file and returns a dictionary containing each unique barcode as keys and a tuple of the mutations
@@ -110,148 +112,148 @@ def parse_barcodes(read1_file, read2_file, min_quality, out_prefix):
 def get_variants(subassembled_variants_file):
 
 
-	infile = open(subassembled_variants_file, 'r')
-	bc_dict = {}
-	
-	print "Reading barcodes and associated mutations."
-	for line in infile:
-		cats = line.strip().split(" ")
-		barcode = cats[0]
-		seq = cats[1]
-		mut_str = cats[2]
-		muts = mut_str.strip().split(',')
-		mut_tup = ()
-		for mut in muts:
-			if mut == "no_mutations":
-				mut_tup = mut_tup + (mut, )
-			else:
-				wt = mut[:3]
-				new = mut[-3:]
-				pos = int(mut[3:len(mut)-3])			
-				mut_string = (wt+str('%03d' % pos)+new)
-				mut_tup = mut_tup + (mut_string, )
-		bc_dict[barcode] = mut_tup
-	
-	return bc_dict
+    infile = open(subassembled_variants_file, 'r')
+    bc_dict = {}
+    
+    print "Reading barcodes and associated mutations."
+    for line in infile:
+        cats = line.strip().split(" ")
+        barcode = cats[0]
+        seq = cats[1]
+        mut_str = cats[2]
+        muts = mut_str.strip().split(',')
+        mut_tup = ()
+        for mut in muts:
+            if mut == "no_mutations":
+                mut_tup = mut_tup + (mut, )
+            else:
+                wt = mut[:3]
+                new = mut[-3:]
+                pos = int(mut[3:len(mut)-3])            
+                mut_string = (wt+str('%03d' % pos)+new)
+                mut_tup = mut_tup + (mut_string, )
+        bc_dict[barcode] = mut_tup
+    
+    return bc_dict
 
 
 
 
 def write_counts_file(bc_list, bc_dict, out_prefix, refseq_filename):
-	char_type = 'codon' #'codon' or 'AA'
+    char_type = 'codon' #'codon' or 'AA'
 
-	# read reference sequence
-	refseq_file = SeqIO.parse(refseq_filename, 'fasta')
-	for reference in refseq_file:
-		refseq = str(reference.seq)
-	sites = [i + 1 for i in range(len(refseq) // 3)]
-	refseq_chars = dict([(site, refseq[3 * site - 3 : 3 * site]) for site in sites])
-
-
-	# Create list of all possible codons. 
-	nts = ['A', 'C', 'G', 'T']
-	codons_list = []
-	for nt1 in nts:
-		for nt2 in nts:
-			for nt3 in nts:
-				codons_list.append('%s%s%s' % (nt1, nt2, nt3))
-
-	aa_list = [	'A', 'C', 'D', 'E', 'F', 'G', 'H', 
-				'I', 'K', 'L', 'M', 'N', 'P', 'Q', 
-				'R', 'S', 'T', 'V', 'W', 'Y', '*',]
+    # read reference sequence
+    refseq_file = SeqIO.parse(refseq_filename, 'fasta')
+    for reference in refseq_file:
+        refseq = str(reference.seq)
+    sites = [i + 1 for i in range(len(refseq) // 3)]
+    refseq_chars = dict([(site, refseq[3 * site - 3 : 3 * site]) for site in sites])
 
 
-	trans_dict = {
-		'ATA':'I', 'ATC':'I', 'ATT':'I', 'ATG':'M',
-		'ACA':'T', 'ACC':'T', 'ACG':'T', 'ACT':'T',
-		'AAC':'N', 'AAT':'N', 'AAA':'K', 'AAG':'K',
-		'AGC':'S', 'AGT':'S', 'AGA':'R', 'AGG':'R',
-		'CTA':'L', 'CTC':'L', 'CTG':'L', 'CTT':'L',
-		'CCA':'P', 'CCC':'P', 'CCG':'P', 'CCT':'P',
-		'CAC':'H', 'CAT':'H', 'CAA':'Q', 'CAG':'Q',
-		'CGA':'R', 'CGC':'R', 'CGG':'R', 'CGT':'R',
-		'GTA':'V', 'GTC':'V', 'GTG':'V', 'GTT':'V',
-		'GCA':'A', 'GCC':'A', 'GCG':'A', 'GCT':'A',
-		'GAC':'D', 'GAT':'D', 'GAA':'E', 'GAG':'E',
-		'GGA':'G', 'GGC':'G', 'GGG':'G', 'GGT':'G',
-		'TCA':'S', 'TCC':'S', 'TCG':'S', 'TCT':'S',
-		'TTC':'F', 'TTT':'F', 'TTA':'L', 'TTG':'L',
-		'TAC':'Y', 'TAT':'Y', 'TAA':'*', 'TAG':'*',
-		'TGC':'C', 'TGT':'C', 'TGA':'*', 'TGG':'W'}
+    # Create list of all possible codons. 
+    nts = ['A', 'C', 'G', 'T']
+    codons_list = []
+    for nt1 in nts:
+        for nt2 in nts:
+            for nt3 in nts:
+                codons_list.append('%s%s%s' % (nt1, nt2, nt3))
 
-		
-	outfile_name = 'mut_counts_%s.txt' % (out_prefix)
-	if os.path.isfile(outfile_name):
-		os.remove(outfile_name)
-	outfile = open(outfile_name, 'w')
-
-	notfound_list = []
-	bcs_total = 0
-	bcs_found = 0
-	bcs_notfound = 0
-	mut_dict = {}
-	for i in range(1, 355):
-		if char_type == 'AA':
-			mut_dict[str('%03d') % i] = {
-			'A':0, 'C':0, 'D':0, 'E':0, 'F':0,
-			'G':0, 'H':0, 'I':0, 'K':0, 'L':0,
-			'M':0, 'N':0, 'P':0, 'Q':0, 'R':0,
-			'S':0, 'T':0, 'V':0, 'W':0, 'Y':0, 
-			'*':0, 'WT':trans_dict[refseq_chars[i]]
-			}
-			codon_list = aa_list
-
-		elif char_type == 'codon':
-			mut_dict[str('%03d') % i] = {
-			"GCT":0, "GCC":0, "GCA":0, "GCG":0, "CGT":0, "CGC":0, "CGA":0, "CGG":0, 
-			"AGA":0, "AGG":0, "AAT":0, "AAC":0, "GAT":0, "GAC":0, "TGT":0, "TGC":0, 
-			"CAA":0, "CAG":0, "GAA":0, "GAG":0, "GGT":0, "GGC":0, "GGA":0, "GGG":0, 
-			"CAT":0, "CAC":0, "ATT":0, "ATC":0, "ATA":0, "TTA":0, "TTG":0, "CTT":0, 
-			"CTC":0, "CTA":0, "CTG":0, "AAA":0, "AAG":0, "ATG":0, "TTT":0, "TTC":0, 
-			"CCT":0, "CCC":0, "CCA":0, "CCG":0, "TCT":0, "TCC":0, "TCA":0, "TCG":0, 
-			"AGT":0, "AGC":0, "TAA":0, "TAG":0, "TGA":0, "ACT":0, "ACC":0, "ACA":0, 
-			"ACG":0, "TGG":0, "TAC":0, "TAT":0, "GTT":0, "GTC":0, "GTA":0, "GTG":0, 
-			"WT":refseq_chars[i]
-			}
-			codon_list = codons_list
-
-	for barcode in bc_list:
-		bcs_total += 1
-		if barcode in bc_dict:
-			bcs_found += 1
-			mutations = bc_dict[barcode]
-			for mutation in mutations:
-				if mutation != 'no_mutations':
-					pos = str(mutation[3:6])
-					new = mutation[-3:]
-					if char_type == 'AA':
-						new_aa = trans_dict[new]
-						mut_dict[pos][new_aa] += 1
-					elif char_type == 'codon':
-						mut_dict[pos][new] += 1
+    aa_list = [ 'A', 'C', 'D', 'E', 'F', 'G', 'H', 
+                'I', 'K', 'L', 'M', 'N', 'P', 'Q', 
+                'R', 'S', 'T', 'V', 'W', 'Y', '*',]
 
 
-		elif barcode not in bc_dict:
-			bcs_notfound += 1
-			notfound_list.append(barcode)
+    trans_dict = {
+        'ATA':'I', 'ATC':'I', 'ATT':'I', 'ATG':'M',
+        'ACA':'T', 'ACC':'T', 'ACG':'T', 'ACT':'T',
+        'AAC':'N', 'AAT':'N', 'AAA':'K', 'AAG':'K',
+        'AGC':'S', 'AGT':'S', 'AGA':'R', 'AGG':'R',
+        'CTA':'L', 'CTC':'L', 'CTG':'L', 'CTT':'L',
+        'CCA':'P', 'CCC':'P', 'CCG':'P', 'CCT':'P',
+        'CAC':'H', 'CAT':'H', 'CAA':'Q', 'CAG':'Q',
+        'CGA':'R', 'CGC':'R', 'CGG':'R', 'CGT':'R',
+        'GTA':'V', 'GTC':'V', 'GTG':'V', 'GTT':'V',
+        'GCA':'A', 'GCC':'A', 'GCG':'A', 'GCT':'A',
+        'GAC':'D', 'GAT':'D', 'GAA':'E', 'GAG':'E',
+        'GGA':'G', 'GGC':'G', 'GGG':'G', 'GGT':'G',
+        'TCA':'S', 'TCC':'S', 'TCG':'S', 'TCT':'S',
+        'TTC':'F', 'TTT':'F', 'TTA':'L', 'TTG':'L',
+        'TAC':'Y', 'TAT':'Y', 'TAA':'*', 'TAG':'*',
+        'TGC':'C', 'TGT':'C', 'TGA':'*', 'TGG':'W'}
+
+        
+    outfile_name = 'mut_counts_%s.txt' % (out_prefix)
+    if os.path.isfile(outfile_name):
+        os.remove(outfile_name)
+    outfile = open(outfile_name, 'w')
+
+    notfound_list = []
+    bcs_total = 0
+    bcs_found = 0
+    bcs_notfound = 0
+    mut_dict = {}
+    for i in range(1, 355):
+        if char_type == 'AA':
+            mut_dict[str('%03d') % i] = {
+            'A':0, 'C':0, 'D':0, 'E':0, 'F':0,
+            'G':0, 'H':0, 'I':0, 'K':0, 'L':0,
+            'M':0, 'N':0, 'P':0, 'Q':0, 'R':0,
+            'S':0, 'T':0, 'V':0, 'W':0, 'Y':0, 
+            '*':0, 'WT':trans_dict[refseq_chars[i]]
+            }
+            codon_list = aa_list
+
+        elif char_type == 'codon':
+            mut_dict[str('%03d') % i] = {
+            "GCT":0, "GCC":0, "GCA":0, "GCG":0, "CGT":0, "CGC":0, "CGA":0, "CGG":0, 
+            "AGA":0, "AGG":0, "AAT":0, "AAC":0, "GAT":0, "GAC":0, "TGT":0, "TGC":0, 
+            "CAA":0, "CAG":0, "GAA":0, "GAG":0, "GGT":0, "GGC":0, "GGA":0, "GGG":0, 
+            "CAT":0, "CAC":0, "ATT":0, "ATC":0, "ATA":0, "TTA":0, "TTG":0, "CTT":0, 
+            "CTC":0, "CTA":0, "CTG":0, "AAA":0, "AAG":0, "ATG":0, "TTT":0, "TTC":0, 
+            "CCT":0, "CCC":0, "CCA":0, "CCG":0, "TCT":0, "TCC":0, "TCA":0, "TCG":0, 
+            "AGT":0, "AGC":0, "TAA":0, "TAG":0, "TGA":0, "ACT":0, "ACC":0, "ACA":0, 
+            "ACG":0, "TGG":0, "TAC":0, "TAT":0, "GTT":0, "GTC":0, "GTA":0, "GTG":0, 
+            "WT":refseq_chars[i]
+            }
+            codon_list = codons_list
+
+    for barcode in bc_list:
+        bcs_total += 1
+        if barcode in bc_dict:
+            bcs_found += 1
+            mutations = bc_dict[barcode]
+            for mutation in mutations:
+                if mutation != 'no_mutations':
+                    pos = str(mutation[3:6])
+                    new = mutation[-3:]
+                    if char_type == 'AA':
+                        new_aa = trans_dict[new]
+                        mut_dict[pos][new_aa] += 1
+                    elif char_type == 'codon':
+                        mut_dict[pos][new] += 1
 
 
-	for position in mut_dict:
-		muts_at_site = 0
-		for mut in mut_dict[position]:
-			if mut != "WT":
-				muts_at_site += mut_dict[position][mut]
-		n_wt = bcs_found - muts_at_site
-		wt_codon = mut_dict[position]['WT']
-		mut_dict[position][wt_codon] += n_wt
+        elif barcode not in bc_dict:
+            bcs_notfound += 1
+            notfound_list.append(barcode)
 
-	pos_list = mut_dict.keys()
-	pos_list.sort()
-	outfile.write('# POSITION WT %s\n' % ' '.join([str(k) for k in codon_list]))
-	for aa_pos in pos_list:
-		outfile.write(aa_pos+' '+mut_dict[aa_pos]['WT']+' '+'%s\n' % ' '.join([str(mut_dict[aa_pos][j]) for j in codon_list]))
-	print 'Wrote mutation counts matrix to %s' % outfile_name
-	outfile.close()
+
+    for position in mut_dict:
+        muts_at_site = 0
+        for mut in mut_dict[position]:
+            if mut != "WT":
+                muts_at_site += mut_dict[position][mut]
+        n_wt = bcs_found - muts_at_site
+        wt_codon = mut_dict[position]['WT']
+        mut_dict[position][wt_codon] += n_wt
+
+    pos_list = mut_dict.keys()
+    pos_list.sort()
+    outfile.write('# POSITION WT %s\n' % ' '.join([str(k) for k in codon_list]))
+    for aa_pos in pos_list:
+        outfile.write(aa_pos+' '+mut_dict[aa_pos]['WT']+' '+'%s\n' % ' '.join([str(mut_dict[aa_pos][j]) for j in codon_list]))
+    print 'Wrote mutation counts matrix to %s' % outfile_name
+    outfile.close()
 
 
 
@@ -259,55 +261,55 @@ def write_counts_file(bc_list, bc_dict, out_prefix, refseq_filename):
 
 
 # The main function requires the following input: 
-# 	gzipped read1 and read2 fastq files of sequenced barcodes,
-# 	_subassembled_variants.txt file produced by dms_subassemble, 
-# 	a reference recA sequence in fasta format,
-# 	a minimum Illumina quality score, below which a basecall will be ignored.
+#   gzipped read1 and read2 fastq files of sequenced barcodes,
+#   _subassembled_variants.txt file produced by dms_subassemble, 
+#   a reference recA sequence in fasta format,
+#   a minimum Illumina quality score, below which a basecall will be ignored.
 # 
 # This function outputs a counts_file that can be used by dms_inferprefs and 
 # dms_inferdiffprefs to compute preferences and differential preferences. 
 
 def main():
-	read1_file = ['Lib1-Input_S1_L001_R1_001.fastq.gz']
-	read2_file = ['Lib1-Input_S1_L001_R2_001.fastq.gz']
-	min_quality = 25
-	out_prefix = 'Lib1_input'
-	sub_variants = 'Lib1_minq20_maxmuts6_minreadspersite2_minreadconcurrence0.74_subassembled_variants.txt'
-	reference_seq = 'recA_Ecoli.fasta'
 
-	# Get barcodes that pass quality filters.
-	barcode_list = parse_barcodes(read1_file, read2_file, min_quality, out_prefix)
+    parser = dms_tools.parsearguments.MatchSubassembledBarcodesParser()
+    args = vars(parser.parse_args())
+    print args
 
-	# Get subassembled barcodes and their mutations.
-	barcode_dict = get_variants(sub_variants)
+    start_time = time.time()
+    localtime = time.asctime()
+    print "Start time: %s" % localtime
 
-	# Write counts_file.
-	write_counts_file(barcode_list, barcode_dict, out_prefix, reference_seq)
+    reference_seq = 'recA_Ecoli.fasta'
 
-	print "finished counting barcodes."
+    # Get barcodes that pass quality filters.
+    barcode_list = parse_barcodes(args['r1files'], args['r2files'], args['min_quality'], args['outprefix'])
 
+    # Get subassembled barcodes and their mutations.
+    barcode_dict = get_variants(args['subassembled'])
 
+    # Write counts_file.
+    write_counts_file(barcode_list, barcode_dict, args['outprefix'], reference_seq)
+
+    print "finished counting barcodes."
+
+    interval = float((time.time() - start_time)/60)
+    time_taken = float(interval)
+    unit = ''
+    if interval > 60:
+        if interval > 1440:
+            time_taken = interval/1440
+            unit = 'days'
+        else:
+            time_taken = interval/60
+            unit = 'hours'
+    else: 
+        tame_taken = interval
+        unit = 'minutes'
+
+    print "\n---------------------------------------- \nthe program took %.2f %s to run \n----------------------------------------\n" % (time_taken, unit)
 
 
 
 
 if __name__ == '__main__':
-	main() #run the script
-
-
-interval = float((time.time() - start_time)/60)
-time_taken = float(interval)
-unit = ''
-if interval > 60:
-	if interval > 1440:
-		time_taken = interval/1440
-		unit = 'days'
-	else:
-		time_taken = interval/60
-		unit = 'hours'
-else: 
-	tame_taken = interval
-	unit = 'minutes'
-
-
-print "\n---------------------------------------- \nthe program took %.2f %s to run \n----------------------------------------\n" % (time_taken, unit)
+    main() #run the script
