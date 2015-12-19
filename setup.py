@@ -69,6 +69,7 @@ setup(
             'scripts/dms_editsites',
             'scripts/dms_barcodedsubamplicons',
             'scripts/dms_subassemble',
+            'scripts/dms_matchsubassembledbarcodes',
             'scripts/dms_summarizealignments',
             ],
     package_data = {'dms_tools':['_weblogo_template.eps']}, # template from weblogo version 3.4
