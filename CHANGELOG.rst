@@ -1,6 +1,10 @@
 Changelog
 ===========
 
+1.1.9
+-------------
+* Added option to trim reads R1 and R2 in ``dms_barcodedsubamplicons``
+
 1.1.8
 --------
 * Fixed algorithm to estimate preferences and differential preferences using the ``--ratio_estimation`` option for both ``dms_inferprefs`` and ``dms_inferdiffprefs``.
