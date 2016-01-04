@@ -107,6 +107,7 @@ def main():
             n['total read pairs'] += 1
             if read_tup:
                 (name, r1, r2, q1, q2) = read_tup
+                (r1, r2, q1, q2) = dms_tools.utils.TrimReads(r1, r2, q1, q2, args['R1trimlength'], args['R2trimlength'])
                 qcheckedreads = dms_tools.utils.CheckReadQuality(r1, r2, q1, q2, args['minq'], args['maxlowqfrac'], args['barcodelength'])
                 if qcheckedreads:
                     (r1, r2) = qcheckedreads

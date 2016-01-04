@@ -20,6 +20,8 @@ Defined in this module
 
 * *NonNegativeInt* : parses whether string is non-negative integer.
 
+* *IntGreaterEqual1* : parses whether string is integer >= 1.
+
 * *IntGreaterEqual2* : parses whether string is integer >= 2.
 
 * *ExistingFile* : parses whether string gives an existing file.
@@ -85,6 +87,21 @@ class SmartHelpFormatter(argparse.ArgumentDefaultsHelpFormatter):
             return text[2:].splitlines()
         else:
             return argparse.ArgumentDefaultsHelpFormatter._split_lines(self, text, width)
+
+
+def IntGreaterEqual1(n):
+    """If *n* is integer >= 1 returns it, otherwise an error."""
+    if not isinstance(n, str):
+        raise argparse.ArgumentTypeError('%r is not a string' % n)
+    try:
+        n = int(n)
+    except:
+        raise argparse.ArgumentTypeError('%s is not an integer' % n)
+    if n < 1:
+        raise argparse.ArgumentTypeError('%d is not greater or equal to one' % n)
+    else:
+        return n
+
 
 def IntGreaterEqual2(n):
     """If *n* is integer >= 2 returns it, otherwise an error."""
@@ -280,6 +297,8 @@ def BarcodedSubampliconsParser():
     parser.add_argument('--maxreadtrim', type=NonNegativeInt, default=3, help="If R1 or R2 reads for same barcode are not all same length, trim up to this many nucleotides from 3' end; if still not same length then discard.")
     parser.add_argument('--R1_is_antisense', dest='R1_is_antisense', action='store_true', help='Is the R1 read in the antisense direction of "refseq"?')
     parser.set_defaults(R1_is_antisense=False)
+    parser.add_argument('--R1trimlength', type=IntGreaterEqual1, help="Before performing any operations on the read pairs, trim nucleotides away from 3' end of R1 read to reach the read length specified here.")
+    parser.add_argument('--R2trimlength', type=IntGreaterEqual1, help="Before performing any operations on the read pairs, trim nucleotides away from 3' end of R2 read to reach the read length specified here.")
     parser.add_argument('--barcodeinfo', dest='barcodeinfo', action='store_true', help='If you specify this option, create a file with suffix "barcodeinfo.txt.gz" containing information for each barcode. This file is quite large, and its creation will about double the program run time.');
     parser.add_argument('--purgefrac', type=FloatBetweenZeroAndOne, default=0, help='Randomly purge barcodes with this probability, thereby subsampling the data. You might want a value > 0 to estimate how the results depend on the sequencing depth.')
     parser.add_argument('--seed', type=int, default=1, help='Random number seed used to select reads for purging when using "--purgefrac".')
