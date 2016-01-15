@@ -103,7 +103,16 @@ def main():
         n = dict([(category, 0) for category in readcategories])
         barcodes = {}
         logger.info('Now parsing reads from the following:\n\tr1files: %s\n\tr2files: %s' % (' '.join(args['r1files']), ' '.join(args['r2files'])))
+        if args['purgereadfrac']:
+            nreadspurged = 0
+            if args['purgefrac']:
+                logger.info('Warning: Both "--purgereadfrac" and "--purgefrac" are being used at the same time. This is not recommended, as these arguments subsample the data in different ways.')
+            logger.info('Randomly purging read pairs with probability %.3f to subsample the data.' % args['purgereadfrac'])
         for read_tup in dms_tools.file_io.IteratePairedFASTQ(args['r1files'], args['r2files'], gzipped, applyfilter=True):
+            if args['purgereadfrac']:
+                if random.random() < args['purgereadfrac']:
+                    nreadspurged += 1
+                    continue
             n['total read pairs'] += 1
             if read_tup:
                 (name, r1, r2, q1, q2) = read_tup
@@ -124,6 +133,11 @@ def main():
                 logger.info('Reads parsed so far: %d' % n['total read pairs'])
 
         logger.info('Finished parsing all %d reads; ended up with %d unique barcodes.\n' % (n['total read pairs'], len(barcodes)))
+        if args['purgereadfrac']:
+            n['read pairs randomly purged'] = nreadspurged
+            logger.info('Randomly purged %d of the %d read pairs, leaving %d readpairs.' %(nreadspurged, n['total read pairs'] + nreadspurged, n['total read pairs']))
+        else:
+            n['read pairs randomly purged'] = 0
 
         readcategories.append('barcodes randomly purged')
         if args['purgefrac']:
