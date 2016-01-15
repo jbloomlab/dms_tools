@@ -106,7 +106,7 @@ def main():
         if args['purgereadfrac']:
             nreadspurged = 0
             if args['purgefrac']:
-                logger.info('Warning: Both "--purgereadfrac" and "--purgefrac" are being used at the same time. This is not recommended, as these arguments subsample the data in different ways.')
+                logger.warning('Both "--purgereadfrac" and "--purgefrac" are being used at the same time. This is not recommended, as these arguments subsample the data in different ways.')
             logger.info('Randomly purging read pairs with probability %.3f to subsample the data.' % args['purgereadfrac'])
         for read_tup in dms_tools.file_io.IteratePairedFASTQ(args['r1files'], args['r2files'], gzipped, applyfilter=True):
             if args['purgereadfrac']:
