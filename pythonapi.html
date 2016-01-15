@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Python API &mdash; dms_tools 1.1.8 documentation</title>
+    <title>Python API &mdash; dms_tools 1.1.10 documentation</title>
     
     <link rel="stylesheet" href="_static/default.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '1.1.8',
+        VERSION:     '1.1.10',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="dms_tools 1.1.8 documentation" href="index.html" />
+    <link rel="top" title="dms_tools 1.1.10 documentation" href="index.html" />
     <link rel="next" title="Citations and Acknowledgments" href="citations.html" />
     <link rel="prev" title="Algorithm to infer differential preferences" href="inferdiffprefs_algorithm.html" /> 
   </head>
@@ -44,7 +44,7 @@
         <li class="right" >
           <a href="inferdiffprefs_algorithm.html" title="Algorithm to infer differential preferences"
              accesskey="P">previous</a> |</li>
-        <li><a href="index.html">dms_tools 1.1.8 documentation</a> &raquo;</li> 
+        <li><a href="index.html">dms_tools 1.1.10 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -117,7 +117,7 @@ it also provides the following Python API.</p>
 are calculated directly from enrichment ratios. Enrichment ratios are computed using the
 same algorithm as in the function InferSitePreferencesFromEnrichmentRatios.</p>
 <p><em>characterlist</em>, <em>wtchar</em>, <em>error_model</em>, and <em>counts</em> have the same meaning as for <em>InferSitePreferences</em>.</p>
-<p><em>pseudocounts</em> is a number &gt; 0 giving the pseudocounts added to each count in <em>counts</em>.</p>
+<p><em>pseudocounts</em> is a number &gt; 0. If the counts for a character are less than <em>pseudocounts</em>, either due to low counts or error correction, then the counts for that character are changed to <em>pseudocounts</em> to avoid estimating ratios of zero, less than zero, or infinity.</p>
 <p>The return value is: 
 <em>(converged, deltapi_means, pr_deltapi_gt0, pr_deltapi_lt0, logstring)</em>, where the tuple
 entries have the same meaning as for <em>InferSiteDiffPrefs</em> except that <em>pr_deltapi_gt0</em> 
@@ -1090,6 +1090,7 @@ as <span class="math">\(h_r = \sum_x \pi_{r,x} \times \log_2 \pi_{r,x}\)</span>.
 <li><em>Pref_or_DiffPref</em> : determines whether data represent preferences or differential preferences.</li>
 <li><em>PrefsToEnrichments</em> : converts preferences to enrichment ratios.</li>
 <li><em>AdjustErrorCounts</em> : adjust error counts so they don&#8217;t exceed actual counts.</li>
+<li><em>TrimReads</em> : trim the ends for a pair of reads.</li>
 <li><em>CheckReadQuality</em> : checks quality of pair of reads.</li>
 <li><em>BuildReadConsensus</em> : builds consensus of reads if they are sufficiently similar.</li>
 <li><em>AlignSubamplicon</em> : attempt to align subamplicon at specified position.</li>
@@ -1696,6 +1697,43 @@ by the same sets of sites and characters.</p>
 </div>
 </dd></dl>
 
+<dl class="function">
+<dt id="utils.TrimReads">
+<tt class="descclassname">utils.</tt><tt class="descname">TrimReads</tt><big>(</big><em>r1</em>, <em>r2</em>, <em>q1</em>, <em>q2</em>, <em>R1trimlength=None</em>, <em>R2trimlength=None</em><big>)</big><a class="headerlink" href="#utils.TrimReads" title="Permalink to this definition">¶</a></dt>
+<dd><p>Trims a pair of reads to a specified length by removing nucleotides from the 3&#8217; ends of the reads.</p>
+<p><em>r1</em> and <em>r2</em> are strings representing a pair of sequencing reads.</p>
+<p><em>q1</em> and <em>q2</em> are strings giving the Q-scores for the nucleotides in
+<em>r1</em> and <em>r2</em>; these Q-scores are assumed to be encoded as the ASCII code
+for the Q-score + 33.</p>
+<p><em>R1trimlength</em> and <em>R2trimlength</em> are the lengths to which the <em>r1</em> and <em>r2</em> reads
+will be trimmed, as well as the corresponding Q-scores <em>q1</em> and <em>q2</em>. If no lengths are
+specified, the un-modified <em>r1</em>, <em>r2</em>, <em>q1</em>, and <em>q2</em> are returned.</p>
+<p>This function trims the <em>r1</em> and <em>r2</em> reads in a pair of reads. Nucleotides are trimmed
+away from the 3&#8217; end of each read to a specified length. The user-provided length includes
+the primer binding site and the barcode sequence at the 5&#8217; end of each read. The
+trimming is done from the 3&#8217; end of the read as Illumina Q-scores typically drop in this
+region resulting in less accurate sequence calls. This drop can be observed
+by running FastQC on the gzipped read files. In addition to trimming reads <em>r1</em> and 
+<em>r2</em>, the corresponding Q-scores <em>q1</em> and <em>q2</em> for those reads are trimmed in the 
+same manner.</p>
+<p>The return variable for this function is <em>(r1trim, r2trim, q1trim, q2trim)</em>, which
+are the trimmed sequencing reads and corresponding Q-scores.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">r1</span> <span class="o">=</span> <span class="s">&#39;GATTCTACATCCAAATGTGCACTGAACTTAAACTCAGTGATTATGAGGGGCGACTGATCCAGAACAGCTTAACAA&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">r2</span> <span class="o">=</span> <span class="s">&#39;TGTTAAGCTGTTCTGGATCAGTCGCCCCTCATAATCACTGAGTTTAAGTTCAGTGCACATTTGGATGTAGAATCT&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">q1</span> <span class="o">=</span> <span class="s">&#39;C9@ACCEFEGGG99-C9E&lt;C9@E,,,CFFFC9CCC,,CA9EEEDD,,,,+66:FEECFFFCGCFE,@DFFFGGGG&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">q2</span> <span class="o">=</span> <span class="s">&#39;6,A@,,6CFFGGGGCA,EC&lt;,CFFCCCFFFFG9&lt;EF9EE,,,&lt;CC,,;EEFC9&lt;,;,;,;CE,,,C8EE99,BC,&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">TrimReads</span><span class="p">(</span><span class="n">r1</span><span class="p">,</span> <span class="n">r2</span><span class="p">,</span> <span class="n">q1</span><span class="p">,</span> <span class="n">q2</span><span class="p">)</span>
+<span class="go">(&#39;GATTCTACATCCAAATGTGCACTGAACTTAAACTCAGTGATTATGAGGGGCGACTGATCCAGAACAGCTTAACAA&#39;, &#39;TGTTAAGCTGTTCTGGATCAGTCGCCCCTCATAATCACTGAGTTTAAGTTCAGTGCACATTTGGATGTAGAATCT&#39;, &#39;C9@ACCEFEGGG99-C9E&lt;C9@E,,,CFFFC9CCC,,CA9EEEDD,,,,+66:FEECFFFCGCFE,@DFFFGGGG&#39;, &#39;6,A@,,6CFFGGGGCA,EC&lt;,CFFCCCFFFFG9&lt;EF9EE,,,&lt;CC,,;EEFC9&lt;,;,;,;CE,,,C8EE99,BC,&#39;)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="p">(</span><span class="n">R1trimlength</span><span class="p">,</span> <span class="n">R2trimlength</span><span class="p">)</span> <span class="o">=</span> <span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">TrimReads</span><span class="p">(</span><span class="n">r1</span><span class="p">,</span> <span class="n">r2</span><span class="p">,</span> <span class="n">q1</span><span class="p">,</span> <span class="n">q2</span><span class="p">,</span> <span class="n">R1trimlength</span><span class="p">,</span> <span class="n">R2trimlength</span><span class="p">)</span>
+<span class="go">(&#39;GATTCTACATCCAAATGTGCACTGAACTTAAACTCAGTGATTATGAGGGGCGACTGATCCAGAACAGCTTAACAA&#39;, &#39;TGTTAAGCTGTTCTGGATCAGTCGCCCCTCATAATCACTGAGTTTAAGTTCAGTGCACATTTGGATGTAGAATCT&#39;, &#39;C9@ACCEFEGGG99-C9E&lt;C9@E,,,CFFFC9CCC,,CA9EEEDD,,,,+66:FEECFFFCGCFE,@DFFFGGGG&#39;, &#39;6,A@,,6CFFGGGGCA,EC&lt;,CFFCCCFFFFG9&lt;EF9EE,,,&lt;CC,,;EEFC9&lt;,;,;,;CE,,,C8EE99,BC,&#39;)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="p">(</span><span class="n">R1trimlength</span><span class="p">,</span> <span class="n">R2trimlength</span><span class="p">)</span> <span class="o">=</span> <span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">TrimReads</span><span class="p">(</span><span class="n">r1</span><span class="p">,</span> <span class="n">r2</span><span class="p">,</span> <span class="n">q1</span><span class="p">,</span> <span class="n">q2</span><span class="p">,</span> <span class="n">R1trimlength</span><span class="p">,</span> <span class="n">R2trimlength</span><span class="p">)</span>
+<span class="go">(&#39;GATTC&#39;, &#39;TGTTAAGCTG&#39;, &#39;C9@AC&#39;, &#39;6,A@,,6CFF&#39;)</span>
+</pre></div>
+</div>
+</dd></dl>
+
 </div>
 </div>
 <span class="target" id="module-parsearguments"></span><div class="section" id="parsearguments-module">
@@ -1710,6 +1748,7 @@ by the same sets of sites and characters.</p>
 <li><em>FloatBetweenZeroAndOne</em> : parses whether is float between 0 and 1.</li>
 <li><em>FloatBetweenHalfAndOne</em> : parses whether is float &gt; 0.5 and &lt;= 1.</li>
 <li><em>NonNegativeInt</em> : parses whether string is non-negative integer.</li>
+<li><em>IntGreaterEqual1</em> : parses whether string is integer &gt;= 1.</li>
 <li><em>IntGreaterEqual2</em> : parses whether string is integer &gt;= 2.</li>
 <li><em>ExistingFile</em> : parses whether string gives an existing file.</li>
 <li><em>PDF_File</em> : parses whether string gives a PDF file name.</li>
@@ -1840,6 +1879,12 @@ Otherwise returns list of files.</p>
 <dt id="parsearguments.InferPrefsParser">
 <tt class="descclassname">parsearguments.</tt><tt class="descname">InferPrefsParser</tt><big>(</big><big>)</big><a class="headerlink" href="#parsearguments.InferPrefsParser" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns <em>argparse.ArgumentParser</em> for <tt class="docutils literal"><span class="pre">dms_inferprefs</span></tt> script.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="parsearguments.IntGreaterEqual1">
+<tt class="descclassname">parsearguments.</tt><tt class="descname">IntGreaterEqual1</tt><big>(</big><em>n</em><big>)</big><a class="headerlink" href="#parsearguments.IntGreaterEqual1" title="Permalink to this definition">¶</a></dt>
+<dd><p>If <em>n</em> is integer &gt;= 1 returns it, otherwise an error.</p>
 </dd></dl>
 
 <dl class="function">
@@ -2545,7 +2590,7 @@ from Dirichlet with this concentration parameter.</p>
         <li class="right" >
           <a href="inferdiffprefs_algorithm.html" title="Algorithm to infer differential preferences"
              >previous</a> |</li>
-        <li><a href="index.html">dms_tools 1.1.8 documentation</a> &raquo;</li> 
+        <li><a href="index.html">dms_tools 1.1.10 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
