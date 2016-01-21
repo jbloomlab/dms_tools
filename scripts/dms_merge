@@ -43,10 +43,10 @@ def main():
     if args['merge_method'] == 'average':
         if args['minus']: 
             raise ValueError('Cannot use --minus option when the merge_method is "average"; can only use it for "sum".')
-        # now conver the sums to averages by dividing values by number of files
+        # now convert the sums to averages by dividing values by number of files
         for r in sums.keys():
             for x in sums[r].keys():
-                sums[r][x] /= float(len(databyfile))
+                sums[r][x] /= float(len(args['infiles']))
         if all([ftype == 'preferences' for ftype in filetypes.values()]):
             print "Writing the average of the preferences to %s" % args['outfile']
             dms_tools.file_io.WritePreferences(args['outfile'], sites, wts, sums, None)
