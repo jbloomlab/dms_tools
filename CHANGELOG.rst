@@ -7,6 +7,8 @@ Changelog
 
 * Added y-axis label override option in ``plot.PlotDepth()`` and corrected ``dms_summarizealignments`` to label the y-axis as 'number of barcodes' when summarizing barcoded subamplicon data.
 
+* Added ``merge_method`` choice ``rescale`` to ``dms_merge`` to rescale a preferences file by a ``--stringencyparameter``.
+
 1.1.9
 -------------
 * Added option to trim reads R1 and R2 in ``dms_barcodedsubamplicons``
