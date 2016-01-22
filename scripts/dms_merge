@@ -32,6 +32,10 @@ def main():
         print "Removing existing output file of %s" % args['outfile']
         os.remove(args['outfile'])
 
+    # error check
+    if args['stringencyparameter'] and args['merge_method'] != 'rescale':
+        raise ValueError("Cannot specify a --stringencyparameter if merge_method is not rescale")
+
     # read data, merge, and create outfile
     if not args['minus']:
         args['minus'] = [] # reassign from None to empty list
