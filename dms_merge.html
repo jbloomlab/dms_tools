@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>dms_merge &mdash; dms_tools 1.1.10 documentation</title>
+    <title>dms_merge &mdash; dms_tools 1.1.11 documentation</title>
     
     <link rel="stylesheet" href="_static/default.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '1.1.10',
+        VERSION:     '1.1.11',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="dms_tools 1.1.10 documentation" href="index.html" />
+    <link rel="top" title="dms_tools 1.1.11 documentation" href="index.html" />
     <link rel="up" title="Programs" href="programs.html" />
     <link rel="next" title="dms_correlate" href="dms_correlate.html" />
     <link rel="prev" title="dms_logoplot" href="dms_logoplot.html" /> 
@@ -45,7 +45,7 @@
         <li class="right" >
           <a href="dms_logoplot.html" title="dms_logoplot"
              accesskey="P">previous</a> |</li>
-        <li><a href="index.html">dms_tools 1.1.10 documentation</a> &raquo;</li>
+        <li><a href="index.html">dms_tools 1.1.11 documentation</a> &raquo;</li>
           <li><a href="programs.html" accesskey="U">Programs</a> &raquo;</li> 
       </ul>
     </div>  
@@ -70,6 +70,7 @@
 <li><a class="reference internal" href="#adding-and-subtracting-preferences" id="id9">Adding and subtracting preferences</a></li>
 <li><a class="reference internal" href="#adding-and-subtracting-differential-preferences" id="id10">Adding and subtracting differential preferences</a></li>
 <li><a class="reference internal" href="#adding-and-subtracting-a-mix-of-preferences-and-differential-preferences" id="id11">Adding and subtracting a mix of preferences and differential preferences</a></li>
+<li><a class="reference internal" href="#rescaling-by-a-stringency-parameter" id="id12">Rescaling by a stringency parameter</a></li>
 </ul>
 </li>
 </ul>
@@ -83,10 +84,11 @@
 </div>
 <div class="section" id="command-line-usage">
 <h2><a class="toc-backref" href="#id4">Command-line usage</a><a class="headerlink" href="#command-line-usage" title="Permalink to this headline">¶</a></h2>
-<p>Merge preferences or differential preferences by averaging or adding / subtracting the values in multiple files. All files must specify the same character type: can be nucleotide, codon, or amino acid (see &#8220;&#8211;excludestop&#8221; if using amino acids). This script is part of dms_tools (version 1.1.10) written by Jesse D. Bloom. Detailed documentation is at http://jbloom.github.io/dms_tools/</p>
+<p>Merge preferences or differential preferences by averaging or adding / subtracting the values in multiple files. All files must specify the same character type: can be nucleotide, codon, or amino acid (see &#8220;&#8211;excludestop&#8221; if using amino acids). This script is part of dms_tools (version 1.1.dev11) written by Jesse D. Bloom. Detailed documentation is at http://jbloom.github.io/dms_tools/</p>
 <pre class="literal-block">
 usage: dms_merge [-h] [--excludestop] [--minus MINUS [MINUS ...]] [-v]
-                 outfile {average,sum} infiles [infiles ...]
+                 [--stringencyparameter STRINGENCYPARAMETER]
+                 outfile {average,sum,rescale} infiles [infiles ...]
 </pre>
 <dl class="docutils">
 <dt>Positional arguments:</dt>
@@ -111,8 +113,8 @@ usage: dms_merge [-h] [--excludestop] [--minus MINUS [MINUS ...]] [-v]
 </td></tr>
 <tr><td class="option-group">
 <kbd>merge_method</kbd></td>
-<td><p class="first">How to merge: If &#8220;average&#8221; then all &#8220;infiles&#8221; must specify either preferences or differential preferences; these are then averaged in &#8220;outfile&#8221;. If &#8220;sum&#8221; then &#8220;infiles&#8221; can either all be differential preferences, or can be a combination of preferences and differential preferences that (along with any additional files specified by &#8220;&#8211;minus&#8221;) sum to a total preference or a total differential preference of zero at each site.</p>
-<p class="last">Possible choices: average, sum</p>
+<td><p class="first">How to merge: If &#8220;average&#8221; then all &#8220;infiles&#8221; must specify either preferences or differential preferences; these are then averaged in &#8220;outfile&#8221;. If &#8220;sum&#8221; then &#8220;infiles&#8221; can either all be differential preferences, or can be a combination of preferences and differential preferences that (along with any additional files specified by &#8220;&#8211;minus&#8221;) sum to a total preference or a total differential preference of zero at each site. If &#8220;rescale&#8221;, then only one infile can be specified and it must be preferences; these preferences are then scaled by the value provided by &#8220;stringencyparameter&#8221;</p>
+<p class="last">Possible choices: average, sum, rescale</p>
 </td></tr>
 <tr><td class="option-group">
 <kbd>infiles</kbd></td>
@@ -137,6 +139,12 @@ usage: dms_merge [-h] [--excludestop] [--minus MINUS [MINUS ...]] [-v]
 <tr><td class="option-group">
 <kbd><span class="option">-v</span>, <span class="option">--version</span></kbd></td>
 <td>show program&#8217;s version number and exit</td></tr>
+<tr><td class="option-group" colspan="2">
+<kbd><span class="option">--stringencyparameter</span></kbd></td>
+</tr>
+<tr><td>&nbsp;</td><td><p class="first">Stringency parameter used to rescale preferences. Can only be used if &#8220;merge_method&#8221; is &#8220;rescale&#8221;.</p>
+<p class="last">If the <tt class="docutils literal"><span class="pre">--stringencparameter</span></tt> is <span class="math">\(\beta\)</span>, then the preferences are rescaled so that the new preference for amino-acid <span class="math">\(a\)</span> at site <span class="math">\(r\)</span> is <span class="math">\(\left(\pi_{r,a}\right)^{\beta} / \left[\sum_{a'} \left(\pi_{r,a'}\right)^{\beta}\right]\)</span>. So values of <span class="math">\(\beta\)</span> greater than one effectively increase the stringency with which favored amino acids are preferred, while value less than one flatten the preferences.</p>
+</td></tr>
 </tbody>
 </table>
 </dd>
@@ -197,15 +205,23 @@ usage: dms_merge [-h] [--excludestop] [--minus MINUS [MINUS ...]] [-v]
 <div class="section" id="adding-and-subtracting-a-mix-of-preferences-and-differential-preferences">
 <h3><a class="toc-backref" href="#id11">Adding and subtracting a mix of preferences and differential preferences</a><a class="headerlink" href="#adding-and-subtracting-a-mix-of-preferences-and-differential-preferences" title="Permalink to this headline">¶</a></h3>
 <p>The command:</p>
-<div class="highlight-python"><div class="highlight"><pre>dms_merge sumprefs.txt prefs1.txt prefs2.txt diffprefs1.txt --minus prefs3.txt diffprefs2.txt
+<div class="highlight-python"><div class="highlight"><pre>dms_merge sumprefs.txt sum prefs1.txt prefs2.txt diffprefs1.txt --minus prefs3.txt diffprefs2.txt
 </pre></div>
 </div>
 <p>creates <tt class="docutils literal"><span class="pre">sumprefs.txt</span></tt> in <a class="reference internal" href="fileformats.html#preferences-file"><em>Preferences file</em></a> format, since the sum at each site is one.</p>
 <p>In contrast, the command:</p>
-<div class="highlight-python"><div class="highlight"><pre>dms_merge sumdiffprefs.txt prefs1.txt diffprefs1.txt --minus prefs2.txt
+<div class="highlight-python"><div class="highlight"><pre>dms_merge sumdiffprefs.txt sum prefs1.txt diffprefs1.txt --minus prefs2.txt
 </pre></div>
 </div>
 <p>creates <tt class="docutils literal"><span class="pre">sumdiffprefs.txt</span></tt> in <a class="reference internal" href="fileformats.html#diffpreferences-file"><em>Differential preferences file</em></a> format, since the sum at each site is zero.</p>
+</div>
+<div class="section" id="rescaling-by-a-stringency-parameter">
+<h3><a class="toc-backref" href="#id12">Rescaling by a stringency parameter</a><a class="headerlink" href="#rescaling-by-a-stringency-parameter" title="Permalink to this headline">¶</a></h3>
+<p>The command:</p>
+<div class="highlight-python"><div class="highlight"><pre>dms_merge rescaledprefs.txt rescale originalprefs.txt --stringencyparameter 1.8
+</pre></div>
+</div>
+<p>rescales the preferences in <tt class="docutils literal"><span class="pre">originalprefs.txt</span></tt> by exponentiating each of them by 1.8 and then normalizing so they sum at one for each site. The new values are then in <tt class="docutils literal"><span class="pre">rescaledprefs.txt</span></tt>. You might use this command if you have inferred a stringency parameter by phylogenetic fitting and want to rescale your data to that.</p>
 </div>
 </div>
 </div>
@@ -228,6 +244,7 @@ usage: dms_merge [-h] [--excludestop] [--minus MINUS [MINUS ...]] [-v]
 <li><a class="reference internal" href="#adding-and-subtracting-preferences">Adding and subtracting preferences</a></li>
 <li><a class="reference internal" href="#adding-and-subtracting-differential-preferences">Adding and subtracting differential preferences</a></li>
 <li><a class="reference internal" href="#adding-and-subtracting-a-mix-of-preferences-and-differential-preferences">Adding and subtracting a mix of preferences and differential preferences</a></li>
+<li><a class="reference internal" href="#rescaling-by-a-stringency-parameter">Rescaling by a stringency parameter</a></li>
 </ul>
 </li>
 </ul>
@@ -279,7 +296,7 @@ usage: dms_merge [-h] [--excludestop] [--minus MINUS [MINUS ...]] [-v]
         <li class="right" >
           <a href="dms_logoplot.html" title="dms_logoplot"
              >previous</a> |</li>
-        <li><a href="index.html">dms_tools 1.1.10 documentation</a> &raquo;</li>
+        <li><a href="index.html">dms_tools 1.1.11 documentation</a> &raquo;</li>
           <li><a href="programs.html" >Programs</a> &raquo;</li> 
       </ul>
     </div>

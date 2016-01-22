@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Python API &mdash; dms_tools 1.1.10 documentation</title>
+    <title>Python API &mdash; dms_tools 1.1.11 documentation</title>
     
     <link rel="stylesheet" href="_static/default.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '1.1.10',
+        VERSION:     '1.1.11',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="dms_tools 1.1.10 documentation" href="index.html" />
+    <link rel="top" title="dms_tools 1.1.11 documentation" href="index.html" />
     <link rel="next" title="Citations and Acknowledgments" href="citations.html" />
     <link rel="prev" title="Algorithm to infer differential preferences" href="inferdiffprefs_algorithm.html" /> 
   </head>
@@ -44,7 +44,7 @@
         <li class="right" >
           <a href="inferdiffprefs_algorithm.html" title="Algorithm to infer differential preferences"
              accesskey="P">previous</a> |</li>
-        <li><a href="index.html">dms_tools 1.1.10 documentation</a> &raquo;</li> 
+        <li><a href="index.html">dms_tools 1.1.11 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -2094,7 +2094,7 @@ It is 1.8 by default.</li>
 
 <dl class="function">
 <dt id="plot.PlotDepth">
-<tt class="descclassname">plot.</tt><tt class="descname">PlotDepth</tt><big>(</big><em>codon_counts</em>, <em>names</em>, <em>plotfile</em>, <em>mutdepth=False</em><big>)</big><a class="headerlink" href="#plot.PlotDepth" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">plot.</tt><tt class="descname">PlotDepth</tt><big>(</big><em>codon_counts</em>, <em>names</em>, <em>plotfile</em>, <em>mutdepth=False</em>, <em>y_axis_label=None</em><big>)</big><a class="headerlink" href="#plot.PlotDepth" title="Permalink to this definition">¶</a></dt>
 <dd><p>Plots per-site depth along primary sequence.</p>
 <p><cite>codon_counts</cite> : a list of dictionaries giving the codon counts for
 each sample as read by <cite>dms_tools.file_io.ReadDMSCounts</cite>.</p>
@@ -2104,6 +2104,8 @@ corresponding to each entry in <cite>codon_counts</cite>.</p>
 (such as &#8216;plot.pdf&#8217;). The extension must be <tt class="docutils literal"><span class="pre">.pdf</span></tt>.</p>
 <p><cite>mutdepth</cite> : Boolean switch, if <em>True</em> then rather than plotting
 sequencing depth, we plot per-site mutation rate.</p>
+<p><cite>y_axis_label</cite> : a string, if specified, overrides the default y-axis
+label &#8216;reads&#8217; or &#8216;mutation frequency&#8217;.</p>
 </dd></dl>
 
 <dl class="function">
@@ -2590,7 +2592,7 @@ from Dirichlet with this concentration parameter.</p>
         <li class="right" >
           <a href="inferdiffprefs_algorithm.html" title="Algorithm to infer differential preferences"
              >previous</a> |</li>
-        <li><a href="index.html">dms_tools 1.1.10 documentation</a> &raquo;</li> 
+        <li><a href="index.html">dms_tools 1.1.11 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
