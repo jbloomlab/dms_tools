@@ -5,6 +5,8 @@ Changelog
 -------------
 * Fixed bug in ``dms_merge``, where normalization of prefs or diffprefs was not occurring when the user provided two or more identical pref or diffpref files
 
+* Added y-axis label override option in ``plot.PlotDepth()`` and corrected ``dms_summarizealignments`` to label the y-axis as 'number of barcodes' when summarizing barcoded subamplicon data.
+
 1.1.9
 -------------
 * Added option to trim reads R1 and R2 in ``dms_barcodedsubamplicons``

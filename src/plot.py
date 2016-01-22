@@ -275,7 +275,7 @@ def PlotCorrelation(xs, ys, plotfile, xlabel, ylabel, logx=False, logy=False,\
     pylab.close()
 
 
-def PlotDepth(codon_counts, names, plotfile, mutdepth=False):
+def PlotDepth(codon_counts, names, plotfile, mutdepth=False, y_axis_label=None):
     """Plots per-site depth along primary sequence.
 
     `codon_counts` : a list of dictionaries giving the codon counts for
@@ -289,6 +289,9 @@ def PlotDepth(codon_counts, names, plotfile, mutdepth=False):
 
     `mutdepth` : Boolean switch, if *True* then rather than plotting
     sequencing depth, we plot per-site mutation rate.
+
+    `y_axis_label` : a string, if specified, overrides the default y-axis
+    label 'reads' or 'mutation frequency'.
     """
     if os.path.splitext(plotfile)[1].lower() != '.pdf':
         raise ValueError("plotfile must end in .pdf: %s" % plotfile)
@@ -325,6 +328,8 @@ def PlotDepth(codon_counts, names, plotfile, mutdepth=False):
         pylab.ylabel('mutation frequency')
     else:
         pylab.ylabel('number of reads')
+    if y_axis_label:
+        pylab.ylabel(y_axis_label)
     all_ys.sort()
     # if the top y value is excessively large, set a small ymax to avoid distorting the y-axis
     if all_ys[-1] >= 2.5 * all_ys[-len(names) - 1]:
