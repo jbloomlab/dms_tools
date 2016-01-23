@@ -13,6 +13,7 @@
 .. _`weblogo`: https://code.google.com/p/weblogo/
 .. _`reference for weblogo`: http://genome.cshlp.org/content/14/6/1188
 .. _`Jesse Bloom`: http://labs.fhcrc.org/bloom
+.. _`Bloom Lab`: http://labs.fhcrc.org/bloom
 .. _`Wu et al (2014)`: http://jvi.asm.org/content/88/17/10157
 .. _`Thyagarajan and Bloom (2014)`: http://elifesciences.org/content/3/e03300
 .. _`Melnikov et al (2014)`: http://nar.oxfordjournals.org/content/42/14/e112
