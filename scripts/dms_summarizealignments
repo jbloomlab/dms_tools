@@ -190,7 +190,7 @@ def main():
             [data[name]['multi_nt_syn_cumulfracs'][ : args['maxmutcounts'] + 1] for name in names],\
             data[names[0]]['multi_nt_all_counts'], data[names[0]]['multi_nt_syn_counts'], legendloc='right', writecounts=False)
         print "Making %s" % depth
-        dms_tools.plot.PlotDepth([data[name]['counts'] for name in names], names, depth)
+        dms_tools.plot.PlotDepth([data[name]['counts'] for name in names], names, depth, y_axis_label='number of barcodes')
         print "Making %s" % mutdepth
         dms_tools.plot.PlotDepth([data[name]['counts'] for name in names], names, mutdepth, mutdepth=True)
         print "Making %s" % reads

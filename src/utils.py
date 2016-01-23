@@ -32,6 +32,8 @@ Functions in this module
 
 * *AdjustErrorCounts* : adjust error counts so they don't exceed actual counts.
 
+* *TrimReads* : trim the ends for a pair of reads.
+
 * *CheckReadQuality* : checks quality of pair of reads.
 
 * *BuildReadConsensus* : builds consensus of reads if they are sufficiently similar.
@@ -565,6 +567,73 @@ def SumCodonToAA(codondict, includestop=True):
         if aa in aas:
             aadict[aa] += codondict[codon]
     return aadict
+
+
+def TrimReads(r1, r2, q1, q2, R1trimlength=None, R2trimlength=None):
+    """Trims a pair of reads to a specified length by removing nucleotides from the 3' ends of the reads. 
+    
+    *r1* and *r2* are strings representing a pair of sequencing reads.
+    
+    *q1* and *q2* are strings giving the Q-scores for the nucleotides in
+    *r1* and *r2*; these Q-scores are assumed to be encoded as the ASCII code
+    for the Q-score + 33.
+
+    *R1trimlength* and *R2trimlength* are the lengths to which the *r1* and *r2* reads
+    will be trimmed, as well as the corresponding Q-scores *q1* and *q2*. If no lengths are
+    specified, the un-modified *r1*, *r2*, *q1*, and *q2* are returned.
+
+    This function trims the *r1* and *r2* reads in a pair of reads. Nucleotides are trimmed
+    away from the 3' end of each read to a specified length. The user-provided length includes
+    the primer binding site and the barcode sequence at the 5' end of each read. The
+    trimming is done from the 3' end of the read as Illumina Q-scores typically drop in this
+    region resulting in less accurate sequence calls. This drop can be observed
+    by running FastQC on the gzipped read files. In addition to trimming reads *r1* and 
+    *r2*, the corresponding Q-scores *q1* and *q2* for those reads are trimmed in the 
+    same manner.
+
+    The return variable for this function is *(r1trim, r2trim, q1trim, q2trim)*, which
+    are the trimmed sequencing reads and corresponding Q-scores.
+
+    >>> r1 = 'GATTCTACATCCAAATGTGCACTGAACTTAAACTCAGTGATTATGAGGGGCGACTGATCCAGAACAGCTTAACAA'
+    >>> r2 = 'TGTTAAGCTGTTCTGGATCAGTCGCCCCTCATAATCACTGAGTTTAAGTTCAGTGCACATTTGGATGTAGAATCT'
+    >>> q1 = 'C9@ACCEFEGGG99-C9E<C9@E,,,CFFFC9CCC,,CA9EEEDD,,,,+66:FEECFFFCGCFE,@DFFFGGGG'
+    >>> q2 = '6,A@,,6CFFGGGGCA,EC<,CFFCCCFFFFG9<EF9EE,,,<CC,,;EEFC9<,;,;,;CE,,,C8EE99,BC,'
+    >>> TrimReads(r1, r2, q1, q2)
+    ('GATTCTACATCCAAATGTGCACTGAACTTAAACTCAGTGATTATGAGGGGCGACTGATCCAGAACAGCTTAACAA', 'TGTTAAGCTGTTCTGGATCAGTCGCCCCTCATAATCACTGAGTTTAAGTTCAGTGCACATTTGGATGTAGAATCT', 'C9@ACCEFEGGG99-C9E<C9@E,,,CFFFC9CCC,,CA9EEEDD,,,,+66:FEECFFFCGCFE,@DFFFGGGG', '6,A@,,6CFFGGGGCA,EC<,CFFCCCFFFFG9<EF9EE,,,<CC,,;EEFC9<,;,;,;CE,,,C8EE99,BC,')
+    >>> (R1trimlength, R2trimlength) = (100, 100)
+    >>> TrimReads(r1, r2, q1, q2, R1trimlength, R2trimlength)
+    ('GATTCTACATCCAAATGTGCACTGAACTTAAACTCAGTGATTATGAGGGGCGACTGATCCAGAACAGCTTAACAA', 'TGTTAAGCTGTTCTGGATCAGTCGCCCCTCATAATCACTGAGTTTAAGTTCAGTGCACATTTGGATGTAGAATCT', 'C9@ACCEFEGGG99-C9E<C9@E,,,CFFFC9CCC,,CA9EEEDD,,,,+66:FEECFFFCGCFE,@DFFFGGGG', '6,A@,,6CFFGGGGCA,EC<,CFFCCCFFFFG9<EF9EE,,,<CC,,;EEFC9<,;,;,;CE,,,C8EE99,BC,')
+    >>> (R1trimlength, R2trimlength) = (5, 10)
+    >>> TrimReads(r1, r2, q1, q2, R1trimlength, R2trimlength)
+    ('GATTC', 'TGTTAAGCTG', 'C9@AC', '6,A@,,6CFF')
+    """
+    if R1trimlength is not None and R2trimlength is not None:
+        assert R1trimlength > 0 and isinstance(R1trimlength, int), 'r1 trimmed length must be positive integer: %s' % R1trimlength
+        assert R2trimlength > 0 and isinstance(R2trimlength, int), 'r2 trimmed length must be positive integer: %s' % R2trimlength
+        assert '\n' not in r1, 'r1 string must not have new line character: %s' % r1
+        assert '\n' not in r2, 'r2 string must not have new line character: %s' % r2
+        assert len(r1) == len(q1), 'r1 and q1 must be the same length: %s %s' % (r1, q1)
+        assert len(r2) == len(q2), 'r2 and q2 must be the same length: %s %s' % (r2, q2)
+
+        # Trim reads and qscores to the length = trimlength unless they are already    
+        # below that length, in which case nothing is trimmed.
+        r1trim = r1
+        r2trim = r2
+        q1trim = q1
+        q2trim = q2
+        if len(r1trim) > R1trimlength:
+            r1trim = r1[:R1trimlength]
+            q1trim = q1[:R1trimlength]
+            assert len(r1trim) == R1trimlength, 'r1 incorrect length: %s' % r1trim
+            assert len(q1trim) == R1trimlength, 'q1 incorrect length: %s' % q1trim
+        if len(r2trim) > R2trimlength:
+            r2trim = r2[:R2trimlength]
+            q2trim = q2[:R2trimlength]
+            assert len(r2trim) == R2trimlength, 'r2 incorrect length: %s' % r2trim
+            assert len(q2trim) == R2trimlength, 'q2 incorrect length: %s' % q2trim
+        return (r1trim, r2trim, q1trim, q2trim)
+    else:
+        return (r1, r2, q1, q2)
 
 
 def CheckReadQuality(r1, r2, q1, q2, minq, maxlowqfrac, barcodelength, use_cutils=True):

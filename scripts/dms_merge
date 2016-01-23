@@ -32,6 +32,10 @@ def main():
         print "Removing existing output file of %s" % args['outfile']
         os.remove(args['outfile'])
 
+    # error check
+    if args['stringencyparameter'] and args['merge_method'] != 'rescale':
+        raise ValueError("Cannot specify a --stringencyparameter if merge_method is not rescale")
+
     # read data, merge, and create outfile
     if not args['minus']:
         args['minus'] = [] # reassign from None to empty list
@@ -43,10 +47,10 @@ def main():
     if args['merge_method'] == 'average':
         if args['minus']: 
             raise ValueError('Cannot use --minus option when the merge_method is "average"; can only use it for "sum".')
-        # now conver the sums to averages by dividing values by number of files
+        # now convert the sums to averages by dividing values by number of files
         for r in sums.keys():
             for x in sums[r].keys():
-                sums[r][x] /= float(len(databyfile))
+                sums[r][x] /= float(len(args['infiles']))
         if all([ftype == 'preferences' for ftype in filetypes.values()]):
             print "Writing the average of the preferences to %s" % args['outfile']
             dms_tools.file_io.WritePreferences(args['outfile'], sites, wts, sums, None)
@@ -65,6 +69,23 @@ def main():
             dms_tools.file_io.WriteDiffPrefs(args['outfile'], sites, wts, sums, None, None)
         else:
             raise ValueError("The sum of the files does not yield either valid preferences or differential preferences. Are you sure you are summing a valid combination?")
+    elif args['merge_method'] == 'rescale':
+        if len(args['infiles']) != 1:
+            raise ValueError('Must specify exactly one infile when using merge_method "rescale".')
+        data = databyfile[args['infiles'][0]]
+        if dms_tools.utils.Pref_or_DiffPref(data) != 'preferences':
+            raise ValueError('Must specify a valid preferences infile when using method "rescale".')
+        if args['minus']:
+            raise ValueError('Cannot use --minus option when the merge_method is "rescale"; can only use it for "sum".')
+        if not args['stringencyparameter']:
+            raise ValueError('Must specify a stringency parameter when using merge_method "rescale".')
+        print "Rescaling preferences with stringency parameter %s" % args['stringencyparameter']
+        for r in list(data.keys()):
+            data[r] = dict([(aa, pi**args['stringencyparameter']) for (aa, pi) in data[r].items()])
+            normsum = float(sum(data[r].values()))
+            data[r] = dict([(aa, pi / normsum) for (aa, pi) in data[r].items()])
+        print "Writing the rescaled preferences to %s" % args['outfile']
+        dms_tools.file_io.WritePreferences(args['outfile'], sites, wts, data, None)
     else:
         raise ValueError("Invalid merge_method of %s" % args['merge_method'])
 

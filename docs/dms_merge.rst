@@ -25,6 +25,9 @@ Command-line usage
    \-\-minus
     Files should be in the formats of a :ref:`preferences_file` or a :ref:`diffpreferences_file`.
 
+   \-\-stringencyparameter
+    If the ``--stringencparameter`` is :math:`\beta`, then the preferences are rescaled so that the new preference for amino-acid :math:`a` at site :math:`r` is :math:`\left(\pi_{r,a}\right)^{\beta} / \left[\sum_{a'} \left(\pi_{r,a'}\right)^{\beta}\right]`. So values of :math:`\beta` greater than one effectively increase the stringency with which favored amino acids are preferred, while value less than one flatten the preferences.
+
    outfile
     For ``merge_method`` of "average", then this file will be of the same type as ``infiles`` (either preferences or differential preferences).
 
@@ -98,15 +101,22 @@ Adding and subtracting a mix of preferences and differential preferences
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 The command::
 
-    dms_merge sumprefs.txt prefs1.txt prefs2.txt diffprefs1.txt --minus prefs3.txt diffprefs2.txt
+    dms_merge sumprefs.txt sum prefs1.txt prefs2.txt diffprefs1.txt --minus prefs3.txt diffprefs2.txt
 
 creates ``sumprefs.txt`` in :ref:`preferences_file` format, since the sum at each site is one.
 
 In contrast, the command::
 
-    dms_merge sumdiffprefs.txt prefs1.txt diffprefs1.txt --minus prefs2.txt
+    dms_merge sumdiffprefs.txt sum prefs1.txt diffprefs1.txt --minus prefs2.txt
 
 creates ``sumdiffprefs.txt`` in :ref:`diffpreferences_file` format, since the sum at each site is zero.
 
+Rescaling by a stringency parameter
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+The command::
+
+    dms_merge rescaledprefs.txt rescale originalprefs.txt --stringencyparameter 1.8
+
+rescales the preferences in ``originalprefs.txt`` by exponentiating each of them by 1.8 and then normalizing so they sum at one for each site. The new values are then in ``rescaledprefs.txt``. You might use this command if you have inferred a stringency parameter by phylogenetic fitting and want to rescale your data to that.
 
 .. include:: weblinks.txt

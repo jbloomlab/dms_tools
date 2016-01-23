@@ -94,6 +94,21 @@ class SmartHelpFormatter(argparse.ArgumentDefaultsHelpFormatter):
         else:
             return argparse.ArgumentDefaultsHelpFormatter._split_lines(self, text, width)
 
+
+def IntGreaterEqual1(n):
+    """If *n* is integer >= 1 returns it, otherwise an error."""
+    if not isinstance(n, str):
+        raise argparse.ArgumentTypeError('%r is not a string' % n)
+    try:
+        n = int(n)
+    except:
+        raise argparse.ArgumentTypeError('%s is not an integer' % n)
+    if n < 1:
+        raise argparse.ArgumentTypeError('%d is not greater or equal to one' % n)
+    else:
+        return n
+
+
 def IntGreaterEqual2(n):
     """If *n* is integer >= 2 returns it, otherwise an error."""
     if not isinstance(n, str):
@@ -355,9 +370,12 @@ def BarcodedSubampliconsParser():
     parser.add_argument('--maxreadtrim', type=NonNegativeInt, default=3, help="If R1 or R2 reads for same barcode are not all same length, trim up to this many nucleotides from 3' end; if still not same length then discard.")
     parser.add_argument('--R1_is_antisense', dest='R1_is_antisense', action='store_true', help='Is the R1 read in the antisense direction of "refseq"?')
     parser.set_defaults(R1_is_antisense=False)
+    parser.add_argument('--R1trimlength', type=IntGreaterEqual1, help="Before performing any operations on the read pairs, trim nucleotides away from 3' end of R1 read to reach the read length specified here.")
+    parser.add_argument('--R2trimlength', type=IntGreaterEqual1, help="Before performing any operations on the read pairs, trim nucleotides away from 3' end of R2 read to reach the read length specified here.")
     parser.add_argument('--barcodeinfo', dest='barcodeinfo', action='store_true', help='If you specify this option, create a file with suffix "barcodeinfo.txt.gz" containing information for each barcode. This file is quite large, and its creation will about double the program run time.');
-    parser.add_argument('--purgefrac', type=FloatBetweenZeroAndOne, default=0, help='Randomly purge barcodes with this probability, thereby subsampling the data. You might want a value > 0 to estimate how the results depend on the sequencing depth.')
-    parser.add_argument('--seed', type=int, default=1, help='Random number seed used to select reads for purging when using "--purgefrac".')
+    parser.add_argument('--purgereadfrac', type=FloatBetweenZeroAndOne, default=0, help='Randomly purge read pairs with this probability, thereby subsampling the data. You might want a value > 0 to estimate how the results depend on the sequencing depth. See also "--purgefrac".')
+    parser.add_argument('--purgefrac', type=FloatBetweenZeroAndOne, default=0, help='Like "--purgereadfrac" but purges barcodes rather than read pairs. In deciding which option to use, remember that the number of unique barcodes sequenced does not necessarily increase linearly with read depth.')
+    parser.add_argument('--seed', type=int, default=1, help='Random number seed used to select reads for purging when using "--purgereadfrac" or "--purgefrac".')
     parser.add_argument('-v', '--version', action='version', version='%(prog)s {version}'.format(version=dms_tools.__version__))
     parser.set_defaults(barcodeinfo=False)
     return parser
@@ -422,12 +440,13 @@ def MergeParser():
     """Returns *argparse.ArgumentParser* for ``dms_merge`` script."""
     parser = ArgumentParserNoArgHelp(description='Merge preferences or differential preferences by averaging or adding / subtracting the values in multiple files. All files must specify the same character type: can be nucleotide, codon, or amino acid (see "--excludestop" if using amino acids). This script is part of %s (version %s) written by %s. Detailed documentation is at %s' % (dms_tools.__name__, dms_tools.__version__, dms_tools.__author__, dms_tools.__url__), formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('outfile', help='Created output file with merged preferences / differential preferences; removed if it already exists. If the "infiles" do not all have the same wildtype residue at a site, then the wildtype is indicated as "?" in "outfile".')
-    parser.add_argument('merge_method', help='How to merge: If "average" then all "infiles" must specify either preferences or differential preferences; these are then averaged in "outfile". If "sum" then "infiles" can either all be differential preferences, or can be a combination of preferences and differential preferences that (along with any additional files specified by "--minus") sum to a total preference or a total differential preference of zero at each site.', choices=['average', 'sum'])
+    parser.add_argument('merge_method', help='How to merge: If "average" then all "infiles" must specify either preferences or differential preferences; these are then averaged in "outfile". If "sum" then "infiles" can either all be differential preferences, or can be a combination of preferences and differential preferences that (along with any additional files specified by "--minus") sum to a total preference or a total differential preference of zero at each site. If "rescale", then only one infile can be specified and it must be preferences; these preferences are then scaled by the value provided by "stringencyparameter"', choices=['average', 'sum', 'rescale'])
     parser.add_argument('infiles', nargs='+', help='Files to average or sum. Must all have the same sites and character type, but do not need to have the same wildtype residue at each site.', type=ExistingFile)
     parser.add_argument('--excludestop', dest='excludestop', action='store_true', help='If we are using amino acids, do we remove stop codons (denoted by "*")? We only remove stop codons if this argument is specified. If this option is used, then any files with stop codons have these codons removed (re-normalizing preferences to sum to one, and differential preferences to sum to zero) before the merge.')
     parser.set_defaults(excludestop=False)
     parser.add_argument('--minus', nargs='+', help='Files to subtract when summing. Can only be used if "merge_method" is "sum".', type=ExistingFile)
     parser.add_argument('-v', '--version', action='version', version='%(prog)s {version}'.format(version=dms_tools.__version__))
+    parser.add_argument('--stringencyparameter', help='Stringency parameter used to rescale preferences. Can only be used if "merge_method" is "rescale".', type=FloatGreaterThanZero)
     return parser
 
 
