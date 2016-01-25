@@ -72,6 +72,9 @@ Command-line usage
    :func: SubassembleParser
    :prog: dms_subassemble
 
+   outprefix
+    See `Output files`_ for a list of the created files.
+
    refseq
     This file should specify a valid in-frame coding sequence.
 
@@ -79,5 +82,102 @@ Command-line usage
     It is important to set ``alignspecs`` so that you don't count the part of the subamplicon that is in the primer binding site, since the nucleotide identities in this region come from the primers rather than the templates being sequences. Typically, *R2START* would be one greater than the length of the gene-binding region of the primer to avoid this.
 
     The alignments will fail if you don't set ``alignspecs`` exactly correctly, as the program only tries gapless alignment.
+
+   \-\-no_write_barcode_reads
+    If you set this option, then the program does **not** create the `All reads by barcode file`_. If you are not debugging, you may not want this file as it is very large.
+
+Output files
+--------------
+The following output files are created. Each has the prefix specified by ``outprefix`` with the following suffixes.
+
+Log file
+++++++++++
+This file has the suffix ``.log`` and tracks the progress of the program.
+
+Subassembled variants file
++++++++++++++++++++++++++++
+This file has the suffix ``_subassembled_variants.txt``. It is the primary output file that lists all barcodes that can be subassembled according to the parameters passed to ``dms_subassemble``.
+
+Here are a few example lines::
+
+    TATTACATCTGCCCCCAA ATGGCTATCGACGAAAACAAACAGAAAGCGTTGGCGGCAGCACTGGGCCAGATTGAGAAACAATTTGGTAAAGGCTCCATCATGCGCCTGGGTGAAGACCGTTCCATGGATGTGGAAACCATCTCTACCGGTTCGCTTTCACTGGATATCGCGCTTGGGGCAGGTGGTCTGCCGATGGGCCGTATCGTCGAAATCTACGGACCGGAATCTTCCGGTAAAACCACGCTGACGCTGCAGGTGATCGCCGCAGCGCAGCGTGAAGGTAAAACCTGTGCGTTTATCGATGCTGAACACGCGCTGGACCCAATCTACGCACGTAAACTGGCAGTCGATATCGACAACCTGCTGTGCTCCCAGCCGGACACCGGCGAGCAGGCACTGGAAATCTGTGACGCCCTGGCGCGTTCTGGCGCAGTAGACGTTATCGTCGTTGACTCCGTGGCGGCACTGACGCCGAAAGCGGAAATCGAAGGCGAAATCGGCGACTCTCATATGGGCCTTGCGGCACGTATGATGAGCCAGGCGATGCGTAAGCTGGCGGGTAACCTGAAGCAGTCCAACACGCTGCTGATCTTCATCAACCAGATCCGTATGAAAATTGGTGTGATGTTCGGCAACCCGGAAACCACTACCGGTGGTAACGCGCTGAAATTCTACGCCTCTGTTCGTCTCGACATCCGTCGTATCGGCGCGGTGAAAGAGGGCGAAAACGTGGTGGGTAGCGAAACCCGCGTGAAAGTGGTGAAGAACAAAATCGCTGCGCCGTTTAAACAGGCTGAATTCCAGATCCTCTACGGCGAAGGTATCAACTTCTACGGCGAACTGGTTGACCTGGGCGTAAAAGAGAAGCTGATCGAGAAAGCAGGCGCGTGGTACAGCTACAAAGGTGAGAAGATCGGTCAGGGTAAAGCGAATGCGACTGCCTGGCTGAAAGATAACCCGGAAACCGCGAAAGAGATCGAGAAGAAAGTACGTGAGTTGCTGCTGAGCAACCCGAACTCAACGCCGGATTTCTCTGTAGATGATAGCGAAGGCGTAGCAGAAACTAACGAAGATTTTTAA GGC109GCA
+    AACTCTGTGTTCCCATCA ATGGCTATCGACGAAAACAAACAGAAAGCGTTGGCGGCAGCACTGGGCCAGATTGAGAAACAATTTGGTAAAGGCTCCATCATGCGCCTGGGTGAAGACCGTTCCATGGATGTGGAAACCATCTCTACCGGTTCGCTTTCACTGGATATCGCGCTTGGGGCAGGTGGTCTGCCGATGGGCCGTATCGTCGAAATCTACGGACCGGAATCTTCCGGTAAAACCACGCTGACGCTGCAGGTGATCGCCGCAGCGCAGCGTGAAGGTAAAACCTGTGCGTTTATCGATGCTGAACACGCGCTGGACCCAATCTACGCACGTAAACTGGGCGTCGATATCGACAACCTGCTGTGCTCCCAGCCGGACACCGGCGAGCAGGCACTGGAAATCTGTGACGCCCTGGCGCGTTCTGGCGCAGTAGACGTTATCGTCGTTGACTCCGTGGCGGCACTGACGCCGAAAGCGGAAATCGAAGGCGAAATCGGCGACTCTCATATGGGCCTTGCGGCACGTATGATGAGCCAGGCGATGCGTAAGCTGGCGGGTAACCTGAAGCAGTCCAACACGCTGCTGATCTTCATCAACCAGATCCGTATGAAAATTGGTGTGATGTTCGGCAACCCGGAAACCACTACCGGTGGTAACGCGCTGAAATTCTACGCCTCTGTTCGTCTCGACATCCGTCGTATCGGCGCGGTGAAAGAGGGCGAAAACGTGGTGGGTAGCGAAACCCGCGTGAAAGTGGTGAAGAACAAAATCGCTGCGCCGTTTAAACAGGCTGAATTCCAGATCCTCTACGGCGAAGGTATCAACTTCTACGGCGAACTGGTTGACCTGGGCGTAAAAGAGAAGCTGATCGAGAAAGCAGGCGCGTGGTACAGCTACAAAGGTGAGAAGATCGGTCAGGGTAAAGCGAATGCGACTGCCTGGCTGAAAGATAACCCGGAAACCGCGAAAGAGATCGAGAAGAAAGTACGTGAGTTGCTGCTGAGCAACCCGAACTCAACGCCGGATTTCTCTGTAGATGATAGCGAAGGCGTAGCAGAAACTAACGAAGATTTTTAA no_mutations
+    GTTAACCGATCAACGCAA ATGGCTATCGACGAAAACAAACAGAAAGCGTTGGCGGCAGCACTGGGCCAGATTGAGAAACAATTTGGTAAAGGCTCCATCATGCGCCTGGGTGAAGACCGTTCCATGGATGTGGAAACCATCTCTACCGGTTCGCTTGCACTGGATATCGCGCTTGGGGCAGGTGGTCTGCCGATGGGCCGTATCGTCGAAATCTACGGACCGGAATCTTCCGGTAAAACCACGCTGACGCTGCAGGTGATCGCCGCAGCGCAGCGTGAAGGTAAAACCTGTGCGTTTATCGATGCTGAACACGCGCTGGACCCAATCTACGCACGTAAACTGGGCGTCGATATCGACAACCTGCTGTGCTCCCAGCCGGACACCGGCGAGCAGGCACTGGAAATCTGTGACGCCCTGGCGCGTTCTGGCGCAGTAGACGTTATCGTCGTTGACTCCGTGGCGGCACTGACGCCGAAAGCGGAAATCGAAGGCGAAATCGGCGACTCTCATATGGGCCTTGCGGCACGTATGATGAGCCAGGCGATGCGTAAGCTGGCGGGTAACCTGAAGCAGTCCAACACGCTGCTGATCTTCATCAACCAGATCCGTATGAAAATTGGTGTGATGTTCGGCAACCCGGAAACCACTACCGGTGGTAACGCGCTGAAATTCTACGCCTCTGTTCGTCTCGACATCCGTCGTATCGGGGCGGTGAAAGAGGGCGAAAACGTGGTGGGTAGCGAAACCCGCGTGAAAGTGGTGAAGAACAAAATCGCTGCGCCGTTTAAACAGGCTGAATTCCAGATCCTCTACGGCGAAGGTATCAACTTCTACGGCGAACTGGTTGACCTGGGCGTAAAAGAGAAGCTGATCGAGAAAGCAGGCGCGTGGTACAGCTACAAAGGTGAGAAGATCGGTCAGGGTAAAGCGAATGCGACTGCCTGGCTGAAAGATAACCCGGAAACCGCGAAAGAGATCGAGAAGAAAGTACGTGAGTTGCTGCTGAGCAACCCGAACTCAACGCCGGATTTCTCTGTAGATGATAGCGAAGGCGTAGCAGAAACTAACGAAGATTTTTAA TCA47GCA,GGC230GGG
+
+Each line lists a barcode, then the sequence subassembled for that barcode, and finally any mutations relative to ``refseq``.
+
+All reads by barcode file
+++++++++++++++++++++++++++
+This file has the suffix ``_all_reads_by_barcode.txt``. It is a **very large** text file that lists each read that matches each barcode (both those successfully subassembled and those that aren't). It also explains why or why not a barcode was subassembled.
+
+This file is **not** created if you set the ``--no_write_barcode_reads``. 
+
+Summary statistics file
++++++++++++++++++++++++
+This file has the suffix ``_summarystats.txt``. It lists summary statistics about the subassembly. Here is an example::
+
+    barcodes (total) = 642641
+    barcodes successfully subassembled = 98281
+    barcodes with at least one alignable read = 615204
+    read pairs (total) = 29611710
+    read pairs aligned at site 1 = 2442839
+    read pairs aligned at site 172 = 1944582
+    read pairs aligned at site 354 = 2794256
+    read pairs aligned at site 481 = 2352744
+    read pairs aligned at site 633 = 2982037
+    read pairs aligned at site 809 = 3024340
+    read pairs aligned at site 941 = 2758838
+    read pairs purged due to low quality = 8965508
+    read pairs that are alignable = 18299636
+    read pairs that are alignable and map to a subassembled barcode = 8068574
+    read pairs that are unalignable = 2346566
+    read pairs that fail Illumina filter = 0
+    sites with insufficient concurrence due to mismatch between mutant and wildtype characters = 52936
+    sites with insufficient concurrence due to mismatch between two mutant characters = 68862
+
+Alignable reads per barcode file
+++++++++++++++++++++++++++++++++++
+This file has the suffix ``_alignablereadsperbarcode.txt``. It gives the distribution of the number of alignable reads per barcode. Here is an example of the first few lines::
+
+    nreads  nbarcodes
+    0   27437
+    1   153500
+    2   10580
+    3   8714
+    4   8670
+    5   8825
+    6   8991
+    7   8958
+
+Mutations among subassembled variants file
++++++++++++++++++++++++++++++++++++++++++++
+This file has the suffix ``_nmuts_among_subassembled.txt``. It gives the distribution of the number of mutations per variant among subassembled variants. Here is an example::
+
+    nmuts   nvariants
+    0   35614
+    1   32442
+    2   17902
+    3   7705
+    4   3046
+    5   1113
+    6   316
+    7   107
+    8   33
+    9   2
+    10  1
+
+Read start sites file
+++++++++++++++++++++++
+This file has the suffix ``_refseqstarts.txt``. It gives the number of reads that start at each of the positions in ``refseq`` specified in ``alignspecs``. Here is an example::
+
+    refseqstart nreads
+    1   2442839
+    172 1944582
+    354 2794256
+    481 2352744
+    633 2982037
+    809 3024340
+    941 2758838
+
 
 .. include:: weblinks.txt
