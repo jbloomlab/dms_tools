@@ -587,7 +587,7 @@ def PlotSampleBargraphs(names, categories, data, plotfile, ylabel, groupbyfirstw
     if os.path.splitext(plotfile)[1].lower() != '.pdf':
         raise ValueError("plotfile must in in .pdf but got %s" % plotfile)
     assert len(names) == len(data) > 0, "names and data are not non-empty and of the same length"
-    colors = matplotlib.rcParams['axes.color_cycle']
+    colors = ['b', 'g', 'r', 'c', 'm', 'y', 'k']
     hatches = ['', '//////', '*****', '.....', '*', 'o'] 
     matplotlib.rc('text', usetex=True)
     matplotlib.rc('legend', fontsize=10)
