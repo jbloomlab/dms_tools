@@ -8,7 +8,7 @@
 
 Overview
 -------------
-``dms_summarizealignments`` is a program included with the `dms_tools`_ package. It can be used to make plots that summarize the results after examining several samples with :ref:`dms_barcodedsubamplicons`.
+``dms_summarizealignments`` is a program included with the `dms_tools`_ package. It can be used to make plots that summarize the results after examining several samples with :ref:`dms_barcodedsubamplicons` or :ref:`dms_subassemble`.
 
 After you install `dms_tools`_, this program will be available to run at the command line. 
 
@@ -22,11 +22,8 @@ Command-line usage
    outprefix
     See `Output files`_ for a detailed description of the created files and examples.
 
-   alignment_type
-    Currently, ``dms_summarizealignments`` assumes that the alignments were created using :ref:`dms_barcodedsubamplicons`.
-
    alignments
-    Essentially, ``ALIGNPREFIX`` should be the value of ``--outprefix`` used when running :ref:`dms_barcodedsubamplicons`. This program expects to find the ``counts.txt`` and ``summarystats.txt`` files that are created by running :ref:`dms_barcodedsubamplicons` with ``--outprefix`` as ``ALIGNPREFIX``. ``NAME`` is simply the name given to each sample in the `Output files`_.
+    Essentially, ``ALIGNPREFIX`` should be the value of ``--outprefix`` used when running :ref:`dms_barcodedsubamplicons` or :ref:`dms_subassemble` (depending on the value of ``alignment_type``). This program expects to find the files that are created by running that program with ``--outprefix`` as ``ALIGNPREFIX``. ``NAME`` is simply the name given to each sample in the `Output files`_.
 
 Example usage
 --------------
@@ -36,9 +33,19 @@ Imagine that you have six samples, *DNA*, *mutDNA*, *virus-p1*, *mutvirus-p1*, *
 
 Because this command uses ``outprefix`` of ``alignmentsummary_``, the `Output files`_ will have names like ``alignmentsummary_mutfreqs.pdf``, ``alignmentsummary_mutcounts_all.pdf``, etc. The ``alignments`` option specifies the prefix for each of the six samples, and then gives them the same names as above (*DNA*, *mutDNA*, etc).
 
+Alternatively, if you have subassembled samples *Lib1*, *Lib2*, *Lib3*, and *WT* with :ref:`dms_subassemble` with ``--outprefix`` as ``subassembly/Lib1``, ``subassembly/Lib2``, etc then you could summarize the results with::
+
+    dms_summarizealignments subassemblysummary_ subassemble ./subassembly/Lib1,Lib1 ./subassembly/Lib2,Lib2 ./subassembly/Lib3,Lib3 ./subassembly/WT,WT
+
+Because the command uses ``outprefix`` of ``subassemblysummary_``, the `Output files`_ will have names like ``subassemblysummary_reads.pdf``, ``subassemblysummary_depth.pdf``, and ``subassemblysummary_nsubassembled.pdf``.
+
 Output files
 ---------------
-Here are the output files, with the names that would be produced if running ``dms_summarizealignments`` as in the `Example usage`_.
+
+For barcoded subamplicons
++++++++++++++++++++++++++++++
+
+Here are the output files, with the names that would be produced if running ``dms_summarizealignments`` as in the `Example usage`_ for ``alignment_type`` of ``barcoded_subamplicons``:
 
 ``reads.pdf``
 ~~~~~~~~~~~~~~
@@ -103,5 +110,36 @@ This plot shows the number of times each codon mutation was observed **only** fo
    :width: 60%
    :alt: alignmentsummary_mutcounts_multi_nt.pdf
 
+For subassemble
++++++++++++++++++++++++++++++
+Here are the output files, with the names that would be produced if running ``dms_summarizealignments`` as in the `Example usage`_ for ``alignment_type`` of ``subassemble``:
+
+``reads.pdf``
+~~~~~~~~~~~~~
+The number of reads and whether or not they were part of a successful subassembly.
+
+.. image:: subassemblysummary_reads.pdf
+   :align: center
+   :width: 60%
+   :alt: subassemblysummary_reads.pdf
+
+
+``depth.pdf``
+~~~~~~~~~~~~~
+The number of reads at each position, regardless of whether or not they were part of a successful subassembly.
+
+.. image:: subassemblysummary_depth.pdf
+   :align: center
+   :width: 60%
+   :alt: subassemblysummary_depth.pdf
+
+``nsubassembled.pdf``
+~~~~~~~~~~~~~~~~~~~~~~
+The number of subassembled barcodes and how many mutations they have.
+
+.. image:: subassemblysummary_nsubassembled.pdf
+   :align: center
+   :width: 60%
+   :alt: subassemblysummary_nsubassembled.pdf
 
 .. include:: weblinks.txt

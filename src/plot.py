@@ -21,6 +21,8 @@ Functions in this module
 
 `PlotDepth` : plots per-site depth along primary sequence
 
+`PlotReadStarts` : plots start of read distributions for subassembly.
+
 `PlotSampleBargraphs` : plots bargraphs of categories for several samples.
 
 Function documentation
@@ -566,7 +568,49 @@ def PlotMutCountFracs(plotfile, title, names, all_cumulfracs, syn_cumulfracs, al
     pylab.close()
 
 
-def PlotSampleBargraphs(names, categories, data, plotfile, ylabel, groupbyfirstword=True):
+def PlotReadStarts(names, depthbystart, plotfile):
+    """Plots distribution of read starts.
+
+    *names* : list of sample names.
+
+    *depthbystart* : dictionary keyed by each name in *names*. V
+    Value is dictionary keyed by read start position, value is
+    number of reads. All names must have same start positions.
+
+    *plotfile* : name of created PDF plot.
+    """
+    if os.path.splitext(plotfile)[1].lower() != '.pdf':
+        raise ValueError("plotfile must in in .pdf but got %s" % plotfile)
+    assert len(names) == len(depthbystart) > 0, "names and depthbystart are not non-empty and of the same length"
+    starts = list(depthbystart[0].keys())
+    starts.sort()
+    assert all([set(istarts.keys()) == set(starts) for istarts in depthbystart]), "Not same starts for all samples"
+    matplotlib.rc('text', usetex=True)
+    matplotlib.rc('legend', fontsize=10)
+    matplotlib.rc('font', size=10)
+    fig = pylab.figure(figsize=(5, 3.25))
+    (lmargin, rmargin, bmargin, tmargin) = (0.1, 0.02, 0.12, 0.21)
+    ax = pylab.axes([lmargin, bmargin, 1 - lmargin - rmargin, 1 - bmargin - tmargin])
+    lines = []
+    styles = ['bo-', 'rs-', 'gd-.', 'c^:', 'mx-', 'y*--', 'kv-.']
+    assert len(names) <= len(styles), "too many names for specified styles"
+    for (name, depth, style) in zip(names, depthbystart, styles):
+        line = pylab.plot(starts, [depth[start] for start in starts], style)
+        lines.append(line[0])
+    pylab.legend(lines, [name.replace('_', ' ') for name in names], ncol=int(math.ceil(len(names) / 2.0)), loc='upper center', numpoints=1, bbox_to_anchor=(0.54, 1.25))
+    yformatter = pylab.ScalarFormatter(useMathText=True)
+    yformatter.set_powerlimits((-2, 4))
+    pylab.gca().yaxis.set_major_formatter(yformatter)
+    pylab.gca().set_xlim([starts[0] - 0.03 * (starts[-1] - starts[0]), starts[-1] + 0.03 * (starts[-1] - starts[0])])
+    pylab.xticks(starts)
+    pylab.xlabel('read start position')
+    pylab.ylabel('number of reads')
+    pylab.savefig(plotfile)
+    pylab.clf()
+    pylab.close()
+
+
+def PlotSampleBargraphs(names, categories, data, plotfile, ylabel, groupbyfirstword=True, ncolumns=3):
     """Plots bargraph of counts for different samples.
 
     *names* is a list of the names of the different samples.
@@ -583,6 +627,8 @@ def PlotSampleBargraphs(names, categories, data, plotfile, ylabel, groupbyfirstw
     *groupbyfirstword* is a Boolean switch that specifies whether we group 
     consecutive categories with the same first word in the string to have
     the same color.
+
+    *ncolumns* is the number of columns in each legend line.
     """
     if os.path.splitext(plotfile)[1].lower() != '.pdf':
         raise ValueError("plotfile must in in .pdf but got %s" % plotfile)
@@ -593,7 +639,7 @@ def PlotSampleBargraphs(names, categories, data, plotfile, ylabel, groupbyfirstw
     matplotlib.rc('legend', fontsize=10)
     matplotlib.rc('font', size=10)
     matplotlib.rc('patch', linewidth=0.75)
-    ncol = 3 # number of legend columns
+    ncol = ncolumns # number of legend columns
     nlegendrows = int(math.ceil(len(categories) / float(ncol)))
     fig = pylab.figure(figsize=(6, 3.96 * (1.02 + 0.055 * nlegendrows)))
     (lmargin, rmargin, bmargin, tmargin) = (0.09, 0.01, 0.41, 0.0175 + 0.046 * nlegendrows)

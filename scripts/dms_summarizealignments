@@ -98,7 +98,7 @@ def ParseBarcodeData(names, stats, maxperbarcode):
 
 
 def ParseReadData(names, stats):
-    """Parses data for ``read.pdf`` plot from summary stats.
+    """Parses data for ``read.pdf`` from summary stats for *barcodedsubamplicons*.
 
     *names* is list of sample names.
 
@@ -124,6 +124,29 @@ def ParseReadData(names, stats):
                 data[name]['barcoded'] += n * int(m.group('nreads'))
     return (categories, data)
 
+def ParseSubassembleReadData(names, stats):
+    """Parses data for ``read.pdf`` for *subassemble*.
+
+    *names* : list of samle names.
+
+    *stats* : list of corresponding summary stats.
+
+    The return value is *(categories, data)*, which are appropriate
+    for use as the same arguments to *dms_tools.plot.PlotSampleBargraphs*.
+    """
+    assert len(names) == len(stats)
+    categories = ['failed filter', 'low quality', 'unalignable', 'aligns to subassembled', 'aligns to non-subassembled']
+    data = {}
+    for (name, s) in zip(names, stats):
+        data[name] = {}
+        data[name]['failed filter'] = s['read pairs that fail Illumina filter']
+        data[name]['low quality'] = s['read pairs purged due to low quality']
+        data[name]['unalignable'] = s['read pairs that are unalignable']
+        data[name]['aligns to subassembled'] = s['read pairs that are alignable and map to a subassembled barcode']
+        data[name]['aligns to non-subassembled'] = s['read pairs that are alignable'] - s['read pairs that are alignable and map to a subassembled barcode']
+        assert set(categories) == set(data[name].keys()), set(categories).symmetric_difference(set(data[name].keys()))
+    return (categories, data)
+
 
 def main():
     """Main body of script."""
@@ -139,23 +162,21 @@ def main():
     print versionstring
     print 'Parsed the following arguments:\n%s\n' % '\n'.join(['\t%s = %s' % tup for tup in args.iteritems()])
 
-    # define output files and remove if they already exist
-    mutfreqs = '%smutfreqs.pdf' % args['outprefix']
-    mutfreqstext = '%smutfreqs.txt' % args['outprefix']
-    mutcountsall = '%smutcounts_all.pdf' % args['outprefix']
-    mutcountsmulti = '%smutcounts_multi_nt.pdf' % args['outprefix']
-    depth = '%sdepth.pdf' % args['outprefix']
-    mutdepth = '%smutdepth.pdf' % args['outprefix']
-    reads = '%sreads.pdf' % args['outprefix']
-    barcodes = '%sbarcodes.pdf' % args['outprefix']
-    for f in [mutfreqs, mutfreqstext, mutcountsall, mutcountsmulti, depth, mutdepth, reads, barcodes]:
-        if os.path.isfile(f):
-            os.remove(f)
-            print "Removing existing file %s" % f
-
-
     # make summaries
     if args['alignment_type'] == 'barcodedsubamplicons':
+        # define output files and remove if they already exist
+        mutfreqs = '%smutfreqs.pdf' % args['outprefix']
+        mutfreqstext = '%smutfreqs.txt' % args['outprefix']
+        mutcountsall = '%smutcounts_all.pdf' % args['outprefix']
+        mutcountsmulti = '%smutcounts_multi_nt.pdf' % args['outprefix']
+        depth = '%sdepth.pdf' % args['outprefix']
+        mutdepth = '%smutdepth.pdf' % args['outprefix']
+        reads = '%sreads.pdf' % args['outprefix']
+        barcodes = '%sbarcodes.pdf' % args['outprefix']
+        for f in [mutfreqs, mutfreqstext, mutcountsall, mutcountsmulti, depth, mutdepth, reads, barcodes]:
+            if os.path.isfile(f):
+                os.remove(f)
+                print "Removing existing file %s" % f
         names = []
         data = {}
         print "\nNow reading data from %s alignments..." % (args['alignment_type'])
@@ -200,6 +221,60 @@ def main():
         (categories, plotdata) = ParseBarcodeData(names, [data[name]['stats'][1] for name in names], args['maxperbarcode'])
         dms_tools.plot.PlotSampleBargraphs(names, categories, plotdata, barcodes, 'number of barcodes')
 
+    elif args['alignment_type'] == 'subassemble':
+        nsubassembled = '%snsubassembled.pdf' % args['outprefix']
+        reads = '%sreads.pdf' % args['outprefix']
+        depth = '%sdepth.pdf' % args['outprefix']
+        for f in [reads, depth, nsubassembled]:
+            if os.path.isfile(f):
+                os.remove(f)
+                print "Removing existing file %s" % f
+        names = []
+        data = {}
+        print "\nNow reading data from %s alignments..." % (args['alignment_type'])
+        for (prefix, name) in args['alignments']:
+            print "Processing data for %s from files with prefix %s" % (name, prefix)
+            assert name not in names, "Duplicate name of %s" % name
+            names.append(name)
+            data[name] = {}
+            summaryfile = '%s_summarystats.txt' % prefix
+            assert os.path.isfile(summaryfile), "Failed to find %s" % summaryfile
+            data[name]['summarystats'] = dms_tools.file_io.ReadSummaryStats(summaryfile)
+            nsubassembledfile = '%s_nmuts_among_subassembled.txt' % prefix
+            assert os.path.isfile(nsubassembledfile), "Failed to find %s" % nsubassembledfile
+            with open(nsubassembledfile) as f:
+                data[name]['nsubassembled'] = dict([(int(line.split()[0]), int(line.split()[1])) for line in f.readlines()[1 : ]])
+            readdepthfile = '%s_refseqstarts.txt' % prefix
+            assert os.path.isfile(readdepthfile), "Failed to find %s" % readdepthfile
+            with open(readdepthfile) as f:
+                data[name]['readdepth'] = dict([(int(line.split()[0]), int(line.split()[1])) for line in f.readlines()[1 : ]])
+        print("Making %s" % reads)
+        (categories, plotdata) = ParseSubassembleReadData(names, [data[name]['summarystats'][1] for name in names])
+        dms_tools.plot.PlotSampleBargraphs(names, categories, plotdata, reads, 'number of read pairs', groupbyfirstword=False)
+        print("Making %s" % depth)
+        dms_tools.plot.PlotReadStarts(names, [data[name]['readdepth'] for name in names], depth)
+        print("Making %s" % nsubassembled)
+        categories = ['no mutations', '1 mutation', '2 mutations', '3 mutations', '4 mutations', '5+ mutations']
+        ndata = {}
+        for name in names:
+            ndata[name] = {}
+            try:
+                ndata[name]['no mutations'] = data[name]['nsubassembled'][0]
+            except KeyError:
+                ndata[name]['no mutations'] = 0
+            for i in range(1, 5):
+                key = '%d mutations' % i
+                if i == 1:
+                    key = key[ : -1] # trim trailing s
+                try:
+                    ndata[name][key] = data[name]['nsubassembled'][i]
+                except KeyError:
+                    ndata[name][key] = 0
+            ndata[name]['5+ mutations'] = 0
+            for (key, value) in data[name]['nsubassembled'].items():
+                if key >= 5:
+                    ndata[name]['5+ mutations'] += value
+        dms_tools.plot.PlotSampleBargraphs(names, categories, ndata, nsubassembled, ylabel='subassembled barcodes', groupbyfirstword=False, ncolumns=3)
     else:
         raise ValueError("Invalid alignment_type of %s" % args['alignment_type'])
 
