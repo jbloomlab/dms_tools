@@ -312,12 +312,14 @@ def SummarizeAlignmentsParser():
 
 def MatchSubassembledBarcodesParser():
     """Returns *argparse.ArgumentParser* for ``dms_matchsubassembledbarcodes``."""
-    parser = ArgumentParserNoArgHelp(description='Match barcodes to subassembled variants, write variant counts files, make summary plots. This script is part of %s (version %s) written by %s. Detailed documentation is at %s' % (dms_tools.__name__, dms_tools.__version__, dms_tools.__author__, dms_tools.__url__), formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser = ArgumentParserNoArgHelp(description='Extract barcodes after quality filter, match to subassembled variants, write variant counts files, make summary plots. This script is part of %s (version %s) written by %s. Detailed documentation is at %s' % (dms_tools.__name__, dms_tools.__version__, dms_tools.__author__, dms_tools.__url__), formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('outprefix', help='Prefix for output files.')
     parser.add_argument('subassembled', type=ExistingFile, help="File output by 'dms_subassemble' that contains the barcodes and subassembled variants.")
     parser.add_argument('r1files', type=CommaSeparatedFASTQFiles, help='Comma-separated list of R1 FASTQ files (no spaces) containing barcodes. Files can optionally be gzipped (extension .gz).')
     parser.add_argument('r2files', type=CommaSeparatedFASTQFiles, help="Like 'r1files' but for R2 read.")
-    parser.add_argument('--minquality', type=int, default=25, help="ADD VARIABLE DESCRIPTION")
+    parser.add_argument('--minquality', type=int, default=25, help="Each site in barcode must have quality scored >= this for at least on read.")
+    parser.add_argument('--r1start', type=IntGreaterEqual1, default=1, help="Barcode starts at this position in R1.")
+    parser.add_argument('--r2end', type=NonNegativeInt, default=0, help="Barcode ends this many nucleotides before the end of R2.")
     return parser
 
 

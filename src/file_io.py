@@ -32,6 +32,8 @@ Functions in this module
 
 * *ReadSummaryStats* : reads alignment summary statistics.
 
+* *ReadSubassembledVariants* : reads subassembled variants
+
 Function documentation
 ---------------------------
 
@@ -1054,6 +1056,64 @@ def ReadSummaryStats(f):
     if openedfile:
         f.close()
     return (keylist, stats)
+
+
+def ReadSubassembledVariants(infile):
+    """Reads subassembled variants file produced by ``dms_subassemble``.
+
+    *infile* : name of a ``*_subassembled_variants.txt`` file
+    produced by ``dms_subassemble``.
+
+    The return value is *(bc_dict, bc_len)*
+
+    *bc_dict* is a dictionary keyed by each barcode, and with values
+    being the list of mutations at that site.
+    There is also a key *"wt_seq"* that has as its value
+    the wildtype sequence.
+
+    *bc_len* is the integer length of barcodes.
+    """
+    bc_dict = {}
+    bc_len = None
+    mutmatch = re.compile('^(?P<wt>[ATCGatcg]+)(?P<pos>\d+)(?P<mut>[ATCGatcg]+)$')
+    wtseq = None
+    with open(infile) as f:
+        for line in infile:
+            cats = line.strip().split()
+            assert len(cats) == 3, "Not 3 entries in subassembly line in %s:\n%s" % (infile, line)
+            barcode = cats[0]
+            if bc_len == None:
+                bc_len = len(barcode)
+            elif len(barcode) != bc_len:
+                raise ValueError("Not all barcodes the same length in %s" % subassembled_variants_file)
+            seq = cats[1]
+            mut_str = cats[2]
+            if mut_str == "no_mutations":
+                muts = []
+                if wtseq == None:
+                    wtseq = seq
+                else:
+                    assert wtseq == seq, "Mismatched wildtype sequence in %s:\n%s" % (infile, line)
+            else:
+                muts = mut_str.split(',')
+                for mut in muts:
+                    m = mutmatch.search(mut)
+                    assert m, "Invalid mutation of %s in %s, line:\n%s" % (mut, infile, line)
+                    (x, i, y) = (m.group('wt'), m.group('pos'), m.group('mut'))
+                    assert len(x) == len(y), "Invalid mutation of %s in %s, line:\n%s" % (mut, infile, line)
+                    if wtseq:
+                        assert wtseq[i - 1 : i - 1 + len(x)] == x, "Invalid wildtype in mutation %s in %s:\n%s" % (mut, infile, line)
+                    assert seq[i - 1 : i - 1 + len(x)] == y, "Invalid mutant in mutation %s in %s:\n%s" % (mut, infile, line)
+                    seq = seq[ : i - 1] + wt + seq[i - 1 + len(x) : ]
+                if wtseq == None:
+                    wtseq = seq
+                else:
+                    assert wtseq == seq, "Mismatched wildtype sequence in %s:\n%s" % (infile, line)
+            if barcode in bc_dict:
+                raise ValueError("Duplicate barcode %s in %s" % (barcode, infile))
+            bc_dict[barcode] = mut
+        bc_dict['wtseq'] = wtseq
+    return (bc_dict, bc_len)
 
 
 if __name__ == '__main__':

@@ -8,48 +8,7 @@ import time
 import os
 import dms_tools.parsearguments
 import dms_tools.file_io
-
-
-
-def get_variants(subassembled_variants_file):
-    """Reads subassembled_variants file produced by *dms_subassemble* and returns barcodes with associated mutations.
-
-    `subassembled_variants_file` is a string that gives the name of a file containing the barcode sequence,
-    gene sequence and mutations associated with each subassembled variant in the format output by *dms_subassemble*.
-
-    `bc_dict` is a dictionary containing each barcode sequence as a key and the mutations associated
-    with that barcode as values. It also contains a key, "wt_seq" with the wildtype nucleotide sequence
-    as its value. 
-
-    `bc_len` is an interger indicating the length of the identifying barcode sequence to be used in *parse_barcodes*. 
-    """
-
-    infile = open(subassembled_variants_file, 'r')
-    bc_dict = {}
-    
-    print("Reading barcodes and associated mutations.")
-    for line in infile:
-        cats = line.strip().split(" ")
-        barcode = cats[0]
-        bc_len = len(barcode)
-        seq = cats[1]
-        mut_str = cats[2]
-        muts = mut_str.strip().split(',')
-        mut_tup = ()
-        for mut in muts:
-            if mut == "no_mutations":
-                mut_tup = mut_tup + (mut, )
-                bc_dict['wt_seq'] = seq
-            else:
-                wt = mut[:3]
-                new = mut[-3:]
-                pos = int(mut[3:len(mut)-3])            
-                mut_string = (wt+str('%03d' % pos)+new)
-                mut_tup = mut_tup + (mut_string, )
-        bc_dict[barcode] = mut_tup
-    
-    return (bc_dict, bc_len)
-
+import dms_tools.cutils
 
 
 def reverse_comp(seq, quals):
@@ -75,86 +34,87 @@ def reverse_comp(seq, quals):
     return(rc_seq, rc_quals)
 
 
-def parse_barcodes(read1_file, read2_file, min_quality, bc_len, out_prefix):
-    """Reads Illumina fastq files and returns a list of barcodes that pass a quality threshold.
+def parse_barcodes(r1files, r2files, minquality, bc_len, r1start, r2end):
+    """Reads FASTQ files and returns barcodes passing quality threshold.
 
-    `read1_file` and `read2_file` are strings indicating the file names of gzipped fastq files
-    produced by Illumina sequencing. Note that both files must contain the same number of reads, 
-    and pairs of reads must be in the same order in each file. 
+    Barcodes discarded if either read fails quality filter, if any site
+    in barcode doesn't have read quality >= *minquality* for at least one 
+    read, or if reads disagree at any site.
 
-    `min_quality` is an interger (0-50) indicating the Phred quality score below which a base call will
-    be ignored. 
+    `r1files` and `r2files` are the file names of FASTQ files, which
+    are optionally gzipped. Both files must contain the same number of reads
+    in the same order.
 
-    `bc_len` is the length of the barcode sequence. This is automatically determined by *get_variants* above
+    `min_quality` is an integer (0-50) indicating the Phred quality score 
+    below which a base call will be ignored. Any reads failing the Illumina
+    filter are also ignored.
+
+    `bc_len` is the length of the barcode sequence. 
+
+    `r1start` indicates the nucleotide in R1 at which the barcode starts,
+    in 1, 2, ... indexing.
+
+    `r2end` indicates how many nucleotides **before** the end of R2 the
+    barcode ends.
+
+    The return variable is the tuple *(bc_list, bc_stats)*:
+
+        * *bc_list* is a list of all barcodes that pass the filters.
+
+        * *bc_stats* is a dictionary with the counts of reads parsed. Keys:
+
+            - *nreads* : total reads in files
+
+            - *nfiltered* : number failed Illumina filter
+
+            - *nlowquality* : number that failed quality filter
+
+            - *nmismatched* : number purged due to mismatch
+
+            - *nretained* : number retained, equals *len(bc_list)*.
+
+
     """
-    
-    gzipped = True
-    bc_dict = {}
-    total_seqs = 0
-    bc_count = 0
+    if all(map(lambda f: os.path.splitext(f)[-1] == '.gz', r1files + r2files)):
+        gzipped = True
+    elif all(map(lambda f: os.path.splitext(f)[-1] == '.fastq', r1files + r2files)):
+        gzipped = False
+    else:
+        raise ValueError("FASTQ files must either all end in '.gz' or all end in '.fastq'. Instead we had:\n%s" '\n'.join(r1files + r2files))
     bc_list = []
-    barcodes_file = 'barcodes_'+out_prefix+'.fastq'
-    if os.path.isfile(barcodes_file):
-        os.remove(barcodes_file)
-    barcodes = open(barcodes_file, 'w')
-    
-
-    read1 = read1_file
-    read2 = read2_file
-    print("\nWriting barcode sequences to: %s" % (barcodes_file))
-    for read_tup in dms_tools.file_io.IteratePairedFASTQ(read1, read2, gzipped, applyfilter=True):
-        if read_tup:
+    r1start -= 1 # decrement so we can use zero-based indexing
+    assert r1start >= 0 and r2end >= 0
+    minqchar = chr(minquality + 33) # minimum character for Q-score
+    ntot = nfiltered = nlowquality = nmismatched = 0
+    for read_tup in dms_tools.file_io.IteratePairedFASTQ(r1files, r2files, gzipped, applyfilter=True):
+        ntot += 1
+        if not read_tup:
+            nfiltered += 1
+        else:
             (name, r1, r2, q1, q2) = read_tup
-            total_seqs += 1
-            (new_r2_seq, new_r2_qual) = reverse_comp(r2, q2)
-            bc1 = r1[:bc_len]
-            bcq1 = q1[:bc_len]
-            bc2 = new_r2_seq[:bc_len]
-            bcq2 = new_r2_qual[:bc_len]
-            assert len(bc1) == len(bc2), "Read1 barcode not the same length as Read2 barcode."
-            bc = ""
-            bcq = ""
-            for j in range(len(bc1)):
-                qual1 = ord(bcq1[j])-33
-                qual2 = ord(bcq2[j])-33
-                if bc1[j] == bc2[j] and (qual1 >= min_quality or qual2 >= min_quality):
-                    bc += bc1[j]
-                    if qual1 >= qual2:
-                        bcq += bcq1[j]
-                    else:
-                        bcq += bcq2[j]
-                elif bc2[j] == 'N' and bc1[j] != 'N' and (qual1 >= min_quality):
-                    bc += bc1[j]
-                    bcq += bcq1[j]
-                elif bc1[j] == 'N' and bc2[j] != 'N' and (qual2 >= min_quality):
-                    bc += bc2[j]
-                    bcq += bcq2[j]
-                elif bc1[j] != bc2[j]:
-                    if qual1 >= qual2 and (qual1 >= min_quality):
-                        bc += bc1[j]
-                        bcq += bcq1[j]
-                    elif qual2 >= qual1 and (qual2 >= min_quality):
-                        bc += bc2[j]
-                        bcq += bcq2[j]
-                else:
-                    break
-            if len(bc) == len(bcq) == bc_len:
-                barcodes.write('@'+name+'\n'+bc+'\n+\n'+bcq+'\n')
-                bc_list.append(bc)
-                bc_count += 1
-    
-    
-    return bc_list
-    
-
-    print("Among %d total sequences:" % (total_seqs))
-    print("%f percent of sequences passed quality standards." % (float(bc_count)/float(total_seqs)))
-    print("--------------------------------------------------------")
-
-
-
-
-
+            assert len(r1) >= r1start + bc_len, "R1 read %s too short" % name
+            assert len(r2) >= r2end + bc_len, "R2 read %s too short" % name
+            r1 = r1[r1start : r1start + bc_len]
+            q1 = r1[r1start : r1start + bc_len]
+            r2 = r2[-bc_len - r2end : -r2end]
+            q2 = r2[-bc_len - r2end : -r2end]
+            if any(map(lambda x: x[0] < minqchar and x[1] < minqchar, zip(q1, q2))):
+                nlowquality += 1
+                continue
+            r2 = dms_tools.cutils.ReverseComplement(r2)
+            if r1 != r2:
+                nmismatched += 1
+            else:
+                bc_list.append(r1)
+    assert ntot == len(bc_list) + nfiltered + nlowquality + nmismatched
+    bc_stats = {
+            'nreads':ntot,
+            'nfiltered':nfiltered,
+            'nlowquality':nlowquality,
+            'nmismatches':nmismatched,
+            'nretained':len(bc_list),
+            }
+    return (bc_list, bc_stats)
 
 
 def write_counts_file(bc_list, bc_dict, out_prefix):
@@ -276,57 +236,38 @@ def write_counts_file(bc_list, bc_dict, out_prefix):
     outfile.close()
 
 
-
-
-
-
-
 def main():
+    """Main body of program."""
 
-    """Creates a counts file that can be used by *dms_inferprefs* and *dms_inferdiffprefs*.
-
-    `subassembled` is the file name of the subassembled variants produced by *dms_subassemble*. This file ends with "_subassembled_variants.txt"
-    `r1files` is the file name of fastq formatted Illumina R1 reads.
-    `r2files` is the file name of fastq formatted Illumina R2 reads. Paired R1 and R2 reads must be in the same order in each file.
-    `outprefix` is the file name prefix for any output files produced. 
-    `min_quality` is an optional variable indicating the minimum quality score below which a basecall will be ignored (Default: 25)
-
-    """
     parser = dms_tools.parsearguments.MatchSubassembledBarcodesParser()
     args = vars(parser.parse_args())
-    print(args)
+    prog = parser.prog
+    assert len(args['r1files']) == len(args['r2files']), "Different number of r1files and r2files."
 
-    start_time = time.time()
-    localtime = time.asctime()
-    print("Start time: %s" % localtime)
+    print("Beginning execution of %s in directory %s\n" % (prog, os.getcwd()))a
+    versionstring = dms_tools.file_io.Versions()
+    print(versionstring)
+    print("Parsed the following arguments:\n%s\n" % '\n'.join(['\t%s = %s' % tup for tup in args.items()])
+    print("Starting time is %s" % time.asctime())
 
-    # Get barcodes for subassembled variants and their respective mutations.
-    (barcode_dict, barcode_length) = get_variants(args['subassembled'])
+    # Get subassembled variants for barcodes
+    print("\nReading barcode for subassembled variants from %s" % args['subassembled'])
+    (bc_dict, bc_length) = dms_tools.file_io.ReadSubassembledVariants(args['subassembled'])
+    print("Read barcodes for %d subassembled variants." % len(bc_dict))
+    print("The barcodes are of length %d nucleotides." % bc_length)
 
     # Get selected barcodes that pass quality filters.
-    barcode_list = parse_barcodes(args['r1files'], args['r2files'], args['min_quality'], barcode_length, args['outprefix'])
-
+    print("\nNow parsing barcodes...")
+    (bc_list, bc_stats) = parse_bc(args['r1files'], args['r2files'], args['min_quality'], bc_length, args['r1start'], args['r2end'])
+    print("Completed parsing barcodes.")
+    print("Here are the stats on the parsing of barcodes from the read pairs:")
+    print("\t%s" % '\t\n'.join(["%s = %d" % tup for tup in bc_stats.items()]))
+I AM HERE
     # Write counts_file.
     write_counts_file(barcode_list, barcode_dict, args['outprefix'])
 
-    print("Finished counting barcodes.")
 
-    interval = float((time.time() - start_time)/60)
-    time_taken = float(interval)
-    unit = ''
-    if interval > 60:
-        if interval > 1440:
-            time_taken = interval/1440
-            unit = 'days'
-        else:
-            time_taken = interval/60
-            unit = 'hours'
-    else: 
-        tame_taken = interval
-        unit = 'minutes'
-
-    print("\n---------------------------------------- \n  the program took %.2f %s to run \n----------------------------------------\n" % (time_taken, unit))
-
+    print('\nSuccessfully completed %s at %s' % (prog, time.asctime()))
 
 
 

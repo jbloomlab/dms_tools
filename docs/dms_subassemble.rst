@@ -96,7 +96,9 @@ This file has the suffix ``.log`` and tracks the progress of the program.
 
 Subassembled variants file
 +++++++++++++++++++++++++++
-This file has the suffix ``_subassembled_variants.txt``. It is the primary output file that lists all barcodes that can be subassembled according to the parameters passed to ``dms_subassemble``.
+This file has the suffix ``_subassembled_variants.txt``. It is the primary output file, and lists all barcodes that can be subassembled according to the parameters passed to ``dms_subassemble``.
+
+It is in the :ref:`subassembly_file` format.
 
 Here are a few example lines::
 

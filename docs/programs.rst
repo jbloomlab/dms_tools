@@ -16,6 +16,7 @@ Installation of `dms_tools`_ installs the following programs. These programs can
    dms_editsites
    dms_barcodedsubamplicons
    dms_subassemble
+   dms_matchsubassembledbarcodes
    dms_summarizealignments
 
 
