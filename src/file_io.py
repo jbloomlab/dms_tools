@@ -207,7 +207,7 @@ def ReadDMSCounts(f, chartype):
 
     The counts are returned in the dictionary *counts*. The dictionary
     is keyed by **strings** giving the position (e.g. '1', '2', or '5A').
-    For each position *r*, *strings[r]* is a dictionary keyed by the
+    For each position *r*, *counts[r]* is a dictionary keyed by the
     string *WT* and all characters (nucleotides or codons) as specified
     by *chartype*, in upper case. *counts[r]['WT']* is the wildtype identity
     at the site; *counts[r][x]* is the number of counts for character *x*.
@@ -1058,25 +1058,36 @@ def ReadSummaryStats(f):
     return (keylist, stats)
 
 
-def ReadSubassembledVariants(infile):
+def ReadSubassembledVariants(infile, assumechartype='codon'):
     """Reads subassembled variants file produced by ``dms_subassemble``.
 
     *infile* : name of a ``*_subassembled_variants.txt`` file
     produced by ``dms_subassemble``.
 
-    The return value is *(bc_dict, bc_len)*
+    *assumechartype* is the type of nucleotide character assumed
+    if it is **not** possible to auto-determine this from *infile*,
+    which will be the case only if there are no mutations.
+
+    The return value is *(bc_dict, bc_len, wtseq, chartype)*
 
     *bc_dict* is a dictionary keyed by each barcode, and with values
     being the list of mutations at that site.
-    There is also a key *"wt_seq"* that has as its value
-    the wildtype sequence.
 
     *bc_len* is the integer length of barcodes.
+
+    *wtseq* is a string giving the wildtype sequence
+
+    *chartype* indicates the character type of the sequence / 
+    mutations as a string, which is auto-determined from
+    *infile*. The *chartype* can be any of *codon*, *DNA*,
+    or *aminoacid*. If all variants are unmutated and the sequence
+    is a nucleotide sequence, then it is not possible to auto-
+    determine whether the character type is *codon* or *DNA*. In that
+    case, it is assumed to have the type of *assumechartype*.
     """
     bc_dict = {}
-    bc_len = None
     mutmatch = re.compile('^(?P<wt>[ATCGatcg]+)(?P<pos>\d+)(?P<mut>[ATCGatcg]+)$')
-    wtseq = None
+    wtseq = len_char = bc_len = chartype = None
     with open(infile) as f:
         for line in infile:
             cats = line.strip().split()
@@ -1086,7 +1097,7 @@ def ReadSubassembledVariants(infile):
                 bc_len = len(barcode)
             elif len(barcode) != bc_len:
                 raise ValueError("Not all barcodes the same length in %s" % subassembled_variants_file)
-            seq = cats[1]
+            seq = cats[1].upper()
             mut_str = cats[2]
             if mut_str == "no_mutations":
                 muts = []
@@ -1096,24 +1107,48 @@ def ReadSubassembledVariants(infile):
                     assert wtseq == seq, "Mismatched wildtype sequence in %s:\n%s" % (infile, line)
             else:
                 muts = mut_str.split(',')
+                # the below checks wildtype sequence for match w/ muttions
                 for mut in muts:
                     m = mutmatch.search(mut)
                     assert m, "Invalid mutation of %s in %s, line:\n%s" % (mut, infile, line)
-                    (x, i, y) = (m.group('wt'), m.group('pos'), m.group('mut'))
-                    assert len(x) == len(y), "Invalid mutation of %s in %s, line:\n%s" % (mut, infile, line)
+                    (x, i, y) = (m.group('wt').upper(), m.group('pos'), m.group('mut').upper())
+                    if len_char == None:
+                        len_char = len(x)
+                        if len_char == 3:
+                            chartype = 'codon'
+                            assert len(seq) % 3 == 0, "mutations indicate chartype of codon, but sequence length is not a multiple of 3 in %s" % infile
+                            assert re.search('^[%s]+$' % ''.join(dms_tools.nts), seq), "mutations indicate chartype of codon, but sequence not all nucleotide characters in %s" % infile
+                        elif len_char == 1:
+                            if re.search('^[%s]+$' % ''.join(dms_tools.nts), seq):
+                                chartype = 'DNA'
+                            elif re.search('^[%s\*]+$' % ''.join(dms_tools.aminoacids_nostop), seq):
+                                chartype = 'protein'
+                            else:
+                                raise ValueError("Unrecognized character type in sequence in %s:\n%s" % (nfile, seq))
+                        else:
+                            raise ValueError("Invalid character length in mutations in %s: %s" % (infile, mut))
+                    assert len(x) == len(y) == len_char, "Invalid mutation of %s in %s. Expected characters of length %d. Line is:\n%s" % (mut, infile, len_char, line)
+                    if chartype == 'codon':
+                        i = (i - 1) * 3 + 1
                     if wtseq:
-                        assert wtseq[i - 1 : i - 1 + len(x)] == x, "Invalid wildtype in mutation %s in %s:\n%s" % (mut, infile, line)
-                    assert seq[i - 1 : i - 1 + len(x)] == y, "Invalid mutant in mutation %s in %s:\n%s" % (mut, infile, line)
-                    seq = seq[ : i - 1] + wt + seq[i - 1 + len(x) : ]
+                        assert wtseq[i - 1 : i - 1 + len_char] == x, "Invalid wildtype in mutation %s in %s:\n%s" % (mut, infile, line)
+                    assert seq[i - 1 : i - 1 + len_char] == y, "Invalid mutant in mutation %s in %s:\n%s" % (mut, infile, line)
+                    seq = seq[ : i - 1] + wt + seq[i - 1 + len_char : ]
                 if wtseq == None:
                     wtseq = seq
                 else:
                     assert wtseq == seq, "Mismatched wildtype sequence in %s:\n%s" % (infile, line)
             if barcode in bc_dict:
                 raise ValueError("Duplicate barcode %s in %s" % (barcode, infile))
-            bc_dict[barcode] = mut
-        bc_dict['wtseq'] = wtseq
-    return (bc_dict, bc_len)
+            bc_dict[barcode] = muts
+    if chartype == None:
+        if re.search('^[%s]+$' % ''.join(dms_tools.nts), wtseq):
+            chartype = assumechartype
+        elif re.search('^[%s\*]+$' % ''.join(dms_tools.aminoacids_nostop), wtseq):
+            chartype = 'aminoacid'
+        else:
+            raise ValueError("Cannot auto-identify character type of wtseq:\n%s" % wtseq)
+    return (bc_dict, bc_len, wtseq, chartype)
 
 
 if __name__ == '__main__':

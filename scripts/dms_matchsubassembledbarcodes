@@ -1,11 +1,13 @@
 #!python
 
-"""Matches barcodes to subassembled variants, makes count files and plots.
+"""Matches barcodes to subassembled variants, makes count files.
 
 Written by Danny Lawrence and Jesse Bloom."""
 
 import time
 import os
+import re
+import dms_tools
 import dms_tools.parsearguments
 import dms_tools.file_io
 import dms_tools.cutils
@@ -70,10 +72,6 @@ def parse_barcodes(r1files, r2files, minquality, bc_len, r1start, r2end):
             - *nlowquality* : number that failed quality filter
 
             - *nmismatched* : number purged due to mismatch
-
-            - *nretained* : number retained, equals *len(bc_list)*.
-
-
     """
     if all(map(lambda f: os.path.splitext(f)[-1] == '.gz', r1files + r2files)):
         gzipped = True
@@ -112,128 +110,8 @@ def parse_barcodes(r1files, r2files, minquality, bc_len, r1start, r2end):
             'nfiltered':nfiltered,
             'nlowquality':nlowquality,
             'nmismatches':nmismatched,
-            'nretained':len(bc_list),
             }
     return (bc_list, bc_stats)
-
-
-def write_counts_file(bc_list, bc_dict, out_prefix):
-    """Writes deep mutational scanning counts file.
-
-    `bc_list` is a list of post-selection barcode sequences parsed from *parse_barcodes*.
-    `bc_dict` is the dictionary linking barcode sequences with associated mutations given by *get_variants* 
-    """
-    char_type = 'codon' #'codon' or 'AA'
-
-    refseq = bc_dict['wt_seq']
-    sites = [i + 1 for i in range(len(refseq) // 3)]
-    refseq_chars = dict([(site, refseq[3 * site - 3 : 3 * site]) for site in sites])
-
-
-    # Create list of all possible codons. 
-    nts = ['A', 'C', 'G', 'T']
-    codons_list = []
-    for nt1 in nts:
-        for nt2 in nts:
-            for nt3 in nts:
-                codons_list.append('%s%s%s' % (nt1, nt2, nt3))
-
-    aa_list = [ 'A', 'C', 'D', 'E', 'F', 'G', 'H', 
-                'I', 'K', 'L', 'M', 'N', 'P', 'Q', 
-                'R', 'S', 'T', 'V', 'W', 'Y', '*',]
-
-
-    trans_dict = {
-        'AAA':'K', 'AAC':'N', 'AAG':'K', 'AAT':'N',
-        'ACA':'T', 'ACC':'T', 'ACG':'T', 'ACT':'T',
-        'AGA':'R', 'AGC':'S', 'AGG':'R', 'AGT':'S',
-        'ATA':'I', 'ATC':'I', 'ATG':'M', 'ATT':'I',
-        'CAA':'Q', 'CAC':'H', 'CAG':'Q', 'CAT':'H',
-        'CCA':'P', 'CCC':'P', 'CCG':'P', 'CCT':'P',
-        'CGA':'R', 'CGC':'R', 'CGG':'R', 'CGT':'R',
-        'CTA':'L', 'CTC':'L', 'CTG':'L', 'CTT':'L',
-        'GAA':'E', 'GAC':'D', 'GAG':'E', 'GAT':'D',
-        'GCA':'A', 'GCC':'A', 'GCG':'A', 'GCT':'A',
-        'GGA':'G', 'GGC':'G', 'GGG':'G', 'GGT':'G',
-        'GTA':'V', 'GTC':'V', 'GTG':'V', 'GTT':'V',
-        'TAA':'*', 'TAC':'Y', 'TAG':'*', 'TAT':'Y',
-        'TCA':'S', 'TCC':'S', 'TCG':'S', 'TCT':'S',
-        'TGA':'*', 'TGC':'C', 'TGG':'W', 'TGT':'C',
-        'TTA':'L', 'TTC':'F', 'TTG':'L', 'TTT':'F',}
-
-        
-    outfile_name = 'mut_counts_%s.txt' % (out_prefix)
-    if os.path.isfile(outfile_name):
-        os.remove(outfile_name)
-    outfile = open(outfile_name, 'w')
-
-    notfound_list = []
-    bcs_total = 0
-    bcs_found = 0
-    bcs_notfound = 0
-    mut_dict = {}
-    for i in range(1, 355):
-        if char_type == 'AA':
-            mut_dict[str('%03d') % i] = {
-            'A':0, 'C':0, 'D':0, 'E':0, 'F':0,
-            'G':0, 'H':0, 'I':0, 'K':0, 'L':0,
-            'M':0, 'N':0, 'P':0, 'Q':0, 'R':0,
-            'S':0, 'T':0, 'V':0, 'W':0, 'Y':0, 
-            '*':0, 'WT':trans_dict[refseq_chars[i]]
-            }
-            codon_list = aa_list
-
-        elif char_type == 'codon':
-            mut_dict[str('%03d') % i] = {
-            'AAA':0, 'AAC':0, 'AAG':0, 'AAT':0, 'ACA':0, 'ACC':0, 'ACG':0, 'ACT':0,
-            'AGA':0, 'AGC':0, 'AGG':0, 'AGT':0, 'ATA':0, 'ATC':0, 'ATG':0, 'ATT':0,
-            'CAA':0, 'CAC':0, 'CAG':0, 'CAT':0, 'CCA':0, 'CCC':0, 'CCG':0, 'CCT':0,
-            'CGA':0, 'CGC':0, 'CGG':0, 'CGT':0, 'CTA':0, 'CTC':0, 'CTG':0, 'CTT':0,
-            'GAA':0, 'GAC':0, 'GAG':0, 'GAT':0, 'GCA':0, 'GCC':0, 'GCG':0, 'GCT':0,
-            'GGA':0, 'GGC':0, 'GGG':0, 'GGT':0, 'GTA':0, 'GTC':0, 'GTG':0, 'GTT':0,
-            'TAA':0, 'TAC':0, 'TAG':0, 'TAT':0, 'TCA':0, 'TCC':0, 'TCG':0, 'TCT':0,
-            'TGA':0, 'TGC':0, 'TGG':0, 'TGT':0, 'TTA':0, 'TTC':0, 'TTG':0, 'TTT':0,
-            "WT":refseq_chars[i]
-            }
-            codon_list = codons_list
-
-    for barcode in bc_list:
-        bcs_total += 1
-        if barcode in bc_dict:
-            bcs_found += 1
-            mutations = bc_dict[barcode]
-            for mutation in mutations:
-                if mutation != 'no_mutations':
-                    pos = str(mutation[3:6])
-                    new = mutation[-3:]
-                    if char_type == 'AA':
-                        new_aa = trans_dict[new]
-                        mut_dict[pos][new_aa] += 1
-                    elif char_type == 'codon':
-                        mut_dict[pos][new] += 1
-
-
-        elif barcode not in bc_dict:
-            bcs_notfound += 1
-            notfound_list.append(barcode)
-
-
-    for position in mut_dict:
-        muts_at_site = 0
-        for mut in mut_dict[position]:
-            if mut != "WT":
-                muts_at_site += mut_dict[position][mut]
-        n_wt = bcs_found - muts_at_site
-        wt_codon = mut_dict[position]['WT']
-        mut_dict[position][wt_codon] += n_wt
-
-    pos_list = mut_dict.keys()
-    pos_list.sort()
-    outfile.write('# POSITION WT %s\n' % ' '.join([str(k) for k in codon_list]))
-    for aa_pos in pos_list:
-        outfile.write(aa_pos+' '+mut_dict[aa_pos]['WT']+' '+'%s\n' % ' '.join([str(mut_dict[aa_pos][j]) for j in codon_list]))
-    print('Wrote mutation counts matrix to %s' % outfile_name)
-    outfile.close()
 
 
 def main():
@@ -250,25 +128,115 @@ def main():
     print("Parsed the following arguments:\n%s\n" % '\n'.join(['\t%s = %s' % tup for tup in args.items()])
     print("Starting time is %s" % time.asctime())
 
+    outfiles = {}
+    for fbase in ['singlemutcounts', 'allmutcounts', 'variantcounts', 'stats']:
+        fname = '%s_%s.txt' % (args['outprefix'], fbase)
+        if os.path.isfile(fname):
+            print("\nRemoving existing file %s" % fname)
+            os.remove(fname)
+        outfiles[fbase] = fname
+
     # Get subassembled variants for barcodes
     print("\nReading barcode for subassembled variants from %s" % args['subassembled'])
-    (bc_dict, bc_length) = dms_tools.file_io.ReadSubassembledVariants(args['subassembled'])
-    print("Read barcodes for %d subassembled variants." % len(bc_dict))
+    (bc_dict, bc_length, wtseq, chartype) = dms_tools.file_io.ReadSubassembledVariants(args['subassembled'])
+    print("Read barcodes for %d subassembled variants. Each variant is a sequence of length %s." % (len(bc_dict), len(wtseq)))
+    print("The mutations are of character type: %s" % chartype)
     print("The barcodes are of length %d nucleotides." % bc_length)
 
-    # Get selected barcodes that pass quality filters.
+    # Get barcodes that pass quality filters.
     print("\nNow parsing barcodes...")
     (bc_list, bc_stats) = parse_bc(args['r1files'], args['r2files'], args['min_quality'], bc_length, args['r1start'], args['r2end'])
-    print("Completed parsing barcodes.")
-    print("Here are the stats on the parsing of barcodes from the read pairs:")
-    print("\t%s" % '\t\n'.join(["%s = %d" % tup for tup in bc_stats.items()]))
-I AM HERE
-    # Write counts_file.
-    write_counts_file(barcode_list, barcode_dict, args['outprefix'])
+    print("Completed parsing %d barcodes." % len(bc_list))
 
+    # Now parse information to create output files
+    # First, set up dictionaries to hold counts
+    print("\nNow looping over all %d barcodes to count mutations..." % len(bc_list))
+    if chartype  == 'DNA':
+        sites = [str(r) for r in range(1, len(wtseq) + 1)]
+        chars = dms_tools.nts
+        wts = dict([(r, wtseq[r - 1]) for r in sites])
+    elif chartype  == 'aminoacid':
+        sites = [str(r) for r in range(1, len(wtseq) + 1)]
+        chars = dms_tools.aminoacids_withstop
+        wts = dict([(r, wtseq[r - 1]) for r in sites])
+    elif chartype == 'codon':
+        sites = [str(r) for r in range(1, len(wtseq) // 3 + 1)]
+        chars = dms_tools.codons
+        assert len(wtseq) % 3 == 0
+        wts = dict([(r, wtseq[3 * (r - 1) : 3 * r]) for r in sites])
+    else:
+        raise ValueError("Invalid chartype %s" % chartype)
+    allmutcounts = {}
+    singlemutcounts = {}
+    for r in sites:
+        allmutcounts[r] = dict([(char, 0) for char in chars])
+        singlemutcounts[r] = dict([(char, 0) for char in chars])
+        allmutcounts[r]['WT'] = wts[r]
+        singlemutcounts[r]['WT'] = wts[r]
+    # now loop over barcodes
+    bc_counts = {}
+    mutmatch = re.compile('^(?P<wt>[%s]+)(?P<r>\d+)(?P<mut>[%s]+)$' % (chars, chars))
+    bc_stats['nunrecognized'] = bc_stats['nretained'] = 0
+    for bc in bc_list:
+        if bc not in bc_dict:
+            bc_stats['nunrecognized'] += 1
+        else:
+            if bc in bc_counts:
+                bc_counts[bc] += 1
+            else:
+                bc_counts[bc] = 1
+            bc_stats['nretained'] += 1
+            muts = [mutmatch.search(m) for m in bc_dict[bc]]
+            assert all(muts), "Failed to match mutation in %s" % bc_dict[bc]
+            muts = dict([(m.group('r'), m.group('mut')) for m in muts])
+            assert len(muts) == len(bc_dict[bc]), "Duplicate mutated site in %s" % bc_dict[bc]
+            statskey = 'n%dmut' % len(muts)
+            if statskey not in stats:
+                stats[statskey] = 1
+            else:
+                stats[statskey] += 1
+            for r in sites:
+                if r in muts:
+                    allmutcounts[r][muts[r]] += 1
+                    if len(muts) == 1:
+                        singlemutcounts[r][muts[r]] += 1
+                else:
+                    allmutcounts[r][wts[r]] += 1
+                    if not muts:
+                        singlemutcounts[r][wts[r]] += 1
+    print("Completed looping over all barcodes.")
+
+    print("\nHere are the stats on the parsing of barcodes from the read pairs:")
+    print("\t%s" % '\t\n'.join(["%s = %d" % tup for tup in bc_stats.items()]))
+    print("Writing these stats to %s" % outfiles['stats'])
+    with open(outfiles['stats'], 'w') as f:
+        f.write("%s" % '\n'.join(["%s = %d" % tup for tup in bc_stats.items()]))
+
+    print("\nWriting single-mutant counts to %s" % outfiles['singlemutcounts'])
+    print("This file contains mutation counts only from singly mutated variants, and wildtype counts only from unmutated variants.")
+    dms_tools.file_io.WriteDMSCounts(outfiles['singlemutcounts'], singlemutcounts)
+
+    print("\nWriting all mutant counts to %s" % outfiles['allmutcounts'])
+    print("This file contains counts from all variants at all sites.")
+    dms_tools.file_io.WriteDMSCounts(outfiles['allmutcounts'], allmutcounts)
+
+    print("\nWriting counts of each barcode to %s" % outfiles['variantcounts'])
+    lines = []
+    for (bc, counts) in bc_counts.items():
+        muts = bc_dict[bc]
+        if muts:
+            muts = ','.join(muts)
+        else:
+            muts = 'no_mutations'
+        lines.append(counts, '%s %s' % (lines, muts))
+    lines.sort()
+    lines.reverse()
+    lines = ['%d %s' % tup for tup in lines]
+    with open(outfiles['variantcounts'], 'w') as f:
+        f.write("#COUNTS BARCODE MUTATIONS\n")
+        f.write('\n'.join(lines))
 
     print('\nSuccessfully completed %s at %s' % (prog, time.asctime()))
-
 
 
 if __name__ == '__main__':

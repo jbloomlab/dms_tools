@@ -118,7 +118,7 @@ Each line has three space-delimited entries:
 
     2) The second entry is the sequence corresponding to that barcode.
 
-    3) The third entry is the list of mutations (separated by comma, no space) of each mutation in the sequence relative to the wildtype parent. If there are no mutations, this entry is *no_mutations*.
+    3) The third entry is the list of mutations (separated by comma, no space) of each mutation in the sequence relative to the wildtype parent. If there are no mutations, this entry is *no_mutations*. The sites are numbered in 1, 2, ... numbering in naming these mutations. Note that if the mutations are codon mutations, then the numbers correspond to the **codon** number, not the nucleotide number.
 
 The following restrictions apply:
 

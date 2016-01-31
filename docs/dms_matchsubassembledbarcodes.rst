@@ -56,7 +56,7 @@ The following output files are created. Each has the prefix specified by ``outpr
 
 Single-mutant counts file
 +++++++++++++++++++++++++++
-This file has the prefix specified by ``outprefix`` followed by the suffix ``_singlemut_counts.txt``. This file is in the format of a :ref:`dms_counts` files. The mutation counts at each site are **only** for single-mutant variants; any subassembled variants with multiple mutations are ignored in this file. The wildtype counts for each site given by this file are **only** for fully wildtype sequence. 
+This file has the prefix specified by ``outprefix`` followed by the suffix ``_singlemutcounts.txt``. This file is in the format of a :ref:`dms_counts` files. The mutation counts at each site are **only** for single-mutant variants; any subassembled variants with multiple mutations are ignored in this file. The wildtype counts for each site given by this file are **only** for fully wildtype sequence. 
 
 In other words, if we have a sequence with a single mutation ``GGC31AGT``, it only contributes to the single count of the mutation to ``AGT`` at position 31. But a wildtype sequence contributes to the wildtype counts at all positions. Therefore, the statistic at each site give how that single mutant fared relative to the wildtype sequence.
 
@@ -64,11 +64,11 @@ This file is suitable for use by :ref:`dms_inferprefs` or :ref:`dms_inferdiffpre
 
 All-mutant counts file
 +++++++++++++++++++++++++
-This file has the prefix specified by ``outprefix`` followed by the suffix ``_allmut_counts.txt``. This file is in the format of a :ref:`dms_counts` files. The mutation counts here include all mutations at all sites. 
+This file has the prefix specified by ``outprefix`` followed by the suffix ``_allmutcounts.txt``. This file is in the format of a :ref:`dms_counts` files. The mutation counts here include all mutations at all sites. 
 
 In other words, a sequence with a single mutation ``GGC31AGT`` contributes a count of a mutation to ``AGT`` at site 31 **and** a wildtype count at all other positions. A wildtype sequence contributes a wildtype count at all positions. A double mutant ``GAG40ATT,AAA46AAT`` contributes a count of a mutation to ``ATT`` at site 40, a mutation to ``AAT`` at site 46, and a wildtype count at all other positions.
 
-This file is suitable for use by :ref:`dms_inferprefs` or :ref:`dms_inferdiffprefs` only if your library consists of singly and multiply mutated clones with a Poisson distribution of the number of mutations per clone. If your library is all single mutants, you should use the `Single-mutant counts file` instead.
+This file is suitable for use by :ref:`dms_inferprefs` or :ref:`dms_inferdiffprefs` only if your library consists of singly and multiply mutated clones with a Poisson distribution of the number of mutations per clone. If your library is all single mutants, you should use the `Single-mutant counts file`_ instead.
 
 Variant counts file
 +++++++++++++++++++++
@@ -85,13 +85,13 @@ After a header line beginning with ``#``, each line has three space-delimited en
 Here are a few example lines::
 
     #COUNTS BARCODE MUTATIONS
-    3 GATACATG GGA31GCT
     5 TTACCATG no_mutations
+    3 GATACATG GGA31GCT
     1 ATACCGAT GGA10AAA,ATA22GTG
 
 Read statistics file
 +++++++++++++++++++++
-This file has the prefix specified by ``outprefix`` followed by the suffix ``_read_stats.txt``.
+This file has the prefix specified by ``outprefix`` followed by the suffix ``_stats.txt``.
 
 It gives the fate of all the read pairs in ``r1files`` and ``r2files``.
 
@@ -99,8 +99,9 @@ It has the following format (although the lines can be in an arbitrary order)::
 
     nreads = 1000
     nfiltered = 10
-    nlowquality = 90
+    nlowquality = 47
     nmismatches = 50
+    nunrecognized = 43
     nretained = 850
     n0mut = 250
     n1mut = 309
@@ -119,6 +120,8 @@ The meanings are:
     * ``nlowquality`` is the number that fail to meet the quality filter specified by ``--minquality``
 
     * ``nmismatches`` is the number that fail because they are mismatched at one or more positions.
+
+    * ``nunrecognized`` is the number of barcodes that don't match one of the subassembled ones present in ``subassembled``.
 
     * ``nretained`` is the number retained.
 

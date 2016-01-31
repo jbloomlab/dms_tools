@@ -98,7 +98,7 @@ Subassembled variants file
 +++++++++++++++++++++++++++
 This file has the suffix ``_subassembled_variants.txt``. It is the primary output file, and lists all barcodes that can be subassembled according to the parameters passed to ``dms_subassemble``.
 
-It is in the :ref:`subassembly_file` format.
+It is in the :ref:`subassembly_file` format. Note that for codon sequences (``--chartype`` of ``codon``), the mutations are numbered according to the **codon** position in 1, 2, ... numbering, not the nucleotide position. 
 
 Here are a few example lines::
 
