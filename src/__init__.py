@@ -68,3 +68,4 @@ codon_to_aa = dict([(codon, str(Bio.Seq.Seq(codon).translate())) for codon in co
 aa_to_codons = {}
 for aa in aminoacids_withstop:
     aa_to_codons[aa] = [codon for codon in codons if codon_to_aa[codon] == aa]
+del aa, nt, nt1, nt2, nt3 # delete loop characters

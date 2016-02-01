@@ -5,6 +5,14 @@ Changelog
 -------------
 * Added ``dms_subassemble`` program
 
+* Added ``dms_matchsubassembledbarcodes`` program
+
+* Augmented ``dms_summarizealignments`` to handle output from ``dms_subassemble`` and ``dms_matchsubassembledbarcodes``
+
+* Author list now is simply all GitHub contributors
+
+* Deleted loop counters that were previously still defined as package-level variables
+
 1.1.11
 -------------
 * Fixed bug in ``dms_merge``, where normalization of prefs or diffprefs was not occurring when the user provided two or more identical pref or diffpref files
