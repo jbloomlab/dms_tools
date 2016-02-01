@@ -8,7 +8,13 @@
 
 Overview
 -------------
-``dms_summarizealignments`` is a program included with the `dms_tools`_ package. It can be used to make plots that summarize the results after examining several samples with :ref:`dms_barcodedsubamplicons` or :ref:`dms_subassemble`.
+``dms_summarizealignments`` is a program included with the `dms_tools`_ package. It can be used to make plots that summarize the results after examining several samples with any of the following programs:
+
+    * :ref:`dms_barcodedsubamplicons` 
+    
+    * :ref:`dms_subassemble`
+
+    * :ref:`dms_matchsubassembledbarcodes`
 
 After you install `dms_tools`_, this program will be available to run at the command line. 
 
@@ -23,7 +29,7 @@ Command-line usage
     See `Output files`_ for a detailed description of the created files and examples.
 
    alignments
-    Essentially, ``ALIGNPREFIX`` should be the value of ``--outprefix`` used when running :ref:`dms_barcodedsubamplicons` or :ref:`dms_subassemble` (depending on the value of ``alignment_type``). This program expects to find the files that are created by running that program with ``--outprefix`` as ``ALIGNPREFIX``. ``NAME`` is simply the name given to each sample in the `Output files`_.
+    ``ALIGNPREFIX`` should be the value of ``--outprefix`` used when running :ref:`dms_barcodedsubamplicons`, :ref:`dms_subassemble`, or :ref:`dms_matchsubassembledbarcodes` (depending on the value of ``alignment_type``). This program expects to find the files that are created by running that program with ``--outprefix`` as ``ALIGNPREFIX``. ``NAME`` is simply the name given to each sample in the `Output files`_.
 
 Example usage
 --------------
@@ -39,13 +45,19 @@ Alternatively, if you have subassembled samples *Lib1*, *Lib2*, *Lib3*, and *WT*
 
 Because the command uses ``outprefix`` of ``subassemblysummary_``, the `Output files`_ will have names like ``subassemblysummary_reads.pdf``, ``subassemblysummary_depth.pdf``, and ``subassemblysummary_nsubassembled.pdf``.
 
+Alternatively, if you have matched barcodes for samples after subassembly, you could summarize the results with::
+
+    dms_summarizealignments matchbarcodesummary_ matchsubassembledbarcodes ./barcodes//Lib1_Input,Lib1_Input ./barcodes//Lib1_0-cip,Lib1_0-cip ./barcodes//Lib1_4-cip,Lib1_4-cip ./barcodes//Lib1_10-cip,Lib1_10-cip ./barcodes//Lib1_15-cip,Lib1_15-cip ./barcodes//Lib2_Input,Lib2_Input ./barcodes//Lib2_0-cip,Lib2_0-cip ./barcodes//Lib2_4-cip,Lib2_4-cip ./barcodes//Lib2_10-cip,Lib2_10-cip ./barcodes//Lib2_15-cip,Lib2_15-cip ./barcodes//Lib3_Input,Lib3_Input ./barcodes//Lib3_0-cip,Lib3_0-cip ./barcodes//Lib3_4-cip,Lib3_4-cip ./barcodes//Lib3_10-cip,Lib3_10-cip ./barcodes//Lib3_15-cip,Lib3_15-cip ./barcodes//WT_Input,WT_Input ./barcodes//WT_0-cip,WT_0-cip ./barcodes//WT_4-cip,WT_4-cip ./barcodes//WT_10-cip,WT_10-cip ./barcodes//WT_15-cip,WT_15-cip
+
+Because the command uses ``outprefix`` of ``matchbarcodesummary``, the `Output files`_ will have names like ``matchbarcodesummary_reads.pdf``, etc.
+
 Output files
 ---------------
 
-For barcoded subamplicons
-+++++++++++++++++++++++++++++
+For ``alignment_type`` of ``barcodedsubamplicons``
++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-Here are the output files, with the names that would be produced if running ``dms_summarizealignments`` as in the `Example usage`_ for ``alignment_type`` of ``barcoded_subamplicons``:
+Here are the output files, with the names that would be produced if running ``dms_summarizealignments`` as in the `Example usage`_ for ``alignment_type`` of ``barcodedsubamplicons``:
 
 ``reads.pdf``
 ~~~~~~~~~~~~~~
@@ -73,6 +85,8 @@ This plot shows the average per-codon mutation rate across the gene as determine
    :align: center
    :width: 60%
    :alt: alignmentsummary_mutfreqs.pdf
+
+If ``--writemutfreqs`` is used, a text file with the suffix ``mutfreqs.txt`` is created that has the raw data in this plot.
 
 ``depth.pdf``
 ~~~~~~~~~~~~~~
@@ -110,8 +124,8 @@ This plot shows the number of times each codon mutation was observed **only** fo
    :width: 60%
    :alt: alignmentsummary_mutcounts_multi_nt.pdf
 
-For subassemble
-+++++++++++++++++++++++++++++
+For ``alignment_type`` of ``subassemble``
+++++++++++++++++++++++++++++++++++++++++++
 Here are the output files, with the names that would be produced if running ``dms_summarizealignments`` as in the `Example usage`_ for ``alignment_type`` of ``subassemble``:
 
 ``reads.pdf``
@@ -141,5 +155,50 @@ The number of subassembled barcodes and how many mutations they have.
    :align: center
    :width: 60%
    :alt: subassemblysummary_nsubassembled.pdf
+
+For ``alignment_type`` of ``matchsubassembledbarcodes``
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Here are the output files, with the names that would be produced if running ``dms_summarizealignments`` as in the `Example usage`_ for ``alignment_type`` of ``matchsubassembledbarcodes``:
+
+``reads.pdf``
+~~~~~~~~~~~~~~
+The number of read pairs for each sample, and their fate (only those indicated as *nretained* are actually successfully matched to a subassembled barcode).
+
+.. image:: matchbarcodesummary_reads.pdf
+   :align: center
+   :width: 60%
+   :alt: matchbarcodesummary_reads.pdf
+
+``muts_per_matched_read.pdf``
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+For each read pair that matches a barcode (there are *nretained* such reads as indicated in the previous plot), this shows that number that match to a variant with the indicated number of mutations.
+
+.. image:: matchbarcodesummary_muts_per_matched_read.pdf
+   :align: center
+   :width: 60%
+   :alt: matchbarcodesummary_muts_per_matched_read.pdf
+
+``allmutfreqs.pdf``
+~~~~~~~~~~~~~~~~~~~~
+This plot shows the average per-site mutation rate averaged over all sites and variants (unmutated, singly mutated, multiply mutated).
+
+.. image:: matchbarcodesummary_allmutfreqs.pdf
+   :align: center
+   :width: 60%
+   :alt: matchbarcodesummary_allmutfreqs.pdf
+
+If ``--writemutfreqs`` is used, a text file with the suffix ``allmutfreqs.txt`` is created that has the raw data in this plot.
+
+``singlemutfreqs.pdf``
+~~~~~~~~~~~~~~~~~~~~~~~~
+This plot shows the fraction of variants that have a mutation of the indicated type **only** among the unmutated and singly mutated variants.
+
+.. image:: matchbarcodesummary_singlemutfreqs.pdf
+   :align: center
+   :width: 60%
+   :alt: matchbarcodesummary_singlemutfreqs.pdf
+
+If ``--writemutfreqs`` is used, a text file with the suffix ``singlemutfreqs.txt`` is created that has the raw data in this plot.
+
 
 .. include:: weblinks.txt

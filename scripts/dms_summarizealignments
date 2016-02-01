@@ -54,7 +54,6 @@ def WriteMutFreqs(codon_counts, names, mutfreqstext):
     f.close()
 
 
-
 def ParseBarcodeData(names, stats, maxperbarcode):
     """Parses data for ``barcodes.pdf`` plot from summary stats.
 
@@ -197,7 +196,7 @@ def main():
 
         print "\nNow making plots..."
         print "Making %s" % mutfreqs
-        dms_tools.plot.PlotPairedMutFracs([data[name]['counts'] for name in names], names, mutfreqs)
+        dms_tools.plot.PlotPairedMutFracs([data[name]['counts'] for name in names], names, mutfreqs, 'per-%s mutation rate' % args['chartype'])
         if args['writemutfreqs']:
             print "Making %s" % mutfreqstext
             WriteMutFreqs([data[name]['counts'] for name in names], names, mutfreqstext)
@@ -228,10 +227,10 @@ def main():
         for f in [reads, depth, nsubassembled]:
             if os.path.isfile(f):
                 os.remove(f)
-                print "Removing existing file %s" % f
+                print("Removing existing file %s" % f)
         names = []
         data = {}
-        print "\nNow reading data from %s alignments..." % (args['alignment_type'])
+        print "\nNow reading %s data..." % (args['alignment_type'])
         for (prefix, name) in args['alignments']:
             print "Processing data for %s from files with prefix %s" % (name, prefix)
             assert name not in names, "Duplicate name of %s" % name
@@ -275,6 +274,68 @@ def main():
                 if key >= 5:
                     ndata[name]['5+ mutations'] += value
         dms_tools.plot.PlotSampleBargraphs(names, categories, ndata, nsubassembled, ylabel='subassembled barcodes', groupbyfirstword=False, ncolumns=3)
+    elif args['alignment_type'] == 'matchsubassembledbarcodes':
+        reads = '%sreads.pdf' % args['outprefix']
+        mutspermatched = '%smuts_per_matched_read.pdf' % args['outprefix']
+        singlemutfreqs = '%ssinglemutfreqs.pdf' % args['outprefix']
+        allmutfreqs = '%sallmutfreqs.pdf' % args['outprefix']
+        singlemutfreqstext = '%ssinglemutfreqs.txt' % args['outprefix']
+        allmutfreqstext = '%sallmutfreqs.txt' % args['outprefix']
+        for f in [reads, mutspermatched, singlemutfreqs, allmutfreqs, singlemutfreqstext, allmutfreqstext]:
+            if os.path.isfile(f):
+                os.remove(f)
+                print("Removing existing file %s" % f)
+        names = []
+        data = {}
+        print "\nNow reading %s data..." % (args['alignment_type'])
+        for (prefix, name) in args['alignments']:
+            print "Processing data for %s from files with prefix %s" % (name, prefix)
+            assert name not in names, "Duplicate name of %s" % name
+            names.append(name)
+            data[name] = {}
+            statsfile = '%s_stats.txt' % prefix
+            assert os.path.isfile(statsfile), "Failed to find %s" % statsfile
+            data[name]['stats'] = dms_tools.file_io.ReadSummaryStats(statsfile)[1]
+        print("Making %s" % reads)
+        readcategories = ['filtered', 'low quality', 'mismatches', 'unrecognized', 'retained']
+        readdata = dict([(name, {}) for name in names])
+        for name in names:
+            readdata[name] = dict([(category, data[name]['stats']['n' + category.replace(' ', '')]) for category in readcategories])
+        dms_tools.plot.PlotSampleBargraphs(names, readcategories, readdata, reads, 'number of read pairs', groupbyfirstword=False)
+        print("Making %s" % mutspermatched)
+        mutpercategories = []
+        mutperdata = dict([(name, {}) for name in names])
+        for nmut in range(0, 5):
+            key = '%d mutations' % nmut
+            if nmut == 1:
+                key = key[ : -1]
+            mutpercategories.append(key)
+            for name in names:
+                statskey = 'n%dmut' % nmut
+                if statskey in data[name]['stats']:
+                    mutperdata[name][key] = data[name]['stats'][statskey]
+                else:
+                    mutperdata[name][key] = 0
+        key = '%d+ mutations' % (nmut + 1)
+        mutpercategories.append(key)
+        for name in names:
+            mutperdata[name][key] = data[name]['stats']['nretained'] - sum(mutperdata[name].values())
+        dms_tools.plot.PlotSampleBargraphs(names, mutpercategories, mutperdata, mutspermatched, 'number of matched read pairs', groupbyfirstword=False)
+        for (plot, text, muttype, ylabel) in [
+                (allmutfreqs, allmutfreqstext, 'allmut', 'per-%s mutation rate' % args['chartype']), 
+                (singlemutfreqs, singlemutfreqstext, 'singlemut', 'fraction with %s mutation' % args['chartype'])]:
+            print("Making %s" % plot)
+            plotdata = [dms_tools.file_io.ReadDMSCounts('%s_%scounts.txt' % (prefix, muttype), args['chartype']) for (prefix, name) in args['alignments']]
+            if muttype =='singlemut':
+                for d in plotdata:
+                    # normalize wildtype to be per variant (right now each wildtype is counted nsites times)
+                    nsites = len(d.keys())
+                    for r in d.keys()[1 : ]:
+                        d[r][d[r]['WT']] = 0
+            dms_tools.plot.PlotPairedMutFracs(plotdata, names, plot, ylabel)
+            if args['writemutfreqs']:
+                print("Writing the data plotted in %s to %s" % (plot, text))
+                WriteMutFreqs(plotdata, names, text)
     else:
         raise ValueError("Invalid alignment_type of %s" % args['alignment_type'])
 

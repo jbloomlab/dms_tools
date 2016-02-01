@@ -358,7 +358,7 @@ def PlotDepth(codon_counts, names, plotfile, mutdepth=False, y_axis_label=None):
     pylab.close()
 
 
-def PlotPairedMutFracs(codon_counts, names, plotfile):
+def PlotPairedMutFracs(codon_counts, names, plotfile, ylabel='fraction'):
     """Makes paired bar graph of mutation fractions per codon.
     
     For each sample, calculates the fraction of codon counts
@@ -375,6 +375,8 @@ def PlotPairedMutFracs(codon_counts, names, plotfile):
 
     `plotfile` : name of the output plot file created by this method
     (such as 'plot.pdf'). The extension must be ``.pdf``.
+
+    `ylabel` : the text placed on the ylabel.
     """
     if os.path.splitext(plotfile)[1].lower() != '.pdf':
         raise ValueError("plotfile must end in .pdf: %s" % plotfile)
@@ -413,8 +415,8 @@ def PlotPairedMutFracs(codon_counts, names, plotfile):
     matplotlib.rc('xtick', labelsize=10)
     matplotlib.rc('patch', linewidth=0.5)
     # make stacked bar graph
-    fig = pylab.figure(figsize=(6.5, 3.75))
-    (lmargin, rmargin, bmargin, tmargin) = (0.07, 0.01, 0.43, 0.13)
+    fig = pylab.figure(figsize=(6.6, 3.75))
+    (lmargin, rmargin, bmargin, tmargin) = (0.08, 0.01, 0.43, 0.13)
     ax = pylab.axes([lmargin, bmargin, 1 - lmargin - rmargin, 1 -\
             bmargin - tmargin])
     bars = []
@@ -443,9 +445,9 @@ def PlotPairedMutFracs(codon_counts, names, plotfile):
     # reorder bar labels since pylab puts them down columns
     barmarks = [barmarks[0], barmarks[3], barmarks[1], barmarks[4], barmarks[2], barmarks[5]]
     barlabels = [barlabels[0], barlabels[3], barlabels[1], barlabels[4], barlabels[2], barlabels[5]]
-    pylab.legend(barmarks, barlabels, handlelength=1.2,\
+    pylab.legend(barmarks, barlabels, handlelength=1.1,\
             bbox_to_anchor=(0.54, 1.31), loc='upper center', ncol=3)
-    pylab.ylabel('fraction', size=10)
+    pylab.ylabel(ylabel, size=10)
     pylab.savefig(plotfile)
     pylab.clf()
     pylab.close()
@@ -668,7 +670,7 @@ def PlotSampleBargraphs(names, categories, data, plotfile, ylabel, groupbyfirstw
             bottoms[iname] += data[name][category]
     ymax = max(bottoms)
     pylab.gca().set_ylim([0, 1.04 * ymax])
-    pylab.xticks([i + barwidth / 2. for i in indices], names, rotation=90)
+    pylab.xticks([i + barwidth / 2. for i in indices], [name.replace('_', ' ') for name in names], rotation=90)
     pylab.gca().set_xlim([0.5, len(names) + 0.5])
     yformatter = pylab.ScalarFormatter(useMathText=True)
     yformatter.set_powerlimits((-3, 3))
