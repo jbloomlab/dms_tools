@@ -1,0 +1,6 @@
+n0mut = 8
+nretained = 25
+nlowquality = 2
+nmismatches = 3
+nunrecognized = 4
+n2mut = 17
