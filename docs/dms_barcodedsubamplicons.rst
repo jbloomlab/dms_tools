@@ -129,8 +129,6 @@ Command-line usage
    \-\-purgereadfrac
     Why would you ever want to purge some of the read pairs? You may be trying to determine whether sequencing to a higher depth (which will give you more barcodes with at least ``--nreadsperbarcode`` reads) will improve the quality of your results. If you set ``--purgereadfrac`` to a value > 0 (say 0.5), you'll see how the results would be affected if you had fewer reads. If these results are noticeably worse by some objective measure, this supports that idea that your read depth might be in regime where greater depth would help.
 
-   \-\-purgefrac
-
 
 Output files
 --------------
