@@ -48,6 +48,12 @@ Command-line usage
     This argument specifies where in R2 the barcode ends. By default, we assume that it ends with the last nucleotide of the read, and so set a value of zero. If instead the barcode ends two nucleotides before the end of R2, you would set a value of 2.
 
     Must be an integer :math:`\ge 0`.
+
+   \-\-purgefrac
+    This option is useful if you are trying to figure out whether to sequence to greater depth. You can use it to randomly subsample your data, and so figure out if your results change if you have fewer reads (which is an indication if more reads will be helpful).
+
+    The purging here is for the barcode read pairs in ``r1files`` and ``r2files``, **not** for the subassembled variants in ``subassembled``.
+
  
 
 Output files
@@ -126,5 +132,7 @@ The meanings are:
     * ``nretained`` is the number retained.
 
     * The retained reads are then further categorized by how many mutations they have, giving ``n0mut``, ``n1mut``, etc for reads that map to unmutated, singly mutated, etc variants.
+
+    * If ``--purgefrac`` is nonzero, then there is also a key ``nrandomlypurged`` indicating the number of reads purged.
 
 .. include:: weblinks.txt

@@ -7,36 +7,14 @@ Written by Danny Lawrence and Jesse Bloom."""
 import time
 import os
 import re
+import random
 import dms_tools
 import dms_tools.parsearguments
 import dms_tools.file_io
 import dms_tools.cutils
 
 
-def reverse_comp(seq, quals):
-    """Returns the reverse complement of a DNA sequence and the respective Illumina quality scores
-
-    `seq` is a string-formatted DNA sequence using the alphabet (A, C, G, T, N). 
-    `quals` is a string containing the respecitve quality score for each base in the DNA sequence.
-
-    `rc_seq` is the reverse-complemented DNA sequence.
-    `rc_quals` is quality scores for the reverse-complemented DNA sequence. 
-    """
-
-    assert len(seq) == len(quals), "Sequence length does not match quality scores length."
-    rc_dict = {'A':'T', 'T':'A', 'G':'C', 'C':'G', 'N':'N'}
-    rc_seq = ""
-    rc_quals = ""
-    
-    rc_list = list(reversed(range(len(seq))))
-    for i in rc_list:
-        nuc = seq[i].upper()
-        rc_seq += rc_dict[nuc]
-        rc_quals += quals[i]
-    return(rc_seq, rc_quals)
-
-
-def parse_barcodes(r1files, r2files, minquality, bc_len, r1start, r2end):
+def parse_barcodes(r1files, r2files, minquality, bc_len, r1start, r2end, purgefrac):
     """Reads FASTQ files and returns barcodes passing quality threshold.
 
     Barcodes discarded if either read fails quality filter, if any site
@@ -47,7 +25,7 @@ def parse_barcodes(r1files, r2files, minquality, bc_len, r1start, r2end):
     are optionally gzipped. Both files must contain the same number of reads
     in the same order.
 
-    `min_quality` is an integer (0-50) indicating the Phred quality score 
+    `minquality` is an integer (0-50) indicating the Phred quality score 
     below which a base call will be ignored. Any reads failing the Illumina
     filter are also ignored.
 
@@ -58,6 +36,8 @@ def parse_barcodes(r1files, r2files, minquality, bc_len, r1start, r2end):
 
     `r2end` indicates how many nucleotides **before** the end of R2 the
     barcode ends.
+
+    `purgefrac` indicates the fraction of read pairs to randomly purge.
 
     The return variable is the tuple *(bc_list, bc_stats)*:
 
@@ -83,9 +63,13 @@ def parse_barcodes(r1files, r2files, minquality, bc_len, r1start, r2end):
     r1start -= 1 # decrement so we can use zero-based indexing
     assert r1start >= 0 and r2end >= 0
     minqchar = chr(minquality + 33) # minimum character for Q-score
-    ntot = nfiltered = nlowquality = nmismatched = 0
+    ntot = nfiltered = nlowquality = nmismatched = nrandomlypurged = 0
     for read_tup in dms_tools.file_io.IteratePairedFASTQ(r1files, r2files, gzipped, applyfilter=True):
         ntot += 1
+        if purgefrac:
+            if random.random() < purgefrac:
+                nrandomlypurged += 1
+                continue
         if not read_tup:
             nfiltered += 1
         else:
@@ -93,9 +77,14 @@ def parse_barcodes(r1files, r2files, minquality, bc_len, r1start, r2end):
             assert len(r1) >= r1start + bc_len, "R1 read %s too short" % name
             assert len(r2) >= r2end + bc_len, "R2 read %s too short" % name
             r1 = r1[r1start : r1start + bc_len]
-            q1 = r1[r1start : r1start + bc_len]
-            r2 = r2[-bc_len - r2end : -r2end]
-            q2 = r2[-bc_len - r2end : -r2end]
+            q1 = q1[r1start : r1start + bc_len]
+            if r2end:
+                r2 = r2[-bc_len - r2end : -r2end]
+                q2 = q2[-bc_len - r2end : -r2end]
+            else:
+                r2 = r2[-bc_len - r2end : ]
+                q2 = q2[-bc_len - r2end : ]
+            assert len(r1) == len(r2), "R1: %s, R2: %s" % (r1, r2)
             if any(map(lambda x: x[0] < minqchar and x[1] < minqchar, zip(q1, q2))):
                 nlowquality += 1
                 continue
@@ -104,28 +93,31 @@ def parse_barcodes(r1files, r2files, minquality, bc_len, r1start, r2end):
                 nmismatched += 1
             else:
                 bc_list.append(r1)
-    assert ntot == len(bc_list) + nfiltered + nlowquality + nmismatched
+    assert ntot == len(bc_list) + nfiltered + nlowquality + nmismatched + nrandomlypurged
     bc_stats = {
             'nreads':ntot,
             'nfiltered':nfiltered,
             'nlowquality':nlowquality,
             'nmismatches':nmismatched,
             }
+    if purgefrac:
+        bc_stats['nrandomlypurged'] = nrandomlypurged
     return (bc_list, bc_stats)
 
 
 def main():
     """Main body of program."""
+    random.seed(1)
 
     parser = dms_tools.parsearguments.MatchSubassembledBarcodesParser()
     args = vars(parser.parse_args())
     prog = parser.prog
     assert len(args['r1files']) == len(args['r2files']), "Different number of r1files and r2files."
 
-    print("Beginning execution of %s in directory %s\n" % (prog, os.getcwd()))a
+    print("Beginning execution of %s in directory %s\n" % (prog, os.getcwd()))
     versionstring = dms_tools.file_io.Versions()
     print(versionstring)
-    print("Parsed the following arguments:\n%s\n" % '\n'.join(['\t%s = %s' % tup for tup in args.items()])
+    print("Parsed the following arguments:\n%s\n" % '\n'.join(['\t%s = %s' % tup for tup in args.items()]))
     print("Starting time is %s" % time.asctime())
 
     outfiles = {}
@@ -137,16 +129,16 @@ def main():
         outfiles[fbase] = fname
 
     # Get subassembled variants for barcodes
-    print("\nReading barcode for subassembled variants from %s" % args['subassembled'])
+    print("\nReading barcoded subassembled variants from %s" % args['subassembled'])
     (bc_dict, bc_length, wtseq, chartype) = dms_tools.file_io.ReadSubassembledVariants(args['subassembled'])
-    print("Read barcodes for %d subassembled variants. Each variant is a sequence of length %s." % (len(bc_dict), len(wtseq)))
+    print("Read %d barcoded subassembled variants. Each variant is a sequence of length %s." % (len(bc_dict), len(wtseq)))
     print("The mutations are of character type: %s" % chartype)
     print("The barcodes are of length %d nucleotides." % bc_length)
 
     # Get barcodes that pass quality filters.
-    print("\nNow parsing barcodes...")
-    (bc_list, bc_stats) = parse_bc(args['r1files'], args['r2files'], args['min_quality'], bc_length, args['r1start'], args['r2end'])
-    print("Completed parsing %d barcodes." % len(bc_list))
+    print("\nNow parsing barcodes from %s..." % ', '.join(args['r1files'] + args['r2files']))
+    (bc_list, bc_stats) = parse_barcodes(args['r1files'], args['r2files'], args['minquality'], bc_length, args['r1start'], args['r2end'], args['purgefrac'])
+    print("Parsed %d high-quality barcodes from %d total read pairs." % (len(bc_list), bc_stats['nreads']))
 
     # Now parse information to create output files
     # First, set up dictionaries to hold counts
@@ -154,16 +146,19 @@ def main():
     if chartype  == 'DNA':
         sites = [str(r) for r in range(1, len(wtseq) + 1)]
         chars = dms_tools.nts
-        wts = dict([(r, wtseq[r - 1]) for r in sites])
+        wts = dict([(r, wtseq[int(r) - 1]) for r in sites])
+        mutmatch = re.compile('^(?P<wt>[%s])(?P<r>\d+)(?P<mut>[%s])$' % (''.join(chars), ''.join(chars)))
     elif chartype  == 'aminoacid':
         sites = [str(r) for r in range(1, len(wtseq) + 1)]
         chars = dms_tools.aminoacids_withstop
-        wts = dict([(r, wtseq[r - 1]) for r in sites])
+        wts = dict([(r, wtseq[int(r) - 1]) for r in sites])
+        mutmatch = re.compile('^(?P<wt>[%s])(?P<r>\d+)(?P<mut>[%s])$' % (''.join(chars), ''.join(chars)))
     elif chartype == 'codon':
         sites = [str(r) for r in range(1, len(wtseq) // 3 + 1)]
         chars = dms_tools.codons
         assert len(wtseq) % 3 == 0
-        wts = dict([(r, wtseq[3 * (r - 1) : 3 * r]) for r in sites])
+        wts = dict([(r, wtseq[3 * (int(r) - 1) : 3 * int(r)]) for r in sites])
+        mutmatch = re.compile('^(?P<wt>[%s]{3})(?P<r>\d+)(?P<mut>[%s]{3})$' % (''.join(dms_tools.nts), ''.join(dms_tools.nts)))
     else:
         raise ValueError("Invalid chartype %s" % chartype)
     allmutcounts = {}
@@ -175,7 +170,6 @@ def main():
         singlemutcounts[r]['WT'] = wts[r]
     # now loop over barcodes
     bc_counts = {}
-    mutmatch = re.compile('^(?P<wt>[%s]+)(?P<r>\d+)(?P<mut>[%s]+)$' % (chars, chars))
     bc_stats['nunrecognized'] = bc_stats['nretained'] = 0
     for bc in bc_list:
         if bc not in bc_dict:
@@ -191,10 +185,10 @@ def main():
             muts = dict([(m.group('r'), m.group('mut')) for m in muts])
             assert len(muts) == len(bc_dict[bc]), "Duplicate mutated site in %s" % bc_dict[bc]
             statskey = 'n%dmut' % len(muts)
-            if statskey not in stats:
-                stats[statskey] = 1
+            if statskey not in bc_stats:
+                bc_stats[statskey] = 1
             else:
-                stats[statskey] += 1
+                bc_stats[statskey] += 1
             for r in sites:
                 if r in muts:
                     allmutcounts[r][muts[r]] += 1
@@ -207,10 +201,17 @@ def main():
     print("Completed looping over all barcodes.")
 
     print("\nHere are the stats on the parsing of barcodes from the read pairs:")
-    print("\t%s" % '\t\n'.join(["%s = %d" % tup for tup in bc_stats.items()]))
+    statkeys = bc_stats.keys()
+    statkeys.sort()
+    countkeymatch = re.compile('^n(?P<count>\d+)mut$')
+    countkeys = [(int(countkeymatch.search(key).group('count')), key) for key in statkeys if countkeymatch.search(key)]
+    statkeys = [key for key in statkeys if not countkeymatch.search(key)]
+    countkeys.sort()
+    statkeys += [tup[1] for tup in countkeys]
+    print('\n'.join(["%s = %d" % (key, bc_stats[key]) for key in statkeys]))
     print("Writing these stats to %s" % outfiles['stats'])
     with open(outfiles['stats'], 'w') as f:
-        f.write("%s" % '\n'.join(["%s = %d" % tup for tup in bc_stats.items()]))
+        f.write('\n'.join(["%s = %d" % (key, bc_stats[key]) for key in statkeys]))
 
     print("\nWriting single-mutant counts to %s" % outfiles['singlemutcounts'])
     print("This file contains mutation counts only from singly mutated variants, and wildtype counts only from unmutated variants.")
@@ -228,7 +229,7 @@ def main():
             muts = ','.join(muts)
         else:
             muts = 'no_mutations'
-        lines.append(counts, '%s %s' % (lines, muts))
+        lines.append((counts, '%s %s' % (bc, muts)))
     lines.sort()
     lines.reverse()
     lines = ['%d %s' % tup for tup in lines]

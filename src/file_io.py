@@ -1089,7 +1089,7 @@ def ReadSubassembledVariants(infile, assumechartype='codon'):
     mutmatch = re.compile('^(?P<wt>[ATCGatcg]+)(?P<pos>\d+)(?P<mut>[ATCGatcg]+)$')
     wtseq = len_char = bc_len = chartype = None
     with open(infile) as f:
-        for line in infile:
+        for line in f:
             cats = line.strip().split()
             assert len(cats) == 3, "Not 3 entries in subassembly line in %s:\n%s" % (infile, line)
             barcode = cats[0]
@@ -1111,7 +1111,7 @@ def ReadSubassembledVariants(infile, assumechartype='codon'):
                 for mut in muts:
                     m = mutmatch.search(mut)
                     assert m, "Invalid mutation of %s in %s, line:\n%s" % (mut, infile, line)
-                    (x, i, y) = (m.group('wt').upper(), m.group('pos'), m.group('mut').upper())
+                    (x, i, y) = (m.group('wt').upper(), int(m.group('pos')), m.group('mut').upper())
                     if len_char == None:
                         len_char = len(x)
                         if len_char == 3:
@@ -1133,7 +1133,7 @@ def ReadSubassembledVariants(infile, assumechartype='codon'):
                     if wtseq:
                         assert wtseq[i - 1 : i - 1 + len_char] == x, "Invalid wildtype in mutation %s in %s:\n%s" % (mut, infile, line)
                     assert seq[i - 1 : i - 1 + len_char] == y, "Invalid mutant in mutation %s in %s:\n%s" % (mut, infile, line)
-                    seq = seq[ : i - 1] + wt + seq[i - 1 + len_char : ]
+                    seq = seq[ : i - 1] + x + seq[i - 1 + len_char : ]
                 if wtseq == None:
                     wtseq = seq
                 else:
