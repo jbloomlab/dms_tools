@@ -304,8 +304,10 @@ def SummarizeAlignmentsParser():
     parser.add_argument('--chartype', default='codon', choices=['codon'], help='Character type used for the alignments / mutation counting.')
     parser.add_argument('--maxmutcounts', type=NonNegativeInt, default=25, help="Maximum x-value for 'mutcounts_all.pdf' and 'mutcounts_multi_nt.pdf' plots.")
     parser.add_argument('--maxperbarcode', type=NonNegativeInt, default=3, help="In 'barcodes.pdf' plot, group all barcodes with >= this many reads.")
-    parser.add_argument('--writemutfreqs', dest='writemutfreqs', action='store_true', help="Write a file 'mutfreqs.txt' that gives the numerical values plotted in 'mutfreqs.pdf'?")
     parser.set_defaults(writemutfreqs=False)
+    parser.add_argument('--writemutfreqs', dest='writemutfreqs', action='store_true', help="Write a file 'mutfreqs.txt' that gives the numerical values plotted in 'mutfreqs.pdf'?")
+    parser.set_defaults(mutdepthgroupbyfirst=False)
+    parser.add_argument('--mutdepthgroupbyfirst', dest='mutdepthgroupbyfirst', action='store_true', help="Make separate 'mutdepth' plots for each name prefix (first word before underscore).")
     parser.add_argument('-v', '--version', action='version', version='%(prog)s {version}'.format(version=dms_tools.__version__))
     return parser
 

@@ -305,9 +305,9 @@ def PlotDepth(codon_counts, names, plotfile, mutdepth=False, y_axis_label=None):
     codon_counts = [dms_tools.utils.ClassifyCodonCounts(counts) for counts in codon_counts]
     xs = list(range(len(sites)))
     dms_tools.utils.NaturalSort(sites)
-    nlegendcols = 3
+    nlegendcols = 4
     nlegendrows = int(math.ceil(len(names) / float(nlegendcols)))
-    fig = pylab.figure(figsize=(5.5, 2.16 * (1 + 0.11 * nlegendrows)))
+    fig = pylab.figure(figsize=(5.5, 2.16 * (0.76 + 0.23 * nlegendrows)))
     (lmargin, rmargin, bmargin, tmargin) = (0.1, 0.02, 0.16, 0.01 + 0.1 * nlegendrows)
     ax = pylab.axes([lmargin, bmargin, 1 - lmargin - rmargin, 1 - bmargin - tmargin])
     lines = []
@@ -352,7 +352,7 @@ def PlotDepth(codon_counts, names, plotfile, mutdepth=False, y_axis_label=None):
         xformatter = matplotlib.ticker.FixedFormatter([sites[i] for i in range(0, len(xs), 100)])
     pylab.gca().xaxis.set_major_locator(xlocator)
     pylab.gca().xaxis.set_major_formatter(xformatter)
-    pylab.legend(lines, names, handlelength=2, bbox_to_anchor=(0.53, 1.03 + 0.14 * nlegendrows), loc='upper center', ncol=nlegendcols)
+    pylab.legend(lines, [name.replace('_', ' ') for name in names], handlelength=1.2, handletextpad=0.3, columnspacing=0.9, bbox_to_anchor=(0.54, 1.03 + 0.14 * nlegendrows), loc='upper center', ncol=nlegendcols)
     pylab.savefig(plotfile)
     pylab.clf()
     pylab.close()

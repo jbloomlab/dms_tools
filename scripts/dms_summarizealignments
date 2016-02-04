@@ -281,7 +281,9 @@ def main():
         allmutfreqs = '%sallmutfreqs.pdf' % args['outprefix']
         singlemutfreqstext = '%ssinglemutfreqs.txt' % args['outprefix']
         allmutfreqstext = '%sallmutfreqs.txt' % args['outprefix']
-        for f in [reads, mutspermatched, singlemutfreqs, allmutfreqs, singlemutfreqstext, allmutfreqstext]:
+        singlemutdepth = '%ssinglemutdepth.pdf' % args['outprefix']
+        allmutdepth = '%sallmutdepth.pdf' % args['outprefix']
+        for f in [reads, mutspermatched, singlemutfreqs, allmutfreqs, singlemutfreqstext, allmutfreqstext, singlemutdepth, allmutdepth]:
             if os.path.isfile(f):
                 os.remove(f)
                 print("Removing existing file %s" % f)
@@ -296,6 +298,8 @@ def main():
             statsfile = '%s_stats.txt' % prefix
             assert os.path.isfile(statsfile), "Failed to find %s" % statsfile
             data[name]['stats'] = dms_tools.file_io.ReadSummaryStats(statsfile)[1]
+        if args['mutdepthgroupbyfirst'] and not all([name.count('_') for name in names]):
+            raise ValueError("Cannot use --mutdepthgroupbyfirst as not all sample names have an underscore")
         print("Making %s" % reads)
         readcategories = ['filtered', 'low quality', 'mismatches', 'unrecognized', 'retained']
         readdata = dict([(name, {}) for name in names])
@@ -321,17 +325,29 @@ def main():
         for name in names:
             mutperdata[name][key] = data[name]['stats']['nretained'] - sum(mutperdata[name].values())
         dms_tools.plot.PlotSampleBargraphs(names, mutpercategories, mutperdata, mutspermatched, 'number of matched read pairs', groupbyfirstword=False)
-        for (plot, text, muttype, ylabel) in [
-                (allmutfreqs, allmutfreqstext, 'allmut', 'per-%s mutation rate' % args['chartype']), 
-                (singlemutfreqs, singlemutfreqstext, 'singlemut', 'fraction with %s mutation' % args['chartype'])]:
-            print("Making %s" % plot)
+        for (plot, depthplot, text, muttype, ylabel) in [
+                (allmutfreqs, allmutdepth, allmutfreqstext, 'allmut', 'per-%s mutation rate' % args['chartype']), 
+                (singlemutfreqs, singlemutdepth, singlemutfreqstext, 'singlemut', 'fraction with %s mutation' % args['chartype'])]:
             plotdata = [dms_tools.file_io.ReadDMSCounts('%s_%scounts.txt' % (prefix, muttype), args['chartype']) for (prefix, name) in args['alignments']]
+            if args['mutdepthgroupbyfirst']:
+                groups = set([name.split('_')[0] for name in names])
+                (prefix, ext) = os.path.splitext(depthplot)
+                for group in groups:
+                    depthplot = prefix + '_' + group + ext
+                    print("Making %s" % depthplot)
+                    inames = [name for name in names if name[ : len(group)] == group]
+                    iplotdata = [idata for (name, idata) in zip(names, plotdata) if name[ : len(group)] == group]
+                    dms_tools.plot.PlotDepth(iplotdata, inames, depthplot, mutdepth=True)
+            else:
+                print("Making %s" % depthplot)
+                dms_tools.plot.PlotDepth(plotdata, names, depthplot, mutdepth=True)
             if muttype =='singlemut':
                 for d in plotdata:
                     # normalize wildtype to be per variant (right now each wildtype is counted nsites times)
                     nsites = len(d.keys())
                     for r in d.keys()[1 : ]:
                         d[r][d[r]['WT']] = 0
+            print("Making %s" % plot)
             dms_tools.plot.PlotPairedMutFracs(plotdata, names, plot, ylabel)
             if args['writemutfreqs']:
                 print("Writing the data plotted in %s to %s" % (plot, text))
