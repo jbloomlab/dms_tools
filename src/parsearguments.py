@@ -299,15 +299,15 @@ def SummarizeAlignmentsParser():
     """Returns *argparse.ArgumentParser* for ``dms_summarizealignments``."""
     parser = ArgumentParserNoArgHelp(description='Makes plots that summarize alignments for one or more samples. Designed to be run after you have used another program to make your alignments, and now you want to visualize the results. This script is part of %s (version %s) written by %s. Detailed documentation is at %s' % (dms_tools.__name__, dms_tools.__version__, dms_tools.__author__, dms_tools.__url__), formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('outprefix', help="Prefix for the output PDF plot files. Any existing files with these names are overwritten.")
-    parser.add_argument('alignment_type', choices=['barcodedsubamplicons', 'subassemble', 'matchsubassembledbarcodes'], help="The type of data being summarized. Use 'barcodedsubamplicons' if output is from 'dms_barcodedsubamplicons', 'subassemble' if output is from 'dms_subassemble', 'matchsubassembledbarcodes' if oiutput is from 'dms_matchsubassembledbarcodes'.")
+    parser.add_argument('alignment_type', choices=['barcodedsubamplicons', 'subassemble', 'matchsubassembledbarcodes'], help="The type of data being summarized. Use 'barcodedsubamplicons' if output is from 'dms_barcodedsubamplicons', 'subassemble' if output is from 'dms_subassemble', 'matchsubassembledbarcodes' if output is from 'dms_matchsubassembledbarcodes'.")
     parser.add_argument('alignments', nargs='+', help="This argument is repeated to specify each alignment that is being summarized. Each repetition is two comma-delimited strings (no spaces): ALIGNPREFIX,NAME. ALIGNPREFIX is the value of '--outprefix' used when calling the alignment program and NAME is the name assigned to that sample in the summaries. We expect to find all of the alignment output files with ALIGNPREFIX; these are the input data.", type=AlignprefixName)
     parser.add_argument('--chartype', default='codon', choices=['codon'], help='Character type used for the alignments / mutation counting.')
-    parser.add_argument('--maxmutcounts', type=NonNegativeInt, default=25, help="Maximum x-value for 'mutcounts_all.pdf' and 'mutcounts_multi_nt.pdf' plots.")
+    parser.add_argument('--maxmutcounts', type=NonNegativeInt, default=20, help="Maximum x-value for cumulative counts plots plots.")
     parser.add_argument('--maxperbarcode', type=NonNegativeInt, default=3, help="In 'barcodes.pdf' plot, group all barcodes with >= this many reads.")
     parser.set_defaults(writemutfreqs=False)
     parser.add_argument('--writemutfreqs', dest='writemutfreqs', action='store_true', help="Write a file 'mutfreqs.txt' that gives the numerical values plotted in 'mutfreqs.pdf'?")
-    parser.set_defaults(mutdepthgroupbyfirst=False)
-    parser.add_argument('--mutdepthgroupbyfirst', dest='mutdepthgroupbyfirst', action='store_true', help="Make separate 'mutdepth' plots for each name prefix (first word before underscore).")
+    parser.set_defaults(groupbyfirst=False)
+    parser.add_argument('--groupbyfirst', dest='groupbyfirst', action='store_true', help="Make separate 'mutdepth' and 'cumulfracs' plots for each name prefix (first word before underscore).")
     parser.add_argument('-v', '--version', action='version', version='%(prog)s {version}'.format(version=dms_tools.__version__))
     return parser
 

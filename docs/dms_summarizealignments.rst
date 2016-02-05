@@ -31,8 +31,8 @@ Command-line usage
    alignments
     ``ALIGNPREFIX`` should be the value of ``--outprefix`` used when running :ref:`dms_barcodedsubamplicons`, :ref:`dms_subassemble`, or :ref:`dms_matchsubassembledbarcodes` (depending on the value of ``alignment_type``). This program expects to find the files that are created by running that program with ``--outprefix`` as ``ALIGNPREFIX``. ``NAME`` is simply the name given to each sample in the `Output files`_.
 
-   \-\-mutdepthgroupbyfirst
-    This option currently only applies when ``alignment_type`` is ``matchsubassembledbarcodes`. In this case, for the ``allmutdepth.pdf`` and ``singlemutdepth.pdf`` `Output files`_, a separate output file is made by grouping samples with the same first word (prefix) in the name, where the first word is separated from the others by an underscore (``_``). This first name is then added directly before the plot extension in the file name.
+   \-\-groupbyfirst
+    This option currently only applies when ``alignment_type`` is ``matchsubassembledbarcodes`. In this case, for the ``allmutdepth.pdf``, ``singlemutdepth.pdf``, ``allcumulfracs.pdf``, and ``singlecumulfracs.pdf`` `Output files`_, a separate output file is made by grouping samples with the same first word (prefix) in the name, where the first word is separated from the others by an underscore (``_``). This first name is then added directly before the plot extension in the file name.
 
 
 
@@ -52,7 +52,7 @@ Because the command uses ``outprefix`` of ``subassemblysummary_``, the `Output f
 
 Alternatively, if you have matched barcodes for samples after subassembly, you could summarize the results with::
 
-    dms_summarizealignments matchbarcodesummary_ matchsubassembledbarcodes ./barcodes//Lib1_Input,Lib1_Input ./barcodes//Lib1_0-cip,Lib1_0-cip ./barcodes//Lib1_4-cip,Lib1_4-cip ./barcodes//Lib1_10-cip,Lib1_10-cip ./barcodes//Lib1_15-cip,Lib1_15-cip ./barcodes//Lib2_Input,Lib2_Input ./barcodes//Lib2_0-cip,Lib2_0-cip ./barcodes//Lib2_4-cip,Lib2_4-cip ./barcodes//Lib2_10-cip,Lib2_10-cip ./barcodes//Lib2_15-cip,Lib2_15-cip ./barcodes//Lib3_Input,Lib3_Input ./barcodes//Lib3_0-cip,Lib3_0-cip ./barcodes//Lib3_4-cip,Lib3_4-cip ./barcodes//Lib3_10-cip,Lib3_10-cip ./barcodes//Lib3_15-cip,Lib3_15-cip ./barcodes//WT_Input,WT_Input ./barcodes//WT_0-cip,WT_0-cip ./barcodes//WT_4-cip,WT_4-cip ./barcodes//WT_10-cip,WT_10-cip ./barcodes//WT_15-cip,WT_15-cip --mutdepthgroupbyfirst
+    dms_summarizealignments matchbarcodesummary_ matchsubassembledbarcodes ./barcodes//Lib1_Input,Lib1_Input ./barcodes//Lib1_0-cip,Lib1_0-cip ./barcodes//Lib1_4-cip,Lib1_4-cip ./barcodes//Lib1_10-cip,Lib1_10-cip ./barcodes//Lib1_15-cip,Lib1_15-cip ./barcodes//Lib2_Input,Lib2_Input ./barcodes//Lib2_0-cip,Lib2_0-cip ./barcodes//Lib2_4-cip,Lib2_4-cip ./barcodes//Lib2_10-cip,Lib2_10-cip ./barcodes//Lib2_15-cip,Lib2_15-cip ./barcodes//Lib3_Input,Lib3_Input ./barcodes//Lib3_0-cip,Lib3_0-cip ./barcodes//Lib3_4-cip,Lib3_4-cip ./barcodes//Lib3_10-cip,Lib3_10-cip ./barcodes//Lib3_15-cip,Lib3_15-cip ./barcodes//WT_Input,WT_Input ./barcodes//WT_0-cip,WT_0-cip ./barcodes//WT_4-cip,WT_4-cip ./barcodes//WT_10-cip,WT_10-cip ./barcodes//WT_15-cip,WT_15-cip --groupbyfirst
 
 Because the command uses ``outprefix`` of ``matchbarcodesummary``, the `Output files`_ will have names like ``matchbarcodesummary_reads.pdf``, etc.
 
@@ -207,7 +207,7 @@ If ``--writemutfreqs`` is used, a text file with the suffix ``singlemutfreqs.txt
 
 ``allmutdepth.pdf``
 ~~~~~~~~~~~~~~~~~~~~
-This plot shows the average per-site mutation rate as a function of primary sequence for all variants (unmutated, singly mutated, multiply mutated). Note that since we have used ``--mutdepthgroupbyfirst``, the `Example usage`_ above would create four plots. Here we show the first, ``allmutdepth_Lib1.pdf``.
+This plot shows the average per-site mutation rate as a function of primary sequence for all variants (unmutated, singly mutated, multiply mutated). Note that since we have used ``--groupbyfirst``, the `Example usage`_ above would create four plots. Here we show the first, ``allmutdepth_Lib1.pdf``.
 
 .. image:: matchbarcodesummary_allmutdepth_Lib1.pdf
    :align: center
@@ -216,12 +216,30 @@ This plot shows the average per-site mutation rate as a function of primary sequ
 
 ``singlemutdepth.pdf``
 ~~~~~~~~~~~~~~~~~~~~~~
-This plot shows the average per-site mutation rate at which each site has a singly mutated variant versus the number of unmutated variants. Note that since we have used ``--mutdepthgroupbyfirst``, the `Example usage`_ above would create four plots. Here we show the first, ``singlemutdepth_Lib1.pdf``.
+This plot shows the average per-site mutation rate at which each site has a singly mutated variant versus the number of unmutated variants. Note that since we have used ``--groupbyfirst``, the `Example usage`_ above would create four plots. Here we show the first, ``singlemutdepth_Lib1.pdf``.
 
 .. image:: matchbarcodesummary_singlemutdepth_Lib1.pdf
    :align: center
    :width: 60%
    :alt: matchbarcodesummary_singlemutdepth_Lib1.pdf
+
+``allcumulcounts.pdf``
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+The number of times each mutation is observed among all variants (singly and multiply mutated). Since we used the ``--groupbyfirst``, the `Example usage`_ above would create four plots. here is the first, ``allcumulcounts_Lib1.pdf``.
+
+.. image:: matchbarcodesummary_allcumulcounts_Lib1.pdf
+   :align: center
+   :width: 60%
+   :alt: matchbarcodesummary_allcumulcounts_Lib1.pdf
+
+``singlecumulcounts.pdf``
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+The number of times each mutation is aboserved among singly mutated variants. Since we used the ``--groupbyfirst``, the `Example usage`_ above would create four plots. here is the first, ``singlecumulcounts_Lib1.pdf``.
+
+.. image:: matchbarcodesummary_singlecumulcounts_Lib1.pdf
+   :align: center
+   :width: 60%
+   :alt: matchbarcodesummary_singlecumulcounts_Lib1.pdf
 
 .. include:: weblinks.txt
 .. include:: weblinks.txt

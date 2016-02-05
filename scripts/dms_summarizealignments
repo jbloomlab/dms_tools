@@ -274,6 +274,7 @@ def main():
                 if key >= 5:
                     ndata[name]['5+ mutations'] += value
         dms_tools.plot.PlotSampleBargraphs(names, categories, ndata, nsubassembled, ylabel='subassembled barcodes', groupbyfirstword=False, ncolumns=3)
+
     elif args['alignment_type'] == 'matchsubassembledbarcodes':
         reads = '%sreads.pdf' % args['outprefix']
         mutspermatched = '%smuts_per_matched_read.pdf' % args['outprefix']
@@ -283,23 +284,38 @@ def main():
         allmutfreqstext = '%sallmutfreqs.txt' % args['outprefix']
         singlemutdepth = '%ssinglemutdepth.pdf' % args['outprefix']
         allmutdepth = '%sallmutdepth.pdf' % args['outprefix']
+        singlecumul = '%ssinglecumulcounts.pdf' % args['outprefix']
+        allcumul = '%sallcumulcounts.pdf' % args['outprefix']
         for f in [reads, mutspermatched, singlemutfreqs, allmutfreqs, singlemutfreqstext, allmutfreqstext, singlemutdepth, allmutdepth]:
             if os.path.isfile(f):
                 os.remove(f)
                 print("Removing existing file %s" % f)
-        names = []
+        names = [name for (prefix, name) in args['alignments']]
+        if args['groupbyfirst']:
+            groups = set([name.split('_')[0] for name in names])
+            (prefix, ext) = os.path.splitext(singlemutdepth)
+            singlemutdepth = dict([(group, prefix + '_' + group + ext) for group in groups])
+            (prefix, ext) = os.path.splitext(allmutdepth)
+            allmutdepth = dict([(group, prefix + '_' + group + ext) for group in groups])
+            (prefix, ext) = os.path.splitext(singlecumul)
+            singlecumul = dict([(group, prefix + '_' + group + ext) for group in groups])
+            (prefix, ext) = os.path.splitext(allcumul)
+            allcumul = dict([(group, prefix + '_' + group + ext) for group in groups])
+            for f in singlemutdepth.values() + allmutdepth.values() + singlecumul.values() + allcumul.values():
+                if os.path.isfile(f):
+                    os.remove(f)
+                    print("Removing existing file %s" % f)
+        assert len(names) == len(set(names)), "Duplicate name:\n%s" % '\n'.join(names)
         data = {}
         print "\nNow reading %s data..." % (args['alignment_type'])
         for (prefix, name) in args['alignments']:
             print "Processing data for %s from files with prefix %s" % (name, prefix)
-            assert name not in names, "Duplicate name of %s" % name
-            names.append(name)
             data[name] = {}
             statsfile = '%s_stats.txt' % prefix
             assert os.path.isfile(statsfile), "Failed to find %s" % statsfile
             data[name]['stats'] = dms_tools.file_io.ReadSummaryStats(statsfile)[1]
-        if args['mutdepthgroupbyfirst'] and not all([name.count('_') for name in names]):
-            raise ValueError("Cannot use --mutdepthgroupbyfirst as not all sample names have an underscore")
+        if args['groupbyfirst'] and not all([name.count('_') for name in names]):
+            raise ValueError("Cannot use --groupbyfirst as not all sample names have an underscore")
         print("Making %s" % reads)
         readcategories = ['filtered', 'low quality', 'mismatches', 'unrecognized', 'retained']
         readdata = dict([(name, {}) for name in names])
@@ -325,22 +341,31 @@ def main():
         for name in names:
             mutperdata[name][key] = data[name]['stats']['nretained'] - sum(mutperdata[name].values())
         dms_tools.plot.PlotSampleBargraphs(names, mutpercategories, mutperdata, mutspermatched, 'number of matched read pairs', groupbyfirstword=False)
-        for (plot, depthplot, text, muttype, ylabel) in [
-                (allmutfreqs, allmutdepth, allmutfreqstext, 'allmut', 'per-%s mutation rate' % args['chartype']), 
-                (singlemutfreqs, singlemutdepth, singlemutfreqstext, 'singlemut', 'fraction with %s mutation' % args['chartype'])]:
+        for (plot, depthplot, cumulplot, text, muttype, ylabel, title) in [
+                (allmutfreqs, allmutdepth, allcumul, allmutfreqstext, 'allmut', 'per-%s mutation rate' % args['chartype'], 'All variants'), 
+                (singlemutfreqs, singlemutdepth, singlecumul, singlemutfreqstext, 'singlemut', 'fraction with %s mutation' % args['chartype'], 'Only singly mutated variants')]:
             plotdata = [dms_tools.file_io.ReadDMSCounts('%s_%scounts.txt' % (prefix, muttype), args['chartype']) for (prefix, name) in args['alignments']]
-            if args['mutdepthgroupbyfirst']:
-                groups = set([name.split('_')[0] for name in names])
-                (prefix, ext) = os.path.splitext(depthplot)
+            cumuldata = [dms_tools.utils.CodonMutsCumulFracs(iplotdata) for iplotdata in plotdata]
+            if args['groupbyfirst']:
                 for group in groups:
-                    depthplot = prefix + '_' + group + ext
-                    print("Making %s" % depthplot)
+                    print("Making %s" % depthplot[group])
                     inames = [name for name in names if name[ : len(group)] == group]
                     iplotdata = [idata for (name, idata) in zip(names, plotdata) if name[ : len(group)] == group]
-                    dms_tools.plot.PlotDepth(iplotdata, inames, depthplot, mutdepth=True)
+                    dms_tools.plot.PlotDepth(iplotdata, inames, depthplot[group], mutdepth=True)
+                    print("Making %s" % cumulplot[group])
+                    icumuldata = [idata for (name, idata) in zip(names, cumuldata) if name[ : len(group)] == group]
+                    dms_tools.plot.PlotMutCountFracs(cumulplot[group], title, inames, 
+                        [icumuldata[i][0] for (i, name) in enumerate(inames)],
+                        [icumuldata[i][2] for (i, name) in enumerate(inames)],
+                        icumuldata[0][1], icumuldata[0][3], legendloc='right', writecounts=True, nmax=args['maxmutcounts'])
             else:
                 print("Making %s" % depthplot)
                 dms_tools.plot.PlotDepth(plotdata, names, depthplot, mutdepth=True)
+                print("Making %s" % cumulplot)
+                dms_tools.plot.PlotMutCountFracs(cumulplot, title, names, 
+                    [cumuldata[i][0][ : args['maxmutcounts'] + 1] for (i, name) in enumerate(names)],
+                    [cumuldata[i][2][ : args['maxmutcounts'] + 1] for (i, name) in enumerate(names)],
+                    cumuldata[0][1], cumuldata[0][3], legendloc='right', writecounts=True)
             if muttype =='singlemut':
                 for d in plotdata:
                     # normalize wildtype to be per variant (right now each wildtype is counted nsites times)

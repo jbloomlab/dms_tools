@@ -453,7 +453,7 @@ def PlotPairedMutFracs(codon_counts, names, plotfile, ylabel='fraction'):
     pylab.close()
 
 
-def PlotMutCountFracs(plotfile, title, names, all_cumulfracs, syn_cumulfracs, all_counts, syn_counts, legendloc, writecounts=True):
+def PlotMutCountFracs(plotfile, title, names, all_cumulfracs, syn_cumulfracs, all_counts, syn_counts, legendloc, writecounts=True, nmax=None):
     """Plots fraction of mutations with >= a given number of counts.
 
     Does this for both all mutations and synonymous mutations. The plots
@@ -497,6 +497,8 @@ def PlotMutCountFracs(plotfile, title, names, all_cumulfracs, syn_cumulfracs, al
     * *writecounts* is a Boolean switch specifying whether we include the counts of all
       mutations (specified by *all_counts* and *syn_counts*) in the plot title. We do
       this if *writecounts* is *True*, and do not if it is *False*. 
+
+    *nmax* if specified, should be an integer > 1 giving the x-axis maximum.
     """
 
     if os.path.splitext(plotfile)[1].lower() != '.pdf':
@@ -519,7 +521,7 @@ def PlotMutCountFracs(plotfile, title, names, all_cumulfracs, syn_cumulfracs, al
     else:
         raise ValueError("Invalid legendloc of %s" % legendloc)
     (xsize, ysize) = (4.75 + xlegendmargin, legendrowheight * nrows + 2.4)
-    styles = ['k-.', 'y-.', 'b-', 'r:', 'g:', 'c--', 'm--']
+    styles = ['k-.', 'y-.', 'b-', 'r:', 'g:', 'c--', 'm--', 'k-', 'y-', 'b:', 'r-', 'g-', 'c:', 'm:', 'k--', 'y:', 'b--', 'g--', 'c-', 'm-', 'k:']
     lmargin = 0.11 * (xsize - xlegendmargin) / xsize # left margin for plot
     rmargin = 0.01 + xlegendmargin / xsize # right margin for plot
     centermargin = 0.02 # horizontal space between plots
@@ -537,12 +539,15 @@ def PlotMutCountFracs(plotfile, title, names, all_cumulfracs, syn_cumulfracs, al
         if not writecounts:
             ax_title = ax_title.split()[0]
         pylab.axes(ax)
-        nmax = max([len(x) for x in cumulfracs])
-        assert nmax, "Length of entries in cumulfracs must be >= 1"
+        if not nmax:
+            nmax = max([len(x) for x in cumulfracs])
+            assert nmax, "Length of entries in cumulfracs must be >= 1"
+        else:
+            assert nmax > 1, "nmax should be > 1"
         lines = []
         xs = [n for n in range(0, nmax)]
         for i in range(len(names)):
-            i_cumulfracs = cumulfracs[i] + [0] * (nmax - len(cumulfracs[i]))
+            i_cumulfracs = (cumulfracs[i] + [0] * (nmax - len(cumulfracs[i])))[ : nmax]
             plotline = pylab.plot(xs, i_cumulfracs, styles[i], lw=1.5)
             lines.append(plotline[0])
             pylab.xlabel("Mutation counts", size=11)
@@ -557,12 +562,13 @@ def PlotMutCountFracs(plotfile, title, names, all_cumulfracs, syn_cumulfracs, al
         pylab.gca().set_xlim([0, nmax - 1])
         xticker = matplotlib.ticker.MaxNLocator(4)
         pylab.gca().xaxis.set_major_locator(xticker)
-        pylab.title(ax_title, size=11)
+        if title:
+            pylab.title(ax_title, size=11)
     pylab.suptitle("{\\bf %s}" % title, size=11)
     if legendloc == 'bottom':
-        fig.legend(lines, names, handlelength=2.25, handletextpad=0.2, columnspacing=0.8, ncol=ncol, bbox_to_anchor=(0.5, -0.01), loc='lower center')
+        fig.legend(lines, [name.replace('_', ' ') for name in names], handlelength=2.25, handletextpad=0.2, columnspacing=0.8, ncol=ncol, bbox_to_anchor=(0.5, -0.01), loc='lower center')
     elif legendloc == 'right':
-        fig.legend(lines, names, handlelength=2.25, handletextpad=0.2, columnspacing=0.8, ncol=ncol, bbox_to_anchor=(1.0, 0.52), loc='center right')
+        fig.legend(lines, [name.replace('_', ' ') for name in names], handlelength=2.25, handletextpad=0.2, columnspacing=0.8, ncol=ncol, bbox_to_anchor=(1.0, 0.52), loc='center right')
     else:
         raise ValueError("Invalid legendloc of %s" % legendloc)
     pylab.savefig(plotfile)
