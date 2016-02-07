@@ -82,7 +82,7 @@ This file has the prefix specified by ``outprefix`` followed by the suffix ``_va
 
 After a header line beginning with ``#``, each line has three space-delimited entries:
 
-    * The number of counts for a barcode (only including barcodes with at least one count).
+    * The number of counts for a barcode (including barcodes with no counts).
 
     * The barcode itself.
 
@@ -94,6 +94,7 @@ Here are a few example lines::
     5 TTACCATG no_mutations
     3 GATACATG GGA31GCT
     1 ATACCGAT GGA10AAA,ATA22GTG
+    0 CCATAGAT no_mutations
 
 Read statistics file
 +++++++++++++++++++++

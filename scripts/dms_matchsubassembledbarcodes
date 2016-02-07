@@ -223,12 +223,16 @@ def main():
 
     print("\nWriting counts of each barcode to %s" % outfiles['variantcounts'])
     lines = []
-    for (bc, counts) in bc_counts.items():
+    for bc in bc_dict.keys():
         muts = bc_dict[bc]
         if muts:
             muts = ','.join(muts)
         else:
             muts = 'no_mutations'
+        if bc in bc_counts:
+            counts = bc_counts[bc]
+        else:
+            counts = 0
         lines.append((counts, '%s %s' % (bc, muts)))
     lines.sort()
     lines.reverse()
