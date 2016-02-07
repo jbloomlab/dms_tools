@@ -277,7 +277,7 @@ def PlotCorrelation(xs, ys, plotfile, xlabel, ylabel, logx=False, logy=False,\
     pylab.close()
 
 
-def PlotDepth(codon_counts, names, plotfile, mutdepth=False, y_axis_label=None):
+def PlotDepth(codon_counts, names, plotfile, mutdepth=False, y_axis_label=None, separatemuttypes=False):
     """Plots per-site depth along primary sequence.
 
     `codon_counts` : a list of dictionaries giving the codon counts for
@@ -294,9 +294,15 @@ def PlotDepth(codon_counts, names, plotfile, mutdepth=False, y_axis_label=None):
 
     `y_axis_label` : a string, if specified, overrides the default y-axis
     label 'reads' or 'mutation frequency'.
+
+    `separatemuttypes` : Boolean switch specifying that we plot a different
+    line for each of nonsynonymous, synonymous, and stop codon mutations.
+    Only can be used if *mutdepth* is *True*.
     """
     if os.path.splitext(plotfile)[1].lower() != '.pdf':
         raise ValueError("plotfile must end in .pdf: %s" % plotfile)
+    if separatemuttypes and not mutdepth:
+        raise ValueError("Can't use separatemuttypes without mutdepth")
     assert len(codon_counts) == len(names) > 0, "codon_counts and names are not non-empty lists of the same length"
     matplotlib.rc('text', usetex=True)
     matplotlib.rc('font', size=10)
@@ -305,26 +311,44 @@ def PlotDepth(codon_counts, names, plotfile, mutdepth=False, y_axis_label=None):
     codon_counts = [dms_tools.utils.ClassifyCodonCounts(counts) for counts in codon_counts]
     xs = list(range(len(sites)))
     dms_tools.utils.NaturalSort(sites)
-    nlegendcols = 4
-    nlegendrows = int(math.ceil(len(names) / float(nlegendcols)))
+    if separatemuttypes:
+        nlegendcols = 2
+        nlegendrows = int(math.ceil(3 * len(names) / float(nlegendcols)))
+    else:
+        nlegendcols = 4
+        nlegendrows = int(math.ceil(len(names) / float(nlegendcols)))
     fig = pylab.figure(figsize=(5.5, 2.16 * (0.76 + 0.23 * nlegendrows)))
     (lmargin, rmargin, bmargin, tmargin) = (0.1, 0.02, 0.16, 0.01 + 0.1 * nlegendrows)
     ax = pylab.axes([lmargin, bmargin, 1 - lmargin - rmargin, 1 - bmargin - tmargin])
     lines = []
     all_ys = []
-    for counts in codon_counts:
+    legendnames = []
+    for (name, counts) in zip(names, codon_counts):
         if mutdepth:
-            ys = []
-            for r in sites:
-                if counts[r]['COUNTS']:
-                    ys.append((counts[r]['COUNTS'] - counts[r]['N_WT']) / float(counts[r]['COUNTS']))
-                else:
-                    ys.append(0)
+            if separatemuttypes:
+                muttypes = [(' nonsyn', 'N_NS', 1), (' syn X 20', 'N_SYN', 20), (' stop X 20', 'N_STOP', 20)]
+            else:
+                muttypes = [('', 'all', 1)]
+            for (mtype, key, scalefac) in muttypes:
+                ys = []
+                for r in sites:
+                    if counts[r]['COUNTS']:
+                        if key == 'all':
+                            ys.append((counts[r]['COUNTS'] - counts[r]['N_WT']) / float(counts[r]['COUNTS']))
+                        else:
+                            ys.append(scalefac * counts[r][key] / float(counts[r]['COUNTS']))
+                    else:
+                        ys.append(0)
+                all_ys += ys
+                line = pylab.plot(xs, ys, lw=1.2)
+                lines.append(line[0])
+                legendnames.append(name.replace('_', ' ') + mtype)
         else:
             ys = [counts[r]['COUNTS'] for r in sites]
-        all_ys += ys
-        line = pylab.plot(xs, ys, lw=1.2)
-        lines.append(line[0])
+            all_ys += ys
+            line = pylab.plot(xs, ys, lw=1.2)
+            lines.append(line[0])
+            legendnames.append(name.replace('_', ' '))
     pylab.xlabel('codon position')
     if mutdepth:
         pylab.ylabel('mutation frequency')
@@ -334,8 +358,8 @@ def PlotDepth(codon_counts, names, plotfile, mutdepth=False, y_axis_label=None):
         pylab.ylabel(y_axis_label)
     all_ys.sort()
     # if the top y value is excessively large, set a small ymax to avoid distorting the y-axis
-    if all_ys[-1] >= 2.5 * all_ys[-len(names) - 1]:
-        pylab.gca().set_ylim([0, 2.5 * all_ys[-len(names) - 1]])
+    if all_ys[-1] >= 2.5 * all_ys[-len(legendnames) - 1]:
+        pylab.gca().set_ylim([0, 2.5 * all_ys[-len(legendnames) - 1]])
     yticker = matplotlib.ticker.MaxNLocator(4)
     pylab.gca().yaxis.set_major_locator(yticker)
     yformatter = pylab.ScalarFormatter(useMathText=True)
@@ -352,7 +376,7 @@ def PlotDepth(codon_counts, names, plotfile, mutdepth=False, y_axis_label=None):
         xformatter = matplotlib.ticker.FixedFormatter([sites[i] for i in range(0, len(xs), 100)])
     pylab.gca().xaxis.set_major_locator(xlocator)
     pylab.gca().xaxis.set_major_formatter(xformatter)
-    pylab.legend(lines, [name.replace('_', ' ') for name in names], handlelength=1.2, handletextpad=0.3, columnspacing=0.9, bbox_to_anchor=(0.54, 1.03 + 0.14 * nlegendrows), loc='upper center', ncol=nlegendcols)
+    pylab.legend(lines, legendnames, handlelength=1.2, handletextpad=0.3, columnspacing=0.9, bbox_to_anchor=(0.54, 1.03 + 0.14 * nlegendrows), loc='upper center', ncol=nlegendcols)
     pylab.savefig(plotfile)
     pylab.clf()
     pylab.close()

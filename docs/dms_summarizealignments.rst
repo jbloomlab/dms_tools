@@ -223,6 +223,18 @@ This plot shows the average per-site mutation rate at which each site has a sing
    :width: 60%
    :alt: matchbarcodesummary_singlemutdepth_Lib1.pdf
 
+``singlemutdepth`` and ``allmutdepth`` plots for **each sample**
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+A plot is also made for **each** sample that shows the mutation depth divided into nonsynonymous, synonymous, and stop-codon mutations. These plots have names like ``matchbarcodesummary_allmutdepth_Lib1_Input.pdf``. Note that the synonymous and stop-codon mutations frequencies are multiplied by a scale factor as indicated in the legend so that they are on a comparable scale to the nonsynonymous mutation frequencies.
+
+Plots like this are made for *all* variants and just for *single* mutant variants.
+
+.. image:: matchbarcodesummary_allmutdepth_Lib1_Input.pdf
+   :align: center
+   :width: 60%
+   :alt: matchbarcodesummary_allmutdepth_Lib1_Input.pdf
+
+
 ``allcumulcounts.pdf``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 The number of times each mutation is observed among all variants (singly and multiply mutated). Since we used the ``--groupbyfirst``, the `Example usage`_ above would create four plots. here is the first, ``allcumulcounts_Lib1.pdf``.
@@ -240,6 +252,7 @@ The number of times each mutation is aboserved among singly mutated variants. Si
    :align: center
    :width: 60%
    :alt: matchbarcodesummary_singlecumulcounts_Lib1.pdf
+
 
 .. include:: weblinks.txt
 .. include:: weblinks.txt
