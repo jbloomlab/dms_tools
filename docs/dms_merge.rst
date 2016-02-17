@@ -23,7 +23,7 @@ Command-line usage
     Files should be in the formats of a :ref:`preferences_file`, :ref:`diffpreferences_file`, or :ref:`dms_counts`.
 
    \-\-minus
-    Files should be in the formats of a :ref:`preferences_file` or a :ref:`diffpreferences_file`.
+    Files should be in the formats of a :ref:`preferences_file` or a :ref:`diffpreferences_file`. Currently, this option does not apply to count files.
 
    outfile
     For ``merge_method`` of "average", then this file will be of the same type as ``infiles`` (either preferences or differential preferences).
@@ -118,7 +118,7 @@ The command::
 
     dms_merge summedcounts.txt sum counts1.txt counts2.txt --chartype codon 
 
-sums counts from the two provided counts files and write them to the file ``summedcounts.txt`` in the :ref:`dms_counts` format.
+sums counts from the two provided counts files and writes them to the file ``summedcounts.txt`` in the :ref:`dms_counts` format.
 
 Adding counts with normalization
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

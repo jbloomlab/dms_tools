@@ -70,6 +70,8 @@ def main():
 
         if args['merge_method'] != 'sum':
             raise ValueError("When summing counts, merge_method must be set to sum")
+        if args['minus']:
+            raise ValueError("Count files may not be subtracted from one another")
         if args['excludestop'] and args['chartype'].lower() != 'aa':
             raise ValueError("When using --excludestop and summing counts, --chartype of counts must be aa")
         filetypes = dict([(fname, 'counts') for fname in args['infiles']])

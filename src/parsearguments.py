@@ -371,12 +371,12 @@ def MergeParser():
     parser.add_argument('infiles', nargs='+', help='Files to average or sum. Must all have the same sites and character type, but do not need to have the same wildtype residue at each site.', type=ExistingFile)
     parser.add_argument('--excludestop', dest='excludestop', action='store_true', help='If we are using amino acids, do we remove stop codons (denoted by "*") from preferences, differential preferences, or counts? We only remove stop codons if this argument is specified. If this option is used, then any files with stop codons have these codons removed (re-normalizing preferences to sum to one, and differential preferences to sum to zero) before the merge.')
     parser.set_defaults(excludestop=False)
-    parser.add_argument('--minus', nargs='+', help='Files to subtract when summing. Can only be used if "merge_method" is "sum".', type=ExistingFile)
+    parser.add_argument('--minus', nargs='+', help='Files to subtract when summing. Can only be used if "merge_method" is "sum" and if files are either preferences or differential preferences.', type=ExistingFile)
     parser.add_argument('-v', '--version', action='version', version='%(prog)s {version}'.format(version=dms_tools.__version__))
     parser.add_argument('--stringencyparameter', help='Stringency parameter used to rescale preferences. Can only be used if "merge_method" is "rescale".', type=FloatGreaterThanZero)
     parser.add_argument('--normalize', dest='normalize', action='store_true', help='Whether to normalize the counts at each site to the minimum number of counts observed at that site across all provided count files, before summing the counts. Can only be used if "merge_method" is "sum".')
     parser.set_defaults(normalize=False)
-    parser.add_argument('--chartype', default='dna', help='Characters for which counts are summed: "DNA" = counts for DNA; "codon" = counts for codons; "aa" = counts for amino acids (possibly including stop codons, see "--excludestop").', choices=['DNA', 'codon', 'aa'])
+    parser.add_argument('--chartype', default='codon', help='Characters for which counts are summed: "DNA" = counts for DNA; "codon" = counts for codons; "aa" = counts for amino acids (possibly including stop codons, see "--excludestop"). This option only needs to be specified when summing count files.', choices=['DNA', 'codon', 'aa'])
     return parser
 
 
