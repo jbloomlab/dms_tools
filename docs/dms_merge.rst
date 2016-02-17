@@ -23,7 +23,7 @@ Command-line usage
     Files should be in the formats of a :ref:`preferences_file`, :ref:`diffpreferences_file`, or :ref:`dms_counts`.
 
    \-\-minus
-    Files should be in the formats of a :ref:`preferences_file` or a :ref:`diffpreferences_file`. Currently, this option does not apply to count files.
+    Files should be in the formats of a :ref:`preferences_file` or a :ref:`diffpreferences_file`. Currently, this option cannot be used with counts files.
 
    outfile
     For ``merge_method`` of "average", then this file will be of the same type as ``infiles`` (either preferences or differential preferences).

@@ -1,7 +1,7 @@
 Changelog
 ===========
 
-1.1.dev12
+1.1.12
 -------------
 * Added option to sum count files in ``dms_merge``, with or without normalization of counts at each site. 
 
