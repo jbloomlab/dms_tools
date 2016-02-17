@@ -1,6 +1,10 @@
 Changelog
 ===========
 
+1.1.dev13
+-----------
+* Catch problems with ``dms_merge`` if multiple input files of the same name.
+
 1.1.12
 -------------
 * Added option to sum count files in ``dms_merge``, with or without normalization of counts at each site. 

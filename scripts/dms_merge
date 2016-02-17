@@ -27,6 +27,9 @@ def main():
     print versionstring
     print 'Parsed the following arguments:\n%s\n' % '\n'.join(['\t%s = %s' % tup for tup in args.iteritems()])
 
+    unique_infiles = set(map(os.path.abspath, args['infiles']))
+    assert len(unique_infiles) == len(args['infiles']), "Duplicate file in infiles"
+
     # remove outfile if it exists
     if os.path.isfile(args['outfile']):
         print "Removing existing output file of %s" % args['outfile']
