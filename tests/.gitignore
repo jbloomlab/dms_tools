@@ -2,3 +2,4 @@
 *.pdf
 *corr.txt
 *inferred*.txt
+test_merged_counts_files/test*

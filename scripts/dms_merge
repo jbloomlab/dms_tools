@@ -27,23 +27,62 @@ def main():
     print versionstring
     print 'Parsed the following arguments:\n%s\n' % '\n'.join(['\t%s = %s' % tup for tup in args.iteritems()])
 
+    unique_infiles = set(map(os.path.abspath, args['infiles']))
+    assert len(unique_infiles) == len(args['infiles']), "Duplicate file in infiles"
+
     # remove outfile if it exists
     if os.path.isfile(args['outfile']):
         print "Removing existing output file of %s" % args['outfile']
         os.remove(args['outfile'])
 
-    # error check
+    # error check that appropriate options are chosen given the merge_method
     if args['stringencyparameter'] and args['merge_method'] != 'rescale':
         raise ValueError("Cannot specify a --stringencyparameter if merge_method is not rescale")
+    if args['normalize'] and args['merge_method'] != 'sum':
+        raise ValueError("Cannot specify counts to be normalized by --normalize if merge_method is not sum")
 
-    # read data, merge, and create outfile
+    # read data as either preferences or counts, and take sums
+    (filetypes, sums) = ({}, {})
+    sumtype = ''
     if not args['minus']:
         args['minus'] = [] # reassign from None to empty list
-    (sites, characters, wts, databyfile) = dms_tools.file_io.ReadMultiPrefOrDiffPref(\
+    try:
+        (sites, characters, wts, databyfile) = dms_tools.file_io.ReadMultiPrefOrDiffPref(\
             args['infiles'] + args['minus'], args['excludestop'])
-    filetypes = dict([(fname, dms_tools.utils.Pref_or_DiffPref(databyfile[fname])) for fname in args['infiles'] + args['minus']])
-    print "\nHere are the apparent file types of the input files:\n%s\n" % '\n'.join(['%s is %s' % tup for tup in filetypes.iteritems()])
-    sums = dms_tools.utils.SumPrefsDiffPrefs([databyfile[fname] for fname in args['infiles']], minus=[databyfile[fname] for fname in args['minus']])
+        filetypes = dict([(fname, dms_tools.utils.Pref_or_DiffPref(databyfile[fname])) for fname in args['infiles'] + args['minus']])
+        print "\nHere are the apparent file types of the input files:\n%s\n" % '\n'.join(['%s is %s' % tup for tup in filetypes.iteritems()])
+        sums = dms_tools.utils.SumPrefsDiffPrefs([databyfile[fname] for fname in args['infiles']], minus=[databyfile[fname] for fname in args['minus']])
+        sumtype = dms_tools.utils.Pref_or_DiffPref(sums)
+    except: 
+        # read in the counts
+        if args['chartype'].lower() == 'codon':
+            chartype = 'codon'
+        elif args['chartype'].upper() == 'DNA':
+            chartype = 'DNA'
+        elif args['chartype'].lower() == 'aa':
+            if args['excludestop']:
+                chartype = 'aminoacids_nostop'
+            else:
+                chartype = 'aminoacids_withstop'
+        else:
+            raise ValueError("Invalid chartype of %s" % args['chartype'])
+        try:
+            (sites, wts, counts) = dms_tools.file_io.ReadMultipleDMSCountsFiles(args['infiles'], chartype)
+        except:
+            raise IOError("input files are not valid preferences, differential preferences, or counts files")
+
+        if args['merge_method'] != 'sum':
+            raise ValueError("When summing counts, merge_method must be set to sum")
+        if args['minus']:
+            raise ValueError("Count files may not be subtracted from one another")
+        if args['excludestop'] and args['chartype'].lower() != 'aa':
+            raise ValueError("When using --excludestop and summing counts, --chartype of counts must be aa")
+        filetypes = dict([(fname, 'counts') for fname in args['infiles']])
+        print "\nHere are the apparent file types of the input files:\n%s\n" % '\n'.join(['%s is %s' % tup for tup in filetypes.iteritems()])
+        sums = dms_tools.utils.SumCounts([counts[fname] for fname in args['infiles']], chartype, args['normalize'])
+        sumtype = 'counts'
+
+    # finish merging, and create outfile
     if args['merge_method'] == 'average':
         if args['minus']: 
             raise ValueError('Cannot use --minus option when the merge_method is "average"; can only use it for "sum".')
@@ -60,15 +99,17 @@ def main():
         else:
             raise ValueError("The input files do not all specify the same file type, but this is required when averaging. The file types appear to be:\n%s" % '\n'.join(['%s is %s' % tup for tup in filetypes.iteritems()]))
     elif args['merge_method'] == 'sum':
-        sumtype = dms_tools.utils.Pref_or_DiffPref(sums)
         if sumtype == 'preferences':
             print "The listed files summed to give valid preferences. Now writing these preferences to %s" % args['outfile']
             dms_tools.file_io.WritePreferences(args['outfile'], sites, wts, sums, None)
         elif sumtype == 'diffprefs':
             print "The listed files summed to give valid differential preferences. Now writing these differential preferences to %s" % args['outfile']
             dms_tools.file_io.WriteDiffPrefs(args['outfile'], sites, wts, sums, None, None)
+        elif sumtype == 'counts':
+            print "The listed count files summed to give valid counts. Now writing these counts to %s" % args['outfile']
+            dms_tools.file_io.WriteDMSCounts(args['outfile'], sums)
         else:
-            raise ValueError("The sum of the files does not yield either valid preferences or differential preferences. Are you sure you are summing a valid combination?")
+            raise ValueError("The sum of the files does not yield either valid preferences, differential preferences, or counts. Are you sure you are summing a valid combination?")
     elif args['merge_method'] == 'rescale':
         if len(args['infiles']) != 1:
             raise ValueError('Must specify exactly one infile when using merge_method "rescale".')
