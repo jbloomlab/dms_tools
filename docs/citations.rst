@@ -4,7 +4,7 @@
 Citations and Acknowledgments
 ==================================
 
-`dms_tools`_ is written by the `Bloom Lab`_ (see https://github.com/jbloom/dms_tools/graphs/contributors for a full-list of contributors). 
+`dms_tools`_ is written by the `Bloom Lab`_ (see https://github.com/jbloomlab/dms_tools/graphs/contributors for a full-list of contributors). 
 
 The software is freely available (see :ref:`license`).
 

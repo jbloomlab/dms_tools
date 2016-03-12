@@ -1,8 +1,10 @@
 Changelog
 ===========
 
-1.1.dev13
+1.1.13
 -----------
+* Moved repository and docs from https://github.com/jbloom/dms_tools and http://jbloom.github.io/dms_tools to https://github.com/jbloomlab/dms_tools and http://jbloomlab.github.io/dms_tools
+
 * Catch problems with ``dms_merge`` if multiple input files of the same name.
 
 1.1.12
