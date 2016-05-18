@@ -33,3 +33,4 @@
 .. _`weblogolib`: https://code.google.com/p/weblogo/
 .. _`PyPDF2`: https://pypi.python.org/pypi/PyPDF2
 .. _`Software for the analysis and visualization of deep mutational scanning data (Bloom, 2015)`: http://www.biomedcentral.com/content/pdf/s12859-015-0590-4.pdf
+.. _`pandas`: http://pandas.pydata.org/

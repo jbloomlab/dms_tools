@@ -16,6 +16,10 @@ For a detailed description of the algorithm implemented by this program, see :re
 
 After you install `dms_tools`_, this program will be available to run at the command line.
 
+Should you use this program?
+-----------------------------
+Note that we are no longer certain if the method implemented in this program is superior to the much simpler :ref:`dms_diffselection`. So consider trying that program as well.
+
 Command-line usage
 ---------------------
 .. argparse::

@@ -415,7 +415,7 @@ def DiffSelectionParser():
     parser.add_argument('mockcounts', type=ExistingFile, help='File with counts from mock-selected library.  For nucleotides, header line should be "# POSITION WT A C G T" and then subsequent lines give wildtype and counts for each site (i.e. "1 G 1013 23 19 47"); for codons use the 64 codons instead (i.e. "AAA AAC AAG ...").')
     parser.add_argument('selectedcounts', type=ExistingFile, help='File with counts from selected library')
     parser.add_argument('outprefix', help="Prefix for output files. Suffixes are 'mutdiffsel.txt' and 'sitediffsel.txt'")
-    parser.add_argument('--pseudocount', type=NonNegativeInt, default=10, help='Pseudocount added to each count.')
+    parser.add_argument('--pseudocount', type=FloatGreaterThanZero, default=10, help='Pseudocount added to each count.')
     parser.add_argument('--chartype', choices=['codon_to_aa', 'DNA', 'codon', 'aa'], default='codon_to_aa', help='Characters: "codon_to_aa" = counts for codons and selection for amino acids; "DNA" = counts and selection for DNA; "codon" = counts and selection for codons; "aa" = counts and selection for amino acids (possibly including stop codons, see "--includestop").')
     parser.set_defaults(includestop=False)
     parser.add_argument('--includestop', help='Include stop codons as a possible amino acid if using "--chartype" of "codon_to_aa" or "aa".', dest='includestop', action='store_true')
