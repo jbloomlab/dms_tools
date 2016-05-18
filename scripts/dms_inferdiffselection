@@ -1,0 +1,124 @@
+#!python
+
+"""Infers differential selection.
+
+Written by Jesse Bloom."""
+
+
+import sys
+import os
+import math
+import pandas
+import dms_tools
+import dms_tools.utils
+import dms_tools.parsearguments
+import dms_tools.file_io
+
+
+def main():
+    """Main body of script."""
+
+    # Parse command line arguments
+    parser = dms_tools.parsearguments.InferDiffSelectionParser()
+    args = vars(parser.parse_args())
+    prog = parser.prog
+
+    # begin execution
+    print('\nBeginning execution of %s in directory %s\n' % (prog, os.getcwd()))
+    print(dms_tools.file_io.Versions())
+    print('Parsed the following arguments:\n%s\n' % '\n'.join(['\t%s = %s' % tup for tup in args.iteritems()]))
+
+    # set up for correct character type
+    translate_to_aa = False # do we translate character to amino acid
+    if args['chartype'].lower() == 'codon_to_aa':
+        chartype = 'codon'
+        translate_to_aa = True
+        countcharacters = dms_tools.codons
+        if args['includestop']:
+            characters = dms_tools.aminoacids_withstop
+        else:
+            characters = dms_tools.aminoacids_nostop
+    elif args['chartype'].lower() == 'codon':
+        chartype = 'codon'
+        countcharacters = characters = dms_tools.codons
+    elif args['chartype'].upper() == 'DNA':
+        chartype = 'DNA'
+        countcharacters = characters = dms_tools.nts
+    elif args['chartype'].lower() == 'aa':
+        if args['includestop']:
+            chartype = 'aminoacids_withstop'
+            characters = countcharacters = dms_tools.aminoacids_withstop
+        else:
+            chartype = 'aminoacids_nostop'
+            characters = countcharacters = dms_tools.aminoacids_nostop
+    else:
+        raise ValueError("Invalid chartype of %s" % args['chartype'])
+
+    # read counts
+    (sites, wts, counts) = dms_tools.file_io.ReadMultipleDMSCountsFiles([args['mockcounts'], args['selectedcounts']], chartype)
+    print("\nRead counts data for {0} sites.".format(len(sites)))
+
+    # compute differential selection
+    pseudocount = args['pseudocount']
+    datacolumns = ['site', 'wt', 'mut', 'diffsel']
+    data = dict([(column, []) for column in datacolumns])
+    for r in sites:
+        wt = wts[r]
+        mock = counts[args['mockcounts']][r]
+        selected = counts[args['selectedcounts']][r]
+        if translate_to_aa:
+            mock = dms_tools.utils.SumCodonToAA(mock, args['includestop'])
+            selected = dms_tools.utils.SumCodonToAA(selected, args['includestop'])
+            wt = dms_tools.codon_to_aa[wt]
+        if wt == '*' and not args['includestop']:
+            continue
+        assert wt in characters, "Invalid wildtype of {0} for site {1}".format(wt, r)
+        assert wt in mock, "mockcounts missing counts for {0} at {1}".format(wt, r)
+        assert wt in selected, "selectedcounts missing counts for {0} at {1}".format(wt, r)
+        nwtmock = float(mock[wt])
+        nwtselected = float(selected[wt])
+        for x in characters:
+            assert x in mock, "mockcounts missing counts for {0} at {1}".format(x, r)
+            assert x in selected, "selectedcounts missing counts for {0} at {1}".format(x, r)
+            nxmock = mock[x]
+            nxselected = selected[x]
+            try:
+                rxdiffsel = ((nxselected + pseudocount)/ (nwtselected + pseudocount)) / ((nxmock + pseudocount) / (nwtmock + pseudocount))
+                if rxdiffsel == 0:
+                    raise ZeroDivisionError("Need to increase pseudocount to avoid log of zero")
+                rxdiffsel = math.log(rxdiffsel, 2)
+            except ZeroDivisionError:
+                raise RuntimeError("The differential selection computation involved dividing by zero. Please increase value of --pseudocount from current value of {0}".format(pseudocount))
+            data['site'].append(r)
+            data['wt'].append(wt)
+            data['mut'].append(x)
+            data['diffsel'].append(rxdiffsel)
+    diffsel = pandas.DataFrame(data, columns=datacolumns)
+
+    # print some summary statistics
+    nprint = 5 # print the top of this many for each statistic
+
+    for (seltype, ascending) in [('highest', False), ('lowest', True)]:
+        print("\nMutations with the {0} differential selection:".format(seltype))
+        print(diffsel.sort_values('diffsel', ascending=ascending).head(nprint).to_string(index=False, float_format='{:.2f}'.format))
+
+    for (description, filterfunc) in [
+            ('magnitude', lambda x : True),
+            ('positive', lambda x : x > 0), 
+            ('negative', lambda x : x < 0)
+            ]:
+        print("\nSites with greatest total {0} differential selection:".format(description))
+        totsel = pandas.DataFrame(
+            {
+            'site':sites,
+            'selection':[sum(map(abs, (filter(filterfunc, diffsel.loc[diffsel['site'] == r]['diffsel'])))) for r in sites],
+            },
+            columns=['site', 'selection'])
+        print(totsel.sort_values('selection', ascending=False).head(nprint).to_string(index=False, float_format='{:.2f}'.format))
+
+    # finished
+    print("\nProgram complete.")
+
+
+if __name__ == '__main__':
+    main() # run the script

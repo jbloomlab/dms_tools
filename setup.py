@@ -46,15 +46,16 @@ setup(
     description = 'Deep mutational scanning (DMS) analysis tools.',
     long_description = readme,
     license = 'GPLv3',
-    install_requires = [\
-        'biopython>=1.6',\
-        'scipy>=0.13',\
-        'numpy>=1.8',\
-        'matplotlib>=1.3',\
-        'pystan>=2.5',\
-        'cython>=0.21',\
-        'weblogo==3.4',\
-        'PyPDF2>=1.23',\
+    install_requires = [
+        'biopython>=1.6',
+        'scipy>=0.13',
+        'numpy>=1.8',
+        'matplotlib>=1.3',
+        'pystan>=2.5',
+        'cython>=0.21',
+        'weblogo==3.4',
+        'PyPDF2>=1.23',
+        'pandas>=0.18',
         ],
     platforms = 'Linux (and maybe also Mac OS X).',
     packages = ['dms_tools'],
@@ -63,6 +64,7 @@ setup(
     scripts = [
             'scripts/dms_inferprefs',
             'scripts/dms_inferdiffprefs',
+            'scripts/dms_inferdiffselection',
             'scripts/dms_merge',
             'scripts/dms_correlate',
             'scripts/dms_logoplot',

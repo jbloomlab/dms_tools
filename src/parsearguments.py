@@ -38,6 +38,8 @@ Defined in this module
 
 * *InferDiffPrefsParser* : parser for ``dms_inferdiffprefs``
 
+* *InferDiffSelectionParser* : parser for ``dms_inferdiffselection``
+
 * *MergeParser* : parser for ``dms_merge``
 
 * *EditSitesParser* : parsers for ``dms_editsites``
@@ -399,6 +401,24 @@ def InferPrefsParser():
     parser.add_argument('--seed', default=1, help='Random number seed.', type=int)
     parser.add_argument('--sites', default=None, nargs='+', help='Only perform the inference for the specified sites, which should be a space separated list such as "--sites 1 2 10". All of these sites must have data in the counts files.')
     parser.add_argument('--ratio_estimation', default=None, metavar='MINCOUNTS', type=FloatGreaterThanZero, help='Rather than use MCMC to estimate the preferences using a statistical model, we simply compute them by calculating enrichment ratios relative to wildtype post- and pre-selection, and then normalizing these ratios to sum to one at each site. The single argument for this option is MINCOUNTS, which is a number > 0. If the counts for a character are less than MINCOUNTS, either due to low counts or error correction, then the counts for that character are changed to MINCOUNTS to avoid estimating ratios of zero, less than zero, or infinity.')
+    parser.add_argument('-v', '--version', action='version', version='%(prog)s {version}'.format(version=dms_tools.__version__))
+    return parser
+
+
+def InferDiffSelectionParser():
+    """Returns *argparse.ArgumentParser* for ``dms_inferdiffselection`` script."""
+    parser = ArgumentParserNoArgHelp(description=\
+        'Infer differential selection between mock-treated and selected samples. ' +
+        'Quantified as log2[{(n_sel_mut + P) / (n_sel_wt + P)} / {(n_mock_mut + P) / (n_mock_wt + P)}] where P is pseudocount. ' +
+        'This script is part of %s (version %s) written by %s. Detailed documentation is at %s' % (dms_tools.__name__, dms_tools.__version__, dms_tools.__author__, dms_tools.__url__), 
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser.add_argument('mockcounts', type=ExistingFile, help='File with counts from mock-selected library.  For nucleotides, header line should be "# POSITION WT A C G T" and then subsequent lines give wildtype and counts for each site (i.e. "1 G 1013 23 19 47"); for codons use the 64 codons instead (i.e. "AAA AAC AAG ...").')
+    parser.add_argument('selectedcounts', type=ExistingFile, help='File with counts from selected library')
+    parser.add_argument('outfile', help='Name of created output file.')
+    parser.add_argument('--pseudocount', type=NonNegativeInt, default=10, help='Pseudocount added to each count.')
+    parser.add_argument('--chartype', choices=['codon_to_aa', 'DNA', 'codon', 'aa'], default='codon_to_aa', help='Characters for which differential selection is inferred: "codon_to_aa" = counts for codons and selection for amino acids; "DNA" = counts and selection for DNA; "codon" = counts and selection for codons; "aa" = counts and selection for amino acids (possibly including stop codons, see "--includestop").')
+    parser.set_defaults(includestop=False)
+    parser.add_argument('--includestop', help='Include stop codons as a possible amino acid if using "--chartype" of "codon_to_aa" or "aa".', dest='includestop', action='store_true')
     parser.add_argument('-v', '--version', action='version', version='%(prog)s {version}'.format(version=dms_tools.__version__))
     return parser
 
