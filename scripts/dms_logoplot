@@ -9,6 +9,7 @@ import sys
 import os
 import time
 import scipy.stats
+import pandas
 import dms_tools.utils
 import dms_tools.parsearguments
 import dms_tools.file_io
@@ -71,24 +72,57 @@ def main():
         print "Removing existing file %s" % args['logoplot']
 
     # read data
-    print "\nReading data from %s" % args['infile']
-    (sites, characters, wts, databyfile) = dms_tools.file_io.ReadMultiPrefOrDiffPref([args['infile']], args['excludestop'], sortsites=False)
-    data = databyfile[args['infile']]
-    if 'preferences' == dms_tools.utils.Pref_or_DiffPref(data):
-        print "%s specifies preferences" % args['infile']
-        datatype = 'prefs'
-        if args['stringencyparameter']:
-            print "\nRescaling preferences with stringency parameter %s" % args['stringencyparameter']
-            for r in list(data.keys()):
-                data[r] = dict([(aa, pi**args['stringencyparameter']) for (aa, pi) in data[r].items()])
-                normsum = float(sum(data[r].values()))
-                data[r] = dict([(aa, pi / normsum) for (aa, pi) in data[r].items()])
-    elif 'diffprefs' == dms_tools.utils.Pref_or_DiffPref(data):
-        print "%s specifies differential preferences" % args['infile']
-        datatype = 'diffprefs'
-        assert not args['stringencyparameter'], "Cannot use --stringencyparameter with differential preferences, only with preferences."
-    else:
-        raise ValueError("infile %s does not either valid preferences or valid differential preferences" % args['infile'])
+    print("\nReading data from %s" % args['infile'])
+    try:
+        # try to read differential selection
+        datatype = 'diffsel'
+        expectedcolumns = set(['site', 'wt', 'mut', 'diffsel'])
+        diffsel = pandas.read_csv(args['infile'])
+        assert set(diffsel.columns.values) == expectedcolumns
+        sites = list(set(diffsel['site'].tolist()))
+        data = {}
+        for r in sites:
+            data[str(r)] = diffsel.loc[diffsel['site'] == r].set_index('mut')['diffsel'].to_dict()
+            if args['excludestop'] and '*' in data[str(r)]:
+                del data[str(r)]['*']
+        sites = [str(r) for r in sites]
+        dms_tools.utils.NaturalSort(sites)
+    except: 
+        # see if preferences or differential preferences
+        (sites, characters, wts, databyfile) = dms_tools.file_io.ReadMultiPrefOrDiffPref([args['infile']], args['excludestop'], sortsites=False)
+        data = databyfile[args['infile']]
+        if 'preferences' == dms_tools.utils.Pref_or_DiffPref(data):
+            print("%s specifies preferences" % args['infile'])
+            datatype = 'prefs'
+            if args['stringencyparameter']:
+                print "\nRescaling preferences with stringency parameter %s" % args['stringencyparameter']
+                for r in list(data.keys()):
+                    data[r] = dict([(aa, pi**args['stringencyparameter']) for (aa, pi) in data[r].items()])
+                    normsum = float(sum(data[r].values()))
+                    data[r] = dict([(aa, pi / normsum) for (aa, pi) in data[r].items()])
+            assert not args['diffprefheight'], "Can't use --diffprefheight' with preferences"
+        elif 'diffprefs' == dms_tools.utils.Pref_or_DiffPref(data):
+            print("%s specifies differential preferences" % args['infile'])
+            datatype = 'diffprefs'
+            assert not args['stringencyparameter'], "Cannot use --stringencyparameter with differential preferences, only with preferences."
+        else:
+            raise ValueError("infile %s is not a valid preferences, differential preferences, or differential selection file" % args['infile'])
+
+    # now get y limits if using differential selection
+    if datatype == 'diffsel':
+        alldiffsel = [diffsel]
+        if args['diffselheight']:
+            alldiffsel += list(map(pandas.read_csv, args['diffselheight']))
+        maxdiffsel = mindiffsel = 0
+        for idataframe in alldiffsel:
+            for r in set(idataframe['site'].tolist()):
+                maxdiffsel = max(maxdiffsel, sum(map(lambda x: max(0, x), idataframe.loc[idataframe['site'] == r]['diffsel'])))
+                mindiffsel = min(mindiffsel, sum(map(lambda x: min(0, x), idataframe.loc[idataframe['site'] == r]['diffsel'])))
+        yspread = maxdiffsel - mindiffsel
+        maxdiffsel += 0.02 * yspread
+        mindiffsel -= 0.02 * yspread
+    elif args['diffselheight']:
+        raise ValueError("Can't use --diffselheight if not using differential selectin")
 
     # read overlays if they exist
     if args['overlay1']:
