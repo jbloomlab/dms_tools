@@ -38,7 +38,7 @@ Defined in this module
 
 * *InferDiffPrefsParser* : parser for ``dms_inferdiffprefs``
 
-* *InferDiffSelectionParser* : parser for ``dms_inferdiffselection``
+* *DiffSelectionParser* : parser for ``dms_diffselection``
 
 * *MergeParser* : parser for ``dms_merge``
 
@@ -405,18 +405,18 @@ def InferPrefsParser():
     return parser
 
 
-def InferDiffSelectionParser():
-    """Returns *argparse.ArgumentParser* for ``dms_inferdiffselection`` script."""
+def DiffSelectionParser():
+    """Returns *argparse.ArgumentParser* for ``dms_diffselection`` script."""
     parser = ArgumentParserNoArgHelp(description=\
-        'Infer differential selection between mock-treated and selected samples. ' +
+        'Differential selection between mock-treated and selected samples. ' +
         'Quantified as log2[{(n_sel_mut + P) / (n_sel_wt + P)} / {(n_mock_mut + P) / (n_mock_wt + P)}] where P is pseudocount. ' +
         'This script is part of %s (version %s) written by %s. Detailed documentation is at %s' % (dms_tools.__name__, dms_tools.__version__, dms_tools.__author__, dms_tools.__url__), 
         formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('mockcounts', type=ExistingFile, help='File with counts from mock-selected library.  For nucleotides, header line should be "# POSITION WT A C G T" and then subsequent lines give wildtype and counts for each site (i.e. "1 G 1013 23 19 47"); for codons use the 64 codons instead (i.e. "AAA AAC AAG ...").')
     parser.add_argument('selectedcounts', type=ExistingFile, help='File with counts from selected library')
-    parser.add_argument('outfile', help='Name of created output file.')
+    parser.add_argument('outprefix', help="Prefix for output files. Suffixes are 'mutdiffsel.txt' and 'sitediffsel.txt'")
     parser.add_argument('--pseudocount', type=NonNegativeInt, default=10, help='Pseudocount added to each count.')
-    parser.add_argument('--chartype', choices=['codon_to_aa', 'DNA', 'codon', 'aa'], default='codon_to_aa', help='Characters for which differential selection is inferred: "codon_to_aa" = counts for codons and selection for amino acids; "DNA" = counts and selection for DNA; "codon" = counts and selection for codons; "aa" = counts and selection for amino acids (possibly including stop codons, see "--includestop").')
+    parser.add_argument('--chartype', choices=['codon_to_aa', 'DNA', 'codon', 'aa'], default='codon_to_aa', help='Characters: "codon_to_aa" = counts for codons and selection for amino acids; "DNA" = counts and selection for DNA; "codon" = counts and selection for codons; "aa" = counts and selection for amino acids (possibly including stop codons, see "--includestop").')
     parser.set_defaults(includestop=False)
     parser.add_argument('--includestop', help='Include stop codons as a possible amino acid if using "--chartype" of "codon_to_aa" or "aa".', dest='includestop', action='store_true')
     parser.add_argument('-v', '--version', action='version', version='%(prog)s {version}'.format(version=dms_tools.__version__))
