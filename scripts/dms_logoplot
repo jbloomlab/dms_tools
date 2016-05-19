@@ -109,6 +109,7 @@ def main():
             raise ValueError("infile %s is not a valid preferences, differential preferences, or differential selection file" % args['infile'])
 
     # now get y limits if using differential selection
+    ylimits = None
     if datatype == 'diffsel':
         alldiffsel = [diffsel]
         if args['diffselheight']:
@@ -121,6 +122,7 @@ def main():
         yspread = maxdiffsel - mindiffsel
         maxdiffsel += 0.02 * yspread
         mindiffsel -= 0.02 * yspread
+        ylimits = (mindiffsel, maxdiffsel)
     elif args['diffselheight']:
         raise ValueError("Can't use --diffselheight if not using differential selectin")
 
@@ -145,9 +147,16 @@ def main():
     else:
         overlay = None
 
+    # use taller default letter stacks for differential selection
+    relativestackheight = {
+            'prefs':args['letterheight'],
+            'diffprefs':args['letterheight'],
+            'diffsel':2 * args['letterheight'],
+            }
+
     # make logo plot
     print "\nNow making the logo plot in file %s" % args['logoplot']
-    dms_tools.weblogo.LogoPlot(sites, datatype, data, args['logoplot'], args['nperline'], numberevery=args['numberevery'], allowunsorted=True, ydatamax=args['diffprefheight'], overlay=overlay)
+    dms_tools.weblogo.LogoPlot(sites, datatype, data, args['logoplot'], args['nperline'], numberevery=args['numberevery'], allowunsorted=True, ydatamax=args['diffprefheight'], overlay=overlay, ylimits=ylimits, relativestackheight=relativestackheight[datatype])
     assert os.path.isfile(args['logoplot']), "Failed to create %s" % args['logoplot']
 
     print '\nSuccessfully completed %s at %s' % (prog, time.asctime())

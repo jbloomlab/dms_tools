@@ -95,7 +95,7 @@ def KyteDoolittleColorMapping(maptype='jet', reverse=True):
 
 
 
-def LogoPlot(sites, datatype, data, plotfile, nperline, numberevery=10, allowunsorted=False, ydatamax=1.01, overlay=None, fix_limits={}, fixlongname=False, overlay_cmap=None):
+def LogoPlot(sites, datatype, data, plotfile, nperline, numberevery=10, allowunsorted=False, ydatamax=1.01, overlay=None, fix_limits={}, fixlongname=False, overlay_cmap=None, ylimits=None, relativestackheight=1):
     """Constructs a sequence logo showing amino-acid or nucleotide preferences.
 
     The heights of each letter is equal to the preference of
@@ -113,13 +113,17 @@ def LogoPlot(sites, datatype, data, plotfile, nperline, numberevery=10, allowuns
       in the plot are ordered in the same arrangement
       listed in *sites*. These should be **strings**, not integers.
 
-    * *datatype* should be one of the two following strings depending on whether
-      we are making a plot of preferences or differential preferences: 
-      'prefs' or 'diffprefs'
+    * *datatype* should be one of the following strings:
+    
+        * 'prefs' for preferences
+        
+        * 'diffprefs' for differential preferences
+        
+        * 'diffsel' for differential selection
 
     * *data* is a dictionary that has a key for every entry in
       *sites*. For every site *r* in *sites*, *sites[r][x]*
-      is the preference or differential preference for character *x*. 
+      is the value for character *x*. 
       Preferences must sum to one; differential preferences to zero.
       All sites must have the same set of characters. The characters
       must be the set of nucleotides (*dms_tools.nts*)
@@ -142,6 +146,11 @@ def LogoPlot(sites, datatype, data, plotfile, nperline, numberevery=10, allowuns
     * *ydatamax* : meaningful only if *datatype* is 'diffprefs'. In this case, it gives
       the maximum that the logo stacks extend in the positive and negative directions.
       Cannot be smaller than the maximum extent of the differential preferences.
+
+    * *ylimits*: is **mandatory** if *datatype* is 'diffsel', and meaningless 
+      otherwise. It is *(ymin, ymax)* where *ymax > 0 > ymin*, and gives extent 
+      of the data in the positive and negative directions. Must encompass the 
+      actual maximum and minimum of the data.
 
     * *overlay* : this argument allows you to make overlay bars that indicated
       other properties for the sites. By default, this option is *None*, meaning that
@@ -167,7 +176,7 @@ def LogoPlot(sites, datatype, data, plotfile, nperline, numberevery=10, allowuns
           same as *shortname* if you don't need a different long name.
 
     * *fix_limits* is only meaningful if *overlay* is being used. In this case, for any
-      *shortname* in *overlay* that also keys and entry in *fix_limits*, we use
+      *shortname* in *overlay* that also keys an entry in *fix_limits*, we use
       *fix_limits[shortname]* to set the limits for *shortname*. Specifically,
       *fix_limits[shortname]* should be the 2-tuple *(ticks, ticknames)*. *ticks*
       should be a list of tick locations (numbers) and *ticknames* should be a list of
@@ -179,31 +188,35 @@ def LogoPlot(sites, datatype, data, plotfile, nperline, numberevery=10, allowuns
 
     * *overlay_cmap* can be the name of a valid *matplotlib.colors.Colormap*, such as the
       string *jet* or *bwr*. Otherwise, it can be *None* and a (hopefully) good choice will 
-      be made for you.
+      be made for you.q
+
+    * *relativestackheight* indicates how high the letter stack is relative to
+      the default. The default is multiplied by this number, so make it > 1
+      for a higher letter stack.
     """
-    assert datatype in ['prefs', 'diffprefs']
+    assert datatype in ['prefs', 'diffprefs', 'diffsel'], "Invalid datatype {0}".format(datatype)
 
     # check data, and get characters
     assert sites, "No sites specified"
-    assert set(sites) == set(data.keys()), "There is not a complete match between sites and the keys of data"
+    assert set(sites) == set(data.keys()), "Not a match between sites and the keys of data"
     characters = data[sites[0]].keys()
     if set(characters) == set(dms_tools.nts):
         alphabet_type = 'nt'
     elif set(characters) == set(dms_tools.aminoacids_nostop) or set(characters) == set(dms_tools.aminoacids_withstop):
         alphabet_type = 'aa'
     else:
-        raise ValueError("Invalid set of character keys in data. Do not specify either nucleotides or amino acids:\n%s" % str(characters))
+        raise ValueError("Invalid set of characters in data. Does not specify either nucleotides or amino acids:\n%s" % str(characters))
     for r in sites:
         if set(data[r].keys()) != set(characters):
             raise ValueError("Not all sites in data have the same set of characters")
 
-    firstblankchar = 'B' # character for first blank space for diffprefs
+    firstblankchar = 'B' # character for first blank space for diffprefs / diffsel
     assert firstblankchar not in characters, "firstblankchar in characters"
-    lastblankchar = 'b' # character for last blank space for diffprefs
+    lastblankchar = 'b' # character for last blank space for diffprefs / diffsel
     assert lastblankchar not in characters, "lastblankchar in characters"
-    separatorchar = '-' # separates positive and negative for diffprefs
+    separatorchar = '-' # separates positive and negative for diffprefs / diffsel
     assert lastblankchar not in characters, "lastblankchar in characters"
-    separatorheight = 0.02 # height of separator as fraction of total for diffprefs
+    separatorheight = 0.02 # height of separator as fraction of total for diffprefs / diffsel
 
     if os.path.splitext(plotfile)[1].lower() != '.pdf':
         raise ValueError("plotfile must end in .pdf: %s" % plotfile)
@@ -221,6 +234,8 @@ def LogoPlot(sites, datatype, data, plotfile, nperline, numberevery=10, allowuns
     barheight = 5.5 # height of bars in points if using overlay
     barspacing = 2.0 # spacing between bars in points if using overlay
     stackaspectratio = 4.4 # ratio of stack height:width, doesn't count part going over maximum value of 1
+    assert relativestackheight > 0, "relativestackheight must be > 0"
+    stackaspectratio *= relativestackheight
     if overlay:
         if not (1 <= len(overlay) <= 2):
             raise ValueError("overlay must be a list of one or two entries; instead it had %d entries" % len(overlay))
@@ -267,6 +282,30 @@ def LogoPlot(sites, datatype, data, plotfile, nperline, numberevery=10, allowuns
                     firstpositiveindex += 1
                 ordered_alphabets[isite] = [firstblankchar] + [tup[1] for tup in deltapi_r[ : firstpositiveindex]] + [separatorchar] + [tup[1] for tup in deltapi_r[firstpositiveindex : ]] + [lastblankchar] # order from most negative to most positive with blank characters and separators
                 f.write(' %g %g %g\n' % (0.5 * (ydatamax + 2.0 * negativesum) / ydatamax, 0.5 * (ydatamax + 2.0 * negativesum) / ydatamax, separatorheight)) # heights for blank charactors and separators
+        elif datatype == 'diffsel':
+            assert ylimits, "You must specify ylimits if using diffsel"
+            (dataymin, dataymax) = ylimits
+            assert dataymax > 0 > dataymin, "Invalid ylimits of {0}".format(ylimits)
+            yextent = float(dataymax - dataymin)
+            separatorheight *= yextent
+            chars_for_string = characters + [firstblankchar, lastblankchar, separatorchar]
+            f.write('ID ID\nBF BF\nP0 {0}\n'.format(' '.join(chars_for_string)))
+            for (isite, r) in enumerate(sites):
+                positivesum = sum([data[r][x] for x in characters if data[r][x] > 0]) + separatorheight / 2.0
+                negativesum = sum([data[r][x] for x in characters if data[r][x] < 0]) - separatorheight / 2.0
+                assert positivesum <= dataymax, "Data exceeds ylimits in positive direction"
+                assert negativesum >= dataymin, "Data exceeds ylimits in negative direction"
+                f.write('{0}'.format(isite))
+                diffsel_r = []
+                for x in characters:
+                    diffsel_r.append((data[r][x], x))
+                    f.write(' {0}'.format(abs(data[r][x]) / yextent))
+                diffsel_r.sort()
+                firstpositiveindex = 0
+                while diffsel_r[firstpositiveindex][0] < 0:
+                    firstpositiveindex += 1
+                ordered_alphabets[isite] = [firstblankchar] + [tup[1] for tup in diffsel_r[ : firstpositiveindex]] + [separatorchar] + [tup[1] for tup in diffsel_r[firstpositiveindex : ]] + [lastblankchar] # order from most negative to most positive with blank characters and separators
+                f.write(' %g %g %g\n' % ((negativesum - dataymin) / yextent, (dataymax - positivesum) / yextent, separatorheight / yextent)) # heights for blank charactors and separators
         else:
             raise ValueError("Invalid datatype of %s" % datatype)
         f.close()
