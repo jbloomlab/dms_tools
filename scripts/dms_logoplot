@@ -100,7 +100,6 @@ def main():
                     data[r] = dict([(aa, pi**args['stringencyparameter']) for (aa, pi) in data[r].items()])
                     normsum = float(sum(data[r].values()))
                     data[r] = dict([(aa, pi / normsum) for (aa, pi) in data[r].items()])
-            assert not args['diffprefheight'], "Can't use --diffprefheight' with preferences"
         elif 'diffprefs' == dms_tools.utils.Pref_or_DiffPref(data):
             print("%s specifies differential preferences" % args['infile'])
             datatype = 'diffprefs'
