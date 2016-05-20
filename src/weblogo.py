@@ -95,11 +95,7 @@ def KyteDoolittleColorMapping(maptype='jet', reverse=True):
 
 
 
-<<<<<<< HEAD
-def LogoPlot(sites, datatype, data, plotfile, nperline, numberevery=10, allowunsorted=False, ydatamax=1.01, overlay=None, fix_limits={}, fixlongname=False, overlay_cmap=None, custom_cmap = 'jet'):
-=======
-def LogoPlot(sites, datatype, data, plotfile, nperline, numberevery=10, allowunsorted=False, ydatamax=1.01, overlay=None, fix_limits={}, fixlongname=False, overlay_cmap=None, ylimits=None, relativestackheight=1):
->>>>>>> d62774f0aa256ec27587f4d14a223c21baf9760b
+def LogoPlot(sites, datatype, data, plotfile, nperline, numberevery=10, allowunsorted=False, ydatamax=1.01, overlay=None, fix_limits={}, fixlongname=False, overlay_cmap=None, ylimits=None, relativestackheight=1, custom_cmap='jet'):
     """Constructs a sequence logo showing amino-acid or nucleotide preferences.
 
     The heights of each letter is equal to the preference of
@@ -192,18 +188,14 @@ def LogoPlot(sites, datatype, data, plotfile, nperline, numberevery=10, allowuns
 
     * *overlay_cmap* can be the name of a valid *matplotlib.colors.Colormap*, such as the
       string *jet* or *bwr*. Otherwise, it can be *None* and a (hopefully) good choice will 
-<<<<<<< HEAD
       be made for you.
 
     * *custom_cmap* can be the name of a valid *matplotlib.colors.Colormap* which will be
     used to color amino-acid one-letter codes in the logoplot by hydrophobicity.
-=======
-      be made for you.q
 
     * *relativestackheight* indicates how high the letter stack is relative to
       the default. The default is multiplied by this number, so make it > 1
       for a higher letter stack.
->>>>>>> d62774f0aa256ec27587f4d14a223c21baf9760b
     """
     assert datatype in ['prefs', 'diffprefs', 'diffsel'], "Invalid datatype {0}".format(datatype)
 
