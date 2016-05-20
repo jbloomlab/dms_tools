@@ -20,10 +20,13 @@ Command-line usage
    :prog: dms_logoplot
 
    infile
-    Should be in the formats of a :ref:`preferences_file` or a :ref:`diffpreferences_file`.
+    Should be in the format of a :ref:`preferences_file`, a :ref:`diffpreferences_file`, or one of the ``*mutdiffsel.txt`` files created by :ref:`dms_diffselection`.
 
    logoplot
     See `Examples`_ for images of the types of plots that are created.
+
+   \-\-diffselheight
+    So if you are using this option, you should specify a list of files in the format of the ``*mutdiffsel.txt`` files created by :ref:`dms_diffselection`.
 
    \-\-stringencyparameter
     Use this option if you have fit a stringency parameter :math:`\beta` and want to rescale the visualization of the preferences using this parameter. The preferences are rescaled so that each preference is proportional to :math:`\left(\pi_{r,a}\right)^{\beta}`, so values > 1 increase the weight of the preferences and values < 1 flatten them.
