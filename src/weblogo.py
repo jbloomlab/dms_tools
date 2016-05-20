@@ -95,7 +95,7 @@ def KyteDoolittleColorMapping(maptype='jet', reverse=True):
 
 
 
-def LogoPlot(sites, datatype, data, plotfile, nperline, numberevery=10, allowunsorted=False, ydatamax=1.01, overlay=None, fix_limits={}, fixlongname=False, overlay_cmap=None):
+def LogoPlot(sites, datatype, data, plotfile, nperline, numberevery=10, allowunsorted=False, ydatamax=1.01, overlay=None, fix_limits={}, fixlongname=False, overlay_cmap=None, custom_cmap = 'jet'):
     """Constructs a sequence logo showing amino-acid or nucleotide preferences.
 
     The heights of each letter is equal to the preference of
@@ -180,6 +180,9 @@ def LogoPlot(sites, datatype, data, plotfile, nperline, numberevery=10, allowuns
     * *overlay_cmap* can be the name of a valid *matplotlib.colors.Colormap*, such as the
       string *jet* or *bwr*. Otherwise, it can be *None* and a (hopefully) good choice will 
       be made for you.
+
+    * *custom_cmap* can be the name of a valid *matplotlib.colors.Colormap* which will be
+    used to color amino-acid one-letter codes in the logoplot by hydrophobicity.
     """
     assert datatype in ['prefs', 'diffprefs']
 
@@ -222,8 +225,8 @@ def LogoPlot(sites, datatype, data, plotfile, nperline, numberevery=10, allowuns
     barspacing = 2.0 # spacing between bars in points if using overlay
     stackaspectratio = 4.4 # ratio of stack height:width, doesn't count part going over maximum value of 1
     if overlay:
-        if not (1 <= len(overlay) <= 2):
-            raise ValueError("overlay must be a list of one or two entries; instead it had %d entries" % len(overlay))
+        if not (1 <= len(overlay) <= 3):
+            raise ValueError("overlay must be a list of between one and three entries; instead it had %d entries" % len(overlay))
         ymax = (stackaspectratio * stackwidth + len(overlay) * (barspacing + barheight)) / float(stackaspectratio * stackwidth)
         aspectratio = ymax * stackaspectratio # effective aspect ratio for full range
     else:
@@ -286,7 +289,7 @@ def LogoPlot(sites, datatype, data, plotfile, nperline, numberevery=10, allowuns
         logo_options.show_yaxis = False
         logo_options.yaxis_scale = ymax 
         if alphabet_type == 'aa':
-            (cmap, colormapping, mapper) = KyteDoolittleColorMapping()
+            (cmap, colormapping, mapper) = KyteDoolittleColorMapping(maptype=custom_cmap)
         elif alphabet_type == 'nt':
             colormapping = {}
             colormapping['A'] = '#008000'

@@ -5,6 +5,8 @@ Changelog
 ------
 * Added ``dms_diffselection`` program.
 
+* Added ``--colormap`` and ``--overlay3`` options to ``dms_logoplot``
+
 1.1.13
 -----------
 * Moved repository and docs from https://github.com/jbloom/dms_tools and http://jbloom.github.io/dms_tools to https://github.com/jbloomlab/dms_tools and http://jbloomlab.github.io/dms_tools
