@@ -9,6 +9,9 @@ Changelog
 
 * Make ``dms_merge`` remove sites indicated as *None* when in *renumber* mode, added ``--skipfirstline`` option, and made commas an allowable separator.
 
+* Added option to ``--scale_pseudocounts`` by site sequencing depths in ``dms_diffselection``.
+
+
 1.1.13
 -----------
 * Moved repository and docs from https://github.com/jbloom/dms_tools and http://jbloom.github.io/dms_tools to https://github.com/jbloomlab/dms_tools and http://jbloomlab.github.io/dms_tools

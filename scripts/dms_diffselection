@@ -87,13 +87,22 @@ def main():
         assert wt in selected, "selectedcounts missing counts for {0} at {1}".format(wt, r)
         nwtmock = float(mock[wt])
         nwtselected = float(selected[wt])
+
+        if args['scale_pseudocounts']:
+            ntotalmock = float(sum([mock[c] for c in characters]))
+            ntotalselected = float(sum([selected[c] for c in characters]))
+            pseudocount_selected = pseudocount
+            pseudocount_mock = ntotalmock/ntotalselected*pseudocount
+        else:
+            pseudocount_selected = pseudocount_mock = pseudocount
+
         for x in characters:
             assert x in mock, "mockcounts missing counts for {0} at {1}".format(x, r)
             assert x in selected, "selectedcounts missing counts for {0} at {1}".format(x, r)
             nxmock = mock[x]
             nxselected = selected[x]
             try:
-                rxdiffsel = ((nxselected + pseudocount)/ (nwtselected + pseudocount)) / ((nxmock + pseudocount) / (nwtmock + pseudocount))
+                rxdiffsel = ((nxselected + pseudocount_selected) / (nwtselected + pseudocount_selected)) / ((nxmock + pseudocount_mock) / (nwtmock + pseudocount_mock))
                 if rxdiffsel == 0:
                     raise ZeroDivisionError("Need to increase pseudocount to avoid log of zero")
                 rxdiffsel = math.log(rxdiffsel, 2)

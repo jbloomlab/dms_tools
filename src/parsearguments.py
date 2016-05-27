@@ -422,6 +422,8 @@ def DiffSelectionParser():
     parser.add_argument('selectedcounts', type=ExistingFile, help='File with counts from selected library')
     parser.add_argument('outprefix', help="Prefix for output files. Suffixes are 'mutdiffsel.txt' and 'sitediffsel.txt'")
     parser.add_argument('--pseudocount', type=FloatGreaterThanZero, default=10, help='Pseudocount added to each count.')
+    parser.add_argument('--scale_pseudocounts', dest='scale_pseudocounts', action='store_true', help='Scale pseudocounts added to mockcounts by the ratio of site depth between the two samples (using the value of `pseudocounts` for the selected sample and the depth-scaled pseudocount for the mock sample).'
+    parser.set_defaults(scale_pseudocounts=False)
     parser.add_argument('--chartype', choices=['codon_to_aa', 'DNA', 'codon', 'aa'], default='codon_to_aa', help='Characters: "codon_to_aa" = counts for codons and selection for amino acids; "DNA" = counts and selection for DNA; "codon" = counts and selection for codons; "aa" = counts and selection for amino acids (possibly including stop codons, see "--includestop").')
     parser.set_defaults(includestop=False)
     parser.add_argument('--includestop', help='Include stop codons as a possible amino acid if using "--chartype" of "codon_to_aa" or "aa".', dest='includestop', action='store_true')
