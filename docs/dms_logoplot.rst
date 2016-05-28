@@ -66,6 +66,23 @@ This will create the file ``prefs_logoplot.pdf``, which will look something like
    :alt: prefs_logoplot.pdf
    :align: center
 
+Differential selection logo plot
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Imagine that you have inferred differential selection into ``mutdiffsel.txt`` using :ref:`dms_diffselection`.
+
+You can visualize the differential selection (the :math:`s_{r,x}` values described in :ref:`dms_diffselection`) using::
+
+    dms_logoplot mutdiffsel.txt diffsel_logoplot.pdf --nperline 115 --diffselheight mutdiffsel.txt mutdiffsel2.txt mutdiffsel3.txt
+
+The ``--diffselheight`` is useful if you are making several such plots and want them to share a common y-axis.
+
+Here is an example of a create plot:
+
+.. image:: diffsel_logoplot.pdf
+   :width: 90%
+   :alt: diffsel_logoplot.pdf
+   :align: center
+
 Differential preferences logo plot
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Imagine that you have inferred differential preferences into ``diffprefs.txt``, which has the format of a :ref:`diffpreferences_file`. To display these differential preferences, run::

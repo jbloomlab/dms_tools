@@ -88,7 +88,7 @@ def main():
         nwtmock = float(mock[wt])
         nwtselected = float(selected[wt])
 
-        if args['scale_pseudocounts']:
+        if not args['no_scale_pseudocounts']:
             ntotalmock = float(sum([mock[c] for c in characters]))
             ntotalselected = float(sum([selected[c] for c in characters]))
             pseudocount_selected = pseudocount

@@ -17,15 +17,25 @@ Let :math:`\operatorname{wt}\left(r\right)` be denote the wildtype character at 
 Then the relative enrichment of the mutant relative to the wildtype after selection is
 
 .. math::
+   :label: E_rx
   
-   E_{r,x} = \frac{\left(n_{r,x}^{\rm{selected}} + P\right) / \left(n_{r,\operatorname{wt}\left(r\right)}^{\rm{selected}} + P\right)}{\left(n_{r,x}^{\rm{mock}} + P\right) / \left(n_{r,\operatorname{wt}\left(r\right)}^{\rm{mock}} + P\right)}
+   E_{r,x} = \frac{\left(n_{r,x}^{\rm{selected}} + P\right) / \left(n_{r,\operatorname{wt}\left(r\right)}^{\rm{selected}} + P\right)}{\left(n_{r,x}^{\rm{mock}} + f_r \times P\right) / \left(n_{r,\operatorname{wt}\left(r\right)}^{\rm{mock}} + f_r \times P\right)}
 
-where :math:`P > 0` is a pseudocount that is added to each observed count. 
+where :math:`P > 0` is a pseudocount that is added to each observed count (specified by ``--pseudocount`` option) and :math:`f_r` is the ratio of the total depth of the mock-selected sample at site :math:`r` to the total depth of the selected sample at site :math:`r`:
+
+.. math::
+   :label: f_r
+
+   f_r = \left(\sum_x n_{r,x}^{\rm{mock}}\right) / \left(\sum_x n_{r,x}^{\rm{selected}}\right).
+
+The reason for scaling the pseudocount by library depth is that otherwise the estimates will tend to be systematically different than one even if the relative counts for the wildtype and mutant amino acid in each library. If you do not want to do this scaling, see the ``--no-scale-pseudocounts`` option.
+
 Note that by definition, :math:`E_{r,\operatorname{wt}\left(r\right)}` is always one.
 
 We then quantify the differential selection :math:`s_{r,x}` for :math:`x` at :math:`r` in the selected versus control condition as:
 
 .. math::
+   :label: s_rx
 
    s_{r,x} = \log_2 E_{r,x}
 
@@ -58,11 +68,14 @@ Command-line usage
    outprefix
     For instance, if ``outprefix`` is ``antibodyselection_`` then the output files are ``antibodyselection_mutdiffsel.txt`` and ``antibodyselection_sitediffsel.txt``. See `Output`_ for an explanation of the contents of these files.
 
-   pseudocount
-    This is the :math:`P` parameter described in the `Overview`_.
+   \-\-pseudocount
+    This is the :math:`P` parameter described in the Equation :eq:`E_rx`. Note that by default this pseudocount is for the **selected** library, and the pseudocount for the mock-selected library is scaled by the parameter in Equation :eq:`f_r`.
 
    \-\-chartype
     A value of ``codon_to_aa`` means we have codon characters for the deep sequencing data, but infer selection for amino acids. Essentially, we sum the counts of all codons for each amino acid, and then do the calculation described in `Overview`_ on these amino-acid counts.
+
+   \-\-no-scale-pseudocounts
+    If you use this option, the scaling :math:`f_r` in Equation :eq:`f_r` is always set to one. Note that this can give biased estimates if the depth is unequal in the two libraries.
 
    \-\-includestop
     If this is true, treat stop codons (denoted by ``*``) as a possible amino acid. Otherwise simply ignore any counts for stop codons.
@@ -113,5 +126,7 @@ In addition, two files with the prefix ``outprefix`` are created (these files ar
 
 
 These output files are in a form where they can directly read into `pandas`_ data frames via that package's ``read_csv`` function.
+
+You can visualize the ``*mutdiffsel.txt`` files with :ref:`dms_logoplot`.
 
 .. include:: weblinks.txt

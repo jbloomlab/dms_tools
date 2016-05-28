@@ -9,8 +9,6 @@ Changelog
 
 * Make ``dms_merge`` remove sites indicated as *None* when in *renumber* mode, added ``--skipfirstline`` option, and made commas an allowable separator.
 
-* Added option to ``--scale_pseudocounts`` by site sequencing depths in ``dms_diffselection``.
-
 
 1.1.13
 -----------
