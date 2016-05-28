@@ -515,7 +515,7 @@ def PlotMutCountFracs(plotfile, title, names, all_cumulfracs, syn_cumulfracs, al
     else:
         raise ValueError("Invalid legendloc of %s" % legendloc)
     (xsize, ysize) = (4.75 + xlegendmargin, legendrowheight * nrows + 2.4)
-    styles = ['k-.', 'y-.', 'b-', 'r:', 'g:', 'c--', 'm--']
+    styles = ['k-.', 'y-.', 'b-', 'r:', 'g:', 'c--', 'm--', 'k:', 'y-', 'b-.', 'r-', 'g--', 'm:']
     lmargin = 0.11 * (xsize - xlegendmargin) / xsize # left margin for plot
     rmargin = 0.01 + xlegendmargin / xsize # right margin for plot
     centermargin = 0.02 # horizontal space between plots

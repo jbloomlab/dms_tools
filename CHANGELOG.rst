@@ -9,6 +9,7 @@ Changelog
 
 * Make ``dms_merge`` remove sites indicated as *None* when in *renumber* mode, added ``--skipfirstline`` option, and made commas an allowable separator.
 
+* Increased number of colors allowed by *PlotMutCountFracs* (used by ``dms_summarizealignments``)
 
 1.1.13
 -----------
