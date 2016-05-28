@@ -191,7 +191,7 @@ def LogoPlot(sites, datatype, data, plotfile, nperline, numberevery=10, allowuns
       be made for you.
 
     * *custom_cmap* can be the name of a valid *matplotlib.colors.Colormap* which will be
-    used to color amino-acid one-letter codes in the logoplot by hydrophobicity.
+      used to color amino-acid one-letter codes in the logoplot by hydrophobicity.
 
     * *relativestackheight* indicates how high the letter stack is relative to
       the default. The default is multiplied by this number, so make it > 1
