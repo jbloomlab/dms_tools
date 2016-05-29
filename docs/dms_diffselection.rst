@@ -28,7 +28,7 @@ where :math:`P > 0` is a pseudocount that is added to each observed count (speci
 
    f_r = \left(\sum_x n_{r,x}^{\rm{mock}}\right) / \left(\sum_x n_{r,x}^{\rm{selected}}\right).
 
-The reason for scaling the pseudocount by library depth is that otherwise the estimates will tend to be systematically different than one even if the relative counts for the wildtype and mutant amino acid in each library. If you do not want to do this scaling, see the ``--no-scale-pseudocounts`` option.
+The reason for scaling the pseudocount by library depth is that otherwise the estimates will tend to be systematically different than one even if the relative counts for the wildtype and mutant amino acid in each library are in the two conditions. If you do not want to do this scaling, see the ``--no-scale-pseudocounts`` option.
 
 Note that by definition, :math:`E_{r,\operatorname{wt}\left(r\right)}` is always one.
 
