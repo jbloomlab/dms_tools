@@ -17,7 +17,7 @@ The :ref:`programs` installed as part of `dms_tools`_ allow you to easily analyz
 
     1) You have measured the effects of all single codon (or amino-acid or nucleotide) mutations to a gene, and wish to quantify the *preference* of each site for each identity. You can do this using :ref:`dms_inferprefs`, and visualize the results using :ref:`dms_logoplot`.
 
-    2) You have subjected a library of mutant genes to selection under two conditions, and wish to identify mutations that are favored under one versus the other. You can do this using :ref:`dms_inferdiffprefs`, and visualize the results using :ref:`dms_logoplot`.
+    2) You have subjected a library of mutant genes to selection under two conditions, and wish to identify mutations that are favored under one versus the other. You can do this using :ref:`dms_diffselection` or :ref:`dms_inferdiffprefs`, and visualize the results using :ref:`dms_logoplot`.
 
     3) You have performed several `biological replicates`_ of deep mutational scanning, and wish to compare and combine the results. You can do this using :ref:`dms_correlate` and :ref:`dms_merge`.
 

@@ -8,6 +8,10 @@ This is a description of the algorithm that :ref:`dms_inferdiffprefs` uses to in
 .. contents::
    :depth: 3
 
+Should you use differential selection instead?
+-------------------------------------------------
+For many applications, we now prefer the much simpler analysis performed by :ref:`dms_diffselection`. In particular, if you are specifically looking at changes away from a defined wildtype (e.g., antibody selection), :ref:`dms_diffselection` may be better.
+
 The definition of differential preferences.
 --------------------------------------------
 The script :ref:`dms_inferprefs` infers the site-specific amino-acid preferences :math:`\pi_{r,x}` for character :math:`x` at site :math:`r` using the :ref:`inferprefs_algorithm`. These site-specific preferences are inferred by comparing an unselected mutant library to variants that have passed through some selection for some function.

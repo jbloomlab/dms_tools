@@ -6,15 +6,15 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Algorithm to infer differential preferences &mdash; dms_tools 1.1.13 documentation</title>
+    <title>Algorithm to infer differential preferences &mdash; dms_tools 1.1.14 documentation</title>
     
-    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/classic.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '1.1.13',
+        VERSION:     '1.1.14',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -23,8 +23,8 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="dms_tools 1.1.13 documentation" href="index.html" />
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="dms_tools 1.1.14 documentation" href="index.html" />
     <link rel="up" title="Algorithms" href="algorithms.html" />
     <link rel="next" title="Python API" href="pythonapi.html" />
     <link rel="prev" title="Algorithm to infer site-specific preferences" href="inferprefs_algorithm.html" /> 
@@ -45,8 +45,8 @@
         <li class="right" >
           <a href="inferprefs_algorithm.html" title="Algorithm to infer site-specific preferences"
              accesskey="P">previous</a> |</li>
-        <li><a href="index.html">dms_tools 1.1.13 documentation</a> &raquo;</li>
-          <li><a href="algorithms.html" accesskey="U">Algorithms</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">dms_tools 1.1.14 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="algorithms.html" accesskey="U">Algorithms</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -57,22 +57,27 @@
             
   <div class="section" id="algorithm-to-infer-differential-preferences">
 <span id="inferdiffprefs-algorithm"></span><h1><a class="toc-backref" href="#id1">Algorithm to infer differential preferences</a><a class="headerlink" href="#algorithm-to-infer-differential-preferences" title="Permalink to this headline">¶</a></h1>
-<p>This is a description of the algorithm that <a class="reference internal" href="dms_inferdiffprefs.html#dms-inferdiffprefs"><em>dms_inferdiffprefs</em></a> uses to infer the differential site-specific preferences between two different selection conditions.</p>
+<p>This is a description of the algorithm that <a class="reference internal" href="dms_inferdiffprefs.html#dms-inferdiffprefs"><span class="std std-ref">dms_inferdiffprefs</span></a> uses to infer the differential site-specific preferences between two different selection conditions.</p>
 <div class="contents topic" id="contents">
 <p class="topic-title first">Contents</p>
 <ul class="simple">
 <li><a class="reference internal" href="#algorithm-to-infer-differential-preferences" id="id1">Algorithm to infer differential preferences</a><ul>
-<li><a class="reference internal" href="#the-definition-of-differential-preferences" id="id2">The definition of differential preferences.</a></li>
-<li><a class="reference internal" href="#the-experimental-data-from-deep-sequencing" id="id3">The experimental data from deep sequencing.</a></li>
-<li><a class="reference internal" href="#actual-frequencies-and-likelihoods-of-observing-experimental-data" id="id4">Actual frequencies and likelihoods of observing experimental data.</a></li>
-<li><a class="reference internal" href="#priors-over-the-unknown-parameters" id="id5">Priors over the unknown parameters.</a></li>
+<li><a class="reference internal" href="#should-you-use-differential-selection-instead" id="id2">Should you use differential selection instead?</a></li>
+<li><a class="reference internal" href="#the-definition-of-differential-preferences" id="id3">The definition of differential preferences.</a></li>
+<li><a class="reference internal" href="#the-experimental-data-from-deep-sequencing" id="id4">The experimental data from deep sequencing.</a></li>
+<li><a class="reference internal" href="#actual-frequencies-and-likelihoods-of-observing-experimental-data" id="id5">Actual frequencies and likelihoods of observing experimental data.</a></li>
+<li><a class="reference internal" href="#priors-over-the-unknown-parameters" id="id6">Priors over the unknown parameters.</a></li>
 </ul>
 </li>
 </ul>
 </div>
+<div class="section" id="should-you-use-differential-selection-instead">
+<h2><a class="toc-backref" href="#id2">Should you use differential selection instead?</a><a class="headerlink" href="#should-you-use-differential-selection-instead" title="Permalink to this headline">¶</a></h2>
+<p>For many applications, we now prefer the much simpler analysis performed by <a class="reference internal" href="dms_diffselection.html#dms-diffselection"><span class="std std-ref">dms_diffselection</span></a>. In particular, if you are specifically looking at changes away from a defined wildtype (e.g., antibody selection), <a class="reference internal" href="dms_diffselection.html#dms-diffselection"><span class="std std-ref">dms_diffselection</span></a> may be better.</p>
+</div>
 <div class="section" id="the-definition-of-differential-preferences">
-<h2><a class="toc-backref" href="#id2">The definition of differential preferences.</a><a class="headerlink" href="#the-definition-of-differential-preferences" title="Permalink to this headline">¶</a></h2>
-<p>The script <a class="reference internal" href="dms_inferprefs.html#dms-inferprefs"><em>dms_inferprefs</em></a> infers the site-specific amino-acid preferences <span class="math">\(\pi_{r,x}\)</span> for character <span class="math">\(x\)</span> at site <span class="math">\(r\)</span> using the <a class="reference internal" href="inferprefs_algorithm.html#inferprefs-algorithm"><em>Algorithm to infer site-specific preferences</em></a>. These site-specific preferences are inferred by comparing an unselected mutant library to variants that have passed through some selection for some function.</p>
+<h2><a class="toc-backref" href="#id3">The definition of differential preferences.</a><a class="headerlink" href="#the-definition-of-differential-preferences" title="Permalink to this headline">¶</a></h2>
+<p>The script <a class="reference internal" href="dms_inferprefs.html#dms-inferprefs"><span class="std std-ref">dms_inferprefs</span></a> infers the site-specific amino-acid preferences <span class="math">\(\pi_{r,x}\)</span> for character <span class="math">\(x\)</span> at site <span class="math">\(r\)</span> using the <a class="reference internal" href="inferprefs_algorithm.html#inferprefs-algorithm"><span class="std std-ref">Algorithm to infer site-specific preferences</span></a>. These site-specific preferences are inferred by comparing an unselected mutant library to variants that have passed through some selection for some function.</p>
 <p>One could then imagine further selecting these functional variants in two different selection conditions, <span class="math">\(s1\)</span> and <span class="math">\(s2\)</span>. We might want to identify mutations that are differentially selected in the two conditions. One way to do this would simply be to infer the preferences <span class="math">\(\pi_{r,x}^{s1}\)</span> and <span class="math">\(\pi_{r,x}^{s2}\)</span> for each selection condition relative to the initial mutant library, and then compare these preferences. The disadvantage of this approach is that the comparison between the two conditions is indirect, and in general we expect the preferences for the two conditions to be mostly similar at most sites. So a more direct way is to directly compare the results for the two conditions, and estimate a parameter <span class="math">\(\Delta\pi_{r,x}\)</span> that represents the difference in preference between selection condition <span class="math">\(s1\)</span> and <span class="math">\(s2\)</span>. The advantage here is that we can directly place a prior over <span class="math">\(\Delta\pi_{r,x}\)</span> that favors the <em>a priori</em> expectation that there is no difference between the selection conditions, and then assess the posterior probability that there is a difference between the two conditions (as well as the magnitude of this difference).</p>
 <p>We begin with some starting library, which will typically be a library of random mutants that has already gone through some initial selection for basic functionality and is now about to be further subjected to selections <span class="math">\(s1\)</span> and <span class="math">\(s2\)</span>. Let <span class="math">\(f^{\textrm{start}}_{r,x}\)</span> be the frequency of character <span class="math">\(x\)</span> at site <span class="math">\(r\)</span> in the starting library, let <span class="math">\(f^{s1}_{r,x}\)</span> be the frequency after the starting library has passed through selection <span class="math">\(s1\)</span>, and let <span class="math">\(f^{s2}_{r,x}\)</span> be the frequency after the starting library has passed through selection <span class="math">\(s2\)</span>. We take the convention of letting <span class="math">\(s1\)</span> be the &#8220;control&#8221; or &#8220;reference&#8221; selection, and looking for changes in site-specific preferences in <span class="math">\(s2\)</span> relative to <span class="math">\(s1\)</span>. Specifically, we define the differential preferences by the following equations:</p>
 <div class="math" id="equation-controlpi">
@@ -88,7 +93,7 @@
 <p>If there is no difference between the site-specific preferences in selections <span class="math">\(s1\)</span> and <span class="math">\(s2\)</span>, then <span class="math">\(\Delta\pi_{r,x} = 0\)</span>. If <span class="math">\(x\)</span> at <span class="math">\(r\)</span> is more preferred in selection <span class="math">\(s2\)</span> than <span class="math">\(s1\)</span>, then <span class="math">\(\Delta\pi_{r,x} &gt; 0\)</span>; conversely if <span class="math">\(x\)</span> at <span class="math">\(r\)</span> is more preferred in selection <span class="math">\(s1\)</span> than <span class="math">\(s2\)</span>, then <span class="math">\(\Delta\pi_{r,x} &lt; 0\)</span>.</p>
 </div>
 <div class="section" id="the-experimental-data-from-deep-sequencing">
-<h2><a class="toc-backref" href="#id3">The experimental data from deep sequencing.</a><a class="headerlink" href="#the-experimental-data-from-deep-sequencing" title="Permalink to this headline">¶</a></h2>
+<h2><a class="toc-backref" href="#id4">The experimental data from deep sequencing.</a><a class="headerlink" href="#the-experimental-data-from-deep-sequencing" title="Permalink to this headline">¶</a></h2>
 <p>In the starting library, each site <span class="math">\(r\)</span> is potentially mutated from the wildtype identity <span class="math">\(\operatorname{wt}\left(r\right)\)</span> to any of the other possible characters. We deep sequence this starting library; let <span class="math">\(N_r^{\textrm{start}}\)</span> be the total number of reads covering <span class="math">\(r\)</span>, and let <span class="math">\(n_{r,x}^{\textrm{start}}\)</span> be the number that report <span class="math">\(x\)</span>.
 We then subject the starting library to selections <span class="math">\(s1\)</span> and <span class="math">\(s2\)</span>, and sequence the resulting selected variants. Let <span class="math">\(N_r^{s1}\)</span> and <span class="math">\(N_r^{s2}\)</span> be the total number of reads covering <span class="math">\(r\)</span> in <span class="math">\(s1\)</span> and <span class="math">\(s2\)</span>, respectively; and let <span class="math">\(n_{r,x}^{s1}\)</span> and <span class="math">\(n_{r,x}^{s2}\)</span> be the number that report <span class="math">\(x\)</span>.</p>
 <p>We allow for the possibility that the deep sequencing is not completely
@@ -99,7 +104,7 @@ Let <span class="math">\(N_r^{\textrm{err}}\)</span>&nbsp;be the total number
 of sequencing reads covering <span class="math">\(r\)</span> in this error
 control, and let <span class="math">\(n_{r,x}^{\textrm{err}}\)</span>&nbsp;be the number that report <span class="math">\(x\)</span>.
 We define <span class="math">\(\xi_{r,x}\)</span> to the be the frequency at which <span class="math">\(r\)</span> is identified as <span class="math">\(x\)</span> in this error control.
-As in <a class="reference internal" href="inferprefs_algorithm.html#inferprefs-algorithm"><em>Algorithm to infer site-specific preferences</em></a>, we assume that mutations and errors are both rare, and so will neglect as negligible the possibility that the same site experiences both a mutation and an error.</p>
+As in <a class="reference internal" href="inferprefs_algorithm.html#inferprefs-algorithm"><span class="std std-ref">Algorithm to infer site-specific preferences</span></a>, we assume that mutations and errors are both rare, and so will neglect as negligible the possibility that the same site experiences both a mutation and an error.</p>
 <p>For notational compactness, we define vectors that contain the counts of
 all characters at each site <span class="math">\(r\)</span> for each sample:
 <span class="math">\(\mathbf{n_r^{\textbf{start}}}= \left(\cdots, \mbox{$n_{r,x}^{\textrm{start}}$}, \cdots\right)\)</span>,
@@ -108,8 +113,8 @@ and
 <span class="math">\(\mathbf{n_r^{\textbf{err}}}= \left(\cdots, \mbox{$n_{r,x}^{\textrm{err}}$}, \cdots\right)\)</span>.</p>
 </div>
 <div class="section" id="actual-frequencies-and-likelihoods-of-observing-experimental-data">
-<h2><a class="toc-backref" href="#id4">Actual frequencies and likelihoods of observing experimental data.</a><a class="headerlink" href="#actual-frequencies-and-likelihoods-of-observing-experimental-data" title="Permalink to this headline">¶</a></h2>
-<p>The notation below follows that in <a class="reference internal" href="inferprefs_algorithm.html#inferprefs-algorithm"><em>Algorithm to infer site-specific preferences</em></a>, so look there for definitions of variable that are not introduced here.</p>
+<h2><a class="toc-backref" href="#id5">Actual frequencies and likelihoods of observing experimental data.</a><a class="headerlink" href="#actual-frequencies-and-likelihoods-of-observing-experimental-data" title="Permalink to this headline">¶</a></h2>
+<p>The notation below follows that in <a class="reference internal" href="inferprefs_algorithm.html#inferprefs-algorithm"><span class="std std-ref">Algorithm to infer site-specific preferences</span></a>, so look there for definitions of variable that are not introduced here.</p>
 <p>We define vectors of the character frequencies, preferences, and differential preferences
 at each site <span class="math">\(r\)</span>:
 <span class="math">\(\boldsymbol{\mathbf{f_r^{\textbf{start}}}}= \left(\cdots, f_{r,x}^{\textrm{start}}, \cdots\right)\)</span>,
@@ -124,7 +129,7 @@ and
 <span class="eqno">(5)</span>\[\boldsymbol{\mathbf{f_r^{s1}}}= \frac{\boldsymbol{\mathbf{f_r^{\textbf{start}}}}\circ \boldsymbol{\mathbf{\pi_r^{s1}}}}{\boldsymbol{\mathbf{f_r^{\textbf{start}}}}\cdot \boldsymbol{\mathbf{\pi_r^{s1}}}}\]</div>
 <div class="math" id="equation-deltapir">
 <span class="eqno">(6)</span>\[\boldsymbol{\mathbf{f_r^{s2}}} = \frac{\boldsymbol{\mathbf{f_r^{\textbf{start}}}}\circ \left(\boldsymbol{\mathbf{\pi_r^{s1}}} + \boldsymbol{\mathbf{\Delta\pi_r}}\right)}{\boldsymbol{\mathbf{f_r^{\textbf{start}}}}\cdot \left(\boldsymbol{\mathbf{\pi_r^{s1}}} + \boldsymbol{\mathbf{\Delta\pi_r}}\right)}.\]</div>
-<p>As described in <a class="reference internal" href="inferprefs_algorithm.html#inferprefs-algorithm"><em>Algorithm to infer site-specific preferences</em></a>, the likelihood of
+<p>As described in <a class="reference internal" href="inferprefs_algorithm.html#inferprefs-algorithm"><span class="std std-ref">Algorithm to infer site-specific preferences</span></a>, the likelihood of
 observing some specific set of deep-sequencing counts will be multinomially distributed
 around the actual frequencies. So</p>
 <div class="math" id="equation-pr_nrstart">
@@ -143,17 +148,17 @@ around the actual frequencies. So</p>
 \end{eqnarray}\end{split}\]</div>
 </div>
 <div class="section" id="priors-over-the-unknown-parameters">
-<h2><a class="toc-backref" href="#id5">Priors over the unknown parameters.</a><a class="headerlink" href="#priors-over-the-unknown-parameters" title="Permalink to this headline">¶</a></h2>
+<h2><a class="toc-backref" href="#id6">Priors over the unknown parameters.</a><a class="headerlink" href="#priors-over-the-unknown-parameters" title="Permalink to this headline">¶</a></h2>
 <p>We specify <a class="reference external" href="http://en.wikipedia.org/wiki/Dirichlet_distribution">Dirichlet</a> priors over the four parameter vectors for each
 site <span class="math">\(r\)</span>:</p>
 <div class="math" id="equation-pr_pir">
-<span class="eqno">(11)</span>\[\begin{split}\Pr\left(\boldsymbol{\mathbf{\pi_r^{s1}}}\right) &amp;=&amp; \operatorname{Dirichlet}\left(\boldsymbol{\mathbf{\pi_r^{s1}}}; \alpha_{\pi^{s1}} \times \mathbf{1}\right)\end{split}\]</div>
+<span class="eqno">(11)</span>\[\Pr\left(\boldsymbol{\mathbf{\pi_r^{s1}}}\right) &amp;=&amp; \operatorname{Dirichlet}\left(\boldsymbol{\mathbf{\pi_r^{s1}}}; \alpha_{\pi^{s1}} \times \mathbf{1}\right)\]</div>
 <div class="math" id="equation-pr_xir">
-<span class="eqno">(12)</span>\[\begin{split}\Pr\left(\boldsymbol{\mathbf{\xi_r}}\right) &amp;=&amp; \operatorname{Dirichlet}\left( \boldsymbol{\mathbf{\xi_r}}; \alpha_{\xi} \times \mathcal{N}_x \times \boldsymbol{\mathbf{a_{r,\xi}}}\right)\end{split}\]</div>
+<span class="eqno">(12)</span>\[\Pr\left(\boldsymbol{\mathbf{\xi_r}}\right) &amp;=&amp; \operatorname{Dirichlet}\left( \boldsymbol{\mathbf{\xi_r}}; \alpha_{\xi} \times \mathcal{N}_x \times \boldsymbol{\mathbf{a_{r,\xi}}}\right)\]</div>
 <div class="math" id="equation-pr_frstart">
-<span class="eqno">(13)</span>\[\begin{split}\Pr\left(\boldsymbol{\mathbf{f_r^{\textbf{start}}}}\right) &amp;=&amp; \operatorname{Dirichlet}\left( \boldsymbol{\mathbf{f_r^{\textbf{start}}}}; \alpha_{\textrm{start}} \times \mathcal{N}_x \times \boldsymbol{\mathbf{a_{r,\textbf{start}}}}\right)\end{split}\]</div>
+<span class="eqno">(13)</span>\[\Pr\left(\boldsymbol{\mathbf{f_r^{\textbf{start}}}}\right) &amp;=&amp; \operatorname{Dirichlet}\left( \boldsymbol{\mathbf{f_r^{\textbf{start}}}}; \alpha_{\textrm{start}} \times \mathcal{N}_x \times \boldsymbol{\mathbf{a_{r,\textbf{start}}}}\right)\]</div>
 <div class="math" id="equation-pr_deltapi">
-<span class="eqno">(14)</span>\[\begin{split}\Pr\left(\boldsymbol{\mathbf{\Delta\pi_r}} \mid \boldsymbol{\mathbf{\pi_r^{s1}}}\right) &amp;=&amp; \operatorname{Dirichlet}\left(\boldsymbol{\mathbf{\Delta\pi_r}}; \alpha_{\Delta\pi} \times \mathcal{N}_x \times \boldsymbol{\mathbf{\pi_r^{s1}}}\right) - \boldsymbol{\mathbf{\pi_r^{s1}}}\end{split}\]</div>
+<span class="eqno">(14)</span>\[\Pr\left(\boldsymbol{\mathbf{\Delta\pi_r}} \mid \boldsymbol{\mathbf{\pi_r^{s1}}}\right) &amp;=&amp; \operatorname{Dirichlet}\left(\boldsymbol{\mathbf{\Delta\pi_r}}; \alpha_{\Delta\pi} \times \mathcal{N}_x \times \boldsymbol{\mathbf{\pi_r^{s1}}}\right) - \boldsymbol{\mathbf{\pi_r^{s1}}}\]</div>
 <p>where the <span class="math">\(\alpha\)</span> parameters
 are scalar concentration parameters with values
 <span class="math">\(&gt; 0\)</span> specified by the user, and the <span class="math">\(\mathbf{a_r}\)</span> vectors
@@ -162,20 +167,20 @@ have entries <span class="math">\(&gt; 0\)</span> that sum to one. You might con
 <p>Our prior assumption is that the rate of sequencing errors depends on the number of nucleotides being changed &#8211; for nucleotide characters all mutations have only one nucleotide changed, but for codon characters there can be one, two, or three nucleotides changed.
 Specifically, the average per-site error rate for mutations with <span class="math">\(m\)</span> nucleotide changes <span class="math">\(\overline{\xi_m}\)</span> is</p>
 <div class="math" id="equation-avgxim">
-<span class="eqno">(15)</span>\[\begin{split}\overline{\xi_m} &amp;=&amp; \frac{1}{L}\sum\limits_r \frac{1}{N_r^{\textrm{err}}}\sum\limits_{x} n_{r,x}^{\textrm{err}}\times \delta_{m,D_{x,\operatorname{wt}\left(r\right)}}\end{split}\]</div>
+<span class="eqno">(15)</span>\[\overline{\xi_m} &amp;=&amp; \frac{1}{L}\sum\limits_r \frac{1}{N_r^{\textrm{err}}}\sum\limits_{x} n_{r,x}^{\textrm{err}}\times \delta_{m,D_{x,\operatorname{wt}\left(r\right)}}\]</div>
 <p>where <span class="math">\(r\)</span> ranges over all <span class="math">\(L\)</span> sites with deep mutational scanning data, <span class="math">\(x\)</span> ranges over all characters (nucleotides or codons), and <span class="math">\(D_{x,\operatorname{wt}\left(r\right)}\)</span> is the number of nucleotide differences between <span class="math">\(x\)</span> and the wildtype character <span class="math">\(\operatorname{wt}\left(r\right)\)</span>.
 We define the prior vector as</p>
 <div class="math" id="equation-arxi">
-<span class="eqno">(16)</span>\[\begin{split}\boldsymbol{\mathbf{a_{r,\xi}}}&amp;=&amp; \left(\cdots, \sum\limits_m \frac{\overline{\xi}_{m}}{\mathcal{C}_m} \times \delta_{m,D_{x,\operatorname{wt}\left(r\right)}},\cdots\right),\end{split}\]</div>
+<span class="eqno">(16)</span>\[\boldsymbol{\mathbf{a_{r,\xi}}}&amp;=&amp; \left(\cdots, \sum\limits_m \frac{\overline{\xi}_{m}}{\mathcal{C}_m} \times \delta_{m,D_{x,\operatorname{wt}\left(r\right)}},\cdots\right),\]</div>
 <p>where <span class="math">\(\mathcal{C}_m\)</span> is the number of mutant characters with <span class="math">\(m\)</span> changes relative to the wildtype.</p>
 <p>Our prior assumption is that all mutations are at equal frequency in the starting library (although this assumption is unlikely to be true if the starting library has already been subjected to some functional selection, we lack a rationale for another prior in the absence of the deep mutational scanning). In estimating the average frequency of these mutations, we need to account for the fact that the observed counts of non-wildtype characters in the starting library will be inflated by the error rate represented by <span class="math">\(\overline{\xi_m}\)</span>. We therefore estimate the average mutation frequency</p>
 <div class="math" id="equation-avgfstart">
 <span class="eqno">(17)</span>\[\overline{f^{\textrm{start}}} = \left(\frac{1}{L}\sum\limits_r \frac{1}{N_r^{\textrm{start}}}\sum\limits_{x\ne \operatorname{wt}\left(r\right)} n_{r,x}^{\textrm{start}}\right) - \sum\limits_{m \ge 1} \overline{\xi_m}.\]</div>
 <p>Note that a value of <span class="math">\(\overline{f^{\textrm{start}}} \le 0\)</span> would suggest that mutations are no more prevalent in the starting library then the error control. Such a situation would violate the assumptions of the experiment, and so the algorithm will halt if this is the case. The prior vector for the mutagenesis rate is</p>
 <div class="math" id="equation-arstart">
-<span class="eqno">(18)</span>\[\begin{split}\boldsymbol{\mathbf{a_{r,\textbf{start}}}}&amp;=&amp; \left(\cdots, \frac{\overline{f^{\textrm{start}}}}{\mathcal{N}_x - 1} + \delta_{x,\operatorname{wt}\left(r\right)} \times \left[1 - \overline{f^{\textrm{start}}}\right] ,\cdots\right).\end{split}\]</div>
-<p>These priors and likelihoods can be applied to several types of characters as described in <a class="reference internal" href="inferprefs_algorithm.html#inferprefs-algorithm"><em>Algorithm to infer site-specific preferences</em></a>. One possibility is that <a class="reference internal" href="inferprefs_algorithm.html#chartype-dna"><em>Characters are nucleotides; preferences are for nucleotides.</em></a> A second possibility is <a class="reference internal" href="inferprefs_algorithm.html#chartype-codon"><em>Characters are codons; preferences are for codons.</em></a> A third possibility is <a class="reference internal" href="inferprefs_algorithm.html#chartype-codon-to-aa"><em>Characters are codons; preferences are for amino acids.</em></a>. A fourth possibility is <a class="reference internal" href="inferprefs_algorithm.html#chartype-aa"><em>Characters are amino acids; preferences are for amino acids.</em></a>.</p>
-<p>The actual preferences are inferred by using <a class="reference external" href="http://en.wikipedia.org/wiki/Markov_chain_Monte_Carlo">MCMC</a> to sample the product of the priors and likelihoods described above. This <cite>MCMC</cite> is done using the same computational approach and convergence criteria described in <a class="reference internal" href="inferprefs_algorithm.html#mcmc-inference"><em>Inferring the preferences by MCMC.</em></a> But rather than reporting credible intervals, we report the posterior probability that <span class="math">\(\Delta\pi_{r,x} &gt; 0\)</span>; this gives us an estimate of the probability that <span class="math">\(x\)</span> is favored at <span class="math">\(r\)</span> in selection condition <span class="math">\(s2\)</span> versus <span class="math">\(s1\)</span>.</p>
+<span class="eqno">(18)</span>\[\boldsymbol{\mathbf{a_{r,\textbf{start}}}}&amp;=&amp; \left(\cdots, \frac{\overline{f^{\textrm{start}}}}{\mathcal{N}_x - 1} + \delta_{x,\operatorname{wt}\left(r\right)} \times \left[1 - \overline{f^{\textrm{start}}}\right] ,\cdots\right).\]</div>
+<p>These priors and likelihoods can be applied to several types of characters as described in <a class="reference internal" href="inferprefs_algorithm.html#inferprefs-algorithm"><span class="std std-ref">Algorithm to infer site-specific preferences</span></a>. One possibility is that <a class="reference internal" href="inferprefs_algorithm.html#chartype-dna"><span class="std std-ref">Characters are nucleotides; preferences are for nucleotides.</span></a> A second possibility is <a class="reference internal" href="inferprefs_algorithm.html#chartype-codon"><span class="std std-ref">Characters are codons; preferences are for codons.</span></a> A third possibility is <a class="reference internal" href="inferprefs_algorithm.html#chartype-codon-to-aa"><span class="std std-ref">Characters are codons; preferences are for amino acids.</span></a>. A fourth possibility is <a class="reference internal" href="inferprefs_algorithm.html#chartype-aa"><span class="std std-ref">Characters are amino acids; preferences are for amino acids.</span></a>.</p>
+<p>The actual preferences are inferred by using <a class="reference external" href="http://en.wikipedia.org/wiki/Markov_chain_Monte_Carlo">MCMC</a> to sample the product of the priors and likelihoods described above. This <cite>MCMC</cite> is done using the same computational approach and convergence criteria described in <a class="reference internal" href="inferprefs_algorithm.html#mcmc-inference"><span class="std std-ref">Inferring the preferences by MCMC.</span></a> But rather than reporting credible intervals, we report the posterior probability that <span class="math">\(\Delta\pi_{r,x} &gt; 0\)</span>; this gives us an estimate of the probability that <span class="math">\(x\)</span> is favored at <span class="math">\(r\)</span> in selection condition <span class="math">\(s2\)</span> versus <span class="math">\(s1\)</span>.</p>
 </div>
 </div>
 
@@ -188,6 +193,7 @@ We define the prior vector as</p>
   <h3><a href="index.html">Table Of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">Algorithm to infer differential preferences</a><ul>
+<li><a class="reference internal" href="#should-you-use-differential-selection-instead">Should you use differential selection instead?</a></li>
 <li><a class="reference internal" href="#the-definition-of-differential-preferences">The definition of differential preferences.</a></li>
 <li><a class="reference internal" href="#the-experimental-data-from-deep-sequencing">The experimental data from deep sequencing.</a></li>
 <li><a class="reference internal" href="#actual-frequencies-and-likelihoods-of-observing-experimental-data">Actual frequencies and likelihoods of observing experimental data.</a></li>
@@ -217,9 +223,6 @@ We define the prior vector as</p>
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
     </form>
-    <p class="searchtip" style="font-size: 90%">
-    Enter search terms or a module, class or function name.
-    </p>
 </div>
 <script type="text/javascript">$('#searchbox').show(0);</script>
         </div>
@@ -241,13 +244,13 @@ We define the prior vector as</p>
         <li class="right" >
           <a href="inferprefs_algorithm.html" title="Algorithm to infer site-specific preferences"
              >previous</a> |</li>
-        <li><a href="index.html">dms_tools 1.1.13 documentation</a> &raquo;</li>
-          <li><a href="algorithms.html" >Algorithms</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">dms_tools 1.1.14 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="algorithms.html" >Algorithms</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
         &copy; Copyright 2014, Jesse Bloom.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3a0.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.
     </div>
   </body>
 </html>

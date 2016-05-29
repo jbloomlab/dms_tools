@@ -112,17 +112,9 @@ or globally with::
 
 Other software required by ``dms_tools``
 ------------------------------------------
-`dms_tools requires Python`_. In addition it requires the following external `Python`_ packages. If you are installing with `pip`_, these external packages will automatically be installed. If you are installing from source, you will need to install these packages yourself:
+`dms_tools requires Python`_. In addition it requires the following external `Python`_ packages. If you are installing with `pip`_, these external packages will automatically be installed. If you are installing from source, you will need to install these packages yourself.
 
-    * `scipy`_ is used for numerical analyses and plotting, mostly via the included `numpy`_ and `matplotlib`_ packages. 
-
-    * `Biopython`_ is used for some sequence manipulations. 
-
-    * `PyStan`_ is used for the `MCMC`_. Using `PyStan`_ requires you to also have `cython`_ available.
-
-    * `weblogolib`_ (the `Python`_ API to `weblogo`_) is required for making logo plots. Note that `dms_tools`_ works with `weblogolib`_ version ``3.4`` but **not** with version ``3.3``.
-
-    * `PyPDF2`_ is used for overlays on the logo plots. 
+The required packages are listed in the ``setup.py`` file.
 
 
 .. _license:
