@@ -8,7 +8,6 @@ Written by Jesse Bloom."""
 import sys
 import os
 import time
-import scipy.stats
 import pandas
 import dms_tools.utils
 import dms_tools.parsearguments
