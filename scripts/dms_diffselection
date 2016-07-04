@@ -91,8 +91,13 @@ def main():
         if not args['no_scale_pseudocounts']:
             ntotalmock = float(sum([mock[c] for c in characters]))
             ntotalselected = float(sum([selected[c] for c in characters]))
-            pseudocount_selected = pseudocount
-            pseudocount_mock = ntotalmock/ntotalselected*pseudocount
+            if ntotalmock > ntotalselected:
+                pseudocount_selected = pseudocount
+                pseudocount_mock = ntotalmock / ntotalselected * pseudocount
+            else:
+                pseudocount_mock = pseudocount
+                pseudocount_selected = ntotalselected / ntotalmock * pseudocount
+            assert pseudocount_mock >= pseudocount and pseudocount_selected >= pseudocount
         else:
             pseudocount_selected = pseudocount_mock = pseudocount
 

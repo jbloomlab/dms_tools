@@ -415,14 +415,14 @@ def DiffSelectionParser():
     """Returns *argparse.ArgumentParser* for ``dms_diffselection`` script."""
     parser = ArgumentParserNoArgHelp(description=\
         'Differential selection between mock-treated and selected samples. ' +
-        'Quantified as log2[{(n_sel_mut + P) / (n_sel_wt + P)} / {(n_mock_mut + f * P) / (n_mock_wt + f * P)}] where P is pseudocount and f is relative sequencing depth for mock versus selected library at that site. ' +
+        'Quantified as log2[{(n_sel_mut + f_sel * P) / (n_sel_wt + f_sel * P)} / {(n_mock_mut + f_mock * P) / (n_mock_wt + f_mock * P)}] where P is pseudocount, f_sel = max(1, N_sel / N_mock), and f_mock = max(1, N_mock / N_sel) where N_mock and N_sel are the sequencing depth for mock and selected libraries at that site. ' +
         'This script is part of %s (version %s) written by %s. Detailed documentation is at %s' % (dms_tools.__name__, dms_tools.__version__, dms_tools.__author__, dms_tools.__url__), 
         formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('mockcounts', type=ExistingFile, help='File with counts from mock-selected library.  For nucleotides, header line should be "# POSITION WT A C G T" and then subsequent lines give wildtype and counts for each site (i.e. "1 G 1013 23 19 47"); for codons use the 64 codons instead (i.e. "AAA AAC AAG ...").')
     parser.add_argument('selectedcounts', type=ExistingFile, help='File with counts from selected library')
     parser.add_argument('outprefix', help="Prefix for output files. Suffixes are 'mutdiffsel.txt' and 'sitediffsel.txt'")
-    parser.add_argument('--pseudocount', type=FloatGreaterThanZero, default=10, help='Pseudocount added to each count for selected library. By default, pseudocounts for mock library are scaled by relative depth at that site (see --no-scale-pseudocounts).')
-    parser.add_argument('--no-scale-pseudocounts', dest='no_scale_pseudocounts', action='store_true', help="Use this option if you do NOT want to scale the pseudocounts for the mock library by relative depth, but instead want to use unscaled value specified by '--pseudocount'.")
+    parser.add_argument('--pseudocount', type=FloatGreaterThanZero, default=10, help='Pseudocount added to each count for selected library. By default, pseudocounts is added to library with smaller depth, and pseudcount for other library is scaled by relative depth at that site (see --no-scale-pseudocounts).')
+    parser.add_argument('--no-scale-pseudocounts', dest='no_scale_pseudocounts', action='store_true', help="Use this option if you do NOT want to scale the pseudocounts for each library by relative depth, but instead want to use unscaled value specified by '--pseudocount'.")
     parser.set_defaults(no_scale_pseudocounts=False)
     parser.add_argument('--chartype', choices=['codon_to_aa', 'DNA', 'codon', 'aa'], default='codon_to_aa', help='Characters: "codon_to_aa" = counts for codons and selection for amino acids; "DNA" = counts and selection for DNA; "codon" = counts and selection for codons; "aa" = counts and selection for amino acids (possibly including stop codons, see "--includestop").')
     parser.set_defaults(includestop=False)

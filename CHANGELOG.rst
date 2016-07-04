@@ -1,6 +1,10 @@
 Changelog
 ===========
 
+1.2.dev0
+-------
+* Implemented what should be final working version of ``dms_diffselection``: the pseudocounts are now scaled by the **smaller** depth library at each site.
+
 1.1.14
 ------
 * Added ``dms_diffselection`` program.

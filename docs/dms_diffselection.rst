@@ -10,23 +10,28 @@ Overview
 -------------
 ``dms_diffselection`` is a program included with the `dms_tools`_ package. 
 
-It is designed to assess the differential selection on each mutation between a library that is mock treated and subjected to some selective condition.
+It is designed to assess the differential selection on each mutation between a library that is mock-treated and subjected to some selective condition.
 
-Specifically, imagine that you have a deep mutational scanning library that is mock selected and selected. For instance, this might be a virus library that is passaged in the absence and presence of immune selection. For each site :math:`r` in the gene, let :math:`n_{r,x}^{\rm{mock}}` be the number of observed counts of character :math:`x` (might be amino acid, nucleotide, or codon) at site :math:`r` in the mock-selected condition, and let :math:`n_{r,x}^{\rm{selected}}` be the number of observed counts of :math:`x` at :math:`r` in the selected condition. 
+Specifically, imagine that you have a deep mutational scanning library that is mock-treated  and selected. For instance, this might be a virus library that is passaged in the absence and presence of immune selection. For each site :math:`r` in the gene, let :math:`n_{r,x}^{\rm{mock}}` be the number of observed counts of character :math:`x` (might be amino acid, nucleotide, or codon) at site :math:`r` in the mock-treated condition, and let :math:`n_{r,x}^{\rm{selected}}` be the number of observed counts of :math:`x` at :math:`r` in the selected condition. 
 Let :math:`\operatorname{wt}\left(r\right)` be denote the wildtype character at :math:`r`.
 Then the relative enrichment of the mutant relative to the wildtype after selection is
 
 .. math::
    :label: E_rx
   
-   E_{r,x} = \frac{\left(n_{r,x}^{\rm{selected}} + P\right) / \left(n_{r,\operatorname{wt}\left(r\right)}^{\rm{selected}} + P\right)}{\left(n_{r,x}^{\rm{mock}} + f_r \times P\right) / \left(n_{r,\operatorname{wt}\left(r\right)}^{\rm{mock}} + f_r \times P\right)}
+   E_{r,x} = \frac{\left(n_{r,x}^{\rm{selected}} + f_{r, \rm{selected}} \times P\right) / \left(n_{r,\operatorname{wt}\left(r\right)}^{\rm{selected}} + f_{r, \rm{selected}} \times P\right)}{\left(n_{r,x}^{\rm{mock}} + f_{r, \rm{mock}} \times P\right) / \left(n_{r,\operatorname{wt}\left(r\right)}^{\rm{mock}} + f_{r, \rm{mock}} \times P\right)}
 
-where :math:`P > 0` is a pseudocount that is added to each observed count (specified by ``--pseudocount`` option) and :math:`f_r` is the ratio of the total depth of the mock-selected sample at site :math:`r` to the total depth of the selected sample at site :math:`r`:
+where :math:`P > 0` is a pseudocount that is added to each observed count (specified by ``--pseudocount`` option), and :math:`f_{r, \rm{selected}}` and :math:`f_{r, \rm{mock}}` are defined so that the pseudocount is scaled up for the library (*mock* or *selected*) with higher depth at site :math:`r`:
 
 .. math::
-   :label: f_r
+   :label: f_rselected
 
-   f_r = \left(\sum_x n_{r,x}^{\rm{mock}}\right) / \left(\sum_x n_{r,x}^{\rm{selected}}\right).
+   f_{r, \rm{selected}} = \max\left[1, \left(\sum_x n_{r,x}^{\rm{selected}}\right) / \left(\sum_x n_{r,x}^{\rm{mock}}\right)\right]
+
+.. math::
+   :label: f_rmock
+
+   f_{r, \rm{mock}} = \max\left[1, \left(\sum_x n_{r,x}^{\rm{mock}}\right) / \left(\sum_x n_{r,x}^{\rm{selected}}\right)\right].
 
 The reason for scaling the pseudocount by library depth is that the *mock* and *selected* libraries may often be sequenced at different depths. In that case, if the same pseudocount is added to both, then estimates of :math:`E_{r,x}` will tend to be systematically different than one even if the relative counts for the wildtype and mutant amino acid are the same in both two conditions. Scaling the pseudocounts by the ratio of depths fixes this problem. If you do not want to do this scaling, see the ``--no-scale-pseudocounts`` option.
 
@@ -69,13 +74,13 @@ Command-line usage
     For instance, if ``outprefix`` is ``antibodyselection_`` then the output files are ``antibodyselection_mutdiffsel.txt`` and ``antibodyselection_sitediffsel.txt``. See `Output`_ for an explanation of the contents of these files.
 
    \-\-pseudocount
-    This is the :math:`P` parameter described in the Equation :eq:`E_rx`. Note that by default this pseudocount is for the **selected** library, and the pseudocount for the mock-selected library is scaled by the parameter in Equation :eq:`f_r`.
+    This is the :math:`P` parameter described in the Equation :eq:`E_rx`. Note that by default this pseudocount is for the library with greater depth at that site, and the pseudocount for the other library is scaled up by the ratio of the relative depths as described by Equations :eq:`f_rselected` and :eq:`f_rmock`.
 
    \-\-chartype
     A value of ``codon_to_aa`` means we have codon characters for the deep sequencing data, but infer selection for amino acids. Essentially, we sum the counts of all codons for each amino acid, and then do the calculation described in `Overview`_ on these amino-acid counts.
 
    \-\-no-scale-pseudocounts
-    If you use this option, the scaling :math:`f_r` in Equation :eq:`f_r` is always set to one. Note that this can give biased estimates if the depth is unequal in the two libraries.
+    If you use this option, the scaling :math:`f_{r, \rm{selected}}` and :math:`f_{r, \rm{mock}}` in Equations :eq:`f_rselected` and :eq:`f_rmock` are always set to one. Note that this can give biased estimates if the depth is unequal in the two libraries.
 
    \-\-includestop
     If this is true, treat stop codons (denoted by ``*``) as a possible amino acid. Otherwise simply ignore any counts for stop codons.
