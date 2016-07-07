@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Data file formats &mdash; dms_tools 1.1.14 documentation</title>
+    <title>Data file formats &mdash; dms_tools 1.1.15 documentation</title>
     
     <link rel="stylesheet" href="_static/classic.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '1.1.14',
+        VERSION:     '1.1.15',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="dms_tools 1.1.14 documentation" href="index.html" />
+    <link rel="top" title="dms_tools 1.1.15 documentation" href="index.html" />
     <link rel="next" title="Examples" href="examples.html" />
     <link rel="prev" title="dms_summarizealignments" href="dms_summarizealignments.html" /> 
   </head>
@@ -44,7 +44,7 @@
         <li class="right" >
           <a href="dms_summarizealignments.html" title="dms_summarizealignments"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">dms_tools 1.1.14 documentation</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">dms_tools 1.1.15 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -71,7 +71,7 @@
 <span id="dms-counts"></span><h2><a class="toc-backref" href="#id3">Deep mutational scanning counts file</a><a class="headerlink" href="#deep-mutational-scanning-counts-file" title="Permalink to this headline">¶</a></h2>
 <p>The programs <a class="reference internal" href="dms_inferprefs.html#dms-inferprefs"><span class="std std-ref">dms_inferprefs</span></a> and <a class="reference internal" href="dms_inferdiffprefs.html#dms-inferdiffprefs"><span class="std std-ref">dms_inferdiffprefs</span></a> take their input data from files giving the counts of each possible character (codon, nucleotide, or amino acid) at each site in the gene. You will need to generate these files after using some other program to analyze your deep sequencing data.</p>
 <p>Here is an example of the first few lines of a valid file giving nucleotide counts:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="c1"># POSITION WT A T C G</span>
+<div class="highlight-default"><div class="highlight"><pre><span class="c"># POSITION WT A T C G</span>
 <span class="mi">1</span> <span class="n">A</span> <span class="mi">310818</span> <span class="mi">13</span> <span class="mi">0</span> <span class="mi">37</span>
 <span class="mi">2</span> <span class="n">T</span> <span class="mi">16</span> <span class="mi">311782</span> <span class="mi">37</span> <span class="mi">4</span>
 <span class="mi">3</span> <span class="n">G</span> <span class="mi">27</span> <span class="mi">27</span> <span class="mi">11</span> <span class="mi">312520</span>
@@ -79,14 +79,14 @@
 </pre></div>
 </div>
 <p>A file giving codon counts would be structured similarly except rather than having the four nucleotide identities (<em>A</em>, <em>T</em>, <em>C</em>, <em>G</em>), the file should have the 64 codon identities (<em>AAA</em>, <em>AAC</em>, <em>AAG</em>, ...). A file giving amino-acid counts would have the 20 amino-acid identites, possibly including stop codons indicated by <code class="docutils literal"><span class="pre">*</span></code>. The file is allowed to have additional lines and columns, but they are ignored as detailed below. For instance, this file would be handled just like the one above (the additional lines and the columns for <em>a</em> and <em>N</em> would be ignored, and the different order of characters is fine, as is the additional space between columns):</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="c1"># Line ignored because it begins with # but isn&#39;t followed by POSITION WT</span>
-<span class="c1">#</span>
-<span class="c1"># The columns beginning with N and a are ignored since they don&#39;t start with an upper case nucleotide.</span>
-<span class="c1"># The fact that the nucleotides are not in alphabetical order is irrelevant.</span>
-<span class="c1"># POSITION WT G A T C N a</span>
+<div class="highlight-default"><div class="highlight"><pre><span class="c"># Line ignored because it begins with # but isn&#39;t followed by POSITION WT</span>
+<span class="c">#</span>
+<span class="c"># The columns beginning with N and a are ignored since they don&#39;t start with an upper case nucleotide.</span>
+<span class="c"># The fact that the nucleotides are not in alphabetical order is irrelevant.</span>
+<span class="c"># POSITION WT G A T C N a</span>
 <span class="mi">1</span> <span class="n">A</span> <span class="mi">37</span> <span class="mi">310818</span> <span class="mi">13</span> <span class="mi">0</span> <span class="mi">0</span> <span class="mi">10</span>
 <span class="mi">2</span> <span class="n">T</span> <span class="mi">4</span> <span class="mi">16</span> <span class="mi">311782</span> <span class="mi">37</span> <span class="mi">1</span> <span class="mi">1</span>
-<span class="c1"># The extra spaces between columns in the next line are irrelevant</span>
+<span class="c"># The extra spaces between columns in the next line are irrelevant</span>
 <span class="mi">3</span>  <span class="n">G</span>   <span class="mi">312520</span>   <span class="mi">27</span> <span class="mi">27</span>  <span class="mi">11</span> <span class="mi">0</span> <span class="mi">0</span>
 <span class="mi">4</span> <span class="n">A</span> <span class="mi">31</span> <span class="mi">313647</span> <span class="mi">13</span> <span class="mi">4</span> <span class="mi">50</span> <span class="mi">49</span>
 </pre></div>
@@ -119,7 +119,7 @@
 <div class="section" id="preferences-file">
 <span id="id1"></span><h2><a class="toc-backref" href="#id4">Preferences file</a><a class="headerlink" href="#preferences-file" title="Permalink to this headline">¶</a></h2>
 <p>The program <a class="reference internal" href="dms_inferprefs.html#dms-inferprefs"><span class="std std-ref">dms_inferprefs</span></a> infers the site-specific preferences <span class="math">\(\pi_{r,x}\)</span> and writes these to a file. Here is an example of the format of one these preferences files for nucleotide characters:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="c1"># POSITION WT SITE_ENTROPY PI_A PI_C PI_G PI_T PI_A_95 PI_C_95 PI_G_95 PI_T_95</span>
+<div class="highlight-default"><div class="highlight"><pre><span class="c"># POSITION WT SITE_ENTROPY PI_A PI_C PI_G PI_T PI_A_95 PI_C_95 PI_G_95 PI_T_95</span>
 <span class="mi">1</span> <span class="n">G</span> <span class="mf">1.61</span> <span class="mf">0.21</span> <span class="mf">0.09</span> <span class="mf">0.58</span> <span class="mf">0.12</span> <span class="mf">0.17</span><span class="p">,</span><span class="mf">0.28</span> <span class="mf">0.04</span><span class="p">,</span><span class="mf">0.12</span> <span class="mf">0.51</span><span class="p">,</span><span class="mf">0.69</span> <span class="mf">0.090</span><span class="p">,</span><span class="mf">0.150</span>
 </pre></div>
 </div>
@@ -140,7 +140,7 @@
 <div class="section" id="differential-preferences-file">
 <span id="diffpreferences-file"></span><h2><a class="toc-backref" href="#id5">Differential preferences file</a><a class="headerlink" href="#differential-preferences-file" title="Permalink to this headline">¶</a></h2>
 <p>The program <a class="reference internal" href="dms_inferdiffprefs.html#dms-inferdiffprefs"><span class="std std-ref">dms_inferdiffprefs</span></a> infers the differential preferences <span class="math">\(\Delta\pi_{r,x}\)</span> and writes these to a file. Here is an example of the formate of one of these files for nucleotide characters:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="c1"># POSITION WT RMS_dPI dPI_A dPI_C dPI_G dPI_T Pr_dPI_A_lt0 Pr_dPI_A_gt0 Pr_dPI_C_lt0 Pr_dPI_C_gt0 Pr_dPI_G_lt0 Pr_dPI_G_gt0 Pr_dPI_T_lt0 Pr_dPI_T_gt0</span>
+<div class="highlight-default"><div class="highlight"><pre><span class="c"># POSITION WT RMS_dPI dPI_A dPI_C dPI_G dPI_T Pr_dPI_A_lt0 Pr_dPI_A_gt0 Pr_dPI_C_lt0 Pr_dPI_C_gt0 Pr_dPI_G_lt0 Pr_dPI_G_gt0 Pr_dPI_T_lt0 Pr_dPI_T_gt0</span>
 <span class="mi">1</span> <span class="n">G</span> <span class="mf">0.241</span> <span class="mf">0.02</span> <span class="o">-</span><span class="mf">0.4</span> <span class="mf">0.2</span> <span class="mf">0.18</span> <span class="mf">0.41</span> <span class="mf">0.59</span> <span class="mf">0.90</span> <span class="mf">0.10</span> <span class="mf">0.2</span> <span class="mf">0.8</span> <span class="mf">0.3</span> <span class="mf">0.7</span>
 </pre></div>
 </div>
@@ -191,8 +191,8 @@
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="search.html" method="get">
-      <input type="text" name="q" />
-      <input type="submit" value="Go" />
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
     </form>
@@ -217,12 +217,12 @@
         <li class="right" >
           <a href="dms_summarizealignments.html" title="dms_summarizealignments"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">dms_tools 1.1.14 documentation</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">dms_tools 1.1.15 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
         &copy; Copyright 2014, Jesse Bloom.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.4.
     </div>
   </body>
 </html>

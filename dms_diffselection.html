@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>dms_diffselection &mdash; dms_tools 1.1.14 documentation</title>
+    <title>dms_diffselection &mdash; dms_tools 1.1.15 documentation</title>
     
     <link rel="stylesheet" href="_static/classic.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '1.1.14',
+        VERSION:     '1.1.15',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="dms_tools 1.1.14 documentation" href="index.html" />
+    <link rel="top" title="dms_tools 1.1.15 documentation" href="index.html" />
     <link rel="up" title="Programs" href="programs.html" />
     <link rel="next" title="dms_inferdiffprefs" href="dms_inferdiffprefs.html" />
     <link rel="prev" title="dms_inferprefs" href="dms_inferprefs.html" /> 
@@ -45,7 +45,7 @@
         <li class="right" >
           <a href="dms_inferprefs.html" title="dms_inferprefs"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">dms_tools 1.1.14 documentation</a> &raquo;</li>
+        <li class="nav-item nav-item-0"><a href="index.html">dms_tools 1.1.15 documentation</a> &raquo;</li>
           <li class="nav-item nav-item-1"><a href="programs.html" accesskey="U">Programs</a> &raquo;</li> 
       </ul>
     </div>  
@@ -72,20 +72,22 @@
 <div class="section" id="overview">
 <h2><a class="toc-backref" href="#id3">Overview</a><a class="headerlink" href="#overview" title="Permalink to this headline">¶</a></h2>
 <p><code class="docutils literal"><span class="pre">dms_diffselection</span></code> is a program included with the <a class="reference external" href="http://jbloomlab.github.io/dms_tools">dms_tools</a> package.</p>
-<p>It is designed to assess the differential selection on each mutation between a library that is mock treated and subjected to some selective condition.</p>
-<p>Specifically, imagine that you have a deep mutational scanning library that is mock selected and selected. For instance, this might be a virus library that is passaged in the absence and presence of immune selection. For each site <span class="math">\(r\)</span> in the gene, let <span class="math">\(n_{r,x}^{\rm{mock}}\)</span> be the number of observed counts of character <span class="math">\(x\)</span> (might be amino acid, nucleotide, or codon) at site <span class="math">\(r\)</span> in the mock-selected condition, and let <span class="math">\(n_{r,x}^{\rm{selected}}\)</span> be the number of observed counts of <span class="math">\(x\)</span> at <span class="math">\(r\)</span> in the selected condition.
+<p>It is designed to assess the differential selection on each mutation between a library that is mock-treated and subjected to some selective condition.</p>
+<p>Specifically, imagine that you have a deep mutational scanning library that is mock-treated  and selected. For instance, this might be a virus library that is passaged in the absence and presence of immune selection. For each site <span class="math">\(r\)</span> in the gene, let <span class="math">\(n_{r,x}^{\rm{mock}}\)</span> be the number of observed counts of character <span class="math">\(x\)</span> (might be amino acid, nucleotide, or codon) at site <span class="math">\(r\)</span> in the mock-treated condition, and let <span class="math">\(n_{r,x}^{\rm{selected}}\)</span> be the number of observed counts of <span class="math">\(x\)</span> at <span class="math">\(r\)</span> in the selected condition.
 Let <span class="math">\(\operatorname{wt}\left(r\right)\)</span> be denote the wildtype character at <span class="math">\(r\)</span>.
 Then the relative enrichment of the mutant relative to the wildtype after selection is</p>
 <div class="math" id="equation-E_rx">
-<span class="eqno">(1)</span>\[E_{r,x} = \frac{\left(n_{r,x}^{\rm{selected}} + P\right) / \left(n_{r,\operatorname{wt}\left(r\right)}^{\rm{selected}} + P\right)}{\left(n_{r,x}^{\rm{mock}} + f_r \times P\right) / \left(n_{r,\operatorname{wt}\left(r\right)}^{\rm{mock}} + f_r \times P\right)}\]</div>
-<p>where <span class="math">\(P &gt; 0\)</span> is a pseudocount that is added to each observed count (specified by <code class="docutils literal"><span class="pre">--pseudocount</span></code> option) and <span class="math">\(f_r\)</span> is the ratio of the total depth of the mock-selected sample at site <span class="math">\(r\)</span> to the total depth of the selected sample at site <span class="math">\(r\)</span>:</p>
-<div class="math" id="equation-f_r">
-<span class="eqno">(2)</span>\[f_r = \left(\sum_x n_{r,x}^{\rm{mock}}\right) / \left(\sum_x n_{r,x}^{\rm{selected}}\right).\]</div>
+<span class="eqno">(1)</span>\[E_{r,x} = \frac{\left(n_{r,x}^{\rm{selected}} + f_{r, \rm{selected}} \times P\right) / \left(n_{r,\operatorname{wt}\left(r\right)}^{\rm{selected}} + f_{r, \rm{selected}} \times P\right)}{\left(n_{r,x}^{\rm{mock}} + f_{r, \rm{mock}} \times P\right) / \left(n_{r,\operatorname{wt}\left(r\right)}^{\rm{mock}} + f_{r, \rm{mock}} \times P\right)}\]</div>
+<p>where <span class="math">\(P &gt; 0\)</span> is a pseudocount that is added to each observed count (specified by <code class="docutils literal"><span class="pre">--pseudocount</span></code> option), and <span class="math">\(f_{r, \rm{selected}}\)</span> and <span class="math">\(f_{r, \rm{mock}}\)</span> are defined so that the pseudocount is scaled up for the library (<em>mock</em> or <em>selected</em>) with higher depth at site <span class="math">\(r\)</span>:</p>
+<div class="math" id="equation-f_rselected">
+<span class="eqno">(2)</span>\[f_{r, \rm{selected}} = \max\left[1, \left(\sum_x n_{r,x}^{\rm{selected}}\right) / \left(\sum_x n_{r,x}^{\rm{mock}}\right)\right]\]</div>
+<div class="math" id="equation-f_rmock">
+<span class="eqno">(3)</span>\[f_{r, \rm{mock}} = \max\left[1, \left(\sum_x n_{r,x}^{\rm{mock}}\right) / \left(\sum_x n_{r,x}^{\rm{selected}}\right)\right].\]</div>
 <p>The reason for scaling the pseudocount by library depth is that the <em>mock</em> and <em>selected</em> libraries may often be sequenced at different depths. In that case, if the same pseudocount is added to both, then estimates of <span class="math">\(E_{r,x}\)</span> will tend to be systematically different than one even if the relative counts for the wildtype and mutant amino acid are the same in both two conditions. Scaling the pseudocounts by the ratio of depths fixes this problem. If you do not want to do this scaling, see the <code class="docutils literal"><span class="pre">--no-scale-pseudocounts</span></code> option.</p>
 <p>Note that by definition, <span class="math">\(E_{r,\operatorname{wt}\left(r\right)}\)</span> is always one.</p>
 <p>We then quantify the differential selection <span class="math">\(s_{r,x}\)</span> for <span class="math">\(x\)</span> at <span class="math">\(r\)</span> in the selected versus control condition as:</p>
 <div class="math" id="equation-s_rx">
-<span class="eqno">(3)</span>\[s_{r,x} = \log_2 E_{r,x}\]</div>
+<span class="eqno">(4)</span>\[s_{r,x} = \log_2 E_{r,x}\]</div>
 <p>It is these <span class="math">\(s_{r,x}\)</span> values that are reported by <code class="docutils literal"><span class="pre">dms_diffselection</span></code>. Note that the choice of logarithm base is arbitrary; we have chosen 2 here. Note that by definition, <span class="math">\(s_{r,\operatorname{wt}\left(r\right)}\)</span> is always zero.</p>
 <p>When <span class="math">\(s_{r,x} &gt; 0\)</span>, then <span class="math">\(x\)</span> is more favored in the selection versus mock condition.
 When <span class="math">\(s_{r,x} &lt; 0\)</span>, then <span class="math">\(x\)</span> is less favored in the selection versus mock condition.</p>
@@ -94,8 +96,8 @@ When <span class="math">\(s_{r,x} &lt; 0\)</span>, then <span class="math">\(x\)
 </div>
 <div class="section" id="command-line-usage">
 <h2><a class="toc-backref" href="#id4">Command-line usage</a><a class="headerlink" href="#command-line-usage" title="Permalink to this headline">¶</a></h2>
-<p>Differential selection between mock-treated and selected samples. Quantified as log2[{(n_sel_mut + P) / (n_sel_wt + P)} / {(n_mock_mut + f * P) / (n_mock_wt + f * P)}] where P is pseudocount and f is relative sequencing depth for mock versus selected library at that site. This script is part of dms_tools (version 1.1.13) written by the Bloom Lab (see <a class="reference external" href="https://github.com/jbloomlab/dms_tools/graphs/contributors">https://github.com/jbloomlab/dms_tools/graphs/contributors</a> for all contributors). Detailed documentation is at <a class="reference external" href="http://jbloomlab.github.io/dms_tools/">http://jbloomlab.github.io/dms_tools/</a></p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">usage</span><span class="p">:</span> <span class="n">dms_diffselection</span> <span class="p">[</span><span class="o">-</span><span class="n">h</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">pseudocount</span> <span class="n">PSEUDOCOUNT</span><span class="p">]</span>
+<p>Differential selection between mock-treated and selected samples. Quantified as log2[{(n_sel_mut + f_sel * P) / (n_sel_wt + f_sel * P)} / {(n_mock_mut + f_mock * P) / (n_mock_wt + f_mock * P)}] where P is pseudocount, f_sel = max(1, N_sel / N_mock), and f_mock = max(1, N_mock / N_sel) where N_mock and N_sel are the sequencing depth for mock and selected libraries at that site. This script is part of dms_tools (version 1.1.15) written by the Bloom Lab (see <a class="reference external" href="https://github.com/jbloomlab/dms_tools/graphs/contributors">https://github.com/jbloomlab/dms_tools/graphs/contributors</a> for all contributors). Detailed documentation is at <a class="reference external" href="http://jbloomlab.github.io/dms_tools/">http://jbloomlab.github.io/dms_tools/</a></p>
+<div class="highlight-default"><div class="highlight"><pre><span class="n">usage</span><span class="p">:</span> <span class="n">dms_diffselection</span> <span class="p">[</span><span class="o">-</span><span class="n">h</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">pseudocount</span> <span class="n">PSEUDOCOUNT</span><span class="p">]</span>
                          <span class="p">[</span><span class="o">--</span><span class="n">no</span><span class="o">-</span><span class="n">scale</span><span class="o">-</span><span class="n">pseudocounts</span><span class="p">]</span>
                          <span class="p">[</span><span class="o">--</span><span class="n">chartype</span> <span class="p">{</span><span class="n">codon_to_aa</span><span class="p">,</span><span class="n">DNA</span><span class="p">,</span><span class="n">codon</span><span class="p">,</span><span class="n">aa</span><span class="p">}]</span>
                          <span class="p">[</span><span class="o">--</span><span class="n">includestop</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">v</span><span class="p">]</span>
@@ -136,14 +138,14 @@ When <span class="math">\(s_{r,x} &lt; 0\)</span>, then <span class="math">\(x\)
 <tr><td class="option-group" colspan="2">
 <kbd><span class="option">--pseudocount=10</span></kbd></td>
 </tr>
-<tr><td>&nbsp;</td><td><p class="first">Pseudocount added to each count for selected library. By default, pseudocounts for mock library are scaled by relative depth at that site (see &#8211;no-scale-pseudocounts).</p>
-<p class="last">This is the <span class="math">\(P\)</span> parameter described in the Equation <a href="#equation-E_rx">(1)</a>. Note that by default this pseudocount is for the <strong>selected</strong> library, and the pseudocount for the mock-selected library is scaled by the parameter in Equation <a href="#equation-f_r">(2)</a>.</p>
+<tr><td>&nbsp;</td><td><p class="first">Pseudocount added to each count for selected library. By default, pseudocounts is added to library with smaller depth, and pseudcount for other library is scaled by relative depth at that site (see &#8211;no-scale-pseudocounts).</p>
+<p class="last">This is the <span class="math">\(P\)</span> parameter described in the Equation <a href="#equation-E_rx">(1)</a>. Note that by default this pseudocount is for the library with greater depth at that site, and the pseudocount for the other library is scaled up by the ratio of the relative depths as described by Equations <a href="#equation-f_rselected">(2)</a> and <a href="#equation-f_rmock">(3)</a>.</p>
 </td></tr>
 <tr><td class="option-group" colspan="2">
 <kbd><span class="option">--no-scale-pseudocounts=False</span></kbd></td>
 </tr>
-<tr><td>&nbsp;</td><td><p class="first">Use this option if you do NOT want to scale the pseudocounts for the mock library by relative depth, but instead want to use unscaled value specified by &#8216;&#8211;pseudocount&#8217;.</p>
-<p class="last">If you use this option, the scaling <span class="math">\(f_r\)</span> in Equation <a href="#equation-f_r">(2)</a> is always set to one. Note that this can give biased estimates if the depth is unequal in the two libraries.</p>
+<tr><td>&nbsp;</td><td><p class="first">Use this option if you do NOT want to scale the pseudocounts for each library by relative depth, but instead want to use unscaled value specified by &#8216;&#8211;pseudocount&#8217;.</p>
+<p class="last">If you use this option, the scaling <span class="math">\(f_{r, \rm{selected}}\)</span> and <span class="math">\(f_{r, \rm{mock}}\)</span> in Equations <a href="#equation-f_rselected">(2)</a> and <a href="#equation-f_rmock">(3)</a> are always set to one. Note that this can give biased estimates if the depth is unequal in the two libraries.</p>
 </td></tr>
 <tr><td class="option-group" colspan="2">
 <kbd><span class="option">--chartype=codon_to_aa</span></kbd></td>
@@ -169,7 +171,7 @@ When <span class="math">\(s_{r,x} &lt; 0\)</span>, then <span class="math">\(x\)
 <div class="section" id="example-usage">
 <h2><a class="toc-backref" href="#id5">Example usage</a><a class="headerlink" href="#example-usage" title="Permalink to this headline">¶</a></h2>
 <p>Let&#8217;s say that <code class="docutils literal"><span class="pre">mock_counts.txt</span></code> has the codon counts in a mock-selected library, and <code class="docutils literal"><span class="pre">antibody_counts</span></code> has these same counts in a library selected with an antibody. To determine selection on the amino acids, you could then run:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">dms_diffselection</span> <span class="n">mock_counts</span><span class="o">.</span><span class="n">txt</span> <span class="n">antibody_counts</span><span class="o">.</span><span class="n">txt</span> <span class="n">antibodyselection_</span>
+<div class="highlight-default"><div class="highlight"><pre><span class="n">dms_diffselection</span> <span class="n">mock_counts</span><span class="o">.</span><span class="n">txt</span> <span class="n">antibody_counts</span><span class="o">.</span><span class="n">txt</span> <span class="n">antibodyselection_</span>
 </pre></div>
 </div>
 <p>The created files would be <code class="docutils literal"><span class="pre">antibodyselection_mutdiffsel.txt</span></code> and <code class="docutils literal"><span class="pre">antibodyselection_sitediffsel.txt</span></code>.</p>
@@ -181,7 +183,7 @@ When <span class="math">\(s_{r,x} &lt; 0\)</span>, then <span class="math">\(x\)
 <blockquote>
 <div><ul>
 <li><p class="first">The <code class="docutils literal"><span class="pre">*mutdiffsel.txt</span></code> file gives the <span class="math">\(s_{r,x}\)</span> values in a CSV file. These are sorted by <span class="math">\(s_{r,x}\)</span> value. The site number and wildtype character are also indicated. Here are the first few lines of an example file:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">site</span><span class="p">,</span><span class="n">wt</span><span class="p">,</span><span class="n">mut</span><span class="p">,</span><span class="n">diffsel</span>
+<div class="highlight-default"><div class="highlight"><pre><span class="n">site</span><span class="p">,</span><span class="n">wt</span><span class="p">,</span><span class="n">mut</span><span class="p">,</span><span class="n">diffsel</span>
 <span class="mi">156</span><span class="p">,</span><span class="n">G</span><span class="p">,</span><span class="n">S</span><span class="p">,</span><span class="mf">7.15912988065</span>
 <span class="mi">146</span><span class="p">,</span><span class="n">N</span><span class="p">,</span><span class="n">D</span><span class="p">,</span><span class="mf">6.85510232461</span>
 <span class="mi">157</span><span class="p">,</span><span class="n">K</span><span class="p">,</span><span class="n">S</span><span class="p">,</span><span class="mf">6.78492241017</span>
@@ -201,7 +203,7 @@ When <span class="math">\(s_{r,x} &lt; 0\)</span>, then <span class="math">\(x\)
 </ul>
 </div></blockquote>
 <p>The file gives all three of these quantities for each site, sorted by <em>abs_diffsel</em>. Here are the first few lines of an example file:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">site</span><span class="p">,</span><span class="n">abs_diffsel</span><span class="p">,</span><span class="n">positive_diffsel</span><span class="p">,</span><span class="n">negative_diffsel</span>
+<div class="highlight-default"><div class="highlight"><pre><span class="n">site</span><span class="p">,</span><span class="n">abs_diffsel</span><span class="p">,</span><span class="n">positive_diffsel</span><span class="p">,</span><span class="n">negative_diffsel</span>
 <span class="mi">157</span><span class="p">,</span><span class="mf">92.5132004464</span><span class="p">,</span><span class="mf">92.5132004464</span><span class="p">,</span><span class="mf">0.0</span>
 <span class="mi">153</span><span class="p">,</span><span class="mf">85.7023127899</span><span class="p">,</span><span class="mf">84.7159706476</span><span class="p">,</span><span class="o">-</span><span class="mf">0.986342142299</span>
 <span class="mi">136</span><span class="p">,</span><span class="mf">56.4005369298</span><span class="p">,</span><span class="mf">56.3664732104</span><span class="p">,</span><span class="o">-</span><span class="mf">0.0340637194023</span>
@@ -251,8 +253,8 @@ When <span class="math">\(s_{r,x} &lt; 0\)</span>, then <span class="math">\(x\)
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="search.html" method="get">
-      <input type="text" name="q" />
-      <input type="submit" value="Go" />
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
     </form>
@@ -277,13 +279,13 @@ When <span class="math">\(s_{r,x} &lt; 0\)</span>, then <span class="math">\(x\)
         <li class="right" >
           <a href="dms_inferprefs.html" title="dms_inferprefs"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">dms_tools 1.1.14 documentation</a> &raquo;</li>
+        <li class="nav-item nav-item-0"><a href="index.html">dms_tools 1.1.15 documentation</a> &raquo;</li>
           <li class="nav-item nav-item-1"><a href="programs.html" >Programs</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
         &copy; Copyright 2014, Jesse Bloom.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.4.
     </div>
   </body>
 </html>
