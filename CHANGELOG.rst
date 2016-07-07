@@ -1,7 +1,7 @@
 Changelog
 ===========
 
-1.1.dev15
+1.1.15
 -------
 * In ``dms_diffselection``, the pseudocounts are now scaled by the **smaller** depth library at each site.
 
