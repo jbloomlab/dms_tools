@@ -1,6 +1,10 @@
 Changelog
 ===========
 
+1.1.dev16
+--------
+* Added ``--mincounts`` option to ``dms_diffselection``, and make ``dms_logoplot`` properly plot differential selection with missing values.
+
 1.1.15
 -------
 * In ``dms_diffselection``, the pseudocounts are now scaled by the **smaller** depth library at each site.

@@ -76,6 +76,11 @@ Command-line usage
    \-\-pseudocount
     This is the :math:`P` parameter described in the Equation :eq:`E_rx`. Note that by default this pseudocount is for the library with greater depth at that site, and the pseudocount for the other library is scaled up by the ratio of the relative depths as described by Equations :eq:`f_rselected` and :eq:`f_rmock`.
 
+   \-\-mincounts
+    If you set this option to anything other than its default of 0, then you will get differential selection (:math:`s_{r,x}` values) of ``NaN`` (not a number) for mutations that have very low counts both before and after selection. In some cases, this may be preferable than estimating a value for a mutation with very little data.
+
+    Note that if you keep ``--mincounts`` at its default of 0 but have a reasonable value of ``--pseudocount``, then mutations with few or no counts will have differential selection values of 0 estimated for them.
+
    \-\-chartype
     A value of ``codon_to_aa`` means we have codon characters for the deep sequencing data, but infer selection for amino acids. Essentially, we sum the counts of all codons for each amino acid, and then do the calculation described in `Overview`_ on these amino-acid counts.
 
@@ -111,6 +116,13 @@ In addition, two files with the prefix ``outprefix`` are created (these files ar
     153,S,I,6.45786904581
     158,S,A,6.31170638356
 
+   In these files, the entry for :math:`x` equal to the wildtype character is always ``NaN`` (not a number). So for instance, given the data above, we would also have entries like::
+
+    156,G,G,NaN
+    146,N,N,NaN
+
+   In addition, if ``--mincounts`` is set to something other than zero, then there may be mutations for which an :math:`s_{r,x}` value cannot be computed. In that case, that value is also reported as ``NaN`` (not a number) in this output file.
+
  * ``*sitediffsel.txt`` file summarizes total differential selection on each site. It provides three summary statistics:
 
         - *abs_diffsel* is the sum of the absolute values of the selection on all mutations at the site, and so is a measure of the total selection at this site. It is computed as :math:`\sum_x \left|s_{r,x}\right|`.
@@ -129,6 +141,7 @@ In addition, two files with the prefix ``outprefix`` are created (these files ar
     156,56.0690809464,56.0690809464,0.0
     175,31.899455678,3.79784216691,-28.1016135111
 
+   Note that if ``--mincounts`` is not 0, then some of the :math:`s_{r,x}` values may be ``NaN`` (not a number). In that case, any characters :math:`x` that do not have a value for the :math:`s_{r,x}` value do **not** contribute to the sums used to define *abs_diffsel*, *positive_diffsel*, and *negative_diffsel* above (in other words, they are counted as if the differential selection for character :math:`x` is 0). If **all** characters have a differential selection of ``NaN``, then the three summed values shown in this output file are ``NaN`` as well.
 
 These output files are in a form where they can directly read into `pandas`_ data frames via that package's ``read_csv`` function.
 

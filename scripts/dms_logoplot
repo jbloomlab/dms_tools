@@ -77,6 +77,7 @@ def main():
         datatype = 'diffsel'
         expectedcolumns = set(['site', 'wt', 'mut', 'diffsel'])
         diffsel = pandas.read_csv(args['infile'])
+        diffsel.fillna(0.0, inplace=True) # set diffsel to zero for any missing (NaN) values
         assert set(diffsel.columns.values) == expectedcolumns
         sites = list(set(diffsel['site'].tolist()))
         data = {}
@@ -111,7 +112,10 @@ def main():
     if datatype == 'diffsel':
         alldiffsel = [diffsel]
         if args['diffselheight']:
-            alldiffsel += list(map(pandas.read_csv, args['diffselheight']))
+            for fname in args['diffselheight']:
+                df = pandas.read_csv(fname)
+                ddf.fillna(0.0, inplace=True) # set diffsel to zero for any missing (NaN) values
+                alldiffsel.append(df)
         maxdiffsel = mindiffsel = 0
         for idataframe in alldiffsel:
             for r in set(idataframe['site'].tolist()):

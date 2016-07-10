@@ -76,7 +76,9 @@ You can visualize the differential selection (the :math:`s_{r,x}` values describ
 
 The ``--diffselheight`` is useful if you are making several such plots and want them to share a common y-axis.
 
-Here is an example of a create plot:
+Any mutations that have missing differential selection values (specified as ``NaN`` in the ``mutdiffsel.txt`` file) are treated as having a differential selection of zero in the plotting.
+
+Here is an example of a created plot:
 
 .. image:: diffsel_logoplot.pdf
    :width: 90%

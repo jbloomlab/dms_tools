@@ -422,6 +422,7 @@ def DiffSelectionParser():
     parser.add_argument('selectedcounts', type=ExistingFile, help='File with counts from selected library')
     parser.add_argument('outprefix', help="Prefix for output files. Suffixes are 'mutdiffsel.txt' and 'sitediffsel.txt'")
     parser.add_argument('--pseudocount', type=FloatGreaterThanZero, default=10, help='Pseudocount added to each count for selected library. By default, pseudocounts is added to library with smaller depth, and pseudcount for other library is scaled by relative depth at that site (see --no-scale-pseudocounts).')
+    parser.add_argument('--mincounts', type=NonNegativeInt, default=0, help='Only report differential selection for mutations for which at least one of mock or selected counts is >= this number. Mutations that do not meet this threshold have differential selection written as "NaN".')
     parser.add_argument('--no-scale-pseudocounts', dest='no_scale_pseudocounts', action='store_true', help="Use this option if you do NOT want to scale the pseudocounts for each library by relative depth, but instead want to use unscaled value specified by '--pseudocount'.")
     parser.set_defaults(no_scale_pseudocounts=False)
     parser.add_argument('--chartype', choices=['codon_to_aa', 'DNA', 'codon', 'aa'], default='codon_to_aa', help='Characters: "codon_to_aa" = counts for codons and selection for amino acids; "DNA" = counts and selection for DNA; "codon" = counts and selection for codons; "aa" = counts and selection for amino acids (possibly including stop codons, see "--includestop").')
