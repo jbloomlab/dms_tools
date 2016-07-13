@@ -114,7 +114,7 @@ def main():
         if args['diffselheight']:
             for fname in args['diffselheight']:
                 df = pandas.read_csv(fname)
-                ddf.fillna(0.0, inplace=True) # set diffsel to zero for any missing (NaN) values
+                df.fillna(0.0, inplace=True) # set diffsel to zero for any missing (NaN) values
                 alldiffsel.append(df)
         maxdiffsel = mindiffsel = 0
         for idataframe in alldiffsel:
