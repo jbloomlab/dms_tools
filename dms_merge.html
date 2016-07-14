@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>dms_merge &mdash; dms_tools 1.1.15 documentation</title>
+    <title>dms_merge &mdash; dms_tools 1.1.16 documentation</title>
     
     <link rel="stylesheet" href="_static/classic.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '1.1.15',
+        VERSION:     '1.1.16',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="dms_tools 1.1.15 documentation" href="index.html" />
+    <link rel="top" title="dms_tools 1.1.16 documentation" href="index.html" />
     <link rel="up" title="Programs" href="programs.html" />
     <link rel="next" title="dms_correlate" href="dms_correlate.html" />
     <link rel="prev" title="dms_logoplot" href="dms_logoplot.html" /> 
@@ -45,7 +45,7 @@
         <li class="right" >
           <a href="dms_logoplot.html" title="dms_logoplot"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">dms_tools 1.1.15 documentation</a> &raquo;</li>
+        <li class="nav-item nav-item-0"><a href="index.html">dms_tools 1.1.16 documentation</a> &raquo;</li>
           <li class="nav-item nav-item-1"><a href="programs.html" accesskey="U">Programs</a> &raquo;</li> 
       </ul>
     </div>  
@@ -85,8 +85,8 @@
 </div>
 <div class="section" id="command-line-usage">
 <h2><a class="toc-backref" href="#id4">Command-line usage</a><a class="headerlink" href="#command-line-usage" title="Permalink to this headline">¶</a></h2>
-<p>Merge preferences or differential preferences by averaging or adding / subtracting the values in multiple files. Alternatively, sum counts by adding the counts for the characters at each site across multiple files. All files must specify the same character type: can be nucleotide, codon, or amino acid (see &#8220;&#8211;excludestop&#8221; if using amino acids). This script is part of dms_tools (version 1.1.15) written by the Bloom Lab (see <a class="reference external" href="https://github.com/jbloomlab/dms_tools/graphs/contributors">https://github.com/jbloomlab/dms_tools/graphs/contributors</a> for all contributors). Detailed documentation is at <a class="reference external" href="http://jbloomlab.github.io/dms_tools/">http://jbloomlab.github.io/dms_tools/</a></p>
-<div class="highlight-default"><div class="highlight"><pre><span class="n">usage</span><span class="p">:</span> <span class="n">dms_merge</span> <span class="p">[</span><span class="o">-</span><span class="n">h</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">excludestop</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">minus</span> <span class="n">MINUS</span> <span class="p">[</span><span class="n">MINUS</span> <span class="o">...</span><span class="p">]]</span> <span class="p">[</span><span class="o">-</span><span class="n">v</span><span class="p">]</span>
+<p>Merge preferences or differential preferences by averaging or adding / subtracting the values in multiple files. Alternatively, sum counts by adding the counts for the characters at each site across multiple files. All files must specify the same character type: can be nucleotide, codon, or amino acid (see &#8220;&#8211;excludestop&#8221; if using amino acids). This script is part of dms_tools (version 1.1.16) written by the Bloom Lab (see <a class="reference external" href="https://github.com/jbloomlab/dms_tools/graphs/contributors">https://github.com/jbloomlab/dms_tools/graphs/contributors</a> for all contributors). Detailed documentation is at <a class="reference external" href="http://jbloomlab.github.io/dms_tools/">http://jbloomlab.github.io/dms_tools/</a></p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">usage</span><span class="p">:</span> <span class="n">dms_merge</span> <span class="p">[</span><span class="o">-</span><span class="n">h</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">excludestop</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">minus</span> <span class="n">MINUS</span> <span class="p">[</span><span class="n">MINUS</span> <span class="o">...</span><span class="p">]]</span> <span class="p">[</span><span class="o">-</span><span class="n">v</span><span class="p">]</span>
                  <span class="p">[</span><span class="o">--</span><span class="n">stringencyparameter</span> <span class="n">STRINGENCYPARAMETER</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">normalize</span><span class="p">]</span>
                  <span class="p">[</span><span class="o">--</span><span class="n">chartype</span> <span class="p">{</span><span class="n">DNA</span><span class="p">,</span><span class="n">codon</span><span class="p">,</span><span class="n">aa</span><span class="p">}]</span>
                  <span class="n">outfile</span> <span class="p">{</span><span class="n">average</span><span class="p">,</span><span class="nb">sum</span><span class="p">,</span><span class="n">rescale</span><span class="p">}</span> <span class="n">infiles</span> <span class="p">[</span><span class="n">infiles</span> <span class="o">...</span><span class="p">]</span>
@@ -168,7 +168,7 @@
 <div class="section" id="averaging-preferences">
 <h3><a class="toc-backref" href="#id6">Averaging preferences</a><a class="headerlink" href="#averaging-preferences" title="Permalink to this headline">¶</a></h3>
 <p>Use:</p>
-<div class="highlight-default"><div class="highlight"><pre><span class="n">dms_merge</span> <span class="n">avgprefs</span><span class="o">.</span><span class="n">txt</span> <span class="n">average</span> <span class="n">prefs1</span><span class="o">.</span><span class="n">txt</span> <span class="n">prefs2</span><span class="o">.</span><span class="n">txt</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">dms_merge</span> <span class="n">avgprefs</span><span class="o">.</span><span class="n">txt</span> <span class="n">average</span> <span class="n">prefs1</span><span class="o">.</span><span class="n">txt</span> <span class="n">prefs2</span><span class="o">.</span><span class="n">txt</span>
 </pre></div>
 </div>
 <p>The created file <code class="docutils literal"><span class="pre">avgprefs.txt</span></code> will have the <a class="reference internal" href="fileformats.html#diffpreferences-file"><span class="std std-ref">Differential preferences file</span></a> format.</p>
@@ -176,7 +176,7 @@
 <div class="section" id="averaging-differential-preferences">
 <h3><a class="toc-backref" href="#id7">Averaging differential preferences</a><a class="headerlink" href="#averaging-differential-preferences" title="Permalink to this headline">¶</a></h3>
 <p>Use:</p>
-<div class="highlight-default"><div class="highlight"><pre><span class="n">dms_merge</span> <span class="n">avgdiffprefs</span><span class="o">.</span><span class="n">txt</span> <span class="n">average</span> <span class="n">diffprefs1</span><span class="o">.</span><span class="n">txt</span> <span class="n">diffprefs2</span><span class="o">.</span><span class="n">txt</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">dms_merge</span> <span class="n">avgdiffprefs</span><span class="o">.</span><span class="n">txt</span> <span class="n">average</span> <span class="n">diffprefs1</span><span class="o">.</span><span class="n">txt</span> <span class="n">diffprefs2</span><span class="o">.</span><span class="n">txt</span>
 </pre></div>
 </div>
 <p>The created file <code class="docutils literal"><span class="pre">avgdiffprefs.txt</span></code> will have the <a class="reference internal" href="fileformats.html#preferences-file"><span class="std std-ref">Preferences file</span></a> format.</p>
@@ -184,24 +184,24 @@
 <div class="section" id="invalid-averaging-a-mix-of-preferences-and-differential-preferences">
 <h3><a class="toc-backref" href="#id8">Invalid: averaging a mix of preferences and differential preferences</a><a class="headerlink" href="#invalid-averaging-a-mix-of-preferences-and-differential-preferences" title="Permalink to this headline">¶</a></h3>
 <p>You cannot average a mix of preferences and differential preferences. So the following would be <strong>invalid</strong> and would cause an error:</p>
-<div class="highlight-default"><div class="highlight"><pre><span class="n">dms_merge</span> <span class="n">mixedaverage</span><span class="o">.</span><span class="n">txt</span> <span class="n">average</span> <span class="n">prefs1</span><span class="o">.</span><span class="n">txt</span> <span class="n">prefs2</span><span class="o">.</span><span class="n">txt</span> <span class="n">diffprefs1</span><span class="o">.</span><span class="n">txt</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">dms_merge</span> <span class="n">mixedaverage</span><span class="o">.</span><span class="n">txt</span> <span class="n">average</span> <span class="n">prefs1</span><span class="o">.</span><span class="n">txt</span> <span class="n">prefs2</span><span class="o">.</span><span class="n">txt</span> <span class="n">diffprefs1</span><span class="o">.</span><span class="n">txt</span>
 </pre></div>
 </div>
 </div>
 <div class="section" id="adding-and-subtracting-preferences">
 <h3><a class="toc-backref" href="#id9">Adding and subtracting preferences</a><a class="headerlink" href="#adding-and-subtracting-preferences" title="Permalink to this headline">¶</a></h3>
 <p>The command:</p>
-<div class="highlight-default"><div class="highlight"><pre><span class="n">dms_merge</span> <span class="n">summedprefs</span><span class="o">.</span><span class="n">txt</span> <span class="nb">sum</span> <span class="n">prefs1</span><span class="o">.</span><span class="n">txt</span> <span class="n">prefs2</span><span class="o">.</span><span class="n">txt</span> <span class="o">--</span><span class="n">minus</span> <span class="n">prefs3</span><span class="o">.</span><span class="n">txt</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">dms_merge</span> <span class="n">summedprefs</span><span class="o">.</span><span class="n">txt</span> <span class="nb">sum</span> <span class="n">prefs1</span><span class="o">.</span><span class="n">txt</span> <span class="n">prefs2</span><span class="o">.</span><span class="n">txt</span> <span class="o">--</span><span class="n">minus</span> <span class="n">prefs3</span><span class="o">.</span><span class="n">txt</span>
 </pre></div>
 </div>
 <p>would create an output file <code class="docutils literal"><span class="pre">summedprefs.txt</span></code> in the <a class="reference internal" href="fileformats.html#preferences-file"><span class="std std-ref">Preferences file</span></a> format.</p>
 <p>The command:</p>
-<div class="highlight-default"><div class="highlight"><pre><span class="n">dms_merge</span> <span class="n">summedprefs</span><span class="o">.</span><span class="n">txt</span> <span class="nb">sum</span> <span class="n">prefs1</span><span class="o">.</span><span class="n">txt</span> <span class="n">prefs2</span><span class="o">.</span><span class="n">txt</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">dms_merge</span> <span class="n">summedprefs</span><span class="o">.</span><span class="n">txt</span> <span class="nb">sum</span> <span class="n">prefs1</span><span class="o">.</span><span class="n">txt</span> <span class="n">prefs2</span><span class="o">.</span><span class="n">txt</span>
 </pre></div>
 </div>
 <p>is <strong>invalid</strong> since it does not create preferences that sum to one at each site (instead they sum to two).</p>
 <p>The command:</p>
-<div class="highlight-default"><div class="highlight"><pre><span class="n">dms_merge</span> <span class="n">diffs</span><span class="o">.</span><span class="n">txt</span> <span class="nb">sum</span> <span class="n">prefs1</span><span class="o">.</span><span class="n">txt</span> <span class="n">prefs2</span><span class="o">.</span><span class="n">txt</span> <span class="o">--</span><span class="n">minus</span> <span class="n">prefs3</span><span class="o">.</span><span class="n">txt</span> <span class="n">prefs4</span><span class="o">.</span><span class="n">txt</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">dms_merge</span> <span class="n">diffs</span><span class="o">.</span><span class="n">txt</span> <span class="nb">sum</span> <span class="n">prefs1</span><span class="o">.</span><span class="n">txt</span> <span class="n">prefs2</span><span class="o">.</span><span class="n">txt</span> <span class="o">--</span><span class="n">minus</span> <span class="n">prefs3</span><span class="o">.</span><span class="n">txt</span> <span class="n">prefs4</span><span class="o">.</span><span class="n">txt</span>
 </pre></div>
 </div>
 <p>would create a file <code class="docutils literal"><span class="pre">diffs.txt</span></code> in the <a class="reference internal" href="fileformats.html#diffpreferences-file"><span class="std std-ref">Differential preferences file</span></a> format since the total for each site sums to zero.</p>
@@ -209,7 +209,7 @@
 <div class="section" id="adding-and-subtracting-differential-preferences">
 <h3><a class="toc-backref" href="#id10">Adding and subtracting differential preferences</a><a class="headerlink" href="#adding-and-subtracting-differential-preferences" title="Permalink to this headline">¶</a></h3>
 <p>The command:</p>
-<div class="highlight-default"><div class="highlight"><pre><span class="n">dms_merge</span> <span class="n">summeddiffprefs</span><span class="o">.</span><span class="n">txt</span> <span class="nb">sum</span> <span class="n">diffprefs1</span><span class="o">.</span><span class="n">txt</span> <span class="n">diffprefs2</span><span class="o">.</span><span class="n">txt</span> <span class="o">--</span><span class="n">minus</span> <span class="n">diffprefs3</span><span class="o">.</span><span class="n">txt</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">dms_merge</span> <span class="n">summeddiffprefs</span><span class="o">.</span><span class="n">txt</span> <span class="nb">sum</span> <span class="n">diffprefs1</span><span class="o">.</span><span class="n">txt</span> <span class="n">diffprefs2</span><span class="o">.</span><span class="n">txt</span> <span class="o">--</span><span class="n">minus</span> <span class="n">diffprefs3</span><span class="o">.</span><span class="n">txt</span>
 </pre></div>
 </div>
 <p>creates <code class="docutils literal"><span class="pre">summeddiffprefs.txt</span></code> in the <a class="reference internal" href="fileformats.html#diffpreferences-file"><span class="std std-ref">Differential preferences file</span></a> format.</p>
@@ -217,12 +217,12 @@
 <div class="section" id="adding-and-subtracting-a-mix-of-preferences-and-differential-preferences">
 <h3><a class="toc-backref" href="#id11">Adding and subtracting a mix of preferences and differential preferences</a><a class="headerlink" href="#adding-and-subtracting-a-mix-of-preferences-and-differential-preferences" title="Permalink to this headline">¶</a></h3>
 <p>The command:</p>
-<div class="highlight-default"><div class="highlight"><pre><span class="n">dms_merge</span> <span class="n">sumprefs</span><span class="o">.</span><span class="n">txt</span> <span class="n">prefs1</span><span class="o">.</span><span class="n">txt</span> <span class="n">prefs2</span><span class="o">.</span><span class="n">txt</span> <span class="n">diffprefs1</span><span class="o">.</span><span class="n">txt</span> <span class="o">--</span><span class="n">minus</span> <span class="n">prefs3</span><span class="o">.</span><span class="n">txt</span> <span class="n">diffprefs2</span><span class="o">.</span><span class="n">txt</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">dms_merge</span> <span class="n">sumprefs</span><span class="o">.</span><span class="n">txt</span> <span class="n">prefs1</span><span class="o">.</span><span class="n">txt</span> <span class="n">prefs2</span><span class="o">.</span><span class="n">txt</span> <span class="n">diffprefs1</span><span class="o">.</span><span class="n">txt</span> <span class="o">--</span><span class="n">minus</span> <span class="n">prefs3</span><span class="o">.</span><span class="n">txt</span> <span class="n">diffprefs2</span><span class="o">.</span><span class="n">txt</span>
 </pre></div>
 </div>
 <p>creates <code class="docutils literal"><span class="pre">sumprefs.txt</span></code> in <a class="reference internal" href="fileformats.html#preferences-file"><span class="std std-ref">Preferences file</span></a> format, since the sum at each site is one.</p>
 <p>In contrast, the command:</p>
-<div class="highlight-default"><div class="highlight"><pre><span class="n">dms_merge</span> <span class="n">sumdiffprefs</span><span class="o">.</span><span class="n">txt</span> <span class="n">prefs1</span><span class="o">.</span><span class="n">txt</span> <span class="n">diffprefs1</span><span class="o">.</span><span class="n">txt</span> <span class="o">--</span><span class="n">minus</span> <span class="n">prefs2</span><span class="o">.</span><span class="n">txt</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">dms_merge</span> <span class="n">sumdiffprefs</span><span class="o">.</span><span class="n">txt</span> <span class="n">prefs1</span><span class="o">.</span><span class="n">txt</span> <span class="n">diffprefs1</span><span class="o">.</span><span class="n">txt</span> <span class="o">--</span><span class="n">minus</span> <span class="n">prefs2</span><span class="o">.</span><span class="n">txt</span>
 </pre></div>
 </div>
 <p>creates <code class="docutils literal"><span class="pre">sumdiffprefs.txt</span></code> in <a class="reference internal" href="fileformats.html#diffpreferences-file"><span class="std std-ref">Differential preferences file</span></a> format, since the sum at each site is zero.</p>
@@ -230,7 +230,7 @@
 <div class="section" id="adding-counts">
 <h3><a class="toc-backref" href="#id12">Adding counts</a><a class="headerlink" href="#adding-counts" title="Permalink to this headline">¶</a></h3>
 <p>The command:</p>
-<div class="highlight-default"><div class="highlight"><pre><span class="n">dms_merge</span> <span class="n">summedcounts</span><span class="o">.</span><span class="n">txt</span> <span class="nb">sum</span> <span class="n">counts1</span><span class="o">.</span><span class="n">txt</span> <span class="n">counts2</span><span class="o">.</span><span class="n">txt</span> <span class="o">--</span><span class="n">chartype</span> <span class="n">codon</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">dms_merge</span> <span class="n">summedcounts</span><span class="o">.</span><span class="n">txt</span> <span class="nb">sum</span> <span class="n">counts1</span><span class="o">.</span><span class="n">txt</span> <span class="n">counts2</span><span class="o">.</span><span class="n">txt</span> <span class="o">--</span><span class="n">chartype</span> <span class="n">codon</span>
 </pre></div>
 </div>
 <p>sums counts from the two provided counts files and writes them to the file <code class="docutils literal"><span class="pre">summedcounts.txt</span></code> in the <a class="reference internal" href="fileformats.html#dms-counts"><span class="std std-ref">Deep mutational scanning counts file</span></a> format.</p>
@@ -238,7 +238,7 @@
 <div class="section" id="adding-counts-with-normalization">
 <h3><a class="toc-backref" href="#id13">Adding counts with normalization</a><a class="headerlink" href="#adding-counts-with-normalization" title="Permalink to this headline">¶</a></h3>
 <p>The command:</p>
-<div class="highlight-default"><div class="highlight"><pre><span class="n">dms_merge</span> <span class="n">summedcounts</span><span class="o">.</span><span class="n">txt</span> <span class="nb">sum</span> <span class="n">counts1</span><span class="o">.</span><span class="n">txt</span> <span class="n">counts2</span><span class="o">.</span><span class="n">txt</span> <span class="o">--</span><span class="n">chartype</span> <span class="n">codon</span> <span class="o">--</span><span class="n">normalize</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">dms_merge</span> <span class="n">summedcounts</span><span class="o">.</span><span class="n">txt</span> <span class="nb">sum</span> <span class="n">counts1</span><span class="o">.</span><span class="n">txt</span> <span class="n">counts2</span><span class="o">.</span><span class="n">txt</span> <span class="o">--</span><span class="n">chartype</span> <span class="n">codon</span> <span class="o">--</span><span class="n">normalize</span>
 </pre></div>
 </div>
 <p>normalizes counts at each site to the minimum number of total counts observed at that site in <code class="docutils literal"><span class="pre">counts1.txt</span></code> and <code class="docutils literal"><span class="pre">counts2.txt</span></code>. The normalized counts are then summed and written to the file <code class="docutils literal"><span class="pre">summedcounts.txt</span></code> in the <a class="reference internal" href="fileformats.html#dms-counts"><span class="std std-ref">Deep mutational scanning counts file</span></a> format.</p>
@@ -314,13 +314,13 @@
         <li class="right" >
           <a href="dms_logoplot.html" title="dms_logoplot"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">dms_tools 1.1.15 documentation</a> &raquo;</li>
+        <li class="nav-item nav-item-0"><a href="index.html">dms_tools 1.1.16 documentation</a> &raquo;</li>
           <li class="nav-item nav-item-1"><a href="programs.html" >Programs</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
         &copy; Copyright 2014, Jesse Bloom.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.4.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.5.
     </div>
   </body>
 </html>

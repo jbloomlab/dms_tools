@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>dms_diffselection &mdash; dms_tools 1.1.15 documentation</title>
+    <title>dms_diffselection &mdash; dms_tools 1.1.16 documentation</title>
     
     <link rel="stylesheet" href="_static/classic.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '1.1.15',
+        VERSION:     '1.1.16',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="dms_tools 1.1.15 documentation" href="index.html" />
+    <link rel="top" title="dms_tools 1.1.16 documentation" href="index.html" />
     <link rel="up" title="Programs" href="programs.html" />
     <link rel="next" title="dms_inferdiffprefs" href="dms_inferdiffprefs.html" />
     <link rel="prev" title="dms_inferprefs" href="dms_inferprefs.html" /> 
@@ -45,7 +45,7 @@
         <li class="right" >
           <a href="dms_inferprefs.html" title="dms_inferprefs"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">dms_tools 1.1.15 documentation</a> &raquo;</li>
+        <li class="nav-item nav-item-0"><a href="index.html">dms_tools 1.1.16 documentation</a> &raquo;</li>
           <li class="nav-item nav-item-1"><a href="programs.html" accesskey="U">Programs</a> &raquo;</li> 
       </ul>
     </div>  
@@ -96,9 +96,9 @@ When <span class="math">\(s_{r,x} &lt; 0\)</span>, then <span class="math">\(x\)
 </div>
 <div class="section" id="command-line-usage">
 <h2><a class="toc-backref" href="#id4">Command-line usage</a><a class="headerlink" href="#command-line-usage" title="Permalink to this headline">¶</a></h2>
-<p>Differential selection between mock-treated and selected samples. Quantified as log2[{(n_sel_mut + f_sel * P) / (n_sel_wt + f_sel * P)} / {(n_mock_mut + f_mock * P) / (n_mock_wt + f_mock * P)}] where P is pseudocount, f_sel = max(1, N_sel / N_mock), and f_mock = max(1, N_mock / N_sel) where N_mock and N_sel are the sequencing depth for mock and selected libraries at that site. This script is part of dms_tools (version 1.1.15) written by the Bloom Lab (see <a class="reference external" href="https://github.com/jbloomlab/dms_tools/graphs/contributors">https://github.com/jbloomlab/dms_tools/graphs/contributors</a> for all contributors). Detailed documentation is at <a class="reference external" href="http://jbloomlab.github.io/dms_tools/">http://jbloomlab.github.io/dms_tools/</a></p>
-<div class="highlight-default"><div class="highlight"><pre><span class="n">usage</span><span class="p">:</span> <span class="n">dms_diffselection</span> <span class="p">[</span><span class="o">-</span><span class="n">h</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">pseudocount</span> <span class="n">PSEUDOCOUNT</span><span class="p">]</span>
-                         <span class="p">[</span><span class="o">--</span><span class="n">no</span><span class="o">-</span><span class="n">scale</span><span class="o">-</span><span class="n">pseudocounts</span><span class="p">]</span>
+<p>Differential selection between mock-treated and selected samples. Quantified as log2[{(n_sel_mut + f_sel * P) / (n_sel_wt + f_sel * P)} / {(n_mock_mut + f_mock * P) / (n_mock_wt + f_mock * P)}] where P is pseudocount, f_sel = max(1, N_sel / N_mock), and f_mock = max(1, N_mock / N_sel) where N_mock and N_sel are the sequencing depth for mock and selected libraries at that site. This script is part of dms_tools (version 1.1.16) written by the Bloom Lab (see <a class="reference external" href="https://github.com/jbloomlab/dms_tools/graphs/contributors">https://github.com/jbloomlab/dms_tools/graphs/contributors</a> for all contributors). Detailed documentation is at <a class="reference external" href="http://jbloomlab.github.io/dms_tools/">http://jbloomlab.github.io/dms_tools/</a></p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">usage</span><span class="p">:</span> <span class="n">dms_diffselection</span> <span class="p">[</span><span class="o">-</span><span class="n">h</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">pseudocount</span> <span class="n">PSEUDOCOUNT</span><span class="p">]</span>
+                         <span class="p">[</span><span class="o">--</span><span class="n">mincounts</span> <span class="n">MINCOUNTS</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">no</span><span class="o">-</span><span class="n">scale</span><span class="o">-</span><span class="n">pseudocounts</span><span class="p">]</span>
                          <span class="p">[</span><span class="o">--</span><span class="n">chartype</span> <span class="p">{</span><span class="n">codon_to_aa</span><span class="p">,</span><span class="n">DNA</span><span class="p">,</span><span class="n">codon</span><span class="p">,</span><span class="n">aa</span><span class="p">}]</span>
                          <span class="p">[</span><span class="o">--</span><span class="n">includestop</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">v</span><span class="p">]</span>
                          <span class="n">mockcounts</span> <span class="n">selectedcounts</span> <span class="n">outprefix</span>
@@ -141,6 +141,12 @@ When <span class="math">\(s_{r,x} &lt; 0\)</span>, then <span class="math">\(x\)
 <tr><td>&nbsp;</td><td><p class="first">Pseudocount added to each count for selected library. By default, pseudocounts is added to library with smaller depth, and pseudcount for other library is scaled by relative depth at that site (see &#8211;no-scale-pseudocounts).</p>
 <p class="last">This is the <span class="math">\(P\)</span> parameter described in the Equation <a href="#equation-E_rx">(1)</a>. Note that by default this pseudocount is for the library with greater depth at that site, and the pseudocount for the other library is scaled up by the ratio of the relative depths as described by Equations <a href="#equation-f_rselected">(2)</a> and <a href="#equation-f_rmock">(3)</a>.</p>
 </td></tr>
+<tr><td class="option-group">
+<kbd><span class="option">--mincounts=0</span></kbd></td>
+<td><p class="first">Only report differential selection for mutations for which at least one of mock or selected counts is &gt;= this number. Mutations that do not meet this threshold have differential selection written as &#8220;NaN&#8221;.</p>
+<p>If you set this option to anything other than its default of 0, then you will get differential selection (<span class="math">\(s_{r,x}\)</span> values) of <code class="docutils literal"><span class="pre">NaN</span></code> (not a number) for mutations that have very low counts both before and after selection. In some cases, this may be preferable than estimating a value for a mutation with very little data.</p>
+<p class="last">Note that if you keep <code class="docutils literal"><span class="pre">--mincounts</span></code> at its default of 0 but have a reasonable value of <code class="docutils literal"><span class="pre">--pseudocount</span></code>, then mutations with few or no counts will have differential selection values of 0 estimated for them.</p>
+</td></tr>
 <tr><td class="option-group" colspan="2">
 <kbd><span class="option">--no-scale-pseudocounts=False</span></kbd></td>
 </tr>
@@ -171,7 +177,7 @@ When <span class="math">\(s_{r,x} &lt; 0\)</span>, then <span class="math">\(x\)
 <div class="section" id="example-usage">
 <h2><a class="toc-backref" href="#id5">Example usage</a><a class="headerlink" href="#example-usage" title="Permalink to this headline">¶</a></h2>
 <p>Let&#8217;s say that <code class="docutils literal"><span class="pre">mock_counts.txt</span></code> has the codon counts in a mock-selected library, and <code class="docutils literal"><span class="pre">antibody_counts</span></code> has these same counts in a library selected with an antibody. To determine selection on the amino acids, you could then run:</p>
-<div class="highlight-default"><div class="highlight"><pre><span class="n">dms_diffselection</span> <span class="n">mock_counts</span><span class="o">.</span><span class="n">txt</span> <span class="n">antibody_counts</span><span class="o">.</span><span class="n">txt</span> <span class="n">antibodyselection_</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">dms_diffselection</span> <span class="n">mock_counts</span><span class="o">.</span><span class="n">txt</span> <span class="n">antibody_counts</span><span class="o">.</span><span class="n">txt</span> <span class="n">antibodyselection_</span>
 </pre></div>
 </div>
 <p>The created files would be <code class="docutils literal"><span class="pre">antibodyselection_mutdiffsel.txt</span></code> and <code class="docutils literal"><span class="pre">antibodyselection_sitediffsel.txt</span></code>.</p>
@@ -183,7 +189,7 @@ When <span class="math">\(s_{r,x} &lt; 0\)</span>, then <span class="math">\(x\)
 <blockquote>
 <div><ul>
 <li><p class="first">The <code class="docutils literal"><span class="pre">*mutdiffsel.txt</span></code> file gives the <span class="math">\(s_{r,x}\)</span> values in a CSV file. These are sorted by <span class="math">\(s_{r,x}\)</span> value. The site number and wildtype character are also indicated. Here are the first few lines of an example file:</p>
-<div class="highlight-default"><div class="highlight"><pre><span class="n">site</span><span class="p">,</span><span class="n">wt</span><span class="p">,</span><span class="n">mut</span><span class="p">,</span><span class="n">diffsel</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">site</span><span class="p">,</span><span class="n">wt</span><span class="p">,</span><span class="n">mut</span><span class="p">,</span><span class="n">diffsel</span>
 <span class="mi">156</span><span class="p">,</span><span class="n">G</span><span class="p">,</span><span class="n">S</span><span class="p">,</span><span class="mf">7.15912988065</span>
 <span class="mi">146</span><span class="p">,</span><span class="n">N</span><span class="p">,</span><span class="n">D</span><span class="p">,</span><span class="mf">6.85510232461</span>
 <span class="mi">157</span><span class="p">,</span><span class="n">K</span><span class="p">,</span><span class="n">S</span><span class="p">,</span><span class="mf">6.78492241017</span>
@@ -193,6 +199,12 @@ When <span class="math">\(s_{r,x} &lt; 0\)</span>, then <span class="math">\(x\)
 <span class="mi">158</span><span class="p">,</span><span class="n">S</span><span class="p">,</span><span class="n">A</span><span class="p">,</span><span class="mf">6.31170638356</span>
 </pre></div>
 </div>
+<p>In these files, the entry for <span class="math">\(x\)</span> equal to the wildtype character is always <code class="docutils literal"><span class="pre">NaN</span></code> (not a number). So for instance, given the data above, we would also have entries like:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="mi">156</span><span class="p">,</span><span class="n">G</span><span class="p">,</span><span class="n">G</span><span class="p">,</span><span class="n">NaN</span>
+<span class="mi">146</span><span class="p">,</span><span class="n">N</span><span class="p">,</span><span class="n">N</span><span class="p">,</span><span class="n">NaN</span>
+</pre></div>
+</div>
+<p>In addition, if <code class="docutils literal"><span class="pre">--mincounts</span></code> is set to something other than zero, then there may be mutations for which an <span class="math">\(s_{r,x}\)</span> value cannot be computed. In that case, that value is also reported as <code class="docutils literal"><span class="pre">NaN</span></code> (not a number) in this output file.</p>
 </li>
 <li><p class="first"><code class="docutils literal"><span class="pre">*sitediffsel.txt</span></code> file summarizes total differential selection on each site. It provides three summary statistics:</p>
 <blockquote>
@@ -203,7 +215,7 @@ When <span class="math">\(s_{r,x} &lt; 0\)</span>, then <span class="math">\(x\)
 </ul>
 </div></blockquote>
 <p>The file gives all three of these quantities for each site, sorted by <em>abs_diffsel</em>. Here are the first few lines of an example file:</p>
-<div class="highlight-default"><div class="highlight"><pre><span class="n">site</span><span class="p">,</span><span class="n">abs_diffsel</span><span class="p">,</span><span class="n">positive_diffsel</span><span class="p">,</span><span class="n">negative_diffsel</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">site</span><span class="p">,</span><span class="n">abs_diffsel</span><span class="p">,</span><span class="n">positive_diffsel</span><span class="p">,</span><span class="n">negative_diffsel</span>
 <span class="mi">157</span><span class="p">,</span><span class="mf">92.5132004464</span><span class="p">,</span><span class="mf">92.5132004464</span><span class="p">,</span><span class="mf">0.0</span>
 <span class="mi">153</span><span class="p">,</span><span class="mf">85.7023127899</span><span class="p">,</span><span class="mf">84.7159706476</span><span class="p">,</span><span class="o">-</span><span class="mf">0.986342142299</span>
 <span class="mi">136</span><span class="p">,</span><span class="mf">56.4005369298</span><span class="p">,</span><span class="mf">56.3664732104</span><span class="p">,</span><span class="o">-</span><span class="mf">0.0340637194023</span>
@@ -212,6 +224,7 @@ When <span class="math">\(s_{r,x} &lt; 0\)</span>, then <span class="math">\(x\)
 <span class="mi">175</span><span class="p">,</span><span class="mf">31.899455678</span><span class="p">,</span><span class="mf">3.79784216691</span><span class="p">,</span><span class="o">-</span><span class="mf">28.1016135111</span>
 </pre></div>
 </div>
+<p>Note that if <code class="docutils literal"><span class="pre">--mincounts</span></code> is not 0, then some of the <span class="math">\(s_{r,x}\)</span> values may be <code class="docutils literal"><span class="pre">NaN</span></code> (not a number). In that case, any characters <span class="math">\(x\)</span> that do not have a value for the <span class="math">\(s_{r,x}\)</span> value do <strong>not</strong> contribute to the sums used to define <em>abs_diffsel</em>, <em>positive_diffsel</em>, and <em>negative_diffsel</em> above (in other words, they are counted as if the differential selection for character <span class="math">\(x\)</span> is 0). If <strong>all</strong> characters have a differential selection of <code class="docutils literal"><span class="pre">NaN</span></code>, then the three summed values shown in this output file are <code class="docutils literal"><span class="pre">NaN</span></code> as well.</p>
 </li>
 </ul>
 </div></blockquote>
@@ -279,13 +292,13 @@ When <span class="math">\(s_{r,x} &lt; 0\)</span>, then <span class="math">\(x\)
         <li class="right" >
           <a href="dms_inferprefs.html" title="dms_inferprefs"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">dms_tools 1.1.15 documentation</a> &raquo;</li>
+        <li class="nav-item nav-item-0"><a href="index.html">dms_tools 1.1.16 documentation</a> &raquo;</li>
           <li class="nav-item nav-item-1"><a href="programs.html" >Programs</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
         &copy; Copyright 2014, Jesse Bloom.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.4.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.5.
     </div>
   </body>
 </html>

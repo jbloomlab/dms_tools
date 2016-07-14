@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>dms_inferprefs &mdash; dms_tools 1.1.15 documentation</title>
+    <title>dms_inferprefs &mdash; dms_tools 1.1.16 documentation</title>
     
     <link rel="stylesheet" href="_static/classic.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '1.1.15',
+        VERSION:     '1.1.16',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="dms_tools 1.1.15 documentation" href="index.html" />
+    <link rel="top" title="dms_tools 1.1.16 documentation" href="index.html" />
     <link rel="up" title="Programs" href="programs.html" />
     <link rel="next" title="dms_diffselection" href="dms_diffselection.html" />
     <link rel="prev" title="Programs" href="programs.html" /> 
@@ -45,7 +45,7 @@
         <li class="right" >
           <a href="programs.html" title="Programs"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">dms_tools 1.1.15 documentation</a> &raquo;</li>
+        <li class="nav-item nav-item-0"><a href="index.html">dms_tools 1.1.16 documentation</a> &raquo;</li>
           <li class="nav-item nav-item-1"><a href="programs.html" accesskey="U">Programs</a> &raquo;</li> 
       </ul>
     </div>  
@@ -79,8 +79,8 @@
 </div>
 <div class="section" id="command-line-usage">
 <h2><a class="toc-backref" href="#id4">Command-line usage</a><a class="headerlink" href="#command-line-usage" title="Permalink to this headline">¶</a></h2>
-<p>Infer site-specific preferences for amino acids, nucleotides, or codons. This script is part of dms_tools (version 1.1.15) written by the Bloom Lab (see <a class="reference external" href="https://github.com/jbloomlab/dms_tools/graphs/contributors">https://github.com/jbloomlab/dms_tools/graphs/contributors</a> for all contributors). Detailed documentation is at <a class="reference external" href="http://jbloomlab.github.io/dms_tools/">http://jbloomlab.github.io/dms_tools/</a></p>
-<div class="highlight-default"><div class="highlight"><pre><span class="n">usage</span><span class="p">:</span> <span class="n">dms_inferprefs</span> <span class="p">[</span><span class="o">-</span><span class="n">h</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">chartype</span> <span class="p">{</span><span class="n">codon_to_aa</span><span class="p">,</span><span class="n">DNA</span><span class="p">,</span><span class="n">codon</span><span class="p">,</span><span class="n">aa</span><span class="p">}]</span>
+<p>Infer site-specific preferences for amino acids, nucleotides, or codons. This script is part of dms_tools (version 1.1.16) written by the Bloom Lab (see <a class="reference external" href="https://github.com/jbloomlab/dms_tools/graphs/contributors">https://github.com/jbloomlab/dms_tools/graphs/contributors</a> for all contributors). Detailed documentation is at <a class="reference external" href="http://jbloomlab.github.io/dms_tools/">http://jbloomlab.github.io/dms_tools/</a></p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">usage</span><span class="p">:</span> <span class="n">dms_inferprefs</span> <span class="p">[</span><span class="o">-</span><span class="n">h</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">chartype</span> <span class="p">{</span><span class="n">codon_to_aa</span><span class="p">,</span><span class="n">DNA</span><span class="p">,</span><span class="n">codon</span><span class="p">,</span><span class="n">aa</span><span class="p">}]</span>
                       <span class="p">[</span><span class="o">--</span><span class="n">errpre</span> <span class="n">ERRPRE</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">errpost</span> <span class="n">ERRPOST</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">excludestop</span><span class="p">]</span>
                       <span class="p">[</span><span class="o">--</span><span class="n">pi_alpha</span> <span class="n">PI_ALPHA</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">mu_alpha</span> <span class="n">MU_ALPHA</span><span class="p">]</span>
                       <span class="p">[</span><span class="o">--</span><span class="n">err_alpha</span> <span class="n">ERR_ALPHA</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">logfile</span> <span class="n">LOGFILE</span><span class="p">]</span>
@@ -227,7 +227,7 @@
 <div class="section" id="do-not-worry-about-informational-messages">
 <h2><a class="toc-backref" href="#id6">Do not worry about Informational Messages</a><a class="headerlink" href="#do-not-worry-about-informational-messages" title="Permalink to this headline">¶</a></h2>
 <p>When you run <code class="docutils literal"><span class="pre">dms_inferprefs</span></code>, you may get a lot of <code class="docutils literal"><span class="pre">Informational</span> <span class="pre">Message</span></code> output on the screen. These messages look like this:</p>
-<div class="highlight-default"><div class="highlight"><pre>Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:
+<div class="highlight-default"><div class="highlight"><pre><span></span>Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:
 stan::prob::dirichlet_log(N4stan5agrad3varE): prior sample sizes[1]  is 0:0, but must be &gt; 0!
 If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,
 but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.
@@ -245,24 +245,24 @@ but if this warning occurs often then your model may be either severely ill-cond
 <div class="section" id="examples">
 <h2><a class="toc-backref" href="#id8">Examples</a><a class="headerlink" href="#examples" title="Permalink to this headline">¶</a></h2>
 <p>Imagine we have data from codon-level mutagenesis of an influenza gene followed by functional sequencing and deep sequencing. We want to determine amino acid preferences. Let&#8217;s say the pre-selection mutant library codon counts are in a file called <code class="docutils literal"><span class="pre">mutDNA_codoncounts.txt</span></code> and the post-selection codon counts are in a file called <code class="docutils literal"><span class="pre">mutvirus_codoncounts.txt</span></code>. If we are <strong>not</strong> trying to account for error rates, we would use the command:</p>
-<div class="highlight-default"><div class="highlight"><pre><span class="n">dms_inferprefs</span> <span class="n">mutDNA_codoncounts</span><span class="o">.</span><span class="n">txt</span> <span class="n">mutvirus_codoncounts</span><span class="o">.</span><span class="n">txt</span> <span class="n">amino_acid_preferences_no_errors</span><span class="o">.</span><span class="n">txt</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">dms_inferprefs</span> <span class="n">mutDNA_codoncounts</span><span class="o">.</span><span class="n">txt</span> <span class="n">mutvirus_codoncounts</span><span class="o">.</span><span class="n">txt</span> <span class="n">amino_acid_preferences_no_errors</span><span class="o">.</span><span class="n">txt</span>
 </pre></div>
 </div>
 <p>The inferred preferences would then be in the created file <code class="docutils literal"><span class="pre">amino_acid_preferences_no_errors.txt</span></code>. The log of the output would be in the file <code class="docutils literal"><span class="pre">amino_acid_preferences_no_errors.log</span></code>.</p>
 <p>The command above would include preferences for 21 different possible amino acids, as stop codons are considered a possible amino acid by default. If you do <strong>not</strong> want stop codons to be considered a possible amino acid (essentially constraining the preference for stop codons to zero), then use:</p>
-<div class="highlight-default"><div class="highlight"><pre><span class="n">dms_inferprefs</span> <span class="o">--</span><span class="n">excludestop</span> <span class="n">mutDNA_codoncounts</span><span class="o">.</span><span class="n">txt</span> <span class="n">mutvirus_codoncounts</span><span class="o">.</span><span class="n">txt</span> <span class="n">amino_acid_preferences_no_errors</span><span class="o">.</span><span class="n">txt</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">dms_inferprefs</span> <span class="o">--</span><span class="n">excludestop</span> <span class="n">mutDNA_codoncounts</span><span class="o">.</span><span class="n">txt</span> <span class="n">mutvirus_codoncounts</span><span class="o">.</span><span class="n">txt</span> <span class="n">amino_acid_preferences_no_errors</span><span class="o">.</span><span class="n">txt</span>
 </pre></div>
 </div>
 <p>If we instead wanted to account for error rates, and we had sequenced unmutated plasmid to generate the codon counts file <code class="docutils literal"><span class="pre">DNA_codoncounts.txt</span></code> and had sequenced unmutated virus to generate the codon counts file <code class="docutils literal"><span class="pre">virus_codoncounts.txt</span></code>, we would use the command:</p>
-<div class="highlight-default"><div class="highlight"><pre><span class="n">dms_inferprefs</span> <span class="o">--</span><span class="n">errpre</span> <span class="n">DNA_codoncounts</span><span class="o">.</span><span class="n">txt</span> <span class="o">--</span><span class="n">errpost</span> <span class="n">virus_codoncounts</span><span class="o">.</span><span class="n">txt</span> <span class="n">mutDNA_codoncounts</span><span class="o">.</span><span class="n">txt</span> <span class="n">mutvirus_codoncounts</span><span class="o">.</span><span class="n">txt</span> <span class="n">amino_acid_preferences_corrected_for_errors</span><span class="o">.</span><span class="n">txt</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">dms_inferprefs</span> <span class="o">--</span><span class="n">errpre</span> <span class="n">DNA_codoncounts</span><span class="o">.</span><span class="n">txt</span> <span class="o">--</span><span class="n">errpost</span> <span class="n">virus_codoncounts</span><span class="o">.</span><span class="n">txt</span> <span class="n">mutDNA_codoncounts</span><span class="o">.</span><span class="n">txt</span> <span class="n">mutvirus_codoncounts</span><span class="o">.</span><span class="n">txt</span> <span class="n">amino_acid_preferences_corrected_for_errors</span><span class="o">.</span><span class="n">txt</span>
 </pre></div>
 </div>
 <p>If we ran that command and it was taking too long, we might want to use more CPUs if we have multi-core processors. If we want to use 12 CPUs, we would run:</p>
-<div class="highlight-default"><div class="highlight"><pre><span class="n">dms_inferprefs</span> <span class="o">--</span><span class="n">ncpus</span> <span class="mi">12</span> <span class="o">--</span><span class="n">errpre</span> <span class="n">DNA_codoncounts</span><span class="o">.</span><span class="n">txt</span> <span class="o">--</span><span class="n">errpost</span> <span class="n">virus_codoncounts</span><span class="o">.</span><span class="n">txt</span> <span class="n">mutDNA_codoncounts</span><span class="o">.</span><span class="n">txt</span> <span class="n">mutvirus_codoncounts</span><span class="o">.</span><span class="n">txt</span> <span class="n">amino_acid_preferences_no_errors</span><span class="o">.</span><span class="n">txt</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">dms_inferprefs</span> <span class="o">--</span><span class="n">ncpus</span> <span class="mi">12</span> <span class="o">--</span><span class="n">errpre</span> <span class="n">DNA_codoncounts</span><span class="o">.</span><span class="n">txt</span> <span class="o">--</span><span class="n">errpost</span> <span class="n">virus_codoncounts</span><span class="o">.</span><span class="n">txt</span> <span class="n">mutDNA_codoncounts</span><span class="o">.</span><span class="n">txt</span> <span class="n">mutvirus_codoncounts</span><span class="o">.</span><span class="n">txt</span> <span class="n">amino_acid_preferences_no_errors</span><span class="o">.</span><span class="n">txt</span>
 </pre></div>
 </div>
 <p><a class="reference external" href="http://en.wikipedia.org/wiki/Markov_chain_Monte_Carlo">MCMC</a> is a stochastic algorithm. If we wanted to re-run it with a different random number seed to ensure we get the same results, we could use a different random number seed:</p>
-<div class="highlight-default"><div class="highlight"><pre><span class="n">dms_inferprefs</span> <span class="o">--</span><span class="n">seed</span> <span class="mi">2</span> <span class="o">--</span><span class="n">ncpus</span> <span class="mi">12</span> <span class="o">--</span><span class="n">errpre</span> <span class="n">DNA_codoncounts</span><span class="o">.</span><span class="n">txt</span> <span class="o">--</span><span class="n">errpost</span> <span class="n">virus_codoncounts</span><span class="o">.</span><span class="n">txt</span> <span class="n">mutDNA_codoncounts</span><span class="o">.</span><span class="n">txt</span> <span class="n">mutvirus_codoncounts</span><span class="o">.</span><span class="n">txt</span> <span class="n">amino_acid_preferences_no_errors</span><span class="o">.</span><span class="n">txt</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">dms_inferprefs</span> <span class="o">--</span><span class="n">seed</span> <span class="mi">2</span> <span class="o">--</span><span class="n">ncpus</span> <span class="mi">12</span> <span class="o">--</span><span class="n">errpre</span> <span class="n">DNA_codoncounts</span><span class="o">.</span><span class="n">txt</span> <span class="o">--</span><span class="n">errpost</span> <span class="n">virus_codoncounts</span><span class="o">.</span><span class="n">txt</span> <span class="n">mutDNA_codoncounts</span><span class="o">.</span><span class="n">txt</span> <span class="n">mutvirus_codoncounts</span><span class="o">.</span><span class="n">txt</span> <span class="n">amino_acid_preferences_no_errors</span><span class="o">.</span><span class="n">txt</span>
 </pre></div>
 </div>
 </div>
@@ -329,13 +329,13 @@ but if this warning occurs often then your model may be either severely ill-cond
         <li class="right" >
           <a href="programs.html" title="Programs"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">dms_tools 1.1.15 documentation</a> &raquo;</li>
+        <li class="nav-item nav-item-0"><a href="index.html">dms_tools 1.1.16 documentation</a> &raquo;</li>
           <li class="nav-item nav-item-1"><a href="programs.html" >Programs</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
         &copy; Copyright 2014, Jesse Bloom.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.4.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.5.
     </div>
   </body>
 </html>
