@@ -831,6 +831,7 @@ def BuildReadConsensus(reads, minreadidentity, minreadconcurrence, maxreadtrim, 
     >>> BuildReadConsensus(reads, 0.75, 0.6, 1)
     ('NTGC', 'CGAN')
     """
+    reads = sorted(reads) # since we compare to first read, sort to make output reproducible
     if use_cutils:
         return dms_tools.cutils.BuildReadConsensus(reads, minreadidentity, minreadconcurrence, maxreadtrim)
     assert len(reads) >= 2, "reads must have at least two entries"

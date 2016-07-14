@@ -7,6 +7,8 @@ Changelog
 
 * Added test (``./tests/test_diffselection.py``) for ``dms_diffselection``
 
+* ``dms_barcodedsubamplicons`` now gives exactly reproducible output regardless of order of input reads. 
+
 1.1.15
 -------
 * In ``dms_diffselection``, the pseudocounts are now scaled by the **smaller** depth library at each site.
