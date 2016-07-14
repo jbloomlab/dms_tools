@@ -1,4 +1,4 @@
-__version__ = '1.1.dev16'
+__version__ = '1.1.16'
 __author__ = 'the Bloom Lab (see https://github.com/jbloomlab/dms_tools/graphs/contributors for all contributors)'
 __url__ = 'http://jbloomlab.github.io/dms_tools/'
 __author_email__ = 'jbloom@fredhutch.org'
