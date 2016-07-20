@@ -69,7 +69,7 @@ def Versions():
             '\tPython version: %s' % sys.version.replace('\n', ' '),
             '\tdms_tools version: %s' % dms_tools.__version__,
             ]
-    for modname in ['Bio', 'numpy', 'scipy', 'matplotlib', 'cython', 'pystan', 'weblogolib', 'PyPDF2']:
+    for modname in ['Bio', 'numpy', 'scipy', 'matplotlib', 'cython', 'pystan', 'weblogolib', 'PyPDF2', 'pandas']:
         try:
             v = importlib.import_module(modname).__version__
             s.append('\t%s version: %s' % (modname, v))

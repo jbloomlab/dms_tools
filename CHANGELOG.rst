@@ -1,6 +1,10 @@
 Changelog
 ===========
 
+1.1.dev17
+----------
+* Print versions of all external packages (some were overlooked before)
+
 1.1.16
 --------
 * Added ``--mincounts`` option to ``dms_diffselection``, and make ``dms_logoplot`` properly plot differential selection with missing values.
