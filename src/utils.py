@@ -1242,9 +1242,8 @@ def ParseNSMutFreqBySite(countsfile, chartype):
     elif chartype.upper() == 'AMINOACIDS_NOSTOP' or chartype.upper() == 'AMINOACIDS_WITHSTOP':
         translate_to_aa = False
     countsdict = dms_tools.file_io.ReadDMSCounts(countsfile, chartype, translate_codon_to_aa = translate_to_aa)
-    convert = lambda text: int(text) if text.isdigit() else text.lower() 
-    alphanum_key = lambda key: [ convert(c) for c in re.split('([0-9]+)', key) ]
-    sites = sorted(countsdict.keys(), key = alphanum_key)
+    sites = countsdict.keys()
+    dms_tools.utils.NaturalSort(sites)
     tuplist = []
     for site in sites:
         wt_aa = countsdict[site]['WT']

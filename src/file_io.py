@@ -423,9 +423,8 @@ def ReadDMSCounts(f, chartype, translate_codon_to_aa=False, return_as_df=False):
         [custom_index.append('F_%s' % c) for c in characters]
         series_dict = {}
         
-        convert = lambda text: int(text) if text.isdigit() else text.lower() 
-        alphanum_key = lambda key: [ convert(c) for c in re.split('([0-9]+)', key) ]
-        sites = sorted(counts.keys(), key = alphanum_key)
+        sites = counts.keys()
+        dms_tools.utils.NaturalSort(sites)
         for site in sites:
             series_dict[site] = pd.Series(counts[site], index=custom_index)
         counts = pd.DataFrame(series_dict, columns=sites)
