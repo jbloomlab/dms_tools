@@ -8,6 +8,8 @@ Written by Jesse Bloom."""
 import sys
 import os
 import time
+import math
+import pandas
 import dms_tools.utils
 import dms_tools.parsearguments
 import dms_tools.file_io
@@ -46,6 +48,7 @@ def main():
     sumtype = ''
     if not args['minus']:
         args['minus'] = [] # reassign from None to empty list
+
     try:
         (sites, characters, wts, databyfile) = dms_tools.file_io.ReadMultiPrefOrDiffPref(\
             args['infiles'] + args['minus'], args['excludestop'])
@@ -68,19 +71,57 @@ def main():
             raise ValueError("Invalid chartype of %s" % args['chartype'])
         try:
             (sites, wts, counts) = dms_tools.file_io.ReadMultipleDMSCountsFiles(args['infiles'], chartype)
+            filetypes = dict([(fname, 'counts') for fname in args['infiles']])
+            print "\nHere are the apparent file types of the input files:\n%s\n" % '\n'.join(['%s is %s' % tup for tup in filetypes.iteritems()])
+            sums = dms_tools.utils.SumCounts([counts[fname] for fname in args['infiles']], chartype, args['normalize'])
+            sumtype = 'counts'
         except:
-            raise IOError("input files are not valid preferences, differential preferences, or counts files")
-
+            try:
+                # read differential selection values
+                diffsels = [pandas.read_csv(infile) for infile in args['infiles']]
+                expectedcolumns = set(['site', 'wt', 'mut', 'diffsel'])
+                assert all([set(diffsel.columns.values) == expectedcolumns for diffsel in diffsels]), "files did not have expected columns."
+            except:
+                raise IOError("input files are not valid preferences, mutation-level differential selection, differential preferences, or counts files")
+            assert args['merge_method'] == 'average', "Must use merge_method of sum with differential selection"
+            diffsel = reduce(lambda left,right: pandas.merge(left,right,on=['site', 'wt', 'mut']), diffsels)
+            diffsel_columns = ['diffsel_{0}'.format(i) for i in range(len(diffsels))]
+            diffsel.columns = ['site', 'wt', 'mut'] + diffsel_columns
+            diffsel['diffsel'] = diffsel[diffsel_columns].mean(axis=1, skipna=False)
+            diffsel = diffsel.sort_values('diffsel', ascending=False)
+            diffsel = diffsel.drop(diffsel_columns, axis=1)
+            print("\nAll files specified differential selection.")
+            print("Writing average differential selection to {0}".format(args['outfile']))
+            diffsel.to_csv(args['outfile'], index=False)
+            if args['sitediffselfile']:
+                sites = sorted(set(diffsel['site']))
+                totseldict = {'site':sites}
+                columns = ['site']
+                for (description, func) in [
+                        ('abs_diffsel', lambda x : 0 if math.isnan(x) else abs(x)),
+                        ('positive_diffsel', lambda x : 0 if math.isnan(x) else max(0, x)),
+                        ('negative_diffsel', lambda x : 0 if math.isnan(x) else min(0, x))]:
+                    totseldict[description] = []
+                    for r in sites:
+                        rdata = diffsel.loc[diffsel['site'] == r]['diffsel']
+                        if all(map(math.isnan, rdata)):
+                            totseldict[description].append(float('NaN'))
+                        else:
+                            totseldict[description].append(sum(map(func, rdata)))
+                    columns.append(description)
+                totsel = pandas.DataFrame(totseldict, columns=columns)
+                totsel.sort_values('abs_diffsel', ascending=False, inplace=True)
+                print("Writing average site differential selection to {0}".format(args['sitediffselfile']))
+                totsel.to_csv(args['sitediffselfile'], index=False, na_rep='NaN')
+            print('\nSuccessfully completed %s at %s' % (prog, time.asctime()))
+            sys.exit(0)
+        # continuing here with counts
         if args['merge_method'] != 'sum':
-            raise ValueError("When summing counts, merge_method must be set to sum")
+            raise ValueError("When summing counts or differential selection, merge_method must be set to sum")
         if args['minus']:
-            raise ValueError("Count files may not be subtracted from one another")
+            raise ValueError("Count files or differential selection cannot be subtracted from one another")
         if args['excludestop'] and args['chartype'].lower() != 'aa':
-            raise ValueError("When using --excludestop and summing counts, --chartype of counts must be aa")
-        filetypes = dict([(fname, 'counts') for fname in args['infiles']])
-        print "\nHere are the apparent file types of the input files:\n%s\n" % '\n'.join(['%s is %s' % tup for tup in filetypes.iteritems()])
-        sums = dms_tools.utils.SumCounts([counts[fname] for fname in args['infiles']], chartype, args['normalize'])
-        sumtype = 'counts'
+            raise ValueError("When using --excludestop and summing counts or differential selection, --chartype of counts must be aa")
 
     # finish merging, and create outfile
     if args['merge_method'] == 'average':

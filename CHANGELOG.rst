@@ -5,6 +5,8 @@ Changelog
 ----------
 * Print versions of all external packages (some were overlooked before)
 
+* Make ``dms_merge`` handle the ``*mutdiffsel.txt`` files created by ``dms_diffselection``.
+
 1.1.16
 --------
 * Added ``--mincounts`` option to ``dms_diffselection``, and make ``dms_logoplot`` properly plot differential selection with missing values.

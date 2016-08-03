@@ -1,0 +1,13 @@
+barcodes (total) = 35
+barcodes successfully subassembled = 8
+barcodes with at least one alignable read = 34
+read pairs (total) = 640
+read pairs aligned at site 1 = 319
+read pairs aligned at site 61 = 319
+read pairs purged due to low quality = 0
+read pairs that are alignable = 638
+read pairs that are alignable and map to a subassembled barcode = 606
+read pairs that are unalignable = 2
+read pairs that fail Illumina filter = 0
+sites with insufficient concurrence due to mismatch between mutant and wildtype characters = 0
+sites with insufficient concurrence due to mismatch between two mutant characters = 0
