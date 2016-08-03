@@ -7,6 +7,8 @@ Changelog
 
 * Make ``dms_merge`` handle the ``*mutdiffsel.txt`` files created by ``dms_diffselection``.
 
+* Added ``translate_codon_to_aa`` and ``return_as_df`` options to dms_tools.file_io.ReadDMSCounts().
+
 1.1.16
 --------
 * Added ``--mincounts`` option to ``dms_diffselection``, and make ``dms_logoplot`` properly plot differential selection with missing values.

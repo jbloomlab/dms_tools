@@ -619,8 +619,12 @@ def AvgMutRate(counts, chartype):
 def SumCodonToAA(codondict, includestop=True):
     """Sums all codon entries for each amino acid.
 
-    *codondict* is a dictionary keyed by all codons (*dms_tools.codons*).
-    The values should be numbers.
+    *codondict* is a dictionary keyed by all codons (*dms_tools.codons*),
+    with values being counts.
+
+    Note that this is NOT a dictionary of the form returned by 
+    dms_tools.file_io.ReadDMSCounts(), which has sites as keys and
+    codondicts as values.
 
     *includestop* specifies whether we also sum values for stop codons to
     give an entry for ``*`` (the stop codon). Do this only if has default

@@ -51,7 +51,7 @@ import subprocess
 import gzip
 import dms_tools
 import dms_tools.utils
-
+import pandas as pd
 
 
 def Versions():
@@ -185,7 +185,7 @@ def WriteDMSCounts(f, counts):
         raise
 
 
-def ReadDMSCounts(f, chartype):
+def ReadDMSCounts(f, chartype, translate_codon_to_aa=False, return_as_df=False):
     """Reads deep mutational scanning counts.
 
     *f* is a readable file-like object that contains the counts, or 
@@ -205,10 +205,16 @@ def ReadDMSCounts(f, chartype):
 
     The counts are returned in the dictionary *counts*. The dictionary
     is keyed by **strings** giving the position (e.g. '1', '2', or '5A').
-    For each position *r*, *strings[r]* is a dictionary keyed by the
-    string *WT* and all characters (nucleotides or codons) as specified
+    For each position *r*, *counts[r]* is a dictionary keyed by the
+    string *WT* and all characters (nucleotides, codons, or amino-acids) as specified
     by *chartype*, in upper case. *counts[r]['WT']* is the wildtype identity
     at the site; *counts[r][x]* is the number of counts for character *x*.
+    Alternatively, if *return_as_df* is set as *True*, the counts are returned
+    as a pandas dataframe.
+
+    If *chartype* is *codon* and the option *translate_codon_to_aa* is set as
+    True, then the returned counts will be for amino-acids as translated
+    by the codon counts.
 
     The specifications on the format of the contents of *f* are as follows:
 
@@ -328,6 +334,8 @@ def ReadDMSCounts(f, chartype):
         characters = dms_tools.aminoacids_withstop
     else:
         raise ValueError("Invalid chartype of %s" % chartype)
+    if translate_codon_to_aa and chartype.upper() != 'CODON':
+        raise ValueError("Can't use translate codon to aa option if chartype is not codon.")
     characterindices = dict([(char, False) for char in characters])
     openedfile = False
     if isinstance(f, str):
@@ -386,6 +394,42 @@ def ReadDMSCounts(f, chartype):
                         raise
     if openedfile:
         f.close()
+
+    # add a new key, 'COUNTS', to each site's counts dict. This is the total number of counts at the site.
+    for site in counts.keys():
+        total_counts = 0
+        for c in characters:
+            total_counts += counts[site][c]
+        counts[site]['COUNTS'] = total_counts
+
+    if translate_codon_to_aa:
+        new_counts_dict = {}
+        for site in counts.keys():
+            siteaacountsdict = dms_tools.utils.SumCodonToAA(counts[site])
+            siteaacountsdict['WT'] = dms_tools.codon_to_aa[counts[site]['WT']]
+            siteaacountsdict['COUNTS'] = counts[site]['COUNTS']
+            new_counts_dict[site] = siteaacountsdict
+        counts =  new_counts_dict
+        characters = dms_tools.aminoacids_withstop
+
+    # add keys for the frequency of each character at each site, F_x:
+    for site in counts.keys():
+        for c in characters:
+            counts[site]['F_%s' % c] = float(counts[site][c])/counts[site]['COUNTS']
+
+    if return_as_df:
+        custom_index = ['COUNTS', 'WT']
+        [custom_index.append(c) for c in characters]
+        [custom_index.append('F_%s' % c) for c in characters]
+        series_dict = {}
+        
+        convert = lambda text: int(text) if text.isdigit() else text.lower() 
+        alphanum_key = lambda key: [ convert(c) for c in re.split('([0-9]+)', key) ]
+        sites = sorted(counts.keys(), key = alphanum_key)
+        for site in sites:
+            series_dict[site] = pd.Series(counts[site], index=custom_index)
+        counts = pd.DataFrame(series_dict, columns=sites)
+
     return counts
 
 
