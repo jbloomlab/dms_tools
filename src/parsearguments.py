@@ -356,6 +356,7 @@ def CorrelateParser():
     parser.set_defaults(enrichment=False)
     parser.add_argument('--enrichment', dest='enrichment', action='store_true', help='If this option is set, we plot the enrichment ratio for all mutations on a log scale rather than plotting the preferences. The computed correlations are also then for the log-transformed enrichment ratios. The enrichment ratio for the wildtype identity is always one, and so is not included.')
     parser.add_argument('-v', '--version', action='version', version='%(prog)s {version}'.format(version=dms_tools.__version__))
+    parser.add_argument('--restrictdiffsel', default='None', help='A optional string specifying "positive" or "negative" to restrict the plotted correlation in site differential selection to positive or negative selection. Only meaningful if file1 and file2 are sitediffsel files.')
     return parser
 
 

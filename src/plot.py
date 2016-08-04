@@ -197,7 +197,7 @@ def PlotCorrelation(xs, ys, plotfile, xlabel, ylabel, logx=False, logy=False,\
     matplotlib.rc('legend', fontsize=10)
     figure = pylab.figure(figsize=(xsize, ysize), facecolor='white')
     ax = pylab.axes([lmargin, bmargin, 1.0 - lmargin - rmargin, 1.0 - tmargin - bmargin])
-    pylab.plot(xs, ys, marker_style, markersize=marker_size, alpha=alpha)
+    pylab.plot(xs, ys, marker_style, markersize=marker_size, alpha=alpha, mew=0)
     if additionalxy:
         if len(additionalxy) != 1:
             raise ValueError("Currently additionalxy only works for one additional set of data")

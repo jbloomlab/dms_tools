@@ -11,6 +11,8 @@ Changelog
 
 * Added ``dms_tools.utils.ParseNSMutFreqBySite()``.
 
+* Make ``dms_correlate`` handle the ``mutdiffsel.txt`` and ``sitediffsel.txt``  files created by ``dms_diffselection``.
+
 1.1.16
 --------
 * Added ``--mincounts`` option to ``dms_diffselection``, and make ``dms_logoplot`` properly plot differential selection with missing values.
