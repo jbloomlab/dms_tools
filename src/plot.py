@@ -103,13 +103,12 @@ def Base10Formatter(number, exp_cutoff, exp_decimal_digits, decimal_digits):
 
 
 def PlotCorrelation(xs, ys, plotfile, xlabel, ylabel, logx=False, logy=False,\
-        corr=None, title=False, alpha=1.0, symmetrize=False, fixaxes=False, additionalxy=[], bigmargin=0.29, xsize=1.8, r2=False):
+        corr=None, title=False, alpha=1.0, symmetrize=False, fixaxes=False, additionalxy=[], bigmargin=0.29, xsize=1.8, r2=False,
+        marker_style='b.', additional_marker_style='r^', marker_size=4, additional_marker_size=3):
     """Plots the correlation between two variables as a scatter plot.
     
     The data is plotted as a scatter plot.
-
     This function uses ``pylab`` / ``matplotlib``. 
-
     The calling variables use LaTex format for strings. So for
     example, '$10^5$' will print the LaTex equivalent of this 
     string. Similarly, certain raw text strings (such as those
@@ -118,41 +117,30 @@ def PlotCorrelation(xs, ys, plotfile, xlabel, ylabel, logx=False, logy=False,\
     will cause a problem since underscore is not valid
     outside of math mode in LaTex, so you would need to use
     'x\_label' to escape the underscore.
-
     CALLING VARIABLES:
-
     * *xs* and *ys* are lists of numbers, with the lists
       being of the same length. Entry *xs[i]* is plotted
       on the x-axis against entries *ys[i]* on the y-axis.
-
     * *plotfile* is a string giving the name of the plot PDF file
       that we create. It should end in the extension ``.pdf``.
       If this plot already exists, it is overwritten.
-
     * *xlabel* is a string giving the label placed on the x-axis.
-
     * *ylabel* is a string giving the label placed on the y-axis.
-
     * *logx* specifies that we log transform the data in *xs*.
       This is *False* by default; set to *True* if you want
       to log transform (base 10 logarithms) the data.
-
     * *logy* is like *logx*, but for the data in *ys*.
-
     * *corr* specifies that we include a correlation coefficient on the
       plot. If it has its default value of *None*, then no correlation
       coefficient is included. Otherwise, *corr = (r, p)* where *r* is
       the correlation coefficient (displayed with the label ``R``) and *p*
       is the P-value (displayed with the label ``P``).
-
     * *r2* : if *True* and using *corr*, then display :math:`R^2` rather
       than :math:`R`.
-
     * *title* is a string giving the title placed above the plot. 
       It can be *False* if no title is to be used. Otherwise, it should
       be the title string (using LaTex formatting, spaces are allowed).
       Is *False* by default.
-
     * *alpha* is the transparency of the plotted points. By default
       it is one, which means that there is no transparency. If you make
       the value closer to zero, then the points become partially transparent.
@@ -161,10 +149,8 @@ def PlotCorrelation(xs, ys, plotfile, xlabel, ylabel, logx=False, logy=False,\
       At any position on the plot, the intensity will be saturated
       when there are 1.0 / alpha points plotted. So a reasonable value
       of *alpha* might be something like 0.1.
-
     * *symmetrize* is an optional argument that is *False* by default.
       If *True*, we make the X and Y limits on the plot the same.
-
     * *fixaxes* is an optional argument that is *False* by default.
       If *True*, we fix both the X and Y axes to go from 0 to 1, 
       with ticks at 0, 0.5, and 1. If you set this option to *True*,
@@ -180,14 +166,17 @@ def PlotCorrelation(xs, ys, plotfile, xlabel, ylabel, logx=False, logy=False,\
       triangles, whereas the main data is plotted as blue
       circles. The same *alpha* value set by the *alpha* parameter applies
       to these points as well. 
-
     * *bigmargin* is an optional argument that is 0.26 by default. It is
       the fraction of the plot width taken up by the larger margin, which
       is the bottom and left. Make larger if you need more space for axis
       labels.
-
     * *xsize* is an optional argument that is the width of the plot in inches.
       It is 1.8 by default.
+    * *marker_style* and *additional_marker_style* are optional arguments to 
+      change the color/style of the marker for the main and additional data points,
+      respectively. See the matplotlib documentation for a full explanation.
+    * *marker_size* and *additional_marker_size* are optional arguments to
+      set the size of the markers.
     """
     if not os.path.splitext(plotfile)[1].upper() == '.PDF':
         raise ValueError("plotfile does not end in PDF extension: %s " % plotfile)
@@ -208,7 +197,7 @@ def PlotCorrelation(xs, ys, plotfile, xlabel, ylabel, logx=False, logy=False,\
     matplotlib.rc('legend', fontsize=10)
     figure = pylab.figure(figsize=(xsize, ysize), facecolor='white')
     ax = pylab.axes([lmargin, bmargin, 1.0 - lmargin - rmargin, 1.0 - tmargin - bmargin])
-    pylab.plot(xs, ys, 'b.', markersize=4, alpha=alpha)
+    pylab.plot(xs, ys, marker_style, markersize=marker_size, alpha=alpha)
     if additionalxy:
         if len(additionalxy) != 1:
             raise ValueError("Currently additionalxy only works for one additional set of data")
@@ -216,7 +205,7 @@ def PlotCorrelation(xs, ys, plotfile, xlabel, ylabel, logx=False, logy=False,\
         assert len(x2s) == len(y2s) > 0, "additionalxy does not specify two non-empty data lists of equal length"
         xs += x2s # add for later correlation and limit calculations
         ys += y2s
-        pylab.plot(x2s, y2s, 'r^', markersize=3, alpha=alpha)
+        pylab.plot(x2s, y2s, additional_marker_style, markersize=additional_marker_size, alpha=alpha)
     (xmin, xmax, ymin, ymax) = (min(xs), max(xs), min(ys), max(ys))
     if fixaxes:
         xmin = ymin = 0.0
@@ -267,6 +256,12 @@ def PlotCorrelation(xs, ys, plotfile, xlabel, ylabel, logx=False, logy=False,\
         xticker = matplotlib.ticker.FixedLocator([0, 0.5, 1])
     else:
         xticker = matplotlib.ticker.MaxNLocator(4)
+        
+    spineOffset = {'left': 3, 'bottom': 3}    
+    [spine.set_position(('outward',spineOffset[loc])) if loc in ['left','bottom'] else spine.set_color('none') for loc, spine in ax.spines.items() ] 
+    ax.tick_params(axis='x', direction='out')
+    ax.tick_params(axis='y', direction='out')
+    
     pylab.gca().xaxis.set_major_locator(xticker)
     pylab.gca().get_xaxis().tick_bottom()
     pylab.gca().get_yaxis().tick_left()
