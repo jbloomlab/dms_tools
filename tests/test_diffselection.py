@@ -7,6 +7,7 @@ import sys
 import os
 import unittest
 import subprocess
+import numpy
 import pandas
 
 
@@ -42,13 +43,15 @@ class TestDiffSelection(unittest.TestCase):
                 cmds = ['dms_diffselection', self.mock, selected, outprefix, '--mincounts', str(mincounts)]
                 sys.stderr.write('\nRunning the following command:\n%s\n' % ' '.join(cmds))
                 subprocess.check_call(cmds)
-                for suffix in ['mutdiffsel.txt', 'sitediffsel.txt']:
+                for (suffix, columntotest) in [
+                        ('mutdiffsel.txt', 'diffsel'),
+                        ('sitediffsel.txt', 'abs_diffsel')]:
                     f = outprefix + suffix
                     self.assertTrue(os.path.isfile(f), 'Failed to create {0} with command:\n{1}\n'.format(f, ' '.join(cmds)))
                     df = pandas.read_csv(f)
                     expected_f = '{0}/{1}_mincounts{2}{3}'.format(self.expecteddir, c, mincounts, suffix)
                     expected_df = pandas.read_csv(expected_f)
-                    self.assertTrue(df.equals(expected_df), "Did not get expected results for comparing {0} and {1}".format(f, expected_f))
+                    self.assertTrue(numpy.allclose(numpy.nan_to_num(df[columntotest].values), numpy.nan_to_num(expected_df[columntotest].values)), "Did not get expected results for comparing {0} and {1}".format(f, expected_f))
 
 
 if __name__ == '__main__':
