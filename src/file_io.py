@@ -221,7 +221,9 @@ def ReadDMSCounts(f, chartype, translate_codon_to_aa=False, return_as_df=False):
     at the site; *counts[r][x]* is the number of counts for character *x*.
     In addition, *counts[r]['F_{0}'.format(x)]*
     is the frequency of counts of *x*, and *counts[r]['COUNTS']* is
-    the total number of counts at site *r*.
+    the total number of counts at site *r*. If there are no counts at a site,
+    the frequency of counts for each character *x* at the site is set to 
+    float(NaN).
 
     Alternatively, if *return_as_df* is set as *True*, the counts are returned
     as a pandas dataframe. 
@@ -429,7 +431,10 @@ def ReadDMSCounts(f, chartype, translate_codon_to_aa=False, return_as_df=False):
     # add keys for the frequency of each character at each site, F_x:
     for site in counts.keys():
         for c in characters:
-            counts[site]['F_%s' % c] = float(counts[site][c])/counts[site]['COUNTS']
+            try:
+                counts[site]['F_%s' % c] = float(counts[site][c])/counts[site]['COUNTS']
+            except ZeroDivisionError:
+                counts[site]['F_%s' % c] = float('NaN')
 
     if return_as_df:
         custom_index = ['COUNTS', 'WT']
