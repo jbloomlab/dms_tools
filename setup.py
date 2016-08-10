@@ -50,7 +50,7 @@ setup(
         'biopython>=1.6',
         'scipy>=0.13',
         'numpy>=1.8',
-        'matplotlib>=1.3',
+        'matplotlib>=1.5',
         'pystan>=2.5',
         'cython>=0.21',
         'weblogo==3.4',
