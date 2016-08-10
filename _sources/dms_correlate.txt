@@ -8,7 +8,7 @@
 
 Overview
 -------------
-``dms_correlate`` is a program included with the `dms_tools`_ package. It computes the correlations between pairs of preferences or differential preferences.
+``dms_correlate`` is a program included with the `dms_tools`_ package. It computes the correlations between pairs of preferences, differential preferences, or differential selections.
 
 After you install `dms_tools`_, this program will be available to run at the command line. 
 

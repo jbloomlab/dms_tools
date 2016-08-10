@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Python API &mdash; dms_tools 1.1.16 documentation</title>
+    <title>Python API &mdash; dms_tools 1.1.17 documentation</title>
     
     <link rel="stylesheet" href="_static/classic.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '1.1.16',
+        VERSION:     '1.1.17',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="dms_tools 1.1.16 documentation" href="index.html" />
+    <link rel="top" title="dms_tools 1.1.17 documentation" href="index.html" />
     <link rel="next" title="Citations and Acknowledgments" href="citations.html" />
     <link rel="prev" title="Algorithm to infer differential preferences" href="inferdiffprefs_algorithm.html" /> 
   </head>
@@ -44,7 +44,7 @@
         <li class="right" >
           <a href="inferdiffprefs_algorithm.html" title="Algorithm to infer differential preferences"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">dms_tools 1.1.16 documentation</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">dms_tools 1.1.17 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -611,7 +611,7 @@ headers are of the type written by the Illumina Casava 1.8 pipeline.</li>
 
 <dl class="function">
 <dt id="file_io.ReadDMSCounts">
-<code class="descclassname">file_io.</code><code class="descname">ReadDMSCounts</code><span class="sig-paren">(</span><em>f</em>, <em>chartype</em><span class="sig-paren">)</span><a class="headerlink" href="#file_io.ReadDMSCounts" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">file_io.</code><code class="descname">ReadDMSCounts</code><span class="sig-paren">(</span><em>f</em>, <em>chartype</em>, <em>translate_codon_to_aa=False</em>, <em>return_as_df=False</em><span class="sig-paren">)</span><a class="headerlink" href="#file_io.ReadDMSCounts" title="Permalink to this definition">¶</a></dt>
 <dd><p>Reads deep mutational scanning counts.</p>
 <p><em>f</em> is a readable file-like object that contains the counts, or 
 a string that gives the name of a file.</p>
@@ -628,10 +628,20 @@ defined in this module.</li>
 </div></blockquote>
 <p>The counts are returned in the dictionary <em>counts</em>. The dictionary
 is keyed by <strong>strings</strong> giving the position (e.g. &#8216;1&#8217;, &#8216;2&#8217;, or &#8216;5A&#8217;).
-For each position <em>r</em>, <em>strings[r]</em> is a dictionary keyed by the
-string <em>WT</em> and all characters (nucleotides or codons) as specified
+For each position <em>r</em>, <em>counts[r]</em> is a dictionary keyed by the
+string <em>WT</em> and characters (nucleotides, codons, or amino-acids) specified
 by <em>chartype</em>, in upper case. <em>counts[r][&#8216;WT&#8217;]</em> is the wildtype identity
-at the site; <em>counts[r][x]</em> is the number of counts for character <em>x</em>.</p>
+at the site; <em>counts[r][x]</em> is the number of counts for character <em>x</em>.
+In addition, <em>counts[r][&#8216;F_{0}&#8217;.format(x)]</em>
+is the frequency of counts of <em>x</em>, and <em>counts[r][&#8216;COUNTS&#8217;]</em> is
+the total number of counts at site <em>r</em>. If there are no counts at a site,
+the frequency of counts for each character <em>x</em> at the site is set to 
+float(NaN).</p>
+<p>Alternatively, if <em>return_as_df</em> is set as <em>True</em>, the counts are returned
+as a pandas dataframe.</p>
+<p>If <em>chartype</em> is <em>codon</em> and the option <em>translate_codon_to_aa</em> is set as
+True, then the returned counts will be for amino-acids as translated
+by the codon counts.</p>
 <p>The specifications on the format of the contents of <em>f</em> are as follows:</p>
 <blockquote>
 <div><ul>
@@ -911,6 +921,16 @@ These counts are written to <em>f</em>.</p>
 <p>There is no <em>chartype</em> argument &#8211; that is automatically determined from
 <em>counts</em>.</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">counts</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;1&#39;</span><span class="p">:{</span><span class="s1">&#39;A&#39;</span><span class="p">:</span><span class="mi">2</span><span class="p">,</span> <span class="s1">&#39;C&#39;</span><span class="p">:</span><span class="mi">3</span><span class="p">,</span> <span class="s1">&#39;G&#39;</span><span class="p">:</span><span class="mi">4</span><span class="p">,</span> <span class="s1">&#39;T&#39;</span><span class="p">:</span><span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;WT&#39;</span><span class="p">:</span><span class="s1">&#39;A&#39;</span><span class="p">},</span> <span class="s1">&#39;2&#39;</span><span class="p">:{</span><span class="s1">&#39;A&#39;</span><span class="p">:</span><span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;C&#39;</span><span class="p">:</span><span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;G&#39;</span><span class="p">:</span><span class="mi">3</span><span class="p">,</span> <span class="s1">&#39;T&#39;</span><span class="p">:</span><span class="mi">4</span><span class="p">,</span> <span class="s1">&#39;WT&#39;</span><span class="p">:</span><span class="s1">&#39;C&#39;</span><span class="p">}}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">counts</span><span class="p">[</span><span class="s1">&#39;1&#39;</span><span class="p">][</span><span class="s1">&#39;COUNTS&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">10</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">counts</span><span class="p">[</span><span class="s1">&#39;2&#39;</span><span class="p">][</span><span class="s1">&#39;COUNTS&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">9</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">counts</span><span class="p">[</span><span class="s1">&#39;1&#39;</span><span class="p">][</span><span class="s1">&#39;F_A&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">counts</span><span class="p">[</span><span class="s1">&#39;1&#39;</span><span class="p">][</span><span class="s1">&#39;A&#39;</span><span class="p">]</span> <span class="o">/</span> <span class="nb">float</span><span class="p">(</span><span class="n">counts</span><span class="p">[</span><span class="s1">&#39;1&#39;</span><span class="p">][</span><span class="s1">&#39;COUNTS&#39;</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">counts</span><span class="p">[</span><span class="s1">&#39;1&#39;</span><span class="p">][</span><span class="s1">&#39;F_C&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">counts</span><span class="p">[</span><span class="s1">&#39;1&#39;</span><span class="p">][</span><span class="s1">&#39;C&#39;</span><span class="p">]</span> <span class="o">/</span> <span class="nb">float</span><span class="p">(</span><span class="n">counts</span><span class="p">[</span><span class="s1">&#39;1&#39;</span><span class="p">][</span><span class="s1">&#39;COUNTS&#39;</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">counts</span><span class="p">[</span><span class="s1">&#39;1&#39;</span><span class="p">][</span><span class="s1">&#39;F_G&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">counts</span><span class="p">[</span><span class="s1">&#39;1&#39;</span><span class="p">][</span><span class="s1">&#39;G&#39;</span><span class="p">]</span> <span class="o">/</span> <span class="nb">float</span><span class="p">(</span><span class="n">counts</span><span class="p">[</span><span class="s1">&#39;1&#39;</span><span class="p">][</span><span class="s1">&#39;COUNTS&#39;</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">counts</span><span class="p">[</span><span class="s1">&#39;1&#39;</span><span class="p">][</span><span class="s1">&#39;F_T&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">counts</span><span class="p">[</span><span class="s1">&#39;1&#39;</span><span class="p">][</span><span class="s1">&#39;T&#39;</span><span class="p">]</span> <span class="o">/</span> <span class="nb">float</span><span class="p">(</span><span class="n">counts</span><span class="p">[</span><span class="s1">&#39;1&#39;</span><span class="p">][</span><span class="s1">&#39;COUNTS&#39;</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">counts</span><span class="p">[</span><span class="s1">&#39;2&#39;</span><span class="p">][</span><span class="s1">&#39;F_A&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">counts</span><span class="p">[</span><span class="s1">&#39;2&#39;</span><span class="p">][</span><span class="s1">&#39;A&#39;</span><span class="p">]</span> <span class="o">/</span> <span class="nb">float</span><span class="p">(</span><span class="n">counts</span><span class="p">[</span><span class="s1">&#39;2&#39;</span><span class="p">][</span><span class="s1">&#39;COUNTS&#39;</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">counts</span><span class="p">[</span><span class="s1">&#39;2&#39;</span><span class="p">][</span><span class="s1">&#39;F_C&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">counts</span><span class="p">[</span><span class="s1">&#39;2&#39;</span><span class="p">][</span><span class="s1">&#39;C&#39;</span><span class="p">]</span> <span class="o">/</span> <span class="nb">float</span><span class="p">(</span><span class="n">counts</span><span class="p">[</span><span class="s1">&#39;2&#39;</span><span class="p">][</span><span class="s1">&#39;COUNTS&#39;</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">counts</span><span class="p">[</span><span class="s1">&#39;2&#39;</span><span class="p">][</span><span class="s1">&#39;F_G&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">counts</span><span class="p">[</span><span class="s1">&#39;2&#39;</span><span class="p">][</span><span class="s1">&#39;G&#39;</span><span class="p">]</span> <span class="o">/</span> <span class="nb">float</span><span class="p">(</span><span class="n">counts</span><span class="p">[</span><span class="s1">&#39;2&#39;</span><span class="p">][</span><span class="s1">&#39;COUNTS&#39;</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">counts</span><span class="p">[</span><span class="s1">&#39;2&#39;</span><span class="p">][</span><span class="s1">&#39;F_T&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">counts</span><span class="p">[</span><span class="s1">&#39;2&#39;</span><span class="p">][</span><span class="s1">&#39;T&#39;</span><span class="p">]</span> <span class="o">/</span> <span class="nb">float</span><span class="p">(</span><span class="n">counts</span><span class="p">[</span><span class="s1">&#39;2&#39;</span><span class="p">][</span><span class="s1">&#39;COUNTS&#39;</span><span class="p">])</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">f</span> <span class="o">=</span> <span class="n">cStringIO</span><span class="o">.</span><span class="n">StringIO</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">WriteDMSCounts</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">counts</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">f</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
@@ -1113,6 +1133,7 @@ as <span class="math">\(h_r = \sum_x \pi_{r,x} \times \log_2 \pi_{r,x}\)</span>.
 <li><em>AlignSubamplicon</em> : attempt to align subamplicon at specified position.</li>
 <li><em>ClassifyCodonCounts</em> : classifies codon mutations.</li>
 <li><em>CodonMutsCumulFracs</em> : cumulative counts of codon mutations.</li>
+<li><em>ParseNSMutFreqBySite</em> : Parse nonsynonymous mutation frequencies at each site from a DMS counts file.</li>
 </ul>
 </div>
 <div class="section" id="id4">
@@ -1470,6 +1491,23 @@ with the integer/float to string conversion if relevant.</p>
 </dd></dl>
 
 <dl class="function">
+<dt id="utils.ParseNSMutFreqBySite">
+<code class="descclassname">utils.</code><code class="descname">ParseNSMutFreqBySite</code><span class="sig-paren">(</span><em>countsfile</em>, <em>chartype</em><span class="sig-paren">)</span><a class="headerlink" href="#utils.ParseNSMutFreqBySite" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parses a deep mutational scanning counts file and returns
+the nonsynonymous mutation frequency at each site.</p>
+<p><em>countsfile</em> is a string that gives the name of a file.</p>
+<p><em>chartype</em> is the type of character, with valid values consisting of:</p>
+<blockquote>
+<div><ul class="simple">
+<li><em>codon</em> : DNA codons.</li>
+<li><em>aminoacids_nostop</em> : amino acids not including stop codons.</li>
+<li><em>aminoacids_withstop</em> : amino acids including stop codons (<code class="docutils literal"><span class="pre">*</span></code>).</li>
+</ul>
+</div></blockquote>
+<p>The returned item is a list of tuples of (site, nonsynonymous frequency).</p>
+</dd></dl>
+
+<dl class="function">
 <dt id="utils.Pref_or_DiffPref">
 <code class="descclassname">utils.</code><code class="descname">Pref_or_DiffPref</code><span class="sig-paren">(</span><em>data</em>, <em>tol=0.001</em><span class="sig-paren">)</span><a class="headerlink" href="#utils.Pref_or_DiffPref" title="Permalink to this definition">¶</a></dt>
 <dd><p>Determines if data represent preferences or differential preferences.</p>
@@ -1644,8 +1682,11 @@ sum to one.</p>
 <dt id="utils.SumCodonToAA">
 <code class="descclassname">utils.</code><code class="descname">SumCodonToAA</code><span class="sig-paren">(</span><em>codondict</em>, <em>includestop=True</em><span class="sig-paren">)</span><a class="headerlink" href="#utils.SumCodonToAA" title="Permalink to this definition">¶</a></dt>
 <dd><p>Sums all codon entries for each amino acid.</p>
-<p><em>codondict</em> is a dictionary keyed by all codons (<em>dms_tools.codons</em>).
-The values should be numbers.</p>
+<p><em>codondict</em> is a dictionary keyed by all codons (<em>dms_tools.codons</em>),
+with values being counts.</p>
+<p>Note that this is NOT a dictionary of the form returned by 
+dms_tools.file_io.ReadDMSCounts(), which has sites as keys and
+codondicts as values.</p>
 <p><em>includestop</em> specifies whether we also sum values for stop codons to
 give an entry for <code class="docutils literal"><span class="pre">*</span></code> (the stop codon). Do this only if has default
 value of <em>True</em>.</p>
@@ -2089,23 +2130,24 @@ returned string is simply &#8216;0&#8217;.</p>
 
 <dl class="function">
 <dt id="plot.PlotCorrelation">
-<code class="descclassname">plot.</code><code class="descname">PlotCorrelation</code><span class="sig-paren">(</span><em>xs</em>, <em>ys</em>, <em>plotfile</em>, <em>xlabel</em>, <em>ylabel</em>, <em>logx=False</em>, <em>logy=False</em>, <em>corr=None</em>, <em>title=False</em>, <em>alpha=1.0</em>, <em>symmetrize=False</em>, <em>fixaxes=False</em>, <em>additionalxy=[]</em>, <em>bigmargin=0.29</em>, <em>xsize=1.8</em>, <em>r2=False</em><span class="sig-paren">)</span><a class="headerlink" href="#plot.PlotCorrelation" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">plot.</code><code class="descname">PlotCorrelation</code><span class="sig-paren">(</span><em>xs</em>, <em>ys</em>, <em>plotfile</em>, <em>xlabel</em>, <em>ylabel</em>, <em>logx=False</em>, <em>logy=False</em>, <em>corr=None</em>, <em>title=False</em>, <em>alpha=1.0</em>, <em>symmetrize=False</em>, <em>fixaxes=False</em>, <em>additionalxy=[]</em>, <em>bigmargin=0.29</em>, <em>xsize=1.8</em>, <em>r2=False</em>, <em>marker_style='b.'</em>, <em>additional_marker_style='r^'</em>, <em>marker_size=4</em>, <em>additional_marker_size=3</em><span class="sig-paren">)</span><a class="headerlink" href="#plot.PlotCorrelation" title="Permalink to this definition">¶</a></dt>
 <dd><p>Plots the correlation between two variables as a scatter plot.</p>
-<p>The data is plotted as a scatter plot.</p>
-<p>This function uses <code class="docutils literal"><span class="pre">pylab</span></code> / <code class="docutils literal"><span class="pre">matplotlib</span></code>.</p>
-<p>The calling variables use LaTex format for strings. So for
+<p>The data is plotted as a scatter plot.
+This function uses <code class="docutils literal"><span class="pre">pylab</span></code> / <code class="docutils literal"><span class="pre">matplotlib</span></code>. 
+The calling variables use LaTex format for strings. So for
 example, &#8216;$10^5$&#8217; will print the LaTex equivalent of this 
 string. Similarly, certain raw text strings (such as those
 including underscores) will cause problems if you do not
 escape the LaTex format meaning. For instance, &#8216;x_label&#8217;
 will cause a problem since underscore is not valid
 outside of math mode in LaTex, so you would need to use
-&#8216;x_label&#8217; to escape the underscore.</p>
-<p>CALLING VARIABLES:</p>
+&#8216;x_label&#8217; to escape the underscore.
+CALLING VARIABLES:
+* <em>xs</em> and <em>ys</em> are lists of numbers, with the lists</p>
+<blockquote>
+<div>being of the same length. Entry <em>xs[i]</em> is plotted
+on the x-axis against entries <em>ys[i]</em> on the y-axis.</div></blockquote>
 <ul class="simple">
-<li><em>xs</em> and <em>ys</em> are lists of numbers, with the lists
-being of the same length. Entry <em>xs[i]</em> is plotted
-on the x-axis against entries <em>ys[i]</em> on the y-axis.</li>
 <li><em>plotfile</em> is a string giving the name of the plot PDF file
 that we create. It should end in the extension <code class="docutils literal"><span class="pre">.pdf</span></code>.
 If this plot already exists, it is overwritten.</li>
@@ -2156,6 +2198,11 @@ is the bottom and left. Make larger if you need more space for axis
 labels.</li>
 <li><em>xsize</em> is an optional argument that is the width of the plot in inches.
 It is 1.8 by default.</li>
+<li><em>marker_style</em> and <em>additional_marker_style</em> are optional arguments to 
+change the color/style of the marker for the main and additional data points,
+respectively. See the matplotlib documentation for a full explanation.</li>
+<li><em>marker_size</em> and <em>additional_marker_size</em> are optional arguments to
+set the size of the markers.</li>
 </ul>
 </dd></dl>
 
@@ -2673,7 +2720,7 @@ from Dirichlet with this concentration parameter.</p>
         <li class="right" >
           <a href="inferdiffprefs_algorithm.html" title="Algorithm to infer differential preferences"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">dms_tools 1.1.16 documentation</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">dms_tools 1.1.17 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
