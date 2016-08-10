@@ -1,7 +1,7 @@
 Changelog
 ===========
 
-1.1.dev17
+1.1.17
 ----------
 * Print versions of all external packages (some were overlooked before)
 
