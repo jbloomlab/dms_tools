@@ -1,6 +1,10 @@
 Changelog
 ===========
 
+1.1.dev18
+----------
+* Updated download URL in ``setup.py``
+
 1.1.17
 ----------
 * Print versions of all external packages (some were overlooked before)

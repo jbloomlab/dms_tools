@@ -42,7 +42,7 @@ setup(
     author = metadata['author'],
     author_email = metadata['author_email'],
     url = metadata['url'],
-    download_url = 'https://github.com/jbloom/dms_tools/tarball/%s' % metadata['version'], # assumes appropriate tagged version is on GitHub
+    download_url = 'https://github.com/jbloomlab/dms_tools/tarball/%s' % metadata['version'], # assumes appropriate tagged version is on GitHub
     description = 'Deep mutational scanning (DMS) analysis tools.',
     long_description = readme,
     license = 'GPLv3',
