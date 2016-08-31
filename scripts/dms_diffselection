@@ -65,7 +65,10 @@ def main():
         raise ValueError("Invalid chartype of %s" % args['chartype'])
 
     # read counts
-    (sites, wts, counts) = dms_tools.file_io.ReadMultipleDMSCountsFiles([args['mockcounts'], args['selectedcounts']], chartype)
+    if args['errorcontrolcounts']:
+        (sites, wts, counts) = dms_tools.file_io.ReadMultipleDMSCountsFiles([args['mockcounts'], args['selectedcounts'], args['errorcontrolcounts']], chartype)
+    else:
+        (sites, wts, counts) = dms_tools.file_io.ReadMultipleDMSCountsFiles([args['mockcounts'], args['selectedcounts']], chartype)
     print("\nRead counts data for {0} sites.".format(len(sites)))
 
     # compute differential selection
@@ -74,17 +77,34 @@ def main():
     data = dict([(column, []) for column in datacolumns])
     for r in sites:
         wt = wts[r]
+        assert wt in countcharacters, "Invalid wildtype of {0} for site {1}".format(wt, r)
         mock = counts[args['mockcounts']][r]
+        assert wt in mock, "mockcounts missing counts for {0} at {1}".format(wt, r)
         selected = counts[args['selectedcounts']][r]
+        assert wt in selected, "selectedcounts missing counts for {0} at {1}".format(wt, r)
+        if args['errorcontrolcounts']:
+            errctrl = counts[args['errorcontrolcounts']][r]
+            n_err_sum = float(sum([errctrl[x] for x in countcharacters]))
+            assert n_err_sum, "No counts for error control at site {0}".format(r)
+            n_mock_sum = float(sum([mock[x] for x in countcharacters]))
+            assert n_mock_sum, "No counts for mock at site {0}".format(r)
+            n_selected_sum = float(sum([selected[x] for x in countcharacters]))
+            assert n_selected_sum, "No counts for selected at site {0}".format(r)
+            for x in countcharacters:
+                epsilon = errctrl[x] / n_err_sum
+                if x == wt:
+                    assert epsilon > 0, "No counts of wildtype in error control at site {0}".format(r)
+                    mock[x] /= epsilon
+                    selected[x] /= epsilon
+                else:
+                    mock[x] = max(0, n_mock_sum * (mock[x] / n_mock_sum - epsilon))
+                    selected[x] = max(0, n_selected_sum * (selected[x] / n_selected_sum - epsilon))
         if translate_to_aa:
             mock = dms_tools.utils.SumCodonToAA(mock, args['includestop'])
             selected = dms_tools.utils.SumCodonToAA(selected, args['includestop'])
             wt = dms_tools.codon_to_aa[wt]
         if wt == '*' and not args['includestop']:
             continue
-        assert wt in characters, "Invalid wildtype of {0} for site {1}".format(wt, r)
-        assert wt in mock, "mockcounts missing counts for {0} at {1}".format(wt, r)
-        assert wt in selected, "selectedcounts missing counts for {0} at {1}".format(wt, r)
         nwtmock = float(mock[wt])
         nwtselected = float(selected[wt])
 
