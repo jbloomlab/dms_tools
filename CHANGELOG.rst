@@ -5,6 +5,8 @@ Changelog
 ----------
 * Updated download URL in ``setup.py``
 
+* Some updates to documentation for programs
+
 1.1.17
 ----------
 * Print versions of all external packages (some were overlooked before)
