@@ -1,6 +1,11 @@
 Changelog
 ===========
 
+1.1.dev19
+------------
+
+* Increased margins on correlaton plots so labels aren't trimmed.
+
 1.1.18
 ----------
 * Added ``--errorcontrolcounts`` to ``dms_diffselection``.
