@@ -195,8 +195,10 @@ def ExistingFile(fname):
     """If *fname* is name of an existing file return it, otherwise an error.
     
     It is also acceptable for *fname* to be the string "none"."""
-    if os.path.isfile(fname) or fname.lower() == 'none':
+    if os.path.isfile(fname):
         return fname
+    elif fname.lower() == 'none':
+        return None
     else:
         raise argparse.ArgumentTypeError("%s does not specify a valid file name" % fname)
 
