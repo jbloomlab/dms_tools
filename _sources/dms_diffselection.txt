@@ -12,7 +12,12 @@ Overview
 
 It is designed to assess the differential selection on each mutation between a library that is mock-treated and subjected to some selective condition.
 
-Specifically, imagine that you have a deep mutational scanning library that is mock-treated  and selected. For instance, this might be a virus library that is passaged in the absence and presence of immune selection. For each site :math:`r` in the gene, let :math:`n_{r,x}^{\rm{mock}}` be the number of observed counts of character :math:`x` (might be amino acid, nucleotide, or codon) at site :math:`r` in the mock-treated condition, and let :math:`n_{r,x}^{\rm{selected}}` be the number of observed counts of :math:`x` at :math:`r` in the selected condition. 
+After you install `dms_tools`_, this program will be available to run at the command line.
+
+Differential selection
+++++++++++++++++++++++++++++++++++++++++
+
+Say you have a deep mutational scanning library that is mock-treated  and selected. For instance, this might be a virus library that is passaged in the absence and presence of immune selection. For each site :math:`r` in the gene, let :math:`n_{r,x}^{\rm{mock}}` be the number of observed counts of character :math:`x` (might be amino acid, nucleotide, or codon) at site :math:`r` in the mock-treated condition, and let :math:`n_{r,x}^{\rm{selected}}` be the number of observed counts of :math:`x` at :math:`r` in the selected condition. 
 Let :math:`\operatorname{wt}\left(r\right)` be denote the wildtype character at :math:`r`.
 Then the relative enrichment of the mutant relative to the wildtype after selection is
 
@@ -51,7 +56,35 @@ When :math:`s_{r,x} < 0`, then :math:`x` is less favored in the selection versus
 
 Larger values of the pseudocount :math:`P` will avoid spuriously estimating strong selection when in fact you just have a lot of statistical noise due to small counts.
 
-After you install `dms_tools`_, this program will be available to run at the command line.
+Error correction
+++++++++++++++++++++++++
+You can optionally correct for the potential inflation of some counts by sequencing errors by using the ``--errorcontrolcounts`` option to ``dms_diffselection``.
+
+In this case, the counts defined in Equation :eq:`E_rx` are adjusted as follows. 
+Let :math:`n_{r,x}` be the counts for character :math:`x` at site :math:`r` in the *mock* or *selected* sample (these are the numbers in the ``mockcounts`` or ``selectecounts`` files). 
+Let :math:`n^{\rm{err}}_{r,x}` be the number of counts of :math:`x` at site :math:`r` in the error control specified by ``--errorcontrolcounts``.
+Define 
+
+.. math::
+   :label: epsilon
+
+   \epsilon_{r,x} = \left(n^{\rm{err}}_{r,x}\right) / \left(\sum_y n^{\rm{err}}_{r,y}\right).
+
+When :math:`x \ne \operatorname{wt}\left(r\right)` then :math:`\epsilon_{r,x}` is the rate of errors to :math:`x` at site :math:`r`, and when :math:`x = \operatorname{wt}\left(r\right)` then :math:`\epsilon_{r,x}` is one minus the rate of errors away from the wildtype at site :math:`r`.
+
+We then adjust observed counts :math:`n_{r,x}` to the error-corrected counts :math:`\hat{n}_{r,x}` by
+
+.. math::
+   :label: n_rx_adjusted
+
+   \hat{n}_{r,x} = \begin{cases}
+   \max\left[\left(\sum_y n_{r,y}\right) \left(\frac{n_{r,x}}{\sum_y n_{r,y}} - \epsilon_{r,x}\right), 0\right] & \mbox{if } x \ne \operatorname{wt}\left(r\right) \\
+   n_{r,x} / \epsilon_{r,x} & \mbox{if } x = \operatorname{wt}\left(r\right) \\
+   \end{cases}
+
+These adjusted counts are then used in place of the un-adjusted counts in Equation :eq:`E_rx` above.
+
+Note that if you are using ``--chartype`` of ``codon_to_aa``, the corrections are done on the codon counts, and these corrected which are then aggregated into the amino acid counts before computing the differential selection.
 
 Command-line usage
 ---------------------
@@ -61,17 +94,24 @@ Command-line usage
    :prog: dms_diffselection
 
    mockcounts
-    This file gives the :math:`n_{r,x}^{\rm{mock}}` values described in the `Overview`_.
+    This file gives the :math:`n_{r,x}^{\rm{mock}}` values described in `Differential selection`_.
        
     Should be in the format of a :ref:`dms_counts` file.
 
    selectedcounts
-    This file gives the :math:`n_{r,x}^{\rm{mock}}` values described in the `Overview`_.
+    This file gives the :math:`n_{r,x}^{\rm{mock}}` values described in `Differential selection`_.
        
     Should be in the format of a :ref:`dms_counts` file.
 
    outprefix
     For instance, if ``outprefix`` is ``antibodyselection_`` then the output files are ``antibodyselection_mutdiffsel.txt`` and ``antibodyselection_sitediffsel.txt``. See `Output`_ for an explanation of the contents of these files.
+
+   \-\-errorcontrolcounts
+    You can use this option if you have estimated your sequencing error rate by sequencing a "wildtype" sample where you expect all errors come from sequencing (or other related processes such as PCR or reverse transcription). The counts will then be adjusted to correct for the error rates estimated from this control.
+
+    This file gives the :math:`n_{r,x}^{\rm{err}}` values described in `Error correction`_.
+
+    Should be in the format of a :ref:`dms_counts` file.
 
    \-\-pseudocount
     This is the :math:`P` parameter described in the Equation :eq:`E_rx`. Note that by default this pseudocount is for the library with greater depth at that site, and the pseudocount for the other library is scaled up by the ratio of the relative depths as described by Equations :eq:`f_rselected` and :eq:`f_rmock`.

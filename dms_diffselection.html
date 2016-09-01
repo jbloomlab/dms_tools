@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>dms_diffselection &mdash; dms_tools 1.1.17 documentation</title>
+    <title>dms_diffselection &#8212; dms_tools 1.1.18 documentation</title>
     
     <link rel="stylesheet" href="_static/classic.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '1.1.17',
+        VERSION:     '1.1.18',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="dms_tools 1.1.17 documentation" href="index.html" />
+    <link rel="top" title="dms_tools 1.1.18 documentation" href="index.html" />
     <link rel="up" title="Programs" href="programs.html" />
     <link rel="next" title="dms_inferdiffprefs" href="dms_inferdiffprefs.html" />
     <link rel="prev" title="dms_inferprefs" href="dms_inferprefs.html" /> 
@@ -45,8 +45,8 @@
         <li class="right" >
           <a href="dms_inferprefs.html" title="dms_inferprefs"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">dms_tools 1.1.17 documentation</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="programs.html" accesskey="U">Programs</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">dms_tools 1.1.18 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="programs.html" accesskey="U">Programs</a> &#187;</li> 
       </ul>
     </div>  
 
@@ -61,10 +61,14 @@
 <p class="topic-title first">Contents</p>
 <ul class="simple">
 <li><a class="reference internal" href="#dms-diffselection" id="id2"><code class="docutils literal"><span class="pre">dms_diffselection</span></code></a><ul>
-<li><a class="reference internal" href="#overview" id="id3">Overview</a></li>
-<li><a class="reference internal" href="#command-line-usage" id="id4">Command-line usage</a></li>
-<li><a class="reference internal" href="#example-usage" id="id5">Example usage</a></li>
-<li><a class="reference internal" href="#output" id="id6">Output</a></li>
+<li><a class="reference internal" href="#overview" id="id3">Overview</a><ul>
+<li><a class="reference internal" href="#differential-selection" id="id4">Differential selection</a></li>
+<li><a class="reference internal" href="#error-correction" id="id5">Error correction</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#command-line-usage" id="id6">Command-line usage</a></li>
+<li><a class="reference internal" href="#example-usage" id="id7">Example usage</a></li>
+<li><a class="reference internal" href="#output" id="id8">Output</a></li>
 </ul>
 </li>
 </ul>
@@ -73,7 +77,10 @@
 <h2><a class="toc-backref" href="#id3">Overview</a><a class="headerlink" href="#overview" title="Permalink to this headline">¶</a></h2>
 <p><code class="docutils literal"><span class="pre">dms_diffselection</span></code> is a program included with the <a class="reference external" href="http://jbloomlab.github.io/dms_tools">dms_tools</a> package.</p>
 <p>It is designed to assess the differential selection on each mutation between a library that is mock-treated and subjected to some selective condition.</p>
-<p>Specifically, imagine that you have a deep mutational scanning library that is mock-treated  and selected. For instance, this might be a virus library that is passaged in the absence and presence of immune selection. For each site <span class="math">\(r\)</span> in the gene, let <span class="math">\(n_{r,x}^{\rm{mock}}\)</span> be the number of observed counts of character <span class="math">\(x\)</span> (might be amino acid, nucleotide, or codon) at site <span class="math">\(r\)</span> in the mock-treated condition, and let <span class="math">\(n_{r,x}^{\rm{selected}}\)</span> be the number of observed counts of <span class="math">\(x\)</span> at <span class="math">\(r\)</span> in the selected condition.
+<p>After you install <a class="reference external" href="http://jbloomlab.github.io/dms_tools">dms_tools</a>, this program will be available to run at the command line.</p>
+<div class="section" id="differential-selection">
+<h3><a class="toc-backref" href="#id4">Differential selection</a><a class="headerlink" href="#differential-selection" title="Permalink to this headline">¶</a></h3>
+<p>Say you have a deep mutational scanning library that is mock-treated  and selected. For instance, this might be a virus library that is passaged in the absence and presence of immune selection. For each site <span class="math">\(r\)</span> in the gene, let <span class="math">\(n_{r,x}^{\rm{mock}}\)</span> be the number of observed counts of character <span class="math">\(x\)</span> (might be amino acid, nucleotide, or codon) at site <span class="math">\(r\)</span> in the mock-treated condition, and let <span class="math">\(n_{r,x}^{\rm{selected}}\)</span> be the number of observed counts of <span class="math">\(x\)</span> at <span class="math">\(r\)</span> in the selected condition.
 Let <span class="math">\(\operatorname{wt}\left(r\right)\)</span> be denote the wildtype character at <span class="math">\(r\)</span>.
 Then the relative enrichment of the mutant relative to the wildtype after selection is</p>
 <div class="math" id="equation-E_rx">
@@ -92,13 +99,33 @@ Then the relative enrichment of the mutant relative to the wildtype after select
 <p>When <span class="math">\(s_{r,x} &gt; 0\)</span>, then <span class="math">\(x\)</span> is more favored in the selection versus mock condition.
 When <span class="math">\(s_{r,x} &lt; 0\)</span>, then <span class="math">\(x\)</span> is less favored in the selection versus mock condition.</p>
 <p>Larger values of the pseudocount <span class="math">\(P\)</span> will avoid spuriously estimating strong selection when in fact you just have a lot of statistical noise due to small counts.</p>
-<p>After you install <a class="reference external" href="http://jbloomlab.github.io/dms_tools">dms_tools</a>, this program will be available to run at the command line.</p>
+</div>
+<div class="section" id="error-correction">
+<h3><a class="toc-backref" href="#id5">Error correction</a><a class="headerlink" href="#error-correction" title="Permalink to this headline">¶</a></h3>
+<p>You can optionally correct for the potential inflation of some counts by sequencing errors by using the <code class="docutils literal"><span class="pre">--errorcontrolcounts</span></code> option to <code class="docutils literal"><span class="pre">dms_diffselection</span></code>.</p>
+<p>In this case, the counts defined in Equation <a href="#equation-E_rx">(1)</a> are adjusted as follows.
+Let <span class="math">\(n_{r,x}\)</span> be the counts for character <span class="math">\(x\)</span> at site <span class="math">\(r\)</span> in the <em>mock</em> or <em>selected</em> sample (these are the numbers in the <code class="docutils literal"><span class="pre">mockcounts</span></code> or <code class="docutils literal"><span class="pre">selectecounts</span></code> files).
+Let <span class="math">\(n^{\rm{err}}_{r,x}\)</span> be the number of counts of <span class="math">\(x\)</span> at site <span class="math">\(r\)</span> in the error control specified by <code class="docutils literal"><span class="pre">--errorcontrolcounts</span></code>.
+Define</p>
+<div class="math" id="equation-epsilon">
+<span class="eqno">(5)</span>\[\epsilon_{r,x} = \left(n^{\rm{err}}_{r,x}\right) / \left(\sum_y n^{\rm{err}}_{r,y}\right).\]</div>
+<p>When <span class="math">\(x \ne \operatorname{wt}\left(r\right)\)</span> then <span class="math">\(\epsilon_{r,x}\)</span> is the rate of errors to <span class="math">\(x\)</span> at site <span class="math">\(r\)</span>, and when <span class="math">\(x = \operatorname{wt}\left(r\right)\)</span> then <span class="math">\(\epsilon_{r,x}\)</span> is one minus the rate of errors away from the wildtype at site <span class="math">\(r\)</span>.</p>
+<p>We then adjust observed counts <span class="math">\(n_{r,x}\)</span> to the error-corrected counts <span class="math">\(\hat{n}_{r,x}\)</span> by</p>
+<div class="math" id="equation-n_rx_adjusted">
+<span class="eqno">(6)</span>\[\begin{split}\hat{n}_{r,x} = \begin{cases}
+\max\left[\left(\sum_y n_{r,y}\right) \left(\frac{n_{r,x}}{\sum_y n_{r,y}} - \epsilon_{r,x}\right), 0\right] &amp; \mbox{if } x \ne \operatorname{wt}\left(r\right) \\
+n_{r,x} / \epsilon_{r,x} &amp; \mbox{if } x = \operatorname{wt}\left(r\right) \\
+\end{cases}\end{split}\]</div>
+<p>These adjusted counts are then used in place of the un-adjusted counts in Equation <a href="#equation-E_rx">(1)</a> above.</p>
+<p>Note that if you are using <code class="docutils literal"><span class="pre">--chartype</span></code> of <code class="docutils literal"><span class="pre">codon_to_aa</span></code>, the corrections are done on the codon counts, and these corrected which are then aggregated into the amino acid counts before computing the differential selection.</p>
+</div>
 </div>
 <div class="section" id="command-line-usage">
-<h2><a class="toc-backref" href="#id4">Command-line usage</a><a class="headerlink" href="#command-line-usage" title="Permalink to this headline">¶</a></h2>
+<h2><a class="toc-backref" href="#id6">Command-line usage</a><a class="headerlink" href="#command-line-usage" title="Permalink to this headline">¶</a></h2>
 <p>Differential selection between mock-treated and selected samples. Quantified as log2[{(n_sel_mut + f_sel * P) / (n_sel_wt + f_sel * P)} / {(n_mock_mut + f_mock * P) / (n_mock_wt + f_mock * P)}] where P is pseudocount, f_sel = max(1, N_sel / N_mock), and f_mock = max(1, N_mock / N_sel) where N_mock and N_sel are the sequencing depth for mock and selected libraries at that site. This script is part of dms_tools (version 1.1.17) written by the Bloom Lab (see <a class="reference external" href="https://github.com/jbloomlab/dms_tools/graphs/contributors">https://github.com/jbloomlab/dms_tools/graphs/contributors</a> for all contributors). Detailed documentation is at <a class="reference external" href="http://jbloomlab.github.io/dms_tools/">http://jbloomlab.github.io/dms_tools/</a></p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">usage</span><span class="p">:</span> <span class="n">dms_diffselection</span> <span class="p">[</span><span class="o">-</span><span class="n">h</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">pseudocount</span> <span class="n">PSEUDOCOUNT</span><span class="p">]</span>
-                         <span class="p">[</span><span class="o">--</span><span class="n">mincounts</span> <span class="n">MINCOUNTS</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">no</span><span class="o">-</span><span class="n">scale</span><span class="o">-</span><span class="n">pseudocounts</span><span class="p">]</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">usage</span><span class="p">:</span> <span class="n">dms_diffselection</span> <span class="p">[</span><span class="o">-</span><span class="n">h</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">errorcontrolcounts</span> <span class="n">ERRORCONTROLCOUNTS</span><span class="p">]</span>
+                         <span class="p">[</span><span class="o">--</span><span class="n">pseudocount</span> <span class="n">PSEUDOCOUNT</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">mincounts</span> <span class="n">MINCOUNTS</span><span class="p">]</span>
+                         <span class="p">[</span><span class="o">--</span><span class="n">no</span><span class="o">-</span><span class="n">scale</span><span class="o">-</span><span class="n">pseudocounts</span><span class="p">]</span>
                          <span class="p">[</span><span class="o">--</span><span class="n">chartype</span> <span class="p">{</span><span class="n">codon_to_aa</span><span class="p">,</span><span class="n">DNA</span><span class="p">,</span><span class="n">codon</span><span class="p">,</span><span class="n">aa</span><span class="p">}]</span>
                          <span class="p">[</span><span class="o">--</span><span class="n">includestop</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">v</span><span class="p">]</span>
                          <span class="n">mockcounts</span> <span class="n">selectedcounts</span> <span class="n">outprefix</span>
@@ -113,13 +140,13 @@ When <span class="math">\(s_{r,x} &lt; 0\)</span>, then <span class="math">\(x\)
 <tr><td class="option-group">
 <kbd>mockcounts</kbd></td>
 <td><p class="first">File with counts from mock-selected library.  For nucleotides, header line should be &#8220;# POSITION WT A C G T&#8221; and then subsequent lines give wildtype and counts for each site (i.e. &#8220;1 G 1013 23 19 47&#8221;); for codons use the 64 codons instead (i.e. &#8220;AAA AAC AAG ...&#8221;).</p>
-<p>This file gives the <span class="math">\(n_{r,x}^{\rm{mock}}\)</span> values described in the <a class="reference internal" href="#overview">Overview</a>.</p>
+<p>This file gives the <span class="math">\(n_{r,x}^{\rm{mock}}\)</span> values described in <a class="reference internal" href="#differential-selection">Differential selection</a>.</p>
 <p class="last">Should be in the format of a <a class="reference internal" href="fileformats.html#dms-counts"><span class="std std-ref">Deep mutational scanning counts file</span></a> file.</p>
 </td></tr>
 <tr><td class="option-group">
 <kbd>selectedcounts</kbd></td>
 <td><p class="first">File with counts from selected library</p>
-<p>This file gives the <span class="math">\(n_{r,x}^{\rm{mock}}\)</span> values described in the <a class="reference internal" href="#overview">Overview</a>.</p>
+<p>This file gives the <span class="math">\(n_{r,x}^{\rm{mock}}\)</span> values described in <a class="reference internal" href="#differential-selection">Differential selection</a>.</p>
 <p class="last">Should be in the format of a <a class="reference internal" href="fileformats.html#dms-counts"><span class="std std-ref">Deep mutational scanning counts file</span></a> file.</p>
 </td></tr>
 <tr><td class="option-group">
@@ -135,6 +162,14 @@ When <span class="math">\(s_{r,x} &lt; 0\)</span>, then <span class="math">\(x\)
 <col class="option" />
 <col class="description" />
 <tbody valign="top">
+<tr><td class="option-group" colspan="2">
+<kbd><span class="option">--errorcontrolcounts</span></kbd></td>
+</tr>
+<tr><td>&nbsp;</td><td><p class="first">Counts file for error control (e.g., wildtype gene or virus) to correct mutation counts.</p>
+<p>You can use this option if you have estimated your sequencing error rate by sequencing a &#8220;wildtype&#8221; sample where you expect all errors come from sequencing (or other related processes such as PCR or reverse transcription). The counts will then be adjusted to correct for the error rates estimated from this control.</p>
+<p>This file gives the <span class="math">\(n_{r,x}^{\rm{err}}\)</span> values described in <a class="reference internal" href="#error-correction">Error correction</a>.</p>
+<p class="last">Should be in the format of a <a class="reference internal" href="fileformats.html#dms-counts"><span class="std std-ref">Deep mutational scanning counts file</span></a> file.</p>
+</td></tr>
 <tr><td class="option-group" colspan="2">
 <kbd><span class="option">--pseudocount=10</span></kbd></td>
 </tr>
@@ -175,7 +210,7 @@ When <span class="math">\(s_{r,x} &lt; 0\)</span>, then <span class="math">\(x\)
 </dl>
 </div>
 <div class="section" id="example-usage">
-<h2><a class="toc-backref" href="#id5">Example usage</a><a class="headerlink" href="#example-usage" title="Permalink to this headline">¶</a></h2>
+<h2><a class="toc-backref" href="#id7">Example usage</a><a class="headerlink" href="#example-usage" title="Permalink to this headline">¶</a></h2>
 <p>Let&#8217;s say that <code class="docutils literal"><span class="pre">mock_counts.txt</span></code> has the codon counts in a mock-selected library, and <code class="docutils literal"><span class="pre">antibody_counts</span></code> has these same counts in a library selected with an antibody. To determine selection on the amino acids, you could then run:</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">dms_diffselection</span> <span class="n">mock_counts</span><span class="o">.</span><span class="n">txt</span> <span class="n">antibody_counts</span><span class="o">.</span><span class="n">txt</span> <span class="n">antibodyselection_</span>
 </pre></div>
@@ -183,7 +218,7 @@ When <span class="math">\(s_{r,x} &lt; 0\)</span>, then <span class="math">\(x\)
 <p>The created files would be <code class="docutils literal"><span class="pre">antibodyselection_mutdiffsel.txt</span></code> and <code class="docutils literal"><span class="pre">antibodyselection_sitediffsel.txt</span></code>.</p>
 </div>
 <div class="section" id="output">
-<h2><a class="toc-backref" href="#id6">Output</a><a class="headerlink" href="#output" title="Permalink to this headline">¶</a></h2>
+<h2><a class="toc-backref" href="#id8">Output</a><a class="headerlink" href="#output" title="Permalink to this headline">¶</a></h2>
 <p>Running <code class="docutils literal"><span class="pre">dms_diffselection</span></code> will cause some descriptive output to be printed to standard output.</p>
 <p>In addition, two files with the prefix <code class="docutils literal"><span class="pre">outprefix</span></code> are created (these files are overwritten if they already exist). These files are:</p>
 <blockquote>
@@ -242,7 +277,11 @@ When <span class="math">\(s_{r,x} &lt; 0\)</span>, then <span class="math">\(x\)
   <h3><a href="index.html">Table Of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#"><code class="docutils literal"><span class="pre">dms_diffselection</span></code></a><ul>
-<li><a class="reference internal" href="#overview">Overview</a></li>
+<li><a class="reference internal" href="#overview">Overview</a><ul>
+<li><a class="reference internal" href="#differential-selection">Differential selection</a></li>
+<li><a class="reference internal" href="#error-correction">Error correction</a></li>
+</ul>
+</li>
 <li><a class="reference internal" href="#command-line-usage">Command-line usage</a></li>
 <li><a class="reference internal" href="#example-usage">Example usage</a></li>
 <li><a class="reference internal" href="#output">Output</a></li>
@@ -292,13 +331,13 @@ When <span class="math">\(s_{r,x} &lt; 0\)</span>, then <span class="math">\(x\)
         <li class="right" >
           <a href="dms_inferprefs.html" title="dms_inferprefs"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">dms_tools 1.1.17 documentation</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="programs.html" >Programs</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">dms_tools 1.1.18 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="programs.html" >Programs</a> &#187;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
-        &copy; Copyright 2014, Jesse Bloom.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.5.
+        &#169; Copyright 2014, Jesse Bloom.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.6.
     </div>
   </body>
 </html>

@@ -20,7 +20,7 @@ Command-line usage
    :prog: dms_correlate
 
    file1
-    Should be in the formats of a :ref:`preferences_file` or a :ref:`diffpreferences_file`.
+    Should be in the formats of a :ref:`preferences_file`, a :ref:`diffpreferences_file`, or a site or mutation differential selection file returned by :ref:`dms_diffselection`.
 
    file2
     Must be in the **same format** as "file1".
