@@ -1,13 +1,13 @@
 Changelog
 ===========
 
-1.1.dev18
+1.1.18
 ----------
 * Added ``--errorcontrolcounts`` to ``dms_diffselection``.
 
 * Updated download URL in ``setup.py``.
 
-* Some updates to documentation for programs.
+* Some updates to documentation.
 
 1.1.17
 ----------
