@@ -103,7 +103,7 @@ def Base10Formatter(number, exp_cutoff, exp_decimal_digits, decimal_digits):
 
 
 def PlotCorrelation(xs, ys, plotfile, xlabel, ylabel, logx=False, logy=False,\
-        corr=None, title=False, alpha=1.0, symmetrize=False, fixaxes=False, additionalxy=[], bigmargin=0.34, xsize=1.8, r2=False,
+        corr=None, title=False, alpha=1.0, symmetrize=False, fixaxes=False, additionalxy=[], bigmargin=0.35, xsize=1.8, r2=False,
         marker_style='b.', additional_marker_style='r^', marker_size=4, additional_marker_size=3):
     """Plots the correlation between two variables as a scatter plot.
     

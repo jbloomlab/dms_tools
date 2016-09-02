@@ -95,7 +95,7 @@ def KyteDoolittleColorMapping(maptype='jet', reverse=True):
 
 
 
-def LogoPlot(sites, datatype, data, plotfile, nperline, numberevery=10, allowunsorted=False, ydatamax=1.01, overlay=None, fix_limits={}, fixlongname=False, overlay_cmap=None, ylimits=None, relativestackheight=1, custom_cmap='jet'):
+def LogoPlot(sites, datatype, data, plotfile, nperline, numberevery=10, allowunsorted=False, ydatamax=1.01, overlay=None, fix_limits={}, fixlongname=False, overlay_cmap=None, ylimits=None, relativestackheight=1, custom_cmap='jet', noseparator=False):
     """Constructs a sequence logo showing amino-acid or nucleotide preferences.
 
     The heights of each letter is equal to the preference of
@@ -196,6 +196,10 @@ def LogoPlot(sites, datatype, data, plotfile, nperline, numberevery=10, allowuns
     * *relativestackheight* indicates how high the letter stack is relative to
       the default. The default is multiplied by this number, so make it > 1
       for a higher letter stack.
+
+    * *noseparator* is only meaningful if *datatype* is 'diffsel' or 'diffprefs'.
+      If it set to *True*, then we do **not** print a black horizontal line to
+      separate positive and negative values.
     """
     assert datatype in ['prefs', 'diffprefs', 'diffsel'], "Invalid datatype {0}".format(datatype)
 
@@ -218,8 +222,11 @@ def LogoPlot(sites, datatype, data, plotfile, nperline, numberevery=10, allowuns
     lastblankchar = 'b' # character for last blank space for diffprefs / diffsel
     assert lastblankchar not in characters, "lastblankchar in characters"
     separatorchar = '-' # separates positive and negative for diffprefs / diffsel
-    assert lastblankchar not in characters, "lastblankchar in characters"
-    separatorheight = 0.02 # height of separator as fraction of total for diffprefs / diffsel
+    assert separatorchar not in characters, "lastblankchar in characters"
+    if noseparator:
+        separatorheight = 0
+    else:
+        separatorheight = 0.02 # height of separator as frac of total for diffprefs / diffsel
 
     if os.path.splitext(plotfile)[1].lower() != '.pdf':
         raise ValueError("plotfile must end in .pdf: %s" % plotfile)

@@ -319,7 +319,10 @@ def LogoPlotParser():
     parser.add_argument('logoplot', help='Name of created file containing the logo plot, must end in the extension ".pdf". Overwritten if it already exists.', type=PDF_File)
     parser.add_argument('--nperline', type=int, default=60, help='Put this many sites per line of the logo plot.')
     parser.add_argument('--numberevery', type=int, default=10, help='Number x-axis ticks for sites at this interval.')
-    parser.add_argument('--diffselheight', type=ExistingFile, nargs='*', help="Only meaningiful if 'infile' gives differential selection. List other differential selection files, and y-axis limits will be set to the max and min of 'infile' and all files listed here. This is useful if you want to make multiple differential selection plots with the same y-axis limits.")
+    parser.add_argument('--restrictdiffsel', default='None', help="Specify 'positive' or 'negative' to restrict plotted differential selection to positive or negative selection. Only meaningful if 'infile' gives differential selection.", choices=['None', 'positive', 'negative'])
+    parser.add_argument('--diffselheight', type=ExistingFile, nargs='*', help="Only meaningful if 'infile' gives differential selection. List other differential selection files, and y-axis limits will be set to the max and min of 'infile' and all files listed here. This is useful if you want to make multiple differential selection plots with the same y-axis limits.")
+    parser.set_defaults(nosepline=False)
+    parser.add_argument('--nosepline', dest='nosepline', action='store_true', help='Do not plot a black center line separating positive and negative values of differential selection or preferences.')
     parser.add_argument('--diffprefheight', type=float, default=1.0, help='This option is only meaningful if "infile" gives differential preferences. In that case, it gives the height of logo stacks (extends from minus this to plus this). Cannot be smaller than the maximum total differential preference range.')
     parser.add_argument('--excludestop', dest='excludestop', action='store_true', help='If we are using amino acids, do we remove stop codons (denoted by "*")? We only remove stop codons if this argument is specified. If this option is used, then data for stop codons is removed by re-normalizing preferences to sum to one, and differential preferences to sum to zero.')
     parser.set_defaults(excludestop=False)
@@ -327,7 +330,7 @@ def LogoPlotParser():
     parser.add_argument('--letterheight', default=1, type=FloatGreaterThanZero, help="Relative parameter indicating the height of the letter stacks in the logo plots.")
     parser.add_argument('--overlay1', default=None, nargs=3, metavar=('FILE', 'SHORTNAME', 'LONGNAME'), help='Specify an overlay bar above each line of the logo plot to illustrate a per-residue property such as relative solvent accessibility or secondary structure. Requires three arguments: FILE SHORTNAME LONGNAME. FILE is the name of an existing file. Except for comment lines beginning with "#", each line should have two whitespace delimited columns (additional columns are allowed but ignored). The first column gives the site number (matching that in "infile") and the second column giving the property for this site; properties must either all be non-whitespace strings giving a discrete category (such as secondary structure), or all be numbers (such as relative solvent accessibility). All listed sites must be in "infile", but not all sites in "infile" must be in FILE -- missing sites are assumed to lack a known value for the property and are shown in white. SHORTNAME is a short (3-5 character) name of the property, such as "RSA" for "relative solvent accessibility." LONGNAME is a longer name (such as "relative solvent accessibiity"), or the same as SHORTNAME if you do not have a separate long name.')
     parser.add_argument('--overlay2', default=None, nargs=3, metavar=('FILE', 'SHORTNAME', 'LONGNAME'), help='Specify a second overlay bar. Arguments have the same meaning as for "overlay1".')
-    parser.add_argument('--overlay3', default=None, nargs=3, metavar=('FILE', 'SHORTNAME', 'LONGNAME'), help='Specify a third overlay bar. Arguments have the same meaning as for "overly1".')
+    parser.add_argument('--overlay3', default=None, nargs=3, metavar=('FILE', 'SHORTNAME', 'LONGNAME'), help='Specify a third overlay bar. Arguments have the same meaning as for "overlay1".')
     parser.add_argument('--stringencyparameter', type=FloatGreaterThanZero, help="Scale preferences by this stringency parameter; only valid when 'infile' specifies preferences.")
     parser.add_argument('-v', '--version', action='version', version='%(prog)s {version}'.format(version=dms_tools.__version__))
     return parser
@@ -358,7 +361,7 @@ def CorrelateParser():
     parser.set_defaults(enrichment=False)
     parser.add_argument('--enrichment', dest='enrichment', action='store_true', help='If this option is set, we plot the enrichment ratio for all mutations on a log scale rather than plotting the preferences. The computed correlations are also then for the log-transformed enrichment ratios. The enrichment ratio for the wildtype identity is always one, and so is not included.')
     parser.add_argument('-v', '--version', action='version', version='%(prog)s {version}'.format(version=dms_tools.__version__))
-    parser.add_argument('--restrictdiffsel', default='None', help='A optional string specifying "positive" or "negative" to restrict the plotted correlation in site differential selection to positive or negative selection. Only meaningful if file1 and file2 are sitediffsel files.')
+    parser.add_argument('--restrictdiffsel', default='None', help='Specify "positive" or "negative" to restrict plotted correlation in site differential selection to positive or negative selection. Only meaningful if file1 and file2 are sitediffsel files.', choices=['None', 'positive', 'negative'])
     return parser
 
 

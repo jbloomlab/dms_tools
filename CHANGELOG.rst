@@ -3,8 +3,11 @@ Changelog
 
 1.1.dev19
 ------------
+* Some tweaks to ``dms_correlate`` to clarify parser and improve appearance of correlation plots.
 
-* Increased margins on correlaton plots so labels aren't trimmed.
+* Added ``--restrictdiffsel`` option to ``dms_logoplot`` to only plot positive or negative site differential selection.
+
+* Added ``--nosepline`` option to ``dms_logoplot`` to plot differential selection without black line separating positive and negative values.
 
 1.1.18
 ----------
