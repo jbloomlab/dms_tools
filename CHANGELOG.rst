@@ -1,7 +1,7 @@
 Changelog
 ===========
 
-1.1.dev19
+1.1.19
 ------------
 * Some tweaks to ``dms_correlate`` to clarify parser and improve appearance of correlation plots.
 
