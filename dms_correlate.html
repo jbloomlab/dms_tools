@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>dms_correlate &#8212; dms_tools 1.1.18 documentation</title>
+    <title>dms_correlate &#8212; dms_tools 1.1.19 documentation</title>
     
     <link rel="stylesheet" href="_static/classic.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '1.1.18',
+        VERSION:     '1.1.19',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="dms_tools 1.1.18 documentation" href="index.html" />
+    <link rel="top" title="dms_tools 1.1.19 documentation" href="index.html" />
     <link rel="up" title="Programs" href="programs.html" />
     <link rel="next" title="dms_editsites" href="dms_editsites.html" />
     <link rel="prev" title="dms_merge" href="dms_merge.html" /> 
@@ -45,7 +45,7 @@
         <li class="right" >
           <a href="dms_merge.html" title="dms_merge"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">dms_tools 1.1.18 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="index.html">dms_tools 1.1.19 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="programs.html" accesskey="U">Programs</a> &#187;</li> 
       </ul>
     </div>  
@@ -79,7 +79,8 @@
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">usage</span><span class="p">:</span> <span class="n">dms_correlate</span> <span class="p">[</span><span class="o">-</span><span class="n">h</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">name1</span> <span class="n">NAME1</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">name2</span> <span class="n">NAME2</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">excludestop</span><span class="p">]</span>
                      <span class="p">[</span><span class="o">--</span><span class="n">noplot</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">alpha</span> <span class="n">ALPHA</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">plot_title</span> <span class="n">PLOT_TITLE</span><span class="p">]</span>
                      <span class="p">[</span><span class="o">--</span><span class="n">corr_on_plot</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">r2</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">rms_dpi</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">pref_entropy</span><span class="p">]</span>
-                     <span class="p">[</span><span class="o">--</span><span class="n">enrichment</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">v</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">restrictdiffsel</span> <span class="n">RESTRICTDIFFSEL</span><span class="p">]</span>
+                     <span class="p">[</span><span class="o">--</span><span class="n">enrichment</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">v</span><span class="p">]</span>
+                     <span class="p">[</span><span class="o">--</span><span class="n">restrictdiffsel</span> <span class="p">{</span><span class="kc">None</span><span class="p">,</span><span class="n">positive</span><span class="p">,</span><span class="n">negative</span><span class="p">}]</span>
                      <span class="n">file1</span> <span class="n">file2</span> <span class="n">outfileprefix</span>
 </pre></div>
 </div>
@@ -161,7 +162,9 @@
 <tr><td class="option-group" colspan="2">
 <kbd><span class="option">--restrictdiffsel=None</span></kbd></td>
 </tr>
-<tr><td>&nbsp;</td><td>A optional string specifying &#8220;positive&#8221; or &#8220;negative&#8221; to restrict the plotted correlation in site differential selection to positive or negative selection. Only meaningful if file1 and file2 are sitediffsel files.</td></tr>
+<tr><td>&nbsp;</td><td><p class="first">Specify &#8220;positive&#8221; or &#8220;negative&#8221; to restrict plotted correlation in site differential selection to positive or negative selection. Only meaningful if file1 and file2 are sitediffsel files.</p>
+<p class="last">Possible choices: None, positive, negative</p>
+</td></tr>
 </tbody>
 </table>
 </dd>
@@ -243,7 +246,7 @@
         <li class="right" >
           <a href="dms_merge.html" title="dms_merge"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">dms_tools 1.1.18 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="index.html">dms_tools 1.1.19 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="programs.html" >Programs</a> &#187;</li> 
       </ul>
     </div>

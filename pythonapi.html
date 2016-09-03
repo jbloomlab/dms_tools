@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Python API &#8212; dms_tools 1.1.18 documentation</title>
+    <title>Python API &#8212; dms_tools 1.1.19 documentation</title>
     
     <link rel="stylesheet" href="_static/classic.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '1.1.18',
+        VERSION:     '1.1.19',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="dms_tools 1.1.18 documentation" href="index.html" />
+    <link rel="top" title="dms_tools 1.1.19 documentation" href="index.html" />
     <link rel="next" title="Citations and Acknowledgments" href="citations.html" />
     <link rel="prev" title="Algorithm to infer differential preferences" href="inferdiffprefs_algorithm.html" /> 
   </head>
@@ -44,7 +44,7 @@
         <li class="right" >
           <a href="inferdiffprefs_algorithm.html" title="Algorithm to infer differential preferences"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">dms_tools 1.1.18 documentation</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">dms_tools 1.1.19 documentation</a> &#187;</li> 
       </ul>
     </div>  
 
@@ -2130,7 +2130,7 @@ returned string is simply &#8216;0&#8217;.</p>
 
 <dl class="function">
 <dt id="plot.PlotCorrelation">
-<code class="descclassname">plot.</code><code class="descname">PlotCorrelation</code><span class="sig-paren">(</span><em>xs</em>, <em>ys</em>, <em>plotfile</em>, <em>xlabel</em>, <em>ylabel</em>, <em>logx=False</em>, <em>logy=False</em>, <em>corr=None</em>, <em>title=False</em>, <em>alpha=1.0</em>, <em>symmetrize=False</em>, <em>fixaxes=False</em>, <em>additionalxy=[]</em>, <em>bigmargin=0.29</em>, <em>xsize=1.8</em>, <em>r2=False</em>, <em>marker_style='b.'</em>, <em>additional_marker_style='r^'</em>, <em>marker_size=4</em>, <em>additional_marker_size=3</em><span class="sig-paren">)</span><a class="headerlink" href="#plot.PlotCorrelation" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">plot.</code><code class="descname">PlotCorrelation</code><span class="sig-paren">(</span><em>xs</em>, <em>ys</em>, <em>plotfile</em>, <em>xlabel</em>, <em>ylabel</em>, <em>logx=False</em>, <em>logy=False</em>, <em>corr=None</em>, <em>title=False</em>, <em>alpha=1.0</em>, <em>symmetrize=False</em>, <em>fixaxes=False</em>, <em>additionalxy=[]</em>, <em>bigmargin=0.35</em>, <em>xsize=1.8</em>, <em>r2=False</em>, <em>marker_style='b.'</em>, <em>additional_marker_style='r^'</em>, <em>marker_size=4</em>, <em>additional_marker_size=3</em><span class="sig-paren">)</span><a class="headerlink" href="#plot.PlotCorrelation" title="Permalink to this definition">¶</a></dt>
 <dd><p>Plots the correlation between two variables as a scatter plot.</p>
 <p>The data is plotted as a scatter plot.
 This function uses <code class="docutils literal"><span class="pre">pylab</span></code> / <code class="docutils literal"><span class="pre">matplotlib</span></code>. 
@@ -2380,7 +2380,7 @@ the overlay. It must end in the extension <code class="docutils literal"><span c
 
 <dl class="function">
 <dt id="weblogo.LogoPlot">
-<code class="descclassname">weblogo.</code><code class="descname">LogoPlot</code><span class="sig-paren">(</span><em>sites</em>, <em>datatype</em>, <em>data</em>, <em>plotfile</em>, <em>nperline</em>, <em>numberevery=10</em>, <em>allowunsorted=False</em>, <em>ydatamax=1.01</em>, <em>overlay=None</em>, <em>fix_limits={}</em>, <em>fixlongname=False</em>, <em>overlay_cmap=None</em>, <em>ylimits=None</em>, <em>relativestackheight=1</em>, <em>custom_cmap='jet'</em><span class="sig-paren">)</span><a class="headerlink" href="#weblogo.LogoPlot" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">weblogo.</code><code class="descname">LogoPlot</code><span class="sig-paren">(</span><em>sites</em>, <em>datatype</em>, <em>data</em>, <em>plotfile</em>, <em>nperline</em>, <em>numberevery=10</em>, <em>allowunsorted=False</em>, <em>ydatamax=1.01</em>, <em>overlay=None</em>, <em>fix_limits={}</em>, <em>fixlongname=False</em>, <em>overlay_cmap=None</em>, <em>ylimits=None</em>, <em>relativestackheight=1</em>, <em>custom_cmap='jet'</em>, <em>noseparator=False</em><span class="sig-paren">)</span><a class="headerlink" href="#weblogo.LogoPlot" title="Permalink to this definition">¶</a></dt>
 <dd><p>Constructs a sequence logo showing amino-acid or nucleotide preferences.</p>
 <p>The heights of each letter is equal to the preference of
 that site for that amino acid or nucleotide.</p>
@@ -2485,6 +2485,10 @@ used to color amino-acid one-letter codes in the logoplot by hydrophobicity.</p>
 <li><p class="first"><em>relativestackheight</em> indicates how high the letter stack is relative to
 the default. The default is multiplied by this number, so make it &gt; 1
 for a higher letter stack.</p>
+</li>
+<li><p class="first"><em>noseparator</em> is only meaningful if <em>datatype</em> is &#8216;diffsel&#8217; or &#8216;diffprefs&#8217;.
+If it set to <em>True</em>, then we do <strong>not</strong> print a black horizontal line to
+separate positive and negative values.</p>
 </li>
 </ul>
 </dd></dl>
@@ -2720,7 +2724,7 @@ from Dirichlet with this concentration parameter.</p>
         <li class="right" >
           <a href="inferdiffprefs_algorithm.html" title="Algorithm to infer differential preferences"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">dms_tools 1.1.18 documentation</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">dms_tools 1.1.19 documentation</a> &#187;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">

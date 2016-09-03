@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>dms_logoplot &#8212; dms_tools 1.1.18 documentation</title>
+    <title>dms_logoplot &#8212; dms_tools 1.1.19 documentation</title>
     
     <link rel="stylesheet" href="_static/classic.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '1.1.18',
+        VERSION:     '1.1.19',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="dms_tools 1.1.18 documentation" href="index.html" />
+    <link rel="top" title="dms_tools 1.1.19 documentation" href="index.html" />
     <link rel="up" title="Programs" href="programs.html" />
     <link rel="next" title="dms_merge" href="dms_merge.html" />
     <link rel="prev" title="dms_inferdiffprefs" href="dms_inferdiffprefs.html" /> 
@@ -45,7 +45,7 @@
         <li class="right" >
           <a href="dms_inferdiffprefs.html" title="dms_inferdiffprefs"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">dms_tools 1.1.18 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="index.html">dms_tools 1.1.19 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="programs.html" accesskey="U">Programs</a> &#187;</li> 
       </ul>
     </div>  
@@ -83,9 +83,11 @@
 <h2><a class="toc-backref" href="#id4">Command-line usage</a><a class="headerlink" href="#command-line-usage" title="Permalink to this headline">¶</a></h2>
 <p>Make a logo plot visually displaying the preferences or differential preferences. Utilizes weblogo (<a class="reference external" href="https://code.google.com/p/weblogo/">https://code.google.com/p/weblogo/</a>). This script is part of dms_tools (version 1.1.17) written by the Bloom Lab (see <a class="reference external" href="https://github.com/jbloomlab/dms_tools/graphs/contributors">https://github.com/jbloomlab/dms_tools/graphs/contributors</a> for all contributors). Detailed documentation is at <a class="reference external" href="http://jbloomlab.github.io/dms_tools/">http://jbloomlab.github.io/dms_tools/</a></p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">usage</span><span class="p">:</span> <span class="n">dms_logoplot</span> <span class="p">[</span><span class="o">-</span><span class="n">h</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">nperline</span> <span class="n">NPERLINE</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">numberevery</span> <span class="n">NUMBEREVERY</span><span class="p">]</span>
+                    <span class="p">[</span><span class="o">--</span><span class="n">restrictdiffsel</span> <span class="p">{</span><span class="kc">None</span><span class="p">,</span><span class="n">positive</span><span class="p">,</span><span class="n">negative</span><span class="p">}]</span>
                     <span class="p">[</span><span class="o">--</span><span class="n">diffselheight</span> <span class="p">[</span><span class="n">DIFFSELHEIGHT</span> <span class="p">[</span><span class="n">DIFFSELHEIGHT</span> <span class="o">...</span><span class="p">]]]</span>
-                    <span class="p">[</span><span class="o">--</span><span class="n">diffprefheight</span> <span class="n">DIFFPREFHEIGHT</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">excludestop</span><span class="p">]</span>
-                    <span class="p">[</span><span class="o">--</span><span class="n">colormap</span> <span class="n">COLORMAP</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">letterheight</span> <span class="n">LETTERHEIGHT</span><span class="p">]</span>
+                    <span class="p">[</span><span class="o">--</span><span class="n">nosepline</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">diffprefheight</span> <span class="n">DIFFPREFHEIGHT</span><span class="p">]</span>
+                    <span class="p">[</span><span class="o">--</span><span class="n">excludestop</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">colormap</span> <span class="n">COLORMAP</span><span class="p">]</span>
+                    <span class="p">[</span><span class="o">--</span><span class="n">letterheight</span> <span class="n">LETTERHEIGHT</span><span class="p">]</span>
                     <span class="p">[</span><span class="o">--</span><span class="n">overlay1</span> <span class="n">FILE</span> <span class="n">SHORTNAME</span> <span class="n">LONGNAME</span><span class="p">]</span>
                     <span class="p">[</span><span class="o">--</span><span class="n">overlay2</span> <span class="n">FILE</span> <span class="n">SHORTNAME</span> <span class="n">LONGNAME</span><span class="p">]</span>
                     <span class="p">[</span><span class="o">--</span><span class="n">overlay3</span> <span class="n">FILE</span> <span class="n">SHORTNAME</span> <span class="n">LONGNAME</span><span class="p">]</span>
@@ -125,11 +127,21 @@
 </tr>
 <tr><td>&nbsp;</td><td>Number x-axis ticks for sites at this interval.</td></tr>
 <tr><td class="option-group" colspan="2">
+<kbd><span class="option">--restrictdiffsel=None</span></kbd></td>
+</tr>
+<tr><td>&nbsp;</td><td><p class="first">Specify &#8216;positive&#8217; or &#8216;negative&#8217; to restrict plotted differential selection to positive or negative selection. Only meaningful if &#8216;infile&#8217; gives differential selection.</p>
+<p class="last">Possible choices: None, positive, negative</p>
+</td></tr>
+<tr><td class="option-group" colspan="2">
 <kbd><span class="option">--diffselheight</span></kbd></td>
 </tr>
-<tr><td>&nbsp;</td><td><p class="first">Only meaningiful if &#8216;infile&#8217; gives differential selection. List other differential selection files, and y-axis limits will be set to the max and min of &#8216;infile&#8217; and all files listed here. This is useful if you want to make multiple differential selection plots with the same y-axis limits.</p>
+<tr><td>&nbsp;</td><td><p class="first">Only meaningful if &#8216;infile&#8217; gives differential selection. List other differential selection files, and y-axis limits will be set to the max and min of &#8216;infile&#8217; and all files listed here. This is useful if you want to make multiple differential selection plots with the same y-axis limits.</p>
 <p class="last">So if you are using this option, you should specify a list of files in the format of the <code class="docutils literal"><span class="pre">*mutdiffsel.txt</span></code> files created by <a class="reference internal" href="dms_diffselection.html#dms-diffselection"><span class="std std-ref">dms_diffselection</span></a>.</p>
 </td></tr>
+<tr><td class="option-group" colspan="2">
+<kbd><span class="option">--nosepline=False</span></kbd></td>
+</tr>
+<tr><td>&nbsp;</td><td>Do not plot a black center line separating positive and negative values of differential selection or preferences.</td></tr>
 <tr><td class="option-group" colspan="2">
 <kbd><span class="option">--diffprefheight=1.0</span></kbd></td>
 </tr>
@@ -171,7 +183,7 @@
 <td>Specify a second overlay bar. Arguments have the same meaning as for &#8220;overlay1&#8221;.</td></tr>
 <tr><td class="option-group">
 <kbd><span class="option">--overlay3</span></kbd></td>
-<td>Specify a third overlay bar. Arguments have the same meaning as for &#8220;overly1&#8221;.</td></tr>
+<td>Specify a third overlay bar. Arguments have the same meaning as for &#8220;overlay1&#8221;.</td></tr>
 <tr><td class="option-group" colspan="2">
 <kbd><span class="option">--stringencyparameter</span></kbd></td>
 </tr>
@@ -320,7 +332,7 @@
         <li class="right" >
           <a href="dms_inferdiffprefs.html" title="dms_inferdiffprefs"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">dms_tools 1.1.18 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="index.html">dms_tools 1.1.19 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="programs.html" >Programs</a> &#187;</li> 
       </ul>
     </div>
