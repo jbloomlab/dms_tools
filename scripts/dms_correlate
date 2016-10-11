@@ -159,7 +159,7 @@ def main():
             corr = (r, p)
         else:
             corr = None
-        dms_tools.plot.PlotCorrelation(xvalues, yvalues, plotfile, args['name1'], args['name2'], alpha=args['alpha'], title=args['plot_title'], corr=corr, symmetrize=True, fixaxes=fixaxes, r2=args['r2'], logx=logx, logy=logy, marker_style='k.')
+        dms_tools.plot.PlotCorrelation(xvalues, yvalues, plotfile, args['name1'], args['name2'], alpha=args['alpha'], title=args['plot_title'], corr=corr, symmetrize=True, fixaxes=fixaxes, r2=args['r2'], logx=logx, logy=logy, marker_style='k.', marker_size=args['markersize'])
 
     print 'Successfully completed %s at %s' % (prog, time.asctime())
 

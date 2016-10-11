@@ -1,6 +1,10 @@
 Changelog
 ===========
 
+1.1.20dev
+------------
+* Added ``--markersize`` option to ``dms_correlate`` and turned clipping off to allow larger markers.
+
 1.1.19
 ------------
 * Some tweaks to ``dms_correlate`` to clarify parser and improve appearance of correlation plots.

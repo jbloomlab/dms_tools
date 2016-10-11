@@ -349,6 +349,7 @@ def CorrelateParser():
     parser.add_argument('--noplot', dest='noplot', action='store_true', help='Normally this script creates a PDF scatter plot. If this option is specified, then no such plot will be created.')
     parser.set_defaults(noplot=False)
     parser.add_argument('--alpha', default=0.1, help='The transparency (alpha value) for the points on the scatter plot. A value of 1.0 correspond to no transparency; values close to zero give high transparency. Transparency (alpha < 1) might be helpful if you have many points on top of each other.', type=float)
+    parser.add_argument('--markersize', default=4, help='The size of the marker for the points on the scatter plot.')
     parser.add_argument('--plot_title', default='None', help='Title put at the top of the correlation plot. The string specified here uses LaTex formatting; names with spaces should be enclosed in spaces. A value of "None" means no title.')
     parser.add_argument('--corr_on_plot', dest='corr_on_plot', action='store_true', help='If this option is used, then the correlation coefficient will be visually displayed on the plot.')
     parser.set_defaults(corr_on_plot=False)
