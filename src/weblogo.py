@@ -18,6 +18,10 @@ Functions in this module
 
 * *KyteDoolittleColorMapping* : maps amino-acid hydrophobicities to colors.
 
+* *MWColorMapping* : maps amino-acid molecular weights to colors.
+
+* *ChargeColorMapping* : maps amino-acid charge at neural pH to colors.
+
 Function documentation
 -----------------------------
 
@@ -93,9 +97,50 @@ def KyteDoolittleColorMapping(maptype='jet', reverse=True):
     cmap = mapper.get_cmap()
     return (cmap, mapping_d, mapper)
 
+def MWColorMapping(maptype='jet', reverse=True):
+    """Maps amino-acid molecular weights to colors. Otherwise, this
+    function is identical to *KyteDoolittleColorMapping*
+    """ 
+    d = {'A':89,'R':174,'N':132,'D':133,'C':121,'Q':146,'E':147,\
+         'G':75,'H':155,'I':131,'L':131,'K':146,'M':149,'F':165,\
+         'P':115,'S':105,'T':119,'W':204,'Y':181,'V':117}
+    
+    mws  = [d[aa] for aa in dms_tools.aminoacids_nostop]
+    if reverse:
+        mws = [-1 * x for x in mws]
+    mapper = pylab.cm.ScalarMappable(cmap=maptype)
+    mapper.set_clim(min(mws), max(mws))
+    mapping_d = {'*':'#000000'}
+    for (aa, h) in zip(dms_tools.aminoacids_nostop, mws):
+        tup = mapper.to_rgba(h, bytes=True)
+        (red, green, blue, alpha) = tup
+        mapping_d[aa] = '#%02x%02x%02x' % (red, green, blue)
+        assert len(mapping_d[aa]) == 7
+    cmap = mapper.get_cmap()
+    return (cmap, mapping_d, mapper)
+
+def ChargeColorMapping(maptype='jet', reverse=False):
+    """Maps amino-acid charge at neutral pH to colors. 
+    Currently does not use the keyword arguments for *maptype*
+    or *reverse* but accepts these arguments to be consistent
+    with KyteDoolittleColorMapping and MWColorMapping for now."""
+
+    pos_color = '#FF0000'
+    neg_color = '#0000FF'
+    neut_color = '#000000'
+
+    mapping_d = {'A':neut_color,'R':pos_color,'N':neut_color,\
+                 'D':neg_color,'C':neut_color,'Q':neut_color,\
+                 'E':neg_color,'G':neut_color,'H':pos_color,\
+                 'I':neut_color,'L':neut_color,'K':pos_color,\
+                 'M':neut_color,'F':neut_color,'P':neut_color,\
+                 'S':neut_color,'T':neut_color,'W':neut_color,\
+                 'Y':neut_color,'V':neut_color}
+
+    return (None, mapping_d, None)
 
 
-def LogoPlot(sites, datatype, data, plotfile, nperline, numberevery=10, allowunsorted=False, ydatamax=1.01, overlay=None, fix_limits={}, fixlongname=False, overlay_cmap=None, ylimits=None, relativestackheight=1, custom_cmap='jet', noseparator=False):
+def LogoPlot(sites, datatype, data, plotfile, nperline, numberevery=10, allowunsorted=False, ydatamax=1.01, overlay=None, fix_limits={}, fixlongname=False, overlay_cmap=None, ylimits=None, relativestackheight=1, custom_cmap='jet', map_metric='kd', noseparator=False):
     """Constructs a sequence logo showing amino-acid or nucleotide preferences.
 
     The heights of each letter is equal to the preference of
@@ -191,11 +236,18 @@ def LogoPlot(sites, datatype, data, plotfile, nperline, numberevery=10, allowuns
       be made for you.
 
     * *custom_cmap* can be the name of a valid *matplotlib.colors.Colormap* which will be
-      used to color amino-acid one-letter codes in the logoplot by hydrophobicity.
+      used to color amino-acid one-letter codes in the logoplot by the *map_metric* when
+      either 'kd' or 'mw' is used as *map_metric*.
 
     * *relativestackheight* indicates how high the letter stack is relative to
       the default. The default is multiplied by this number, so make it > 1
       for a higher letter stack.
+
+    * *map_metric* specifies the amino-acid property metric used to map colors to amino-acid
+    letters. Valid options are 'kd' (Kyte-Doolittle hydrophobicity scale, default), 'mw' 
+    (molecular weight), and 'charge' (charge at neutral pH). If 'charge' is used, then the
+    argument for *custom_cmap* will no longer be meaningful, since 'charge' uses its own 
+    blue/black/red colormapping.
 
     * *noseparator* is only meaningful if *datatype* is 'diffsel' or 'diffprefs'.
       If it set to *True*, then we do **not** print a black horizontal line to
@@ -335,7 +387,11 @@ def LogoPlot(sites, datatype, data, plotfile, nperline, numberevery=10, allowuns
         logo_options.show_yaxis = False
         logo_options.yaxis_scale = ymax 
         if alphabet_type == 'aa':
-            (cmap, colormapping, mapper) = KyteDoolittleColorMapping(maptype=custom_cmap)
+            map_functions = {'kd':KyteDoolittleColorMapping,
+                             'mw': MWColorMapping,
+                             'charge' : ChargeColorMapping}
+            map_fcn = map_functions[map_metric]
+            (cmap, colormapping, mapper) = map_fcn(maptype=custom_cmap)
         elif alphabet_type == 'nt':
             colormapping = {}
             colormapping['A'] = '#008000'
