@@ -212,7 +212,7 @@ def PlotCorrelation(xs, ys, plotfile, xlabel, ylabel, logx=False, logy=False,\
         xmax = ymax = 1.0
     elif symmetrize:
         xmin = ymin = min(xmin, ymin)
-        xmax = ymax = max(xmax, xmin)
+        xmax = ymax = max(xmax, ymax)
     if logy:
         pylab.gca().set_yscale('log')
         ax.set_ylim([ymin / logplotmargin, ymax * logplotmargin])
