@@ -22,6 +22,8 @@ Functions in this module
 
 * *ChargeColorMapping* : maps amino-acid charge at neural pH to colors.
 
+* *FunctionalGroupColorMapping* : maps amino-acid functional groups (small, nucleophilic, hydrophobic, aromatic, acidic, amide, basic) to colors.
+
 Function documentation
 -----------------------------
 
@@ -139,6 +141,31 @@ def ChargeColorMapping(maptype='jet', reverse=False):
 
     return (None, mapping_d, None)
 
+def FunctionalGroupColorMapping(maptype='jet', reverse=False):
+    """Maps amino-acid functional groups to colors.
+    Currently does not use the keyword arguments for *maptype*
+    or *reverse* but accepts these arguments to be consistent
+    with the other mapping functions, which all get called with 
+    these arguments."""
+
+    small_color = '#f76ab4'
+    nucleophilic_color = '#ff7f00'
+    hydrophobic_color = '#12ab0d'
+    aromatic_color = '#84380b'
+    acidic_color = '#3c58e5'
+    amide_color = '#972aa8'
+    basic_color = '#e41a1c'
+
+    mapping_d = {'G':small_color, 'A':small_color,
+                 'S':nucleophilic_color, 'T':nucleophilic_color, 'C':nucleophilic_color,
+                 'V':hydrophobic_color, 'L':hydrophobic_color, 'I':hydrophobic_color, 'M':hydrophobic_color, 'P':hydrophobic_color,
+                 'F':aromatic_color, 'Y':aromatic_color, 'W':aromatic_color,
+                 'D':acidic_color, 'E':acidic_color,
+                 'H':basic_color, 'K':basic_color, 'R':basic_color,
+                 'N':amide_color, 'Q':amide_color,
+                 '*':'#000000'}
+    return (None, mapping_d, None)
+
 
 def LogoPlot(sites, datatype, data, plotfile, nperline, numberevery=10, allowunsorted=False, ydatamax=1.01, overlay=None, fix_limits={}, fixlongname=False, overlay_cmap=None, ylimits=None, relativestackheight=1, custom_cmap='jet', map_metric='kd', noseparator=False):
     """Constructs a sequence logo showing amino-acid or nucleotide preferences.
@@ -245,9 +272,10 @@ def LogoPlot(sites, datatype, data, plotfile, nperline, numberevery=10, allowuns
 
     * *map_metric* specifies the amino-acid property metric used to map colors to amino-acid
     letters. Valid options are 'kd' (Kyte-Doolittle hydrophobicity scale, default), 'mw' 
-    (molecular weight), and 'charge' (charge at neutral pH). If 'charge' is used, then the
+    (molecular weight), 'functionalgroup' (functional groups: small, nucleophilic, hydrophobic,
+    aromatic, basic, acidic, and amide), and 'charge' (charge at neutral pH). If 'charge' is used, then the
     argument for *custom_cmap* will no longer be meaningful, since 'charge' uses its own 
-    blue/black/red colormapping.
+    blue/black/red colormapping. Similarly, 'functionalgroup' uses its own colormapping.
 
     * *noseparator* is only meaningful if *datatype* is 'diffsel' or 'diffprefs'.
       If it set to *True*, then we do **not** print a black horizontal line to
@@ -389,7 +417,8 @@ def LogoPlot(sites, datatype, data, plotfile, nperline, numberevery=10, allowuns
         if alphabet_type == 'aa':
             map_functions = {'kd':KyteDoolittleColorMapping,
                              'mw': MWColorMapping,
-                             'charge' : ChargeColorMapping}
+                             'charge' : ChargeColorMapping,
+                             'functionalgroup':FunctionalGroupColorMapping}
             map_fcn = map_functions[map_metric]
             (cmap, colormapping, mapper) = map_fcn(maptype=custom_cmap)
         elif alphabet_type == 'nt':

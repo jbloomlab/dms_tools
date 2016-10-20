@@ -3,7 +3,7 @@ Changelog
 
 1.1.20dev
 ------------
-* Added ``--mapmetric`` option to ``dms_logoplot`` to allow mapping of molecular weight or charge to logoplot letter color.
+* Added ``--mapmetric`` option to ``dms_logoplot`` to allow mapping of molecular weight, charge, or functional group to logoplot letter color.
 
 * Added ``--markersize`` option to ``dms_correlate`` and turned clipping off to allow larger markers.
 
