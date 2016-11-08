@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Python API &#8212; dms_tools 1.1.19 documentation</title>
+    <title>Python API &#8212; dms_tools 1.1.20 documentation</title>
     
     <link rel="stylesheet" href="_static/classic.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '1.1.19',
+        VERSION:     '1.1.20',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="dms_tools 1.1.19 documentation" href="index.html" />
+    <link rel="top" title="dms_tools 1.1.20 documentation" href="index.html" />
     <link rel="next" title="Citations and Acknowledgments" href="citations.html" />
     <link rel="prev" title="Algorithm to infer differential preferences" href="inferdiffprefs_algorithm.html" /> 
   </head>
@@ -44,7 +44,7 @@
         <li class="right" >
           <a href="inferdiffprefs_algorithm.html" title="Algorithm to infer differential preferences"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">dms_tools 1.1.19 documentation</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">dms_tools 1.1.20 documentation</a> &#187;</li> 
       </ul>
     </div>  
 
@@ -2317,10 +2317,32 @@ the same color.</p>
 <li><em>LogoPlot</em> : plots a sequence logo of site-specific preferences or differential preferences.</li>
 <li><em>LogoOverlay</em> : makes logo plot overlays, called by <em>LogoPlot</em>.</li>
 <li><em>KyteDoolittleColorMapping</em> : maps amino-acid hydrophobicities to colors.</li>
+<li><em>MWColorMapping</em> : maps amino-acid molecular weights to colors.</li>
+<li><em>ChargeColorMapping</em> : maps amino-acid charge at neural pH to colors.</li>
+<li><em>FunctionalGroupColorMapping</em> : maps amino-acid functional groups (small, nucleophilic, hydrophobic, aromatic, acidic, amide, basic) to colors.</li>
 </ul>
 </div>
 <div class="section" id="id8">
 <h3>Function documentation<a class="headerlink" href="#id8" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="weblogo.ChargeColorMapping">
+<code class="descclassname">weblogo.</code><code class="descname">ChargeColorMapping</code><span class="sig-paren">(</span><em>maptype='jet'</em>, <em>reverse=False</em><span class="sig-paren">)</span><a class="headerlink" href="#weblogo.ChargeColorMapping" title="Permalink to this definition">¶</a></dt>
+<dd><p>Maps amino-acid charge at neutral pH to colors. 
+Currently does not use the keyword arguments for <em>maptype</em>
+or <em>reverse</em> but accepts these arguments to be consistent
+with KyteDoolittleColorMapping and MWColorMapping for now.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="weblogo.FunctionalGroupColorMapping">
+<code class="descclassname">weblogo.</code><code class="descname">FunctionalGroupColorMapping</code><span class="sig-paren">(</span><em>maptype='jet'</em>, <em>reverse=False</em><span class="sig-paren">)</span><a class="headerlink" href="#weblogo.FunctionalGroupColorMapping" title="Permalink to this definition">¶</a></dt>
+<dd><p>Maps amino-acid functional groups to colors.
+Currently does not use the keyword arguments for <em>maptype</em>
+or <em>reverse</em> but accepts these arguments to be consistent
+with the other mapping functions, which all get called with 
+these arguments.</p>
+</dd></dl>
+
 <dl class="function">
 <dt id="weblogo.KyteDoolittleColorMapping">
 <code class="descclassname">weblogo.</code><code class="descname">KyteDoolittleColorMapping</code><span class="sig-paren">(</span><em>maptype='jet'</em>, <em>reverse=True</em><span class="sig-paren">)</span><a class="headerlink" href="#weblogo.KyteDoolittleColorMapping" title="Permalink to this definition">¶</a></dt>
@@ -2380,7 +2402,7 @@ the overlay. It must end in the extension <code class="docutils literal"><span c
 
 <dl class="function">
 <dt id="weblogo.LogoPlot">
-<code class="descclassname">weblogo.</code><code class="descname">LogoPlot</code><span class="sig-paren">(</span><em>sites</em>, <em>datatype</em>, <em>data</em>, <em>plotfile</em>, <em>nperline</em>, <em>numberevery=10</em>, <em>allowunsorted=False</em>, <em>ydatamax=1.01</em>, <em>overlay=None</em>, <em>fix_limits={}</em>, <em>fixlongname=False</em>, <em>overlay_cmap=None</em>, <em>ylimits=None</em>, <em>relativestackheight=1</em>, <em>custom_cmap='jet'</em>, <em>noseparator=False</em><span class="sig-paren">)</span><a class="headerlink" href="#weblogo.LogoPlot" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">weblogo.</code><code class="descname">LogoPlot</code><span class="sig-paren">(</span><em>sites</em>, <em>datatype</em>, <em>data</em>, <em>plotfile</em>, <em>nperline</em>, <em>numberevery=10</em>, <em>allowunsorted=False</em>, <em>ydatamax=1.01</em>, <em>overlay=None</em>, <em>fix_limits={}</em>, <em>fixlongname=False</em>, <em>overlay_cmap=None</em>, <em>ylimits=None</em>, <em>relativestackheight=1</em>, <em>custom_cmap='jet'</em>, <em>map_metric='kd'</em>, <em>noseparator=False</em><span class="sig-paren">)</span><a class="headerlink" href="#weblogo.LogoPlot" title="Permalink to this definition">¶</a></dt>
 <dd><p>Constructs a sequence logo showing amino-acid or nucleotide preferences.</p>
 <p>The heights of each letter is equal to the preference of
 that site for that amino acid or nucleotide.</p>
@@ -2480,17 +2502,33 @@ string <em>jet</em> or <em>bwr</em>. Otherwise, it can be <em>None</em> and a (h
 be made for you.</p>
 </li>
 <li><p class="first"><em>custom_cmap</em> can be the name of a valid <em>matplotlib.colors.Colormap</em> which will be
-used to color amino-acid one-letter codes in the logoplot by hydrophobicity.</p>
+used to color amino-acid one-letter codes in the logoplot by the <em>map_metric</em> when
+either &#8216;kd&#8217; or &#8216;mw&#8217; is used as <em>map_metric</em>.</p>
 </li>
 <li><p class="first"><em>relativestackheight</em> indicates how high the letter stack is relative to
 the default. The default is multiplied by this number, so make it &gt; 1
 for a higher letter stack.</p>
 </li>
-<li><p class="first"><em>noseparator</em> is only meaningful if <em>datatype</em> is &#8216;diffsel&#8217; or &#8216;diffprefs&#8217;.
-If it set to <em>True</em>, then we do <strong>not</strong> print a black horizontal line to
-separate positive and negative values.</p>
+<li><p class="first"><em>map_metric</em> specifies the amino-acid property metric used to map colors to amino-acid</p>
 </li>
 </ul>
+<p>letters. Valid options are &#8216;kd&#8217; (Kyte-Doolittle hydrophobicity scale, default), &#8216;mw&#8217; 
+(molecular weight), &#8216;functionalgroup&#8217; (functional groups: small, nucleophilic, hydrophobic,
+aromatic, basic, acidic, and amide), and &#8216;charge&#8217; (charge at neutral pH). If &#8216;charge&#8217; is used, then the
+argument for <em>custom_cmap</em> will no longer be meaningful, since &#8216;charge&#8217; uses its own 
+blue/black/red colormapping. Similarly, &#8216;functionalgroup&#8217; uses its own colormapping.</p>
+<ul class="simple">
+<li><em>noseparator</em> is only meaningful if <em>datatype</em> is &#8216;diffsel&#8217; or &#8216;diffprefs&#8217;.
+If it set to <em>True</em>, then we do <strong>not</strong> print a black horizontal line to
+separate positive and negative values.</li>
+</ul>
+</dd></dl>
+
+<dl class="function">
+<dt id="weblogo.MWColorMapping">
+<code class="descclassname">weblogo.</code><code class="descname">MWColorMapping</code><span class="sig-paren">(</span><em>maptype='jet'</em>, <em>reverse=True</em><span class="sig-paren">)</span><a class="headerlink" href="#weblogo.MWColorMapping" title="Permalink to this definition">¶</a></dt>
+<dd><p>Maps amino-acid molecular weights to colors. Otherwise, this
+function is identical to <em>KyteDoolittleColorMapping</em></p>
 </dd></dl>
 
 </div>
@@ -2724,7 +2762,7 @@ from Dirichlet with this concentration parameter.</p>
         <li class="right" >
           <a href="inferdiffprefs_algorithm.html" title="Algorithm to infer differential preferences"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">dms_tools 1.1.19 documentation</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">dms_tools 1.1.20 documentation</a> &#187;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
