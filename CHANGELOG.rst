@@ -1,7 +1,7 @@
 Changelog
 ===========
 
-1.1.20dev
+1.1.20
 ------------
 * Added ``--mapmetric`` option to ``dms_logoplot`` to allow mapping of molecular weight, charge, or functional group to logoplot letter color.
 
