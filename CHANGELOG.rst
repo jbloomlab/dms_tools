@@ -1,7 +1,7 @@
 Changelog
 ===========
 
-1.2.0
+1.dev2
 -------------
 * Added ``dms_subassemble`` program
 
