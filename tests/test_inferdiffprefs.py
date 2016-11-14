@@ -61,7 +61,7 @@ class TestInferDiffPrefs(unittest.TestCase):
         self.assertTrue(os.path.isfile(self.ratioinferred), 'Failed to create file %s with command:\n%s\n' % (self.ratioinferred, ' '.join(cmds)))
 
         self.assertFalse(os.path.isfile(self.ratiocorr), '%s already exists' % self.ratiocorr)
-        cmds = ['dms_correlate', self.actualdiffprefs, self.ratioinferred, os.path.splitext(self.corr)[0], '--name1', 'actual', '--name2', 'ratio inferred', '--corr_on_plot']
+        cmds = ['dms_correlate', self.actualdiffprefs, self.ratioinferred, os.path.splitext(self.corr)[0], '--name1', 'actual', '--name2', 'ratio-inferred', '--corr_on_plot']
         subprocess.call(cmds)
         self.assertTrue(os.path.isfile(self.ratiocorr), 'Failed to create file %s with command:\n%s\n' % (self.corr, ' '.join(cmds)))
         with open(self.ratiocorr) as f:

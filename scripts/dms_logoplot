@@ -8,7 +8,7 @@ Written by Jesse Bloom."""
 import sys
 import os
 import time
-import scipy.stats
+import pandas
 import dms_tools.utils
 import dms_tools.parsearguments
 import dms_tools.file_io
@@ -71,24 +71,70 @@ def main():
         print "Removing existing file %s" % args['logoplot']
 
     # read data
-    print "\nReading data from %s" % args['infile']
-    (sites, characters, wts, databyfile) = dms_tools.file_io.ReadMultiPrefOrDiffPref([args['infile']], args['excludestop'], sortsites=False)
-    data = databyfile[args['infile']]
-    if 'preferences' == dms_tools.utils.Pref_or_DiffPref(data):
-        print "%s specifies preferences" % args['infile']
-        datatype = 'prefs'
-        if args['stringencyparameter']:
-            print "\nRescaling preferences with stringency parameter %s" % args['stringencyparameter']
-            for r in list(data.keys()):
-                data[r] = dict([(aa, pi**args['stringencyparameter']) for (aa, pi) in data[r].items()])
-                normsum = float(sum(data[r].values()))
-                data[r] = dict([(aa, pi / normsum) for (aa, pi) in data[r].items()])
-    elif 'diffprefs' == dms_tools.utils.Pref_or_DiffPref(data):
-        print "%s specifies differential preferences" % args['infile']
-        datatype = 'diffprefs'
-        assert not args['stringencyparameter'], "Cannot use --stringencyparameter with differential preferences, only with preferences."
-    else:
-        raise ValueError("infile %s does not either valid preferences or valid differential preferences" % args['infile'])
+    print("\nReading data from %s" % args['infile'])
+    try:
+        # try to read differential selection
+        datatype = 'diffsel'
+        expectedcolumns = set(['site', 'wt', 'mut', 'diffsel'])
+        diffsel = pandas.read_csv(args['infile'])
+        diffsel.fillna(0.0, inplace=True) # set diffsel to zero for any missing (NaN) values
+        if args['restrictdiffsel'] == 'positive':
+            diffsel['diffsel'][diffsel['diffsel'] < 0] = 0
+        elif args['restrictdiffsel'] == 'negative':
+            diffsel['diffsel'][diffsel['diffsel'] > 0] = 0
+        assert set(diffsel.columns.values) == expectedcolumns
+        sites = list(set(diffsel['site'].tolist()))
+        data = {}
+        for r in sites:
+            data[str(r)] = diffsel.loc[diffsel['site'] == r].set_index('mut')['diffsel'].to_dict()
+            if args['excludestop'] and '*' in data[str(r)]:
+                del data[str(r)]['*']
+        sites = [str(r) for r in sites]
+        dms_tools.utils.NaturalSort(sites)
+    except: 
+        # see if preferences or differential preferences
+        (sites, characters, wts, databyfile) = dms_tools.file_io.ReadMultiPrefOrDiffPref([args['infile']], args['excludestop'], sortsites=False)
+        data = databyfile[args['infile']]
+        if 'preferences' == dms_tools.utils.Pref_or_DiffPref(data):
+            print("%s specifies preferences" % args['infile'])
+            datatype = 'prefs'
+            if args['stringencyparameter']:
+                print "\nRescaling preferences with stringency parameter %s" % args['stringencyparameter']
+                for r in list(data.keys()):
+                    data[r] = dict([(aa, pi**args['stringencyparameter']) for (aa, pi) in data[r].items()])
+                    normsum = float(sum(data[r].values()))
+                    data[r] = dict([(aa, pi / normsum) for (aa, pi) in data[r].items()])
+        elif 'diffprefs' == dms_tools.utils.Pref_or_DiffPref(data):
+            print("%s specifies differential preferences" % args['infile'])
+            datatype = 'diffprefs'
+            assert not args['stringencyparameter'], "Cannot use --stringencyparameter with differential preferences, only with preferences."
+        else:
+            raise ValueError("infile %s is not a valid preferences, differential preferences, or differential selection file" % args['infile'])
+
+    # now get y limits if using differential selection
+    ylimits = None
+    if datatype == 'diffsel':
+        alldiffsel = [diffsel]
+        if args['diffselheight']:
+            for fname in args['diffselheight']:
+                df = pandas.read_csv(fname)
+                df.fillna(0.0, inplace=True) # set diffsel to zero for any missing (NaN) values
+                if args['restrictdiffsel'] == 'positive':
+                    df['diffsel'][df['diffsel'] < 0] = 0
+                elif args['restrictdiffsel'] == 'negative':
+                    df['diffsel'][df['diffsel'] > 0] = 0
+                alldiffsel.append(df)
+        maxdiffsel = mindiffsel = 0
+        for idataframe in alldiffsel:
+            for r in set(idataframe['site'].tolist()):
+                maxdiffsel = max(maxdiffsel, sum(map(lambda x: max(0, x), idataframe.loc[idataframe['site'] == r]['diffsel'])))
+                mindiffsel = min(mindiffsel, sum(map(lambda x: min(0, x), idataframe.loc[idataframe['site'] == r]['diffsel'])))
+        yspread = maxdiffsel - mindiffsel
+        maxdiffsel += 0.02 * yspread
+        mindiffsel -= 0.02 * yspread
+        ylimits = (mindiffsel, maxdiffsel)
+    elif args['diffselheight']:
+        raise ValueError("Can't use --diffselheight if not using differential selectin")
 
     # read overlays if they exist
     if args['overlay1']:
@@ -106,14 +152,34 @@ def main():
             if extrasites:
                 raise ValueError("Set of sites specified for overlay2 includes sites not in infile:\n%s" % str(extrasites))
             overlay.append((overlaydata2, overlayshortname2, overlaylongname2))
+            if args['overlay3']:
+                [overlayfile3, overlayshortname3, overlaylongname3] = args['overlay3']
+                assert overlayshortname2 != overlayshortname3, "overlay2 and overlay3 have the same SHORTNAME. This is not allowed."
+                overlaydata3 = ReadOverlay(overlayfile3)
+                extrasites = set(overlaydata3.keys()) - set(sites)
+                if extrasites:
+                    raise ValueError("Set of sites specified for overlay3 includes sites not in infile:\n%s" % str(extrasites))
+                overlay.append((overlaydata3, overlayshortname3, overlaylongname3))
+        elif args['overlay3']:
+            raise ValueError("You cannot specify --overlay3 unless you also specify --overlay2")
     elif args['overlay2']:
         raise ValueError("You cannot specify --overlay2 unless you also specify --overlay1")
     else:
         overlay = None
 
+    # use taller default letter stacks for differential selection
+    relativestackheight = {
+            'prefs':args['letterheight'],
+            'diffprefs':args['letterheight'],
+            'diffsel':2 * args['letterheight'],
+            }
+    
     # make logo plot
     print "\nNow making the logo plot in file %s" % args['logoplot']
-    dms_tools.weblogo.LogoPlot(sites, datatype, data, args['logoplot'], args['nperline'], numberevery=args['numberevery'], allowunsorted=True, ydatamax=args['diffprefheight'], overlay=overlay)
+    dms_tools.weblogo.LogoPlot(sites, datatype, data, args['logoplot'], args['nperline'], numberevery=args['numberevery'], 
+                               allowunsorted=True, ydatamax=args['diffprefheight'], overlay=overlay, ylimits=ylimits, 
+                               relativestackheight=relativestackheight[datatype], custom_cmap=args['colormap'], map_metric=args['mapmetric'],
+                               noseparator=args['nosepline'])
     assert os.path.isfile(args['logoplot']), "Failed to create %s" % args['logoplot']
 
     print '\nSuccessfully completed %s at %s' % (prog, time.asctime())

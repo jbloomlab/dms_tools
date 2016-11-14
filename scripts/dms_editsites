@@ -35,6 +35,7 @@ def main():
         os.remove(args['outfile'])
 
     f = open(args['outfile'], 'w')
+    setsplitchar = False
     try:
         if args['edit_method'] == 'renumber':
             with open(args['edit_file']) as f_edit:
@@ -45,25 +46,33 @@ def main():
                         assert len(entries) == 2, "line in edit_file %s does not have two entries:\n%s" % (args['edit_file'], line)
                         assert entries[0] not in renumber_d, "Duplicate site %s in edit_file %s" % (entries[0], args['edit_file'])
                         renumber_d[entries[0]] = entries[1]
-            assert len(renumber_d) == len(set(renumber_d.items())), "Duplicate new (renumbered) sites specified in %s" % args['edit_file']
             print "Renumbering %d sites as specified in %s to transform %s to %s" % (len(renumber_d), args['edit_file'], args['infile'], args['outfile'])
             with open(args['infile']) as f_in:
+                firstline = True
                 for line in f_in:
-                    if not line or line.isspace() or line[0] == '#':
+                    if (not line) or line.isspace() or (line[0] == '#') or (firstline and args['skipfirstline']):
                         f.write(line)
                     else:
-                        splitline = line.split(None, 1)
+                        if not setsplitchar:
+                            if len(line.split()) > 1:
+                                splitchar = None
+                            elif ',' in line:
+                                splitchar = ','
+                            else:
+                                raise ValueError("Cannot determine splitchar")
+                        setsplitchar = True
+                        splitline = line.split(splitchar, 1)
                         site = splitline[0]
                         if len(splitline) == 1:
                             remainderline = '\n'
                         else:
                             remainderline = splitline[1]
                         if site in renumber_d:
-                            f.write('%s %s' % (renumber_d[site], remainderline))
-                            del renumber_d[site]
+                            if renumber_d[site].lower() != 'none':
+                                f.write('{0}{1}{2}'.format(renumber_d[site], {None:' ', ',':','}[splitchar], remainderline))
                         else:
                             raise ValueError("Cannot find site %s in edit_file %s in infile %s" % (site, args['edit_file'], args['infile']))
-            assert not renumber_d, "Cannot find all of the sites in edit_file %s in infile %s. Here are the missing sites:\n%s" % (args['edit_file'], args['infile'], ' '.join(renumber_d.keys()))
+                    firstline = False
         elif args['edit_method'] in ['remove', 'retain']:
             with open(args['edit_file']) as f_edit:
                 specified_sites = [line.split()[0].strip() for line in f_edit if line and (not line.isspace()) and line[0] != '#']
@@ -71,11 +80,22 @@ def main():
                 raise ValueError("%s contains duplicate sites:\n%s" % (args['edit_file'], ' '.join(specified_sites)))
             print "\nNow %s the %d sites specified in %s, thereby transforming %s to %s" % (args['edit_method'], len(specified_sites), args['edit_file'], args['infile'], args['outfile'])
             with open(args['infile']) as f_in:
+                firstline = True
                 for line in f_in:
-                    if not line or line.isspace() or line[0] == '#':
+                    if (not line) or line.isspace() or (line[0] == '#') or (firstline and args['skipfirstline']):
                         f.write(line)
-                    elif ((line.split()[0].strip() in specified_sites) and args['edit_method'] == 'retain') or ((line.split()[0].strip() not in specified_sites) and args['edit_method'] == 'remove'):
-                        f.write(line)
+                    else:
+                        if not setsplitchar:
+                            if len(line.split()) > 1:
+                                splitchar = None
+                            elif ',' in line:
+                                splitchar = ','
+                            else:
+                                raise ValueError("Cannot determine splitchar")
+                        setsplitchar = True
+                        if ((line.split(splitchar)[0].strip() in specified_sites) and args['edit_method'] == 'retain') or ((line.split(splitchar)[0].strip() not in specified_sites) and args['edit_method'] == 'remove'):
+                            f.write(line)
+                    firstline = False
         else:
             raise ValueError("Invalid edit_method of %s" % args['edit_method'])
         f.close()

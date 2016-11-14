@@ -40,6 +40,8 @@ Defined in this module
 
 * *InferDiffPrefsParser* : parser for ``dms_inferdiffprefs``
 
+* *DiffSelectionParser* : parser for ``dms_diffselection``
+
 * *MergeParser* : parser for ``dms_merge``
 
 * *EditSitesParser* : parsers for ``dms_editsites``
@@ -213,8 +215,10 @@ def ExistingFile(fname):
     """If *fname* is name of an existing file return it, otherwise an error.
     
     It is also acceptable for *fname* to be the string "none"."""
-    if os.path.isfile(fname) or fname.lower() == 'none':
+    if os.path.isfile(fname):
         return fname
+    elif fname.lower() == 'none':
+        return None
     else:
         raise argparse.ArgumentTypeError("%s does not specify a valid file name" % fname)
 
@@ -390,25 +394,33 @@ def BarcodedSubampliconsParser():
 def LogoPlotParser():
     """Returns *argparse.ArgumentParser* for ``dms_logoplot`` script."""
     parser = ArgumentParserNoArgHelp(description='Make a logo plot visually displaying the preferences or differential preferences. Utilizes weblogo (https://code.google.com/p/weblogo/). This script is part of %s (version %s) written by %s. Detailed documentation is at %s' % (dms_tools.__name__, dms_tools.__version__, dms_tools.__author__, dms_tools.__url__), formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    parser.add_argument('infile', help='Existing file giving the preferences or differential preferences. The program auto-detects which type of data is present. The preferences can be for DNA or amino acids (stop codons allowed, indicated by "*").', type=ExistingFile)
+    parser.add_argument('infile', help='Existing file giving preferences, differential preferences, or differential selection. The program auto-detects which type of data is present. The values can be for DNA or amino acids (stop codons allowed, indicated by "*").', type=ExistingFile)
     parser.add_argument('logoplot', help='Name of created file containing the logo plot, must end in the extension ".pdf". Overwritten if it already exists.', type=PDF_File)
     parser.add_argument('--nperline', type=int, default=60, help='Put this many sites per line of the logo plot.')
     parser.add_argument('--numberevery', type=int, default=10, help='Number x-axis ticks for sites at this interval.')
+    parser.add_argument('--restrictdiffsel', default='None', help="Specify 'positive' or 'negative' to restrict plotted differential selection to positive or negative selection. Only meaningful if 'infile' gives differential selection.", choices=['None', 'positive', 'negative'])
+    parser.add_argument('--diffselheight', type=ExistingFile, nargs='*', help="Only meaningful if 'infile' gives differential selection. List other differential selection files, and y-axis limits will be set to the max and min of 'infile' and all files listed here. This is useful if you want to make multiple differential selection plots with the same y-axis limits.")
+    parser.set_defaults(nosepline=False)
+    parser.add_argument('--nosepline', dest='nosepline', action='store_true', help='Do not plot a black center line separating positive and negative values of differential selection or preferences.')
     parser.add_argument('--diffprefheight', type=float, default=1.0, help='This option is only meaningful if "infile" gives differential preferences. In that case, it gives the height of logo stacks (extends from minus this to plus this). Cannot be smaller than the maximum total differential preference range.')
     parser.add_argument('--excludestop', dest='excludestop', action='store_true', help='If we are using amino acids, do we remove stop codons (denoted by "*")? We only remove stop codons if this argument is specified. If this option is used, then data for stop codons is removed by re-normalizing preferences to sum to one, and differential preferences to sum to zero.')
     parser.set_defaults(excludestop=False)
+    parser.add_argument('--colormap', type=str, default='jet', help='Colormap for amino-acid hydrophobicity or molecular weight. Must specify a valid ``pylab`` color map. Only meaningful if "mapmetric" is "kd" or "mw".')
+    parser.add_argument('--letterheight', default=1, type=FloatGreaterThanZero, help="Relative parameter indicating the height of the letter stacks in the logo plots.")
     parser.add_argument('--overlay1', default=None, nargs=3, metavar=('FILE', 'SHORTNAME', 'LONGNAME'), help='Specify an overlay bar above each line of the logo plot to illustrate a per-residue property such as relative solvent accessibility or secondary structure. Requires three arguments: FILE SHORTNAME LONGNAME. FILE is the name of an existing file. Except for comment lines beginning with "#", each line should have two whitespace delimited columns (additional columns are allowed but ignored). The first column gives the site number (matching that in "infile") and the second column giving the property for this site; properties must either all be non-whitespace strings giving a discrete category (such as secondary structure), or all be numbers (such as relative solvent accessibility). All listed sites must be in "infile", but not all sites in "infile" must be in FILE -- missing sites are assumed to lack a known value for the property and are shown in white. SHORTNAME is a short (3-5 character) name of the property, such as "RSA" for "relative solvent accessibility." LONGNAME is a longer name (such as "relative solvent accessibiity"), or the same as SHORTNAME if you do not have a separate long name.')
     parser.add_argument('--overlay2', default=None, nargs=3, metavar=('FILE', 'SHORTNAME', 'LONGNAME'), help='Specify a second overlay bar. Arguments have the same meaning as for "overlay1".')
+    parser.add_argument('--overlay3', default=None, nargs=3, metavar=('FILE', 'SHORTNAME', 'LONGNAME'), help='Specify a third overlay bar. Arguments have the same meaning as for "overlay1".')
     parser.add_argument('--stringencyparameter', type=FloatGreaterThanZero, help="Scale preferences by this stringency parameter; only valid when 'infile' specifies preferences.")
+    parser.add_argument('--mapmetric', default='kd', help="Specify the amino-acid metric used to map colors to amino-acids in the logoplot. 'kd' uses the Kyte-Doolittle hydrophobicity scale, 'mw' uses molecular weight, 'functionalgroup' divides the amino acids into seven functional groups, and 'charge' uses charge at neutral pH. When using 'kd' or 'mw', 'colormap' is used to map colors to the metric; when using 'charge', a black/red/blue colormapping is used for neutral/positive/negative; similarly 'functionalgroup' has its own colormap.", choices=['kd','mw','charge','functionalgroup'])
     parser.add_argument('-v', '--version', action='version', version='%(prog)s {version}'.format(version=dms_tools.__version__))
     return parser
 
 
 def CorrelateParser():
     """Returns *argparse.ArgumentParser* for ``dms_correlate`` script."""
-    parser = ArgumentParserNoArgHelp(description='Determine and plot the Pearson correlation between pairs of preferences or pairs of differential preferences. This script is part of %s (version %s) written by %s. Detailed documentation is at %s' % (dms_tools.__name__, dms_tools.__version__, dms_tools.__author__, dms_tools.__url__), formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    parser.add_argument('file1', help='Existing file giving first set of preferences or differential preferences.', type=ExistingFile)
-    parser.add_argument('file2', help='Existing file giving second set of preferences or differential preferences. Must give the same type of data (preferences or differential preferences) for the same set of sites and same type of character as "file1".', type=ExistingFile)
+    parser = ArgumentParserNoArgHelp(description='Determine and plot the Pearson correlation between pairs of preferences, differential selections, or differential preferences. This script is part of %s (version %s) written by %s. Detailed documentation is at %s' % (dms_tools.__name__, dms_tools.__version__, dms_tools.__author__, dms_tools.__url__), formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser.add_argument('file1', help='Existing file giving first set of preferences, differential selections (either site or mutation), or differential preferences.', type=ExistingFile)
+    parser.add_argument('file2', help='Existing file giving second set of data; must be the same type of data "file1".', type=ExistingFile)
     parser.add_argument('outfileprefix', help='Prefix for name of created output files (these files are overwritten if they already exist). The correlations are written to a file with this prefix and the suffix ".txt". Unless you use the option "--noplot", a scatter plot is written to a file with this prefix and the suffix ".pdf". In the correlations text file, the first line gives the Pearson correlation coefficient in the format: "R = 0.5312". The second line gives the P-value in the format: "P = 0.0000131". The third line gives the number of points in the format: "N = 4200".')
     parser.add_argument('--name1', default='data 1', help='Name used for the data in "file1" in the correlation plot. The string specified here uses LaTex formatting; names with spaces should be enclosed in quotes.')
     parser.add_argument('--name2', default='data 2', help='Name used for the data in "file2" in the correlation plot. The string specified here uses LaTex formatting; names with spaces should be enclosed in quotes.')
@@ -417,6 +429,7 @@ def CorrelateParser():
     parser.add_argument('--noplot', dest='noplot', action='store_true', help='Normally this script creates a PDF scatter plot. If this option is specified, then no such plot will be created.')
     parser.set_defaults(noplot=False)
     parser.add_argument('--alpha', default=0.1, help='The transparency (alpha value) for the points on the scatter plot. A value of 1.0 correspond to no transparency; values close to zero give high transparency. Transparency (alpha < 1) might be helpful if you have many points on top of each other.', type=float)
+    parser.add_argument('--markersize', default=4, help='The size of the marker for the points on the scatter plot.')
     parser.add_argument('--plot_title', default='None', help='Title put at the top of the correlation plot. The string specified here uses LaTex formatting; names with spaces should be enclosed in spaces. A value of "None" means no title.')
     parser.add_argument('--corr_on_plot', dest='corr_on_plot', action='store_true', help='If this option is used, then the correlation coefficient will be visually displayed on the plot.')
     parser.set_defaults(corr_on_plot=False)
@@ -429,28 +442,32 @@ def CorrelateParser():
     parser.set_defaults(enrichment=False)
     parser.add_argument('--enrichment', dest='enrichment', action='store_true', help='If this option is set, we plot the enrichment ratio for all mutations on a log scale rather than plotting the preferences. The computed correlations are also then for the log-transformed enrichment ratios. The enrichment ratio for the wildtype identity is always one, and so is not included.')
     parser.add_argument('-v', '--version', action='version', version='%(prog)s {version}'.format(version=dms_tools.__version__))
+    parser.add_argument('--restrictdiffsel', default='None', help='Specify "positive" or "negative" to restrict plotted correlation in site differential selection to positive or negative selection. Only meaningful if file1 and file2 are sitediffsel files.', choices=['None', 'positive', 'negative'])
     return parser
 
 
 def EditSitesParser():
     parser = ArgumentParserNoArgHelp(description='Edits sites in a data file. Typically you would use this program if you wanted to renumber sites or remove certain sites. This script is part of %s (version %s) written by %s. Detailed documentation is at %s' % (dms_tools.__name__, dms_tools.__version__, dms_tools.__author__, dms_tools.__url__), formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    parser.add_argument('infile', type=ExistingFile, help='Existing data file. This could be a deep mutational scanning counts file, a preferences file, a differential preferences file, or any other file with the following format: blank lines or lines beginning with "#" (comment lines) are ignored; every other line must begin with an entry giving a unique site number (such as "1" or "2A"). The line may then have an arbitrary number of other entries separated from the site number by whitespace.')
+    parser.add_argument('infile', type=ExistingFile, help='Existing data file. This could be a deep mutational scanning counts file, a preferences file, a differential preferences file, or any other file with the following format: blank lines or lines beginning with "#" (comment lines) are ignored; every other line must begin with an entry giving a unique site number (such as "1" or "2A"). The line may then have an arbitrary number of other entries separated from the site number by whitespace. If the lines have no whitespace, then we look for comma separators.')
     parser.add_argument('outfile', help='The created output file in which the site editing has been performed on "infile". If this output file already exists, it is overwritten.')
     parser.add_argument('edit_method', choices=['renumber', 'remove', 'retain'], help='How to do the editing: renumber sites, remove specified sites, or retain only specified sites.')
-    parser.add_argument('edit_file', type=ExistingFile, help='Existing file specifying how edits are made. If "edit_method" is "renumber", then all non-comment lines (those not beginning with "#") must have two space delimited entries specifying the existing site in "infile" and the new site number with which it is replaced; all sites must be specified. If "edit_method" is "remove", then each line should have as its first entry a site, and all of the listed sites are removed. If "edit_method" is "retain", then each line should have as its first entry a site, and only the listed sites are retained.')
+    parser.add_argument('edit_file', type=ExistingFile, help='Existing file specifying how edits are made. If "edit_method" is "renumber", then all non-comment lines (those not beginning with "#") must have two space delimited entries specifying the existing site in "infile" and the new site number with which it is replaced; all sites must be specified, and if the new number is "None" then the site is removed in the created file. If "edit_method" is "remove", then each line should have as its first entry a site, and all of the listed sites are removed. If "edit_method" is "retain", then each line should have as its first entry a site, and only the listed sites are retained.')
+    parser.set_defaults(skipfirstline=False)
+    parser.add_argument('--skipfirstline', action='store_true', dest='skipfirstline', help='Skip the edit operation on the first site. This could be helpful if dealing with a CSV file in pandas format.')
     parser.add_argument('-v', '--version', action='version', version='%(prog)s {version}'.format(version=dms_tools.__version__))
     return parser
 
 
 def MergeParser():
     """Returns *argparse.ArgumentParser* for ``dms_merge`` script."""
-    parser = ArgumentParserNoArgHelp(description='Merge preferences or differential preferences by averaging or adding / subtracting the values in multiple files. Alternatively, sum counts by adding the counts for the characters at each site across multiple files. All files must specify the same character type: can be nucleotide, codon, or amino acid (see "--excludestop" if using amino acids). This script is part of %s (version %s) written by %s. Detailed documentation is at %s' % (dms_tools.__name__, dms_tools.__version__, dms_tools.__author__, dms_tools.__url__), formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    parser.add_argument('outfile', help='Created output file with merged preferences / differential preferences or summed counts; removed if it already exists. If the "infiles" do not all have the same wildtype residue at a site, then the wildtype is indicated as "?" in "outfile".')
-    parser.add_argument('merge_method', help='How to merge: If "average" then all "infiles" must specify either preferences or differential preferences; these are then averaged in "outfile". If "sum" then "infiles" can either all be count files, all be differential preferences, or can be a combination of preferences and differential preferences that (along with any additional files specified by "--minus") sum to a total preference or a total differential preference of zero at each site. If "rescale", then only one infile can be specified and it must be preferences; these preferences are then scaled by the value provided by "stringencyparameter"', choices=['average', 'sum', 'rescale'])
-    parser.add_argument('infiles', nargs='+', help='Files to average or sum. Must all have the same sites and character type, but do not need to have the same wildtype residue at each site.', type=ExistingFile)
-    parser.add_argument('--excludestop', dest='excludestop', action='store_true', help='If we are using amino acids, do we remove stop codons (denoted by "*") from preferences, differential preferences, or counts? We only remove stop codons if this argument is specified. If this option is used, then any files with stop codons have these codons removed (re-normalizing preferences to sum to one, and differential preferences to sum to zero) before the merge.')
+    parser = ArgumentParserNoArgHelp(description='Merge preferences, differential selection, or differential preferences by averaging or adding / subtracting the values in multiple files. Alternatively, sum counts by adding the counts for the characters at each site across multiple files. All files must specify the same character type: can be nucleotide, codon, or amino acid (see "--excludestop" if using amino acids). This script is part of %s (version %s) written by %s. Detailed documentation is at %s' % (dms_tools.__name__, dms_tools.__version__, dms_tools.__author__, dms_tools.__url__), formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser.add_argument('outfile', help='Created output file with merged values; removed if it already exists. If the "infiles" do not all have the same wildtype residue at a site, then the wildtype is indicated as "?" in "outfile".')
+    parser.add_argument('merge_method', help='How to merge: If "average" then all "infiles" must specify preferences, differential selection on mutations (mutdiffsel.txt file), or differential preferences; these are then averaged in "outfile". If "sum" then "infiles" can either all be count files, all be differential preferences, or can be a combination of preferences and differential preferences that (along with any additional files specified by "--minus") sum to a total preference or a total differential preference of zero at each site. If "rescale", then only one infile can be specified and it must be preferences; these preferences are then scaled by the value provided by "stringencyparameter"', choices=['average', 'sum', 'rescale'])
+    parser.add_argument('infiles', nargs='+', help='Files to average or sum. Must all have the same sites and character type, but do not need to have the same wildtype residue at each site. Note that for differential selection, must be the *mutdiffsel.txt file.', type=ExistingFile)
+    parser.add_argument('--excludestop', dest='excludestop', action='store_true', help='If we are using amino acids, do we remove stop codons (denoted by "*")? We only remove stop codons if this argument is specified. If this option is used, then any files with stop codons have these codons removed (re-normalizing preferences to sum to one, and differential preferences to sum to zero) before the merge.')
     parser.set_defaults(excludestop=False)
     parser.add_argument('--minus', nargs='+', help='Files to subtract when summing. Can only be used if "merge_method" is "sum" and if files are either preferences or differential preferences.', type=ExistingFile)
+    parser.add_argument('--sitediffselfile', help="If merging differential selection, 'infiles' and 'outfile' are the '*mutdiffsel.txt' file. If you also want to create a '*sitdiffsel.txt' file for the merged '*mutdiffsel.txt' file, specify the name of that file here.")
     parser.add_argument('-v', '--version', action='version', version='%(prog)s {version}'.format(version=dms_tools.__version__))
     parser.add_argument('--stringencyparameter', help='Stringency parameter used to rescale preferences. Can only be used if "merge_method" is "rescale".', type=FloatGreaterThanZero)
     parser.add_argument('--normalize', dest='normalize', action='store_true', help='Whether to normalize the counts at each site to the minimum number of counts observed at that site across all provided count files, before summing the counts. Can only be used if "merge_method" is "sum".')
@@ -478,6 +495,28 @@ def InferPrefsParser():
     parser.add_argument('--seed', default=1, help='Random number seed.', type=int)
     parser.add_argument('--sites', default=None, nargs='+', help='Only perform the inference for the specified sites, which should be a space separated list such as "--sites 1 2 10". All of these sites must have data in the counts files.')
     parser.add_argument('--ratio_estimation', default=None, metavar='MINCOUNTS', type=FloatGreaterThanZero, help='Rather than use MCMC to estimate the preferences using a statistical model, we simply compute them by calculating enrichment ratios relative to wildtype post- and pre-selection, and then normalizing these ratios to sum to one at each site. The single argument for this option is MINCOUNTS, which is a number > 0. If the counts for a character are less than MINCOUNTS, either due to low counts or error correction, then the counts for that character are changed to MINCOUNTS to avoid estimating ratios of zero, less than zero, or infinity.')
+    parser.add_argument('-v', '--version', action='version', version='%(prog)s {version}'.format(version=dms_tools.__version__))
+    return parser
+
+
+def DiffSelectionParser():
+    """Returns *argparse.ArgumentParser* for ``dms_diffselection`` script."""
+    parser = ArgumentParserNoArgHelp(description=\
+        'Differential selection between mock-treated and selected samples. ' +
+        'Quantified as log2[{(n_sel_mut + f_sel * P) / (n_sel_wt + f_sel * P)} / {(n_mock_mut + f_mock * P) / (n_mock_wt + f_mock * P)}] where P is pseudocount, f_sel = max(1, N_sel / N_mock), and f_mock = max(1, N_mock / N_sel) where N_mock and N_sel are the sequencing depth for mock and selected libraries at that site. ' +
+        'This script is part of %s (version %s) written by %s. Detailed documentation is at %s' % (dms_tools.__name__, dms_tools.__version__, dms_tools.__author__, dms_tools.__url__), 
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser.add_argument('mockcounts', type=ExistingFile, help='File with counts from mock-selected library.  For nucleotides, header line should be "# POSITION WT A C G T" and then subsequent lines give wildtype and counts for each site (i.e. "1 G 1013 23 19 47"); for codons use the 64 codons instead (i.e. "AAA AAC AAG ...").')
+    parser.add_argument('selectedcounts', type=ExistingFile, help='File with counts from selected library')
+    parser.add_argument('outprefix', help="Prefix for output files. Suffixes are 'mutdiffsel.txt' and 'sitediffsel.txt'")
+    parser.add_argument('--errorcontrolcounts', type=ExistingFile, help='Counts file for error control (e.g., wildtype gene or virus) to correct mutation counts.')
+    parser.add_argument('--pseudocount', type=FloatGreaterThanZero, default=10, help='Pseudocount added to each count for selected library. By default, pseudocounts is added to library with smaller depth, and pseudcount for other library is scaled by relative depth at that site (see --no-scale-pseudocounts).')
+    parser.add_argument('--mincounts', type=NonNegativeInt, default=0, help='Only report differential selection for mutations for which at least one of mock or selected counts is >= this number. Mutations that do not meet this threshold have differential selection written as "NaN".')
+    parser.add_argument('--no-scale-pseudocounts', dest='no_scale_pseudocounts', action='store_true', help="Use this option if you do NOT want to scale the pseudocounts for each library by relative depth, but instead want to use unscaled value specified by '--pseudocount'.")
+    parser.set_defaults(no_scale_pseudocounts=False)
+    parser.add_argument('--chartype', choices=['codon_to_aa', 'DNA', 'codon', 'aa'], default='codon_to_aa', help='Characters: "codon_to_aa" = counts for codons and selection for amino acids; "DNA" = counts and selection for DNA; "codon" = counts and selection for codons; "aa" = counts and selection for amino acids (possibly including stop codons, see "--includestop").')
+    parser.set_defaults(includestop=False)
+    parser.add_argument('--includestop', help='Include stop codons as a possible amino acid if using "--chartype" of "codon_to_aa" or "aa".', dest='includestop', action='store_true')
     parser.add_argument('-v', '--version', action='version', version='%(prog)s {version}'.format(version=dms_tools.__version__))
     return parser
 

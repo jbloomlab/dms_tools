@@ -13,7 +13,8 @@ import dms_tools.utils
 import dms_tools.parsearguments
 import dms_tools.file_io
 import dms_tools.plot
-
+import pandas as pd
+import math
 
 
 def main():
@@ -54,53 +55,97 @@ def main():
     logx = logy = fixaxes = False
 
     # read data
-    (sites, characters, wts, databyfile) = dms_tools.file_io.ReadMultiPrefOrDiffPref([args['file1'], args['file2']], args['excludestop'])
-    (data1, data2) = (databyfile[args['file1']], databyfile[args['file2']])
-    if 'preferences' == dms_tools.utils.Pref_or_DiffPref(data1) == dms_tools.utils.Pref_or_DiffPref(data2):
-        print "%s and %s both specify preferences." % (args['file1'], args['file2'])
-        assert not args['rms_dpi'], 'rms_dpi argument cannot be used if files specify preferences; it is only valid for differential preferences'
-        if args['pref_entropy']:
-            print "Computing site entropies from preferences; the correlations will be for these entropies rather than the preferences themselves."
-            xvalues = [dms_tools.utils.SiteEntropy(data1[r].values()) for r in sites]
-            yvalues = [dms_tools.utils.SiteEntropy(data2[r].values()) for r in sites]
-        elif args['enrichment']:
-            print("The correlations will be for enrichment ratios calculated from the preferences.")
-            data1 = dms_tools.utils.PrefsToEnrichments(wts, data1, include_wt=False)
-            data2 = dms_tools.utils.PrefsToEnrichments(wts, data2, include_wt=False)
-            xvalues = []
-            yvalues = []
-            for r in sites:
-                for x in [x for x in characters if x != wts[r]]:
-                    xvalues.append(data1[r][x])
-                    yvalues.append(data2[r][x])
-            logx = logy = True
+    try:
+        (sites, characters, wts, databyfile) = dms_tools.file_io.ReadMultiPrefOrDiffPref([args['file1'], args['file2']], args['excludestop'])
+        (data1, data2) = (databyfile[args['file1']], databyfile[args['file2']])
+        filetype = 'prefs_or_diffprefs'
+    except IOError:
+        (data1, data2) = (pd.read_csv(args['file1']), pd.read_csv(args['file2']))
+        assert list(data1) == list(data2), 'file1 and file2 are not the same type of data.'
+        column_names = list(data1)
+        if column_names == ['site', 'wt', 'mut', 'diffsel']:
+            filetype = 'mutdiffsel'
+        elif column_names == ['site', 'abs_diffsel', 'positive_diffsel', 'negative_diffsel']:
+            filetype = 'sitediffsel'
         else:
-            print "The correlations will be for the preferences."
-            xvalues = []
-            yvalues = []
-            for r in sites:
-                for x in characters:
-                    xvalues.append(data1[r][x])
-                    yvalues.append(data2[r][x])
-            fixaxes = True
-    elif 'diffprefs' == dms_tools.utils.Pref_or_DiffPref(data1) == dms_tools.utils.Pref_or_DiffPref(data2):
-        print "%s and %s both specify differential preferences." % (args['file1'], args['file2'])
-        assert not args['pref_entropy'], 'pref_entropy argument cannot be used if files specify differential preferences; it is only valid for preferences'
-        assert not args['enrichment'], 'enrichment option cannot be usef if files specify differential preferences; it is only valid for preferences'
-        if args['rms_dpi']:
-            print "Computing RMS differential preferences; the correlations will be for these RMS values rather than the differential preferences themselves."
-            xvalues = [dms_tools.utils.RMS(data1[r].values()) for r in sites]
-            yvalues = [dms_tools.utils.RMS(data2[r].values()) for r in sites]
+            raise ValueError('diffsel files do not have appropriate set of column identifiers')
+
+    # parse data based on file format
+    if filetype == 'prefs_or_diffprefs':
+        if 'preferences' == dms_tools.utils.Pref_or_DiffPref(data1) == dms_tools.utils.Pref_or_DiffPref(data2):
+            print "%s and %s both specify preferences." % (args['file1'], args['file2'])
+            assert not args['rms_dpi'], 'rms_dpi argument cannot be used if files specify preferences; it is only valid for differential preferences'
+            if args['pref_entropy']:
+                print "Computing site entropies from preferences; the correlations will be for these entropies rather than the preferences themselves."
+                xvalues = [dms_tools.utils.SiteEntropy(data1[r].values()) for r in sites]
+                yvalues = [dms_tools.utils.SiteEntropy(data2[r].values()) for r in sites]
+            elif args['enrichment']:
+                print("The correlations will be for enrichment ratios calculated from the preferences.")
+                data1 = dms_tools.utils.PrefsToEnrichments(wts, data1, include_wt=False)
+                data2 = dms_tools.utils.PrefsToEnrichments(wts, data2, include_wt=False)
+                xvalues = []
+                yvalues = []
+                for r in sites:
+                    for x in [x for x in characters if x != wts[r]]:
+                        xvalues.append(data1[r][x])
+                        yvalues.append(data2[r][x])
+                logx = logy = True
+            else:
+                print "The correlations will be for the preferences."
+                xvalues = []
+                yvalues = []
+                for r in sites:
+                    for x in characters:
+                        xvalues.append(data1[r][x])
+                        yvalues.append(data2[r][x])
+                fixaxes = True
+        elif 'diffprefs' == dms_tools.utils.Pref_or_DiffPref(data1) == dms_tools.utils.Pref_or_DiffPref(data2):
+            print "%s and %s both specify differential preferences." % (args['file1'], args['file2'])
+            assert not args['pref_entropy'], 'pref_entropy argument cannot be used if files specify differential preferences; it is only valid for preferences'
+            assert not args['enrichment'], 'enrichment option cannot be usef if files specify differential preferences; it is only valid for preferences'
+            if args['rms_dpi']:
+                print "Computing RMS differential preferences; the correlations will be for these RMS values rather than the differential preferences themselves."
+                xvalues = [dms_tools.utils.RMS(data1[r].values()) for r in sites]
+                yvalues = [dms_tools.utils.RMS(data2[r].values()) for r in sites]
+            else:
+                print "The correlations will be for the differential preferences."
+                xvalues = []
+                yvalues = []
+                for r in sites:
+                    for x in characters:
+                        xvalues.append(data1[r][x])
+                        yvalues.append(data2[r][x])
         else:
-            print "The correlations will be for the differential preferences."
-            xvalues = []
-            yvalues = []
-            for r in sites:
-                for x in characters:
-                    xvalues.append(data1[r][x])
-                    yvalues.append(data2[r][x])
+            raise ValueError("file1 and file2 do not both specify either valid preferences or valid differential preferences")
+    elif filetype == 'mutdiffsel':
+        diffsel_merged = pd.merge(data1, data2, on=['site', 'wt', 'mut'])
+        xvalues = diffsel_merged['diffsel_x']
+        yvalues = diffsel_merged['diffsel_y']
+    elif filetype == 'sitediffsel':
+        diffsel_merged = pd.merge(data1, data2, on='site')
+        if args['restrictdiffsel'] == "positive":
+            xvalues = diffsel_merged['positive_diffsel_x']
+            yvalues = diffsel_merged['positive_diffsel_y']
+        elif args['restrictdiffsel'] == "negative":
+            xvalues = diffsel_merged['negative_diffsel_x']
+            yvalues = diffsel_merged['negative_diffsel_y']
+        else:
+            xvalues = diffsel_merged['abs_diffsel_x']
+            yvalues = diffsel_merged['abs_diffsel_y']
     else:
-        raise ValueError("file1 and file2 do not both specify either valid preferences or valid differential preferences")
+        raise ValueError('file format could not be properly identified.')
+
+    # remove NaN values if they are present
+    new_x_values = []
+    new_y_values = []
+    for (x,y) in zip(xvalues,yvalues):
+        if math.isnan(x) or math.isnan(y):
+            pass
+        else:
+            new_x_values.append(x)
+            new_y_values.append(y)
+    xvalues = new_x_values
+    yvalues = new_y_values
 
     # compute and plot correlation
     (r, p) = scipy.stats.pearsonr(xvalues, yvalues)
@@ -114,7 +159,7 @@ def main():
             corr = (r, p)
         else:
             corr = None
-        dms_tools.plot.PlotCorrelation(xvalues, yvalues, plotfile, args['name1'], args['name2'], alpha=args['alpha'], title=args['plot_title'], corr=corr, symmetrize=True, fixaxes=fixaxes, r2=args['r2'], logx=logx, logy=logy)
+        dms_tools.plot.PlotCorrelation(xvalues, yvalues, plotfile, args['name1'], args['name2'], alpha=args['alpha'], title=args['plot_title'], corr=corr, symmetrize=True, fixaxes=fixaxes, r2=args['r2'], logx=logx, logy=logy, marker_style='k.', marker_size=args['markersize'])
 
     print 'Successfully completed %s at %s' % (prog, time.asctime())
 

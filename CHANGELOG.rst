@@ -11,6 +11,62 @@ Changelog
 
 * Deleted loop counters that were previously still defined as package-level variables
 
+1.1.20
+------------
+* Added ``--mapmetric`` option to ``dms_logoplot`` to allow mapping of molecular weight, charge, or functional group to logoplot letter color.
+
+* Added ``--markersize`` option to ``dms_correlate`` and turned clipping off to allow larger markers.
+
+1.1.19
+------------
+* Some tweaks to ``dms_correlate`` to clarify parser and improve appearance of correlation plots.
+
+* Added ``--restrictdiffsel`` option to ``dms_logoplot`` to only plot positive or negative site differential selection.
+
+* Added ``--nosepline`` option to ``dms_logoplot`` to plot differential selection without black line separating positive and negative values.
+
+1.1.18
+----------
+* Added ``--errorcontrolcounts`` to ``dms_diffselection``.
+
+* Updated download URL in ``setup.py``.
+
+* Some updates to documentation.
+
+1.1.17
+----------
+* Print versions of all external packages (some were overlooked before)
+
+* Make ``dms_merge`` handle the ``*mutdiffsel.txt`` files created by ``dms_diffselection``.
+
+* Added ``translate_codon_to_aa`` and ``return_as_df`` options to dms_tools.file_io.ReadDMSCounts().
+
+* Added ``dms_tools.utils.ParseNSMutFreqBySite()``.
+
+* Make ``dms_correlate`` handle the ``mutdiffsel.txt`` and ``sitediffsel.txt``  files created by ``dms_diffselection``.
+
+1.1.16
+--------
+* Added ``--mincounts`` option to ``dms_diffselection``, and make ``dms_logoplot`` properly plot differential selection with missing values.
+
+* Added test (``./tests/test_diffselection.py``) for ``dms_diffselection``
+
+* ``dms_barcodedsubamplicons`` now gives exactly reproducible output regardless of order of input reads. 
+
+1.1.15
+-------
+* In ``dms_diffselection``, the pseudocounts are now scaled by the **smaller** depth library at each site.
+
+1.1.14
+------
+* Added ``dms_diffselection`` program.
+
+* Added ``--colormap`` and ``--overlay3`` options to ``dms_logoplot``
+
+* Make ``dms_merge`` remove sites indicated as *None* when in *renumber* mode, added ``--skipfirstline`` option, and made commas an allowable separator.
+
+* Increased number of colors allowed by *PlotMutCountFracs* (used by ``dms_summarizealignments``)
+
 1.1.13
 -----------
 * Moved repository and docs from https://github.com/jbloom/dms_tools and http://jbloom.github.io/dms_tools to https://github.com/jbloomlab/dms_tools and http://jbloomlab.github.io/dms_tools

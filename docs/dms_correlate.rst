@@ -8,7 +8,7 @@
 
 Overview
 -------------
-``dms_correlate`` is a program included with the `dms_tools`_ package. It computes the correlations between pairs of preferences or differential preferences.
+``dms_correlate`` is a program included with the `dms_tools`_ package. It computes the correlations between pairs of preferences, differential preferences, or differential selections.
 
 After you install `dms_tools`_, this program will be available to run at the command line. 
 
@@ -20,7 +20,7 @@ Command-line usage
    :prog: dms_correlate
 
    file1
-    Should be in the formats of a :ref:`preferences_file` or a :ref:`diffpreferences_file`.
+    Should be in the formats of a :ref:`preferences_file`, a :ref:`diffpreferences_file`, or a site or mutation differential selection file returned by :ref:`dms_diffselection`.
 
    file2
     Must be in the **same format** as "file1".

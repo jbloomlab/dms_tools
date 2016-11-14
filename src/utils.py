@@ -50,6 +50,8 @@ Functions in this module
 
 * *CodonMutsCumulFracs* : cumulative counts of codon mutations.
 
+* *ParseNSMutFreqBySite* : Parse nonsynonymous mutation frequencies at each site from a DMS counts file.
+
 Function documentation
 ---------------------------
 
@@ -623,8 +625,12 @@ def AvgMutRate(counts, chartype):
 def SumCodonToAA(codondict, includestop=True):
     """Sums all codon entries for each amino acid.
 
-    *codondict* is a dictionary keyed by all codons (*dms_tools.codons*).
-    The values should be numbers.
+    *codondict* is a dictionary keyed by all codons (*dms_tools.codons*),
+    with values being counts.
+
+    Note that this is NOT a dictionary of the form returned by 
+    dms_tools.file_io.ReadDMSCounts(), which has sites as keys and
+    codondicts as values.
 
     *includestop* specifies whether we also sum values for stop codons to
     give an entry for ``*`` (the stop codon). Do this only if has default
@@ -835,6 +841,7 @@ def BuildReadConsensus(reads, minreadidentity, minreadconcurrence, maxreadtrim, 
     >>> BuildReadConsensus(reads, 0.75, 0.6, 1)
     ('NTGC', 'CGAN')
     """
+    reads = sorted(reads) # since we compare to first read, sort to make output reproducible
     if use_cutils:
         return dms_tools.cutils.BuildReadConsensus(reads, minreadidentity, minreadconcurrence, maxreadtrim)
     assert len(reads) >= 2, "reads must have at least two entries"
@@ -1387,6 +1394,37 @@ def CodonMutsCumulFracs(codon_counts):
     multi_nt_all_cumulfracs = [multi_nt_all_cumulfracs[n] for n in range(maxkey + 1)]
     multi_nt_syn_cumulfracs = [multi_nt_syn_cumulfracs[n] for n in range(maxkey + 1)]
     return (all_cumulfracs, all_counts, syn_cumulfracs, syn_counts, multi_nt_all_cumulfracs, multi_nt_all_counts, multi_nt_syn_cumulfracs, multi_nt_syn_counts)
+
+def ParseNSMutFreqBySite(countsfile, chartype):
+    """Parses a deep mutational scanning counts file and returns
+    the nonsynonymous mutation frequency at each site.
+    
+    *countsfile* is a string that gives the name of a file.
+    
+    *chartype* is the type of character, with valid values consisting of:
+
+        - *codon* : DNA codons.
+
+        - *aminoacids_nostop* : amino acids not including stop codons.
+
+        - *aminoacids_withstop* : amino acids including stop codons (``*``).
+    
+    The returned item is a list of tuples of (site, nonsynonymous frequency).
+    
+    """
+    if chartype.upper() == 'CODON':
+        translate_to_aa = True
+    elif chartype.upper() == 'AMINOACIDS_NOSTOP' or chartype.upper() == 'AMINOACIDS_WITHSTOP':
+        translate_to_aa = False
+    countsdict = dms_tools.file_io.ReadDMSCounts(countsfile, chartype, translate_codon_to_aa = translate_to_aa)
+    sites = countsdict.keys()
+    dms_tools.utils.NaturalSort(sites)
+    tuplist = []
+    for site in sites:
+        wt_aa = countsdict[site]['WT']
+        ns_mut_freq = 1 - countsdict[site]['F_%s' % wt_aa]
+        tuplist.append((site,ns_mut_freq))
+    return tuplist
 
 
 # Test with doctest

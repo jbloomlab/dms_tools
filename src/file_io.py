@@ -53,7 +53,7 @@ import subprocess
 import gzip
 import dms_tools
 import dms_tools.utils
-
+import pandas as pd
 
 
 def Versions():
@@ -71,7 +71,7 @@ def Versions():
             '\tPython version: %s' % sys.version.replace('\n', ' '),
             '\tdms_tools version: %s' % dms_tools.__version__,
             ]
-    for modname in ['Bio', 'numpy', 'scipy', 'matplotlib', 'cython', 'pystan', 'weblogolib', 'PyPDF2']:
+    for modname in ['Bio', 'numpy', 'scipy', 'matplotlib', 'cython', 'pystan', 'weblogolib', 'PyPDF2', 'pandas']:
         try:
             v = importlib.import_module(modname).__version__
             s.append('\t%s version: %s' % (modname, v))
@@ -136,6 +136,16 @@ def WriteDMSCounts(f, counts):
     *counts*.
 
     >>> counts = {'1':{'A':2, 'C':3, 'G':4, 'T':1, 'WT':'A'}, '2':{'A':1, 'C':1, 'G':3, 'T':4, 'WT':'C'}}
+    >>> counts['1']['COUNTS'] = 10
+    >>> counts['2']['COUNTS'] = 9
+    >>> counts['1']['F_A'] = counts['1']['A'] / float(counts['1']['COUNTS'])
+    >>> counts['1']['F_C'] = counts['1']['C'] / float(counts['1']['COUNTS'])
+    >>> counts['1']['F_G'] = counts['1']['G'] / float(counts['1']['COUNTS'])
+    >>> counts['1']['F_T'] = counts['1']['T'] / float(counts['1']['COUNTS'])
+    >>> counts['2']['F_A'] = counts['2']['A'] / float(counts['2']['COUNTS'])
+    >>> counts['2']['F_C'] = counts['2']['C'] / float(counts['2']['COUNTS'])
+    >>> counts['2']['F_G'] = counts['2']['G'] / float(counts['2']['COUNTS'])
+    >>> counts['2']['F_T'] = counts['2']['T'] / float(counts['2']['COUNTS'])
     >>> f = cStringIO.StringIO()
     >>> WriteDMSCounts(f, counts)
     >>> f.seek(0)
@@ -157,7 +167,7 @@ def WriteDMSCounts(f, counts):
     sites = list(counts.keys())
     dms_tools.utils.NaturalSort(sites)
     assert sites, "No sites defined in counts"
-    characters = set(counts[sites[0]].keys())
+    characters = set([x for x in counts[sites[0]].keys() if x != 'COUNTS' and x[ : 2] != 'F_'])
     assert 'WT' in characters, 'No wildtype specified by "WT" key'
     characters.remove('WT')
     for charset in [dms_tools.nts, dms_tools.codons, dms_tools.aminoacids_withstop, dms_tools.aminoacids_nostop]:
@@ -170,7 +180,7 @@ def WriteDMSCounts(f, counts):
     try:
         f.write('# POSITION WT %s\n' % ' '.join(characters))
         for r in sites:
-            assert set(characters + ['WT']) == set(counts[r].keys()), "Not the right set of characters (or missing 'WT')"
+            assert set(characters + ['WT']).issubset(set(counts[r].keys())), "Not all the needed characters (or missing 'WT')"
             wt = counts[r]['WT']
             assert wt in characters, "Invalid wildtype of %s" % wt
             f.write('%s %s %s\n' % (r, wt, ' '.join(['%d' % counts[r][x] for x in characters])))
@@ -187,7 +197,7 @@ def WriteDMSCounts(f, counts):
         raise
 
 
-def ReadDMSCounts(f, chartype):
+def ReadDMSCounts(f, chartype, translate_codon_to_aa=False, return_as_df=False):
     """Reads deep mutational scanning counts.
 
     *f* is a readable file-like object that contains the counts, or 
@@ -208,9 +218,21 @@ def ReadDMSCounts(f, chartype):
     The counts are returned in the dictionary *counts*. The dictionary
     is keyed by **strings** giving the position (e.g. '1', '2', or '5A').
     For each position *r*, *counts[r]* is a dictionary keyed by the
-    string *WT* and all characters (nucleotides or codons) as specified
+    string *WT* and characters (nucleotides, codons, or amino-acids) specified
     by *chartype*, in upper case. *counts[r]['WT']* is the wildtype identity
     at the site; *counts[r][x]* is the number of counts for character *x*.
+    In addition, *counts[r]['F_{0}'.format(x)]*
+    is the frequency of counts of *x*, and *counts[r]['COUNTS']* is
+    the total number of counts at site *r*. If there are no counts at a site,
+    the frequency of counts for each character *x* at the site is set to 
+    float(NaN).
+
+    Alternatively, if *return_as_df* is set as *True*, the counts are returned
+    as a pandas dataframe. 
+
+    If *chartype* is *codon* and the option *translate_codon_to_aa* is set as
+    True, then the returned counts will be for amino-acids as translated
+    by the codon counts.
 
     The specifications on the format of the contents of *f* are as follows:
 
@@ -330,6 +352,8 @@ def ReadDMSCounts(f, chartype):
         characters = dms_tools.aminoacids_withstop
     else:
         raise ValueError("Invalid chartype of %s" % chartype)
+    if translate_codon_to_aa and chartype.upper() != 'CODON':
+        raise ValueError("Can't use translate codon to aa option if chartype is not codon.")
     characterindices = dict([(char, False) for char in characters])
     openedfile = False
     if isinstance(f, str):
@@ -388,6 +412,44 @@ def ReadDMSCounts(f, chartype):
                         raise
     if openedfile:
         f.close()
+
+    # add a new key, 'COUNTS', to each site's counts dict. This is the total number of counts at the site.
+    for site in counts.keys():
+        total_counts = 0
+        for c in characters:
+            total_counts += counts[site][c]
+        counts[site]['COUNTS'] = total_counts
+
+    if translate_codon_to_aa:
+        new_counts_dict = {}
+        for site in counts.keys():
+            siteaacountsdict = dms_tools.utils.SumCodonToAA(counts[site])
+            siteaacountsdict['WT'] = dms_tools.codon_to_aa[counts[site]['WT']]
+            siteaacountsdict['COUNTS'] = counts[site]['COUNTS']
+            new_counts_dict[site] = siteaacountsdict
+        counts =  new_counts_dict
+        characters = dms_tools.aminoacids_withstop
+
+    # add keys for the frequency of each character at each site, F_x:
+    for site in counts.keys():
+        for c in characters:
+            try:
+                counts[site]['F_%s' % c] = float(counts[site][c])/counts[site]['COUNTS']
+            except ZeroDivisionError:
+                counts[site]['F_%s' % c] = float('NaN')
+
+    if return_as_df:
+        custom_index = ['COUNTS', 'WT']
+        [custom_index.append(c) for c in characters]
+        [custom_index.append('F_%s' % c) for c in characters]
+        series_dict = {}
+        
+        sites = counts.keys()
+        dms_tools.utils.NaturalSort(sites)
+        for site in sites:
+            series_dict[site] = pd.Series(counts[site], index=custom_index)
+        counts = pd.DataFrame(series_dict, columns=sites)
+
     return counts
 
 

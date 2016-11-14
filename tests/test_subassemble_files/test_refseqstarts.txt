@@ -1,0 +1,3 @@
+refseqstart	nreads
+1	319
+61	319

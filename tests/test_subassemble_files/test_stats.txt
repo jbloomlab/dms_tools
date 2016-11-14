@@ -1,0 +1,8 @@
+nfiltered = 0
+nlowquality = 2
+nmismatches = 3
+nreads = 34
+nretained = 25
+nunrecognized = 4
+n0mut = 8
+n2mut = 17

@@ -18,6 +18,12 @@ Functions in this module
 
 * *KyteDoolittleColorMapping* : maps amino-acid hydrophobicities to colors.
 
+* *MWColorMapping* : maps amino-acid molecular weights to colors.
+
+* *ChargeColorMapping* : maps amino-acid charge at neural pH to colors.
+
+* *FunctionalGroupColorMapping* : maps amino-acid functional groups (small, nucleophilic, hydrophobic, aromatic, acidic, amide, basic) to colors.
+
 Function documentation
 -----------------------------
 
@@ -93,9 +99,75 @@ def KyteDoolittleColorMapping(maptype='jet', reverse=True):
     cmap = mapper.get_cmap()
     return (cmap, mapping_d, mapper)
 
+def MWColorMapping(maptype='jet', reverse=True):
+    """Maps amino-acid molecular weights to colors. Otherwise, this
+    function is identical to *KyteDoolittleColorMapping*
+    """ 
+    d = {'A':89,'R':174,'N':132,'D':133,'C':121,'Q':146,'E':147,\
+         'G':75,'H':155,'I':131,'L':131,'K':146,'M':149,'F':165,\
+         'P':115,'S':105,'T':119,'W':204,'Y':181,'V':117}
+    
+    mws  = [d[aa] for aa in dms_tools.aminoacids_nostop]
+    if reverse:
+        mws = [-1 * x for x in mws]
+    mapper = pylab.cm.ScalarMappable(cmap=maptype)
+    mapper.set_clim(min(mws), max(mws))
+    mapping_d = {'*':'#000000'}
+    for (aa, h) in zip(dms_tools.aminoacids_nostop, mws):
+        tup = mapper.to_rgba(h, bytes=True)
+        (red, green, blue, alpha) = tup
+        mapping_d[aa] = '#%02x%02x%02x' % (red, green, blue)
+        assert len(mapping_d[aa]) == 7
+    cmap = mapper.get_cmap()
+    return (cmap, mapping_d, mapper)
+
+def ChargeColorMapping(maptype='jet', reverse=False):
+    """Maps amino-acid charge at neutral pH to colors. 
+    Currently does not use the keyword arguments for *maptype*
+    or *reverse* but accepts these arguments to be consistent
+    with KyteDoolittleColorMapping and MWColorMapping for now."""
+
+    pos_color = '#FF0000'
+    neg_color = '#0000FF'
+    neut_color = '#000000'
+
+    mapping_d = {'A':neut_color,'R':pos_color,'N':neut_color,\
+                 'D':neg_color,'C':neut_color,'Q':neut_color,\
+                 'E':neg_color,'G':neut_color,'H':pos_color,\
+                 'I':neut_color,'L':neut_color,'K':pos_color,\
+                 'M':neut_color,'F':neut_color,'P':neut_color,\
+                 'S':neut_color,'T':neut_color,'W':neut_color,\
+                 'Y':neut_color,'V':neut_color}
+
+    return (None, mapping_d, None)
+
+def FunctionalGroupColorMapping(maptype='jet', reverse=False):
+    """Maps amino-acid functional groups to colors.
+    Currently does not use the keyword arguments for *maptype*
+    or *reverse* but accepts these arguments to be consistent
+    with the other mapping functions, which all get called with 
+    these arguments."""
+
+    small_color = '#f76ab4'
+    nucleophilic_color = '#ff7f00'
+    hydrophobic_color = '#12ab0d'
+    aromatic_color = '#84380b'
+    acidic_color = '#3c58e5'
+    amide_color = '#972aa8'
+    basic_color = '#e41a1c'
+
+    mapping_d = {'G':small_color, 'A':small_color,
+                 'S':nucleophilic_color, 'T':nucleophilic_color, 'C':nucleophilic_color,
+                 'V':hydrophobic_color, 'L':hydrophobic_color, 'I':hydrophobic_color, 'M':hydrophobic_color, 'P':hydrophobic_color,
+                 'F':aromatic_color, 'Y':aromatic_color, 'W':aromatic_color,
+                 'D':acidic_color, 'E':acidic_color,
+                 'H':basic_color, 'K':basic_color, 'R':basic_color,
+                 'N':amide_color, 'Q':amide_color,
+                 '*':'#000000'}
+    return (None, mapping_d, None)
 
 
-def LogoPlot(sites, datatype, data, plotfile, nperline, numberevery=10, allowunsorted=False, ydatamax=1.01, overlay=None, fix_limits={}, fixlongname=False, overlay_cmap=None):
+def LogoPlot(sites, datatype, data, plotfile, nperline, numberevery=10, allowunsorted=False, ydatamax=1.01, overlay=None, fix_limits={}, fixlongname=False, overlay_cmap=None, ylimits=None, relativestackheight=1, custom_cmap='jet', map_metric='kd', noseparator=False):
     """Constructs a sequence logo showing amino-acid or nucleotide preferences.
 
     The heights of each letter is equal to the preference of
@@ -113,13 +185,17 @@ def LogoPlot(sites, datatype, data, plotfile, nperline, numberevery=10, allowuns
       in the plot are ordered in the same arrangement
       listed in *sites*. These should be **strings**, not integers.
 
-    * *datatype* should be one of the two following strings depending on whether
-      we are making a plot of preferences or differential preferences: 
-      'prefs' or 'diffprefs'
+    * *datatype* should be one of the following strings:
+    
+        * 'prefs' for preferences
+        
+        * 'diffprefs' for differential preferences
+        
+        * 'diffsel' for differential selection
 
     * *data* is a dictionary that has a key for every entry in
       *sites*. For every site *r* in *sites*, *sites[r][x]*
-      is the preference or differential preference for character *x*. 
+      is the value for character *x*. 
       Preferences must sum to one; differential preferences to zero.
       All sites must have the same set of characters. The characters
       must be the set of nucleotides (*dms_tools.nts*)
@@ -142,6 +218,11 @@ def LogoPlot(sites, datatype, data, plotfile, nperline, numberevery=10, allowuns
     * *ydatamax* : meaningful only if *datatype* is 'diffprefs'. In this case, it gives
       the maximum that the logo stacks extend in the positive and negative directions.
       Cannot be smaller than the maximum extent of the differential preferences.
+
+    * *ylimits*: is **mandatory** if *datatype* is 'diffsel', and meaningless 
+      otherwise. It is *(ymin, ymax)* where *ymax > 0 > ymin*, and gives extent 
+      of the data in the positive and negative directions. Must encompass the 
+      actual maximum and minimum of the data.
 
     * *overlay* : this argument allows you to make overlay bars that indicated
       other properties for the sites. By default, this option is *None*, meaning that
@@ -167,7 +248,7 @@ def LogoPlot(sites, datatype, data, plotfile, nperline, numberevery=10, allowuns
           same as *shortname* if you don't need a different long name.
 
     * *fix_limits* is only meaningful if *overlay* is being used. In this case, for any
-      *shortname* in *overlay* that also keys and entry in *fix_limits*, we use
+      *shortname* in *overlay* that also keys an entry in *fix_limits*, we use
       *fix_limits[shortname]* to set the limits for *shortname*. Specifically,
       *fix_limits[shortname]* should be the 2-tuple *(ticks, ticknames)*. *ticks*
       should be a list of tick locations (numbers) and *ticknames* should be a list of
@@ -180,30 +261,52 @@ def LogoPlot(sites, datatype, data, plotfile, nperline, numberevery=10, allowuns
     * *overlay_cmap* can be the name of a valid *matplotlib.colors.Colormap*, such as the
       string *jet* or *bwr*. Otherwise, it can be *None* and a (hopefully) good choice will 
       be made for you.
+
+    * *custom_cmap* can be the name of a valid *matplotlib.colors.Colormap* which will be
+      used to color amino-acid one-letter codes in the logoplot by the *map_metric* when
+      either 'kd' or 'mw' is used as *map_metric*.
+
+    * *relativestackheight* indicates how high the letter stack is relative to
+      the default. The default is multiplied by this number, so make it > 1
+      for a higher letter stack.
+
+    * *map_metric* specifies the amino-acid property metric used to map colors to amino-acid
+    letters. Valid options are 'kd' (Kyte-Doolittle hydrophobicity scale, default), 'mw' 
+    (molecular weight), 'functionalgroup' (functional groups: small, nucleophilic, hydrophobic,
+    aromatic, basic, acidic, and amide), and 'charge' (charge at neutral pH). If 'charge' is used, then the
+    argument for *custom_cmap* will no longer be meaningful, since 'charge' uses its own 
+    blue/black/red colormapping. Similarly, 'functionalgroup' uses its own colormapping.
+
+    * *noseparator* is only meaningful if *datatype* is 'diffsel' or 'diffprefs'.
+      If it set to *True*, then we do **not** print a black horizontal line to
+      separate positive and negative values.
     """
-    assert datatype in ['prefs', 'diffprefs']
+    assert datatype in ['prefs', 'diffprefs', 'diffsel'], "Invalid datatype {0}".format(datatype)
 
     # check data, and get characters
     assert sites, "No sites specified"
-    assert set(sites) == set(data.keys()), "There is not a complete match between sites and the keys of data"
+    assert set(sites) == set(data.keys()), "Not a match between sites and the keys of data"
     characters = data[sites[0]].keys()
     if set(characters) == set(dms_tools.nts):
         alphabet_type = 'nt'
     elif set(characters) == set(dms_tools.aminoacids_nostop) or set(characters) == set(dms_tools.aminoacids_withstop):
         alphabet_type = 'aa'
     else:
-        raise ValueError("Invalid set of character keys in data. Do not specify either nucleotides or amino acids:\n%s" % str(characters))
+        raise ValueError("Invalid set of characters in data. Does not specify either nucleotides or amino acids:\n%s" % str(characters))
     for r in sites:
         if set(data[r].keys()) != set(characters):
             raise ValueError("Not all sites in data have the same set of characters")
 
-    firstblankchar = 'B' # character for first blank space for diffprefs
+    firstblankchar = 'B' # character for first blank space for diffprefs / diffsel
     assert firstblankchar not in characters, "firstblankchar in characters"
-    lastblankchar = 'b' # character for last blank space for diffprefs
+    lastblankchar = 'b' # character for last blank space for diffprefs / diffsel
     assert lastblankchar not in characters, "lastblankchar in characters"
-    separatorchar = '-' # separates positive and negative for diffprefs
-    assert lastblankchar not in characters, "lastblankchar in characters"
-    separatorheight = 0.02 # height of separator as fraction of total for diffprefs
+    separatorchar = '-' # separates positive and negative for diffprefs / diffsel
+    assert separatorchar not in characters, "lastblankchar in characters"
+    if noseparator:
+        separatorheight = 0
+    else:
+        separatorheight = 0.02 # height of separator as frac of total for diffprefs / diffsel
 
     if os.path.splitext(plotfile)[1].lower() != '.pdf':
         raise ValueError("plotfile must end in .pdf: %s" % plotfile)
@@ -221,9 +324,11 @@ def LogoPlot(sites, datatype, data, plotfile, nperline, numberevery=10, allowuns
     barheight = 5.5 # height of bars in points if using overlay
     barspacing = 2.0 # spacing between bars in points if using overlay
     stackaspectratio = 4.4 # ratio of stack height:width, doesn't count part going over maximum value of 1
+    assert relativestackheight > 0, "relativestackheight must be > 0"
+    stackaspectratio *= relativestackheight
     if overlay:
-        if not (1 <= len(overlay) <= 2):
-            raise ValueError("overlay must be a list of one or two entries; instead it had %d entries" % len(overlay))
+        if not (1 <= len(overlay) <= 3):
+            raise ValueError("overlay must be a list of between one and three entries; instead it had %d entries" % len(overlay))
         ymax = (stackaspectratio * stackwidth + len(overlay) * (barspacing + barheight)) / float(stackaspectratio * stackwidth)
         aspectratio = ymax * stackaspectratio # effective aspect ratio for full range
     else:
@@ -267,6 +372,30 @@ def LogoPlot(sites, datatype, data, plotfile, nperline, numberevery=10, allowuns
                     firstpositiveindex += 1
                 ordered_alphabets[isite] = [firstblankchar] + [tup[1] for tup in deltapi_r[ : firstpositiveindex]] + [separatorchar] + [tup[1] for tup in deltapi_r[firstpositiveindex : ]] + [lastblankchar] # order from most negative to most positive with blank characters and separators
                 f.write(' %g %g %g\n' % (0.5 * (ydatamax + 2.0 * negativesum) / ydatamax, 0.5 * (ydatamax + 2.0 * negativesum) / ydatamax, separatorheight)) # heights for blank charactors and separators
+        elif datatype == 'diffsel':
+            assert ylimits, "You must specify ylimits if using diffsel"
+            (dataymin, dataymax) = ylimits
+            assert dataymax > 0 > dataymin, "Invalid ylimits of {0}".format(ylimits)
+            yextent = float(dataymax - dataymin)
+            separatorheight *= yextent
+            chars_for_string = characters + [firstblankchar, lastblankchar, separatorchar]
+            f.write('ID ID\nBF BF\nP0 {0}\n'.format(' '.join(chars_for_string)))
+            for (isite, r) in enumerate(sites):
+                positivesum = sum([data[r][x] for x in characters if data[r][x] > 0]) + separatorheight / 2.0
+                negativesum = sum([data[r][x] for x in characters if data[r][x] < 0]) - separatorheight / 2.0
+                assert positivesum <= dataymax, "Data exceeds ylimits in positive direction"
+                assert negativesum >= dataymin, "Data exceeds ylimits in negative direction"
+                f.write('{0}'.format(isite))
+                diffsel_r = []
+                for x in characters:
+                    diffsel_r.append((data[r][x], x))
+                    f.write(' {0}'.format(abs(data[r][x]) / yextent))
+                diffsel_r.sort()
+                firstpositiveindex = 0
+                while diffsel_r[firstpositiveindex][0] < 0:
+                    firstpositiveindex += 1
+                ordered_alphabets[isite] = [firstblankchar] + [tup[1] for tup in diffsel_r[ : firstpositiveindex]] + [separatorchar] + [tup[1] for tup in diffsel_r[firstpositiveindex : ]] + [lastblankchar] # order from most negative to most positive with blank characters and separators
+                f.write(' %g %g %g\n' % ((negativesum - dataymin) / yextent, (dataymax - positivesum) / yextent, separatorheight / yextent)) # heights for blank charactors and separators
         else:
             raise ValueError("Invalid datatype of %s" % datatype)
         f.close()
@@ -286,7 +415,12 @@ def LogoPlot(sites, datatype, data, plotfile, nperline, numberevery=10, allowuns
         logo_options.show_yaxis = False
         logo_options.yaxis_scale = ymax 
         if alphabet_type == 'aa':
-            (cmap, colormapping, mapper) = KyteDoolittleColorMapping()
+            map_functions = {'kd':KyteDoolittleColorMapping,
+                             'mw': MWColorMapping,
+                             'charge' : ChargeColorMapping,
+                             'functionalgroup':FunctionalGroupColorMapping}
+            map_fcn = map_functions[map_metric]
+            (cmap, colormapping, mapper) = map_fcn(maptype=custom_cmap)
         elif alphabet_type == 'nt':
             colormapping = {}
             colormapping['A'] = '#008000'

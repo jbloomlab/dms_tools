@@ -9,6 +9,7 @@ Installation of `dms_tools`_ installs the following programs. These programs can
    :maxdepth: 1
 
    dms_inferprefs
+   dms_diffselection
    dms_inferdiffprefs
    dms_logoplot
    dms_merge
