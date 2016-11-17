@@ -271,11 +271,11 @@ def LogoPlot(sites, datatype, data, plotfile, nperline, numberevery=10, allowuns
       for a higher letter stack.
 
     * *map_metric* specifies the amino-acid property metric used to map colors to amino-acid
-    letters. Valid options are 'kd' (Kyte-Doolittle hydrophobicity scale, default), 'mw' 
-    (molecular weight), 'functionalgroup' (functional groups: small, nucleophilic, hydrophobic,
-    aromatic, basic, acidic, and amide), and 'charge' (charge at neutral pH). If 'charge' is used, then the
-    argument for *custom_cmap* will no longer be meaningful, since 'charge' uses its own 
-    blue/black/red colormapping. Similarly, 'functionalgroup' uses its own colormapping.
+      letters. Valid options are 'kd' (Kyte-Doolittle hydrophobicity scale, default), 'mw' 
+      (molecular weight), 'functionalgroup' (functional groups: small, nucleophilic, hydrophobic,
+      aromatic, basic, acidic, and amide), and 'charge' (charge at neutral pH). If 'charge' is used, then the
+      argument for *custom_cmap* will no longer be meaningful, since 'charge' uses its own 
+      blue/black/red colormapping. Similarly, 'functionalgroup' uses its own colormapping.
 
     * *noseparator* is only meaningful if *datatype* is 'diffsel' or 'diffprefs'.
       If it set to *True*, then we do **not** print a black horizontal line to
