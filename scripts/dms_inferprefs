@@ -83,14 +83,16 @@ def main():
         else:
             raise ValueError("Invalid chartype of %s" % args['chartype'])
         counts_files = {'nrpre':args['n_pre'], 'nrpost':args['n_post']}
-        if args['errpre'].lower() == args['errpost'].lower() == 'none':
+        if (not args['errpre'] and not args['errpost']) or (
+                args['errpre'].lower() == args['errpost'].lower() == 'none'):
             pystan_error_model = dms_tools.mcmc.StanModelNoneErr
             error_model = 'none'
         elif args['errpre'] == args['errpost']:
             pystan_error_model = dms_tools.mcmc.StanModelSameErr
             error_model = 'same'
             counts_files['nrerr'] = args['errpre']
-        elif args['errpre'].lower() == 'none' or args['errpost'].lower() == 'none':
+        elif (not args['errpre'] or not args['errpost']) or (
+                args['errpre'].lower() == 'none' or args['errpost'].lower() == 'none'):
             raise ValueError("Either --errpre and --errpost must both be 'none', or they must both NOT be 'none'")
         else:
             pystan_error_model = dms_tools.mcmc.StanModelDifferentErr

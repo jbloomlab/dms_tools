@@ -82,7 +82,7 @@ def main():
         else:
             raise ValueError("Invalid chartype of %s" % args['chartype'])
         counts_files = {'nrstart':args['n_start'], 'nrs1':args['n_s1'], 'nrs2':args['n_s2']}
-        if args['err'].lower() == 'none':
+        if not args['err'] or args['err'].lower() == 'none':
             pystan_error_model = dms_tools.mcmc.StanModelDiffPrefNoErr
             error_model = 'none'
         else:
