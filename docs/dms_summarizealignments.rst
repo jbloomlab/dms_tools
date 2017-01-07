@@ -129,6 +129,17 @@ This plot shows the number of times each codon mutation was observed **only** fo
    :width: 60%
    :alt: alignmentsummary_mutcounts_multi_nt.pdf
 
+``singlemuttypes.pdf``
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+This plot shows the frequency of different types of nucleotide mutations among **only** codons with single-nucleotide changes. This can be useful for assessing if oxidative damage is affecting your sample by inducing specific mutations. Note that this file shows a different set of samples than for the others above.
+
+.. image:: alignmentsummary_singlemuttypes.pdf
+   :align: center
+   :width: 60%
+   :alt: alignmentsummary_singlemutttypes.pdf
+
+
+
 For ``alignment_type`` of ``subassemble``
 ++++++++++++++++++++++++++++++++++++++++++
 Here are the output files, with the names that would be produced if running ``dms_summarizealignments`` as in the `Example usage`_ for ``alignment_type`` of ``subassemble``:

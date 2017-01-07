@@ -1271,6 +1271,9 @@ def ClassifyCodonCounts(codon_counts):
 
     'TOTAL_N_1MUT', 'TOTAL_N_2MUT', 'TOTAL_N_3MUT' : total number of
     'N_1MUT', N_2MUT', and 'N_3MUT' for all codons.
+
+    'TOTAL_1MUT_AtoC', 'TOTAL_1MUT_AtoG', etc : total number of one-nucleotide codon
+    mutations that change from A to C, etc.
     """
     sites = list(codon_counts.iterkeys())
     codon_counts = copy.deepcopy(codon_counts)
@@ -1281,6 +1284,10 @@ def ClassifyCodonCounts(codon_counts):
     codon_counts['TOTAL_N_1MUT'] = 0
     codon_counts['TOTAL_N_2MUT'] = 0
     codon_counts['TOTAL_N_3MUT'] = 0
+    for nt1 in dms_tools.nts:
+        for nt2 in dms_tools.nts:
+            if nt1 != nt2:
+                codon_counts['TOTAL_1MUT_{0}to{1}'.format(nt1, nt2)] = 0
     keys = ['COUNTS', 'N_WT', 'N_NS', 'N_SYN', 'N_STOP', 'N_1MUT', 'N_2MUT', 'N_3MUT']
     for i in sites:
         di = codon_counts[i]
@@ -1306,9 +1313,13 @@ def ClassifyCodonCounts(codon_counts):
                 elif aa == '*':
                     codon_counts['TOTAL_STOP'] += n
                     di['N_STOP'] += n
-                ndiffs = len([j for j in range(3) if wtcodon[j] != codon[j]])
+                diffs = [j for j in range(3) if wtcodon[j] != codon[j]]
+                ndiffs = len(diffs)
                 di['N_%dMUT' % ndiffs] += n
                 codon_counts['TOTAL_N_%dMUT' % ndiffs] += n
+                if ndiffs == 1:
+                    codon_counts['TOTAL_1MUT_{0}to{1}'.format(wtcodon[diffs[0]],
+                            codon[diffs[0]])] += n
     codon_counts['TOTAL_MUT'] = codon_counts['TOTAL_SYN'] + codon_counts['TOTAL_NS'] + codon_counts['TOTAL_STOP']
     return codon_counts
 

@@ -9,6 +9,7 @@ import sys
 import os
 import time
 import re
+import dms_tools
 import dms_tools.utils
 import dms_tools.parsearguments
 import dms_tools.file_io
@@ -172,7 +173,8 @@ def main():
         mutdepth = '%smutdepth.pdf' % args['outprefix']
         reads = '%sreads.pdf' % args['outprefix']
         barcodes = '%sbarcodes.pdf' % args['outprefix']
-        for f in [mutfreqs, mutfreqstext, mutcountsall, mutcountsmulti, depth, mutdepth, reads, barcodes]:
+        singlemuttypes = '{0}singlemuttypes.pdf'.format(args['outprefix'])
+        for f in [mutfreqs, mutfreqstext, mutcountsall, mutcountsmulti, depth, mutdepth, reads, barcodes, singlemuttypes]:
             if os.path.isfile(f):
                 os.remove(f)
                 print "Removing existing file %s" % f
@@ -219,6 +221,16 @@ def main():
         print "Making %s" % barcodes
         (categories, plotdata) = ParseBarcodeData(names, [data[name]['stats'][1] for name in names], args['maxperbarcode'])
         dms_tools.plot.PlotSampleBargraphs(names, categories, plotdata, barcodes, 'number of barcodes')
+        print("Making {0}".format(singlemuttypes))
+        categories = ['{0}to{1}'.format(nt1, nt2) for nt1 in dms_tools.nts
+                for nt2 in dms_tools.nts if nt2 != nt1]
+        plotdata = {}
+        for name in names:
+            c = dms_tools.utils.ClassifyCodonCounts(data[name]['counts'])
+            plotdata[name] = dict([(cat,
+                    c['TOTAL_1MUT_{0}'.format(cat)] / float(c['TOTAL_COUNTS']))
+                    for cat in categories])
+        dms_tools.plot.PlotSampleBargraphs(names, categories, plotdata, singlemuttypes, 'freq 1-nt mutation')
 
     elif args['alignment_type'] == 'subassemble':
         nsubassembled = '%snsubassembled.pdf' % args['outprefix']
