@@ -412,6 +412,7 @@ def LogoPlotParser():
     parser.add_argument('--overlay3', default=None, nargs=3, metavar=('FILE', 'SHORTNAME', 'LONGNAME'), help='Specify a third overlay bar. Arguments have the same meaning as for "overlay1".')
     parser.add_argument('--stringencyparameter', type=FloatGreaterThanZero, help="Scale preferences by this stringency parameter; only valid when 'infile' specifies preferences.")
     parser.add_argument('--mapmetric', default='kd', help="Specify the amino-acid metric used to map colors to amino-acids in the logoplot. 'kd' uses the Kyte-Doolittle hydrophobicity scale, 'mw' uses molecular weight, 'functionalgroup' divides the amino acids into seven functional groups, and 'charge' uses charge at neutral pH. When using 'kd' or 'mw', 'colormap' is used to map colors to the metric; when using 'charge', a black/red/blue colormapping is used for neutral/positive/negative; similarly 'functionalgroup' has its own colormap.", choices=['kd','mw','charge','functionalgroup'])
+    parser.add_argument('--overlay_cmap', default=None, help="Specify color map for overlay bars. Should be name of valid matplotlib colormap such as 'jet' or 'OrRd' (http://matplotlib.org/users/colormaps.html)")
     parser.add_argument('-v', '--version', action='version', version='%(prog)s {version}'.format(version=dms_tools.__version__))
     return parser
 
