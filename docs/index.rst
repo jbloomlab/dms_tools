@@ -15,7 +15,7 @@ The :ref:`programs` installed as part of `dms_tools`_ allow you to easily analyz
 
 `dms_tools`_ is suited for the following analyses:
 
-    1) If you have sequenced a gene using barcoded subamplicon sequencing, you can process the FASTQ files to count the mutations using :ref:`dms_barcodedsubamplicons`. If you are using subassembly, you can process the FASTQ files using :ref:`dms_subassemble` and then count the frequencies of variants / mutations using `dms_matchsubassembledbarcodes`. In either case, you can summarize the results for multiple samples with :ref:`dms_summarizealignments`.
+    1) If you have sequenced a gene using barcoded subamplicon sequencing, you can process the FASTQ files to count the mutations using :ref:`dms_barcodedsubamplicons`. If you are using subassembly, you can process the FASTQ files using :ref:`dms_subassemble` and then count the frequencies of variants / mutations using :ref:`dms_matchsubassembledbarcodes`. In either case, you can summarize the results for multiple samples with :ref:`dms_summarizealignments`.
 
     2) You have subjected a library of mutant genes to selection under two conditions, and wish to identify mutations that are favored under one versus the other. You can do this using :ref:`dms_diffselection` or :ref:`dms_inferdiffprefs`, and visualize the results using :ref:`dms_logoplot`.
 
