@@ -1,7 +1,7 @@
 Changelog
 ===========
 
-1.dev2
+1.2.0
 -------------
 * Added ``dms_subassemble`` program
 
@@ -14,6 +14,8 @@ Changelog
 * Added ``*singlemuttypes.pdf`` plot to ``dms_summarizealignments`` for *barcodedsubamplicons*.
 
 * Added ``overlay_cmap`` option to ``dms_logoplot``
+
+* Updated docs about installation
 
 1.1.20
 ------------
