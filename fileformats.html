@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Data file formats &#8212; dms_tools 1.1.20 documentation</title>
+    <title>Data file formats &mdash; dms_tools 1.2.0 documentation</title>
     
     <link rel="stylesheet" href="_static/classic.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '1.1.20',
+        VERSION:     '1.2.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="dms_tools 1.1.20 documentation" href="index.html" />
+    <link rel="top" title="dms_tools 1.2.0 documentation" href="index.html" />
     <link rel="next" title="Examples" href="examples.html" />
     <link rel="prev" title="dms_summarizealignments" href="dms_summarizealignments.html" /> 
   </head>
@@ -44,7 +44,7 @@
         <li class="right" >
           <a href="dms_summarizealignments.html" title="dms_summarizealignments"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">dms_tools 1.1.20 documentation</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">dms_tools 1.2.0 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -54,21 +54,22 @@
           <div class="body" role="main">
             
   <div class="section" id="data-file-formats">
-<h1><a class="toc-backref" href="#id2">Data file formats</a><a class="headerlink" href="#data-file-formats" title="Permalink to this headline">¶</a></h1>
+<h1><a class="toc-backref" href="#id3">Data file formats</a><a class="headerlink" href="#data-file-formats" title="Permalink to this headline">¶</a></h1>
 <p>Below is information about the formats of the input and output files used by the <a class="reference internal" href="programs.html#programs"><span class="std std-ref">Programs</span></a> in <a class="reference external" href="http://jbloomlab.github.io/dms_tools">dms_tools</a>.</p>
 <div class="contents topic" id="contents">
 <p class="topic-title first">Contents</p>
 <ul class="simple">
-<li><a class="reference internal" href="#data-file-formats" id="id2">Data file formats</a><ul>
-<li><a class="reference internal" href="#deep-mutational-scanning-counts-file" id="id3">Deep mutational scanning counts file</a></li>
-<li><a class="reference internal" href="#preferences-file" id="id4">Preferences file</a></li>
-<li><a class="reference internal" href="#differential-preferences-file" id="id5">Differential preferences file</a></li>
+<li><a class="reference internal" href="#data-file-formats" id="id3">Data file formats</a><ul>
+<li><a class="reference internal" href="#deep-mutational-scanning-counts-file" id="id4">Deep mutational scanning counts file</a></li>
+<li><a class="reference internal" href="#preferences-file" id="id5">Preferences file</a></li>
+<li><a class="reference internal" href="#differential-preferences-file" id="id6">Differential preferences file</a></li>
+<li><a class="reference internal" href="#subassembly-file" id="id7">Subassembly file</a></li>
 </ul>
 </li>
 </ul>
 </div>
 <div class="section" id="deep-mutational-scanning-counts-file">
-<span id="dms-counts"></span><h2><a class="toc-backref" href="#id3">Deep mutational scanning counts file</a><a class="headerlink" href="#deep-mutational-scanning-counts-file" title="Permalink to this headline">¶</a></h2>
+<span id="dms-counts"></span><h2><a class="toc-backref" href="#id4">Deep mutational scanning counts file</a><a class="headerlink" href="#deep-mutational-scanning-counts-file" title="Permalink to this headline">¶</a></h2>
 <p>The programs <a class="reference internal" href="dms_inferprefs.html#dms-inferprefs"><span class="std std-ref">dms_inferprefs</span></a> and <a class="reference internal" href="dms_inferdiffprefs.html#dms-inferdiffprefs"><span class="std std-ref">dms_inferdiffprefs</span></a> take their input data from files giving the counts of each possible character (codon, nucleotide, or amino acid) at each site in the gene. You will need to generate these files after using some other program to analyze your deep sequencing data.</p>
 <p>Here is an example of the first few lines of a valid file giving nucleotide counts:</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="c1"># POSITION WT A T C G</span>
@@ -117,7 +118,7 @@
 <p>The <code class="docutils literal"><span class="pre">*_codoncounts.txt</span></code> and <code class="docutils literal"><span class="pre">*_ntcounts.txt</span></code> files generated by <a class="reference external" href="http://jbloom.github.io/mapmuts">mapmuts</a> represent valid deep mutational scanning counts input files.</p>
 </div>
 <div class="section" id="preferences-file">
-<span id="id1"></span><h2><a class="toc-backref" href="#id4">Preferences file</a><a class="headerlink" href="#preferences-file" title="Permalink to this headline">¶</a></h2>
+<span id="id1"></span><h2><a class="toc-backref" href="#id5">Preferences file</a><a class="headerlink" href="#preferences-file" title="Permalink to this headline">¶</a></h2>
 <p>The program <a class="reference internal" href="dms_inferprefs.html#dms-inferprefs"><span class="std std-ref">dms_inferprefs</span></a> infers the site-specific preferences <span class="math">\(\pi_{r,x}\)</span> and writes these to a file. Here is an example of the format of one these preferences files for nucleotide characters:</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="c1"># POSITION WT SITE_ENTROPY PI_A PI_C PI_G PI_T PI_A_95 PI_C_95 PI_G_95 PI_T_95</span>
 <span class="mi">1</span> <span class="n">G</span> <span class="mf">1.61</span> <span class="mf">0.21</span> <span class="mf">0.09</span> <span class="mf">0.58</span> <span class="mf">0.12</span> <span class="mf">0.17</span><span class="p">,</span><span class="mf">0.28</span> <span class="mf">0.04</span><span class="p">,</span><span class="mf">0.12</span> <span class="mf">0.51</span><span class="p">,</span><span class="mf">0.69</span> <span class="mf">0.090</span><span class="p">,</span><span class="mf">0.150</span>
@@ -138,7 +139,7 @@
 <p>When the credible intervals are present, these columns are named <code class="docutils literal"><span class="pre">PI_A_95</span></code>, etc.</p>
 </div>
 <div class="section" id="differential-preferences-file">
-<span id="diffpreferences-file"></span><h2><a class="toc-backref" href="#id5">Differential preferences file</a><a class="headerlink" href="#differential-preferences-file" title="Permalink to this headline">¶</a></h2>
+<span id="diffpreferences-file"></span><h2><a class="toc-backref" href="#id6">Differential preferences file</a><a class="headerlink" href="#differential-preferences-file" title="Permalink to this headline">¶</a></h2>
 <p>The program <a class="reference internal" href="dms_inferdiffprefs.html#dms-inferdiffprefs"><span class="std std-ref">dms_inferdiffprefs</span></a> infers the differential preferences <span class="math">\(\Delta\pi_{r,x}\)</span> and writes these to a file. Here is an example of the formate of one of these files for nucleotide characters:</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="c1"># POSITION WT RMS_dPI dPI_A dPI_C dPI_G dPI_T Pr_dPI_A_lt0 Pr_dPI_A_gt0 Pr_dPI_C_lt0 Pr_dPI_C_gt0 Pr_dPI_G_lt0 Pr_dPI_G_gt0 Pr_dPI_T_lt0 Pr_dPI_T_gt0</span>
 <span class="mi">1</span> <span class="n">G</span> <span class="mf">0.241</span> <span class="mf">0.02</span> <span class="o">-</span><span class="mf">0.4</span> <span class="mf">0.2</span> <span class="mf">0.18</span> <span class="mf">0.41</span> <span class="mf">0.59</span> <span class="mf">0.90</span> <span class="mf">0.10</span> <span class="mf">0.2</span> <span class="mf">0.8</span> <span class="mf">0.3</span> <span class="mf">0.7</span>
@@ -157,6 +158,32 @@
 <p>If the differential preferences are for amino acids, the format is the same except there are now 20 or 21 columns of the form <code class="docutils literal"><span class="pre">dPI_A</span></code>, <code class="docutils literal"><span class="pre">dPI_C</span></code>, <code class="docutils literal"><span class="pre">dPI_D</span></code>, etc. There are 20 if we are excluding stop codons, and 21 if we are including stop codons. Stop codons are indicated by <code class="docutils literal"><span class="pre">*</span></code>.</p>
 <p>If the preferences are for codons, the format is the same except there are now 64 columns of the form <code class="docutils literal"><span class="pre">dPI_AA</span></code>, <code class="docutils literal"><span class="pre">dPI_AAC</span></code>, <code class="docutils literal"><span class="pre">dPI_AAG</span></code>, ..., <code class="docutils literal"><span class="pre">dPI_TTG</span></code>, <code class="docutils literal"><span class="pre">dPI_TTT</span></code>.</p>
 </div>
+<div class="section" id="subassembly-file">
+<span id="id2"></span><h2><a class="toc-backref" href="#id7">Subassembly file</a><a class="headerlink" href="#subassembly-file" title="Permalink to this headline">¶</a></h2>
+<p>This file format matches barcodes to subassembled variants. It is the primary output file of <a class="reference internal" href="dms_subassemble.html#dms-subassemble"><span class="std std-ref">dms_subassemble</span></a>.</p>
+<p>Each line has three space-delimited entries:</p>
+<blockquote>
+<div><ol class="arabic simple">
+<li>The first entry is the barcode.</li>
+<li>The second entry is the sequence corresponding to that barcode.</li>
+<li>The third entry is the list of mutations (separated by comma, no space) of each mutation in the sequence relative to the wildtype parent. If there are no mutations, this entry is <em>no_mutations</em>. The sites are numbered in 1, 2, ... numbering in naming these mutations. Note that if the mutations are codon mutations, then the numbers correspond to the <strong>codon</strong> number, not the nucleotide number.</li>
+</ol>
+</div></blockquote>
+<p>The following restrictions apply:</p>
+<blockquote>
+<div><ul class="simple">
+<li>all barcodes must be the same length</li>
+<li>each barcode must be unique.</li>
+<li>the second and third entries (the sequence of the subassembled variant and the mutations) must correspond to the same wildtype sequence.</li>
+</ul>
+</div></blockquote>
+<p>Here are a few example lines:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">TATTACATCTGCCCCCAA</span> <span class="n">ATGGCTATCGACGAAAACAAACAGAAAGCGTTGGCGGCAGCACTGGGCCAGATTGAGAAACAATTTGGTAAAGGCTCCATCATGCGCCTGGGTGAAGACCGTTCCATGGATGTGGAAACCATCTCTACCGGTTCGCTTTCACTGGATATCGCGCTTGGGGCAGGTGGTCTGCCGATGGGCCGTATCGTCGAAATCTACGGACCGGAATCTTCCGGTAAAACCACGCTGACGCTGCAGGTGATCGCCGCAGCGCAGCGTGAAGGTAAAACCTGTGCGTTTATCGATGCTGAACACGCGCTGGACCCAATCTACGCACGTAAACTGGCAGTCGATATCGACAACCTGCTGTGCTCCCAGCCGGACACCGGCGAGCAGGCACTGGAAATCTGTGACGCCCTGGCGCGTTCTGGCGCAGTAGACGTTATCGTCGTTGACTCCGTGGCGGCACTGACGCCGAAAGCGGAAATCGAAGGCGAAATCGGCGACTCTCATATGGGCCTTGCGGCACGTATGATGAGCCAGGCGATGCGTAAGCTGGCGGGTAACCTGAAGCAGTCCAACACGCTGCTGATCTTCATCAACCAGATCCGTATGAAAATTGGTGTGATGTTCGGCAACCCGGAAACCACTACCGGTGGTAACGCGCTGAAATTCTACGCCTCTGTTCGTCTCGACATCCGTCGTATCGGCGCGGTGAAAGAGGGCGAAAACGTGGTGGGTAGCGAAACCCGCGTGAAAGTGGTGAAGAACAAAATCGCTGCGCCGTTTAAACAGGCTGAATTCCAGATCCTCTACGGCGAAGGTATCAACTTCTACGGCGAACTGGTTGACCTGGGCGTAAAAGAGAAGCTGATCGAGAAAGCAGGCGCGTGGTACAGCTACAAAGGTGAGAAGATCGGTCAGGGTAAAGCGAATGCGACTGCCTGGCTGAAAGATAACCCGGAAACCGCGAAAGAGATCGAGAAGAAAGTACGTGAGTTGCTGCTGAGCAACCCGAACTCAACGCCGGATTTCTCTGTAGATGATAGCGAAGGCGTAGCAGAAACTAACGAAGATTTTTAA</span> <span class="n">GGC109GCA</span>
+<span class="n">AACTCTGTGTTCCCATCA</span> <span class="n">ATGGCTATCGACGAAAACAAACAGAAAGCGTTGGCGGCAGCACTGGGCCAGATTGAGAAACAATTTGGTAAAGGCTCCATCATGCGCCTGGGTGAAGACCGTTCCATGGATGTGGAAACCATCTCTACCGGTTCGCTTTCACTGGATATCGCGCTTGGGGCAGGTGGTCTGCCGATGGGCCGTATCGTCGAAATCTACGGACCGGAATCTTCCGGTAAAACCACGCTGACGCTGCAGGTGATCGCCGCAGCGCAGCGTGAAGGTAAAACCTGTGCGTTTATCGATGCTGAACACGCGCTGGACCCAATCTACGCACGTAAACTGGGCGTCGATATCGACAACCTGCTGTGCTCCCAGCCGGACACCGGCGAGCAGGCACTGGAAATCTGTGACGCCCTGGCGCGTTCTGGCGCAGTAGACGTTATCGTCGTTGACTCCGTGGCGGCACTGACGCCGAAAGCGGAAATCGAAGGCGAAATCGGCGACTCTCATATGGGCCTTGCGGCACGTATGATGAGCCAGGCGATGCGTAAGCTGGCGGGTAACCTGAAGCAGTCCAACACGCTGCTGATCTTCATCAACCAGATCCGTATGAAAATTGGTGTGATGTTCGGCAACCCGGAAACCACTACCGGTGGTAACGCGCTGAAATTCTACGCCTCTGTTCGTCTCGACATCCGTCGTATCGGCGCGGTGAAAGAGGGCGAAAACGTGGTGGGTAGCGAAACCCGCGTGAAAGTGGTGAAGAACAAAATCGCTGCGCCGTTTAAACAGGCTGAATTCCAGATCCTCTACGGCGAAGGTATCAACTTCTACGGCGAACTGGTTGACCTGGGCGTAAAAGAGAAGCTGATCGAGAAAGCAGGCGCGTGGTACAGCTACAAAGGTGAGAAGATCGGTCAGGGTAAAGCGAATGCGACTGCCTGGCTGAAAGATAACCCGGAAACCGCGAAAGAGATCGAGAAGAAAGTACGTGAGTTGCTGCTGAGCAACCCGAACTCAACGCCGGATTTCTCTGTAGATGATAGCGAAGGCGTAGCAGAAACTAACGAAGATTTTTAA</span> <span class="n">no_mutations</span>
+<span class="n">TCTAGGGTGCGATCTATT</span> <span class="n">ATGGCTATCGACGAAAACAAACAGAAAGCGTTGGCGGCAGCACTGGGCCAGATTGAGAAACAATTTGGTAAAGGCTCCATCATGCGCCTGGGTGAAGACTCATCCATGGATGTGGAAACCATCTCTACCGGTTCGCTTTCACTGGATATCGCGCTTGGGGCAGGTGGTCTGCCGATGGGCCGTATCGTCGAAATCTACGGACCGGAATCTTCCGGTAAAACCACGCTGACGCTGCAGGTGATCGCCGCAGCGCAGCGTGAAGGTAAAACCTGTGCGTTTATCGATGCTGAACACGCGCTGGACCCAATCTACGCACGTAAACTGGGCGTCGATATCGACAACCTGCTGTGCTCCCAGCCGGACACCGGCGAGCAGGCACTGGAAATCTGTGACGCCCTGGCGCGTTCTGGCGCAGTAGACGTTATCGTCGTTGACTCCGTGGCGGCACTGACGCCGAAAGCGGAAATCGAAGGCGAAATCGGCGACTCTCATATGGGCCTTGCGGCACGTATGATGAGCCAGGCGATGCGTAAGCTGGCGGGTAACCTGAAGCAGTCCAACACGCTGCTGATCTTCATCAACCAGATCCGTATGAAAATTGGTGTGATGTTCGGCAACCCGGAAACCACTACCGGTGGTAACGCGCTGAAATTCTACGCCTCTGTTCGTCTCGACATCCGTCGTATCGGCGCGGTGAAAGAGGGCGAAAACGTGGTGGGTAGCGAAACCCGCGTGAAAGTGGTGAAGAACAAAATCGCTGCGCCGTTTAAACAGGCTGAATTCCAGATCCTCTACGGCGAAGGTATCAACTTCTACGGCGAACTGGTTGACCTGGGCGTAAAAGAGAAGCTGATCGAGAAAGCAGGCGCGTGGTACAGCTACAAAGGTGAGAAGATCGGTCAGGGTAAAGCGAATGCGACTGCCTGGCTGAAAGATAACCCGGAAACCGCGAAAGAGATCGAGAAGAAAGTACGTGAGTTGCTGCTGAGCAACCCGAACTCAACGCCGGATTTCTCTGTAATGGATAGCGAAGGCGTAGCAGAAACTAACGAAGATTTTTAA</span> <span class="n">CGT34TCA</span><span class="p">,</span><span class="n">GAT341ATG</span>
+</pre></div>
+</div>
+</div>
 </div>
 
 
@@ -171,6 +198,7 @@
 <li><a class="reference internal" href="#deep-mutational-scanning-counts-file">Deep mutational scanning counts file</a></li>
 <li><a class="reference internal" href="#preferences-file">Preferences file</a></li>
 <li><a class="reference internal" href="#differential-preferences-file">Differential preferences file</a></li>
+<li><a class="reference internal" href="#subassembly-file">Subassembly file</a></li>
 </ul>
 </li>
 </ul>
@@ -191,8 +219,8 @@
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="search.html" method="get">
-      <div><input type="text" name="q" /></div>
-      <div><input type="submit" value="Go" /></div>
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
     </form>
@@ -217,12 +245,12 @@
         <li class="right" >
           <a href="dms_summarizealignments.html" title="dms_summarizealignments"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">dms_tools 1.1.20 documentation</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">dms_tools 1.2.0 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
-        &#169; Copyright 2014, Jesse Bloom.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.6.
+        &copy; Copyright 2014, Jesse Bloom.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.
     </div>
   </body>
 </html>

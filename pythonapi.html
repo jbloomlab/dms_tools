@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Python API &#8212; dms_tools 1.1.20 documentation</title>
+    <title>Python API &mdash; dms_tools 1.2.0 documentation</title>
     
     <link rel="stylesheet" href="_static/classic.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '1.1.20',
+        VERSION:     '1.2.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="dms_tools 1.1.20 documentation" href="index.html" />
+    <link rel="top" title="dms_tools 1.2.0 documentation" href="index.html" />
     <link rel="next" title="Citations and Acknowledgments" href="citations.html" />
     <link rel="prev" title="Algorithm to infer differential preferences" href="inferdiffprefs_algorithm.html" /> 
   </head>
@@ -44,7 +44,7 @@
         <li class="right" >
           <a href="inferdiffprefs_algorithm.html" title="Algorithm to infer differential preferences"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">dms_tools 1.1.20 documentation</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">dms_tools 1.2.0 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -540,6 +540,7 @@ always converges.</p>
 <li><em>ReadMultiPrefOrDiffPref</em> : reads multiple preferences or differential preferences files.</li>
 <li><em>IteratePairedFASTQ</em> : iterate over paired-read FASTQ files.</li>
 <li><em>ReadSummaryStats</em> : reads alignment summary statistics.</li>
+<li><em>ReadSubassembledVariants</em> : reads subassembled variants</li>
 </ul>
 </div>
 <div class="section" id="id2">
@@ -858,6 +859,29 @@ and <em>h</em> is a dictionary with <em>h[r]</em> giving the site entropy (log b
 </dd></dl>
 
 <dl class="function">
+<dt id="file_io.ReadSubassembledVariants">
+<code class="descclassname">file_io.</code><code class="descname">ReadSubassembledVariants</code><span class="sig-paren">(</span><em>infile</em>, <em>assumechartype='codon'</em><span class="sig-paren">)</span><a class="headerlink" href="#file_io.ReadSubassembledVariants" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads subassembled variants file produced by <code class="docutils literal"><span class="pre">dms_subassemble</span></code>.</p>
+<p><em>infile</em> : name of a <code class="docutils literal"><span class="pre">*_subassembled_variants.txt</span></code> file
+produced by <code class="docutils literal"><span class="pre">dms_subassemble</span></code>.</p>
+<p><em>assumechartype</em> is the type of nucleotide character assumed
+if it is <strong>not</strong> possible to auto-determine this from <em>infile</em>,
+which will be the case only if there are no mutations.</p>
+<p>The return value is <em>(bc_dict, bc_len, wtseq, chartype)</em></p>
+<p><em>bc_dict</em> is a dictionary keyed by each barcode, and with values
+being the list of mutations at that site.</p>
+<p><em>bc_len</em> is the integer length of barcodes.</p>
+<p><em>wtseq</em> is a string giving the wildtype sequence</p>
+<p><em>chartype</em> indicates the character type of the sequence / 
+mutations as a string, which is auto-determined from
+<em>infile</em>. The <em>chartype</em> can be any of <em>codon</em>, <em>DNA</em>,
+or <em>aminoacid</em>. If all variants are unmutated and the sequence
+is a nucleotide sequence, then it is not possible to auto-
+determine whether the character type is <em>codon</em> or <em>DNA</em>. In that
+case, it is assumed to have the type of <em>assumechartype</em>.</p>
+</dd></dl>
+
+<dl class="function">
 <dt id="file_io.ReadSummaryStats">
 <code class="descclassname">file_io.</code><code class="descname">ReadSummaryStats</code><span class="sig-paren">(</span><em>f</em><span class="sig-paren">)</span><a class="headerlink" href="#file_io.ReadSummaryStats" title="Permalink to this definition">¶</a></dt>
 <dd><p>Reads alignment summary statistics.</p>
@@ -1131,6 +1155,8 @@ as <span class="math">\(h_r = \sum_x \pi_{r,x} \times \log_2 \pi_{r,x}\)</span>.
 <li><em>CheckReadQuality</em> : checks quality of pair of reads.</li>
 <li><em>BuildReadConsensus</em> : builds consensus of reads if they are sufficiently similar.</li>
 <li><em>AlignSubamplicon</em> : attempt to align subamplicon at specified position.</li>
+<li><em>AlignRead</em> : attempt to align a read at a specified position</li>
+<li><em>Subassemble</em> : subassembles a read from per site counts</li>
 <li><em>ClassifyCodonCounts</em> : classifies codon mutations.</li>
 <li><em>CodonMutsCumulFracs</em> : cumulative counts of codon mutations.</li>
 <li><em>ParseNSMutFreqBySite</em> : Parse nonsynonymous mutation frequencies at each site from a DMS counts file.</li>
@@ -1187,6 +1213,70 @@ they only exceed the controlled for sample by <em>maxexcess</em>.</p>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">counts</span><span class="p">[</span><span class="s1">&#39;nrs2&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">adjusted_counts</span><span class="p">[</span><span class="s1">&#39;nrs2&#39;</span><span class="p">]</span>
 <span class="go">True</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">adjusted_counts</span><span class="p">[</span><span class="s1">&#39;nrerr&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="p">{</span><span class="s1">&#39;A&#39;</span><span class="p">:</span><span class="mi">1000</span><span class="p">,</span> <span class="s1">&#39;C&#39;</span><span class="p">:</span><span class="mi">21</span><span class="p">,</span> <span class="s1">&#39;G&#39;</span><span class="p">:</span><span class="mi">20</span><span class="p">,</span> <span class="s1">&#39;T&#39;</span><span class="p">:</span><span class="mi">41</span><span class="p">}</span>
+<span class="go">True</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="utils.AlignRead">
+<code class="descclassname">utils.</code><code class="descname">AlignRead</code><span class="sig-paren">(</span><em>refseq</em>, <em>read</em>, <em>refseqstart</em>, <em>maxmuts</em>, <em>counts</em>, <em>chartype</em><span class="sig-paren">)</span><a class="headerlink" href="#utils.AlignRead" title="Permalink to this definition">¶</a></dt>
+<dd><p>Attempt to gaplessly align a read at a specific location.</p>
+<p><em>refseq</em> and <em>read</em> are strings, assumed to be upper case.</p>
+<p>Tries to align <em>refseq</em> starting at position <em>refseqstart</em> (in 1, 2, ... numbering),
+counting the number of mutations. If the read aligns with <span class="math">\(\le\)</span> <em>maxmuts</em>
+mutations, then returns <em>True</em> and updates <em>counts</em> as described below; otherwise 
+returns <em>False</em> and does nothing to <em>counts</em>. Note that characters with
+ambiguous nucleotides (<code class="docutils literal"><span class="pre">N</span></code>) nucleotides are ignored, and not counted as mutations
+but also not recorded as counts.</p>
+<p><em>chartype</em> is the type of character for which we count mutations. Allowable values:</p>
+<blockquote>
+<div><ul class="simple">
+<li>&#8216;codon&#8217; : this requires <em>refseq</em> to be an in-frame gene, and only counts
+identities when codon is fully spanned.</li>
+</ul>
+</div></blockquote>
+<p><em>counts</em> is a dictionary that keyed by every site of <em>chartype</em> in <em>refseq</em> using
+1, 2, ... numbering.</p>
+<p>This functions modifies <em>counts</em> as follows: <em>counts[isite][char]</em> is 
+incremented (creating entry for <em>char</em> if not already
+present) if the read aligns with a character of <em>char</em> at <em>isite</em>.</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">refseq</span> <span class="o">=</span> <span class="s1">&#39;ATGGGACCC&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">read</span> <span class="o">=</span> <span class="s1">&#39;GGGAC&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">counts</span> <span class="o">=</span> <span class="p">{</span><span class="mi">1</span><span class="p">:{},</span> <span class="mi">2</span><span class="p">:{},</span> <span class="mi">3</span><span class="p">:{}}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">AlignRead</span><span class="p">(</span><span class="n">refseq</span><span class="p">,</span> <span class="n">read</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">counts</span><span class="p">,</span> <span class="s1">&#39;codon&#39;</span><span class="p">)</span>
+<span class="go">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">counts</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="p">{}</span> <span class="ow">and</span> <span class="n">counts</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="p">{</span><span class="s1">&#39;GGA&#39;</span><span class="p">:</span><span class="mi">1</span><span class="p">}</span> <span class="ow">and</span> <span class="n">counts</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">==</span> <span class="p">{}</span>
+<span class="go">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">read2</span> <span class="o">=</span> <span class="s1">&#39;GGTAC&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">AlignRead</span><span class="p">(</span><span class="n">refseq</span><span class="p">,</span> <span class="n">read2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">counts</span><span class="p">,</span> <span class="s1">&#39;codon&#39;</span><span class="p">)</span>
+<span class="go">False</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">AlignRead</span><span class="p">(</span><span class="n">refseq</span><span class="p">,</span> <span class="n">read2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">counts</span><span class="p">,</span> <span class="s1">&#39;codon&#39;</span><span class="p">)</span>
+<span class="go">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">counts</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="p">{}</span> <span class="ow">and</span> <span class="n">counts</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="p">{</span><span class="s1">&#39;GGA&#39;</span><span class="p">:</span><span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;GTA&#39;</span><span class="p">:</span><span class="mi">1</span><span class="p">}</span> <span class="ow">and</span> <span class="n">counts</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">==</span> <span class="p">{}</span>
+<span class="go">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">AlignRead</span><span class="p">(</span><span class="n">refseq</span><span class="p">,</span> <span class="n">read2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">counts</span><span class="p">,</span> <span class="s1">&#39;codon&#39;</span><span class="p">)</span>
+<span class="go">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">counts</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="p">{}</span> <span class="ow">and</span> <span class="n">counts</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="p">{</span><span class="s1">&#39;GGA&#39;</span><span class="p">:</span><span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;GTA&#39;</span><span class="p">:</span><span class="mi">2</span><span class="p">}</span> <span class="ow">and</span> <span class="n">counts</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">==</span> <span class="p">{}</span>
+<span class="go">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">read3</span> <span class="o">=</span> <span class="s1">&#39;GGNAC&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">AlignRead</span><span class="p">(</span><span class="n">refseq</span><span class="p">,</span> <span class="n">read3</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">counts</span><span class="p">,</span> <span class="s1">&#39;codon&#39;</span><span class="p">)</span>
+<span class="go">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">counts</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="p">{}</span> <span class="ow">and</span> <span class="n">counts</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="p">{</span><span class="s1">&#39;GGA&#39;</span><span class="p">:</span><span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;GTA&#39;</span><span class="p">:</span><span class="mi">2</span><span class="p">}</span> <span class="ow">and</span> <span class="n">counts</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">==</span> <span class="p">{}</span>
+<span class="go">True</span>
+</pre></div>
+</div>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">refseq</span> <span class="o">=</span> <span class="s1">&#39;ATGGGACCC&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">read</span> <span class="o">=</span> <span class="s1">&#39;GGACCC&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">counts</span> <span class="o">=</span> <span class="p">{</span><span class="mi">1</span><span class="p">:{},</span> <span class="mi">2</span><span class="p">:{},</span> <span class="mi">3</span><span class="p">:{}}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">AlignRead</span><span class="p">(</span><span class="n">refseq</span><span class="p">,</span> <span class="n">read</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">counts</span><span class="p">,</span> <span class="s1">&#39;codon&#39;</span><span class="p">)</span>
+<span class="go">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">counts</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="p">{}</span> <span class="ow">and</span> <span class="n">counts</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="p">{</span><span class="s1">&#39;GGA&#39;</span><span class="p">:</span><span class="mi">1</span><span class="p">}</span> <span class="ow">and</span> <span class="n">counts</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">==</span> <span class="p">{</span><span class="s1">&#39;CCC&#39;</span><span class="p">:</span><span class="mi">1</span><span class="p">}</span>
+<span class="go">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">read</span> <span class="o">=</span> <span class="s1">&#39;NGACCC&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">AlignRead</span><span class="p">(</span><span class="n">refseq</span><span class="p">,</span> <span class="n">read</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">counts</span><span class="p">,</span> <span class="s1">&#39;codon&#39;</span><span class="p">)</span>
+<span class="go">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">counts</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="p">{}</span> <span class="ow">and</span> <span class="n">counts</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="p">{</span><span class="s1">&#39;GGA&#39;</span><span class="p">:</span><span class="mi">1</span><span class="p">}</span> <span class="ow">and</span> <span class="n">counts</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">==</span> <span class="p">{</span><span class="s1">&#39;CCC&#39;</span><span class="p">:</span><span class="mi">2</span><span class="p">}</span>
 <span class="go">True</span>
 </pre></div>
 </div>
@@ -1436,6 +1526,8 @@ represent totals over all codon positions:</p>
 <p>&#8216;TOTAL_MUT&#8217; : sum of &#8216;N_NS&#8217; + &#8216;N_SYN&#8217; + &#8216;N_STOP&#8217;, total number of mutations.</p>
 <p>&#8216;TOTAL_N_1MUT&#8217;, &#8216;TOTAL_N_2MUT&#8217;, &#8216;TOTAL_N_3MUT&#8217; : total number of
 &#8216;N_1MUT&#8217;, N_2MUT&#8217;, and &#8216;N_3MUT&#8217; for all codons.</p>
+<p>&#8216;TOTAL_1MUT_AtoC&#8217;, &#8216;TOTAL_1MUT_AtoG&#8217;, etc : total number of one-nucleotide codon
+mutations that change from A to C, etc.</p>
 </dd></dl>
 
 <dl class="function">
@@ -1679,6 +1771,52 @@ sum to one.</p>
 </dd></dl>
 
 <dl class="function">
+<dt id="utils.Subassemble">
+<code class="descclassname">utils.</code><code class="descname">Subassemble</code><span class="sig-paren">(</span><em>counts</em>, <em>minpersite</em>, <em>minconcurrence</em>, <em>refseq_chars</em><span class="sig-paren">)</span><a class="headerlink" href="#utils.Subassemble" title="Permalink to this definition">¶</a></dt>
+<dd><p>Subassembles sequence if possible.</p>
+<p><em>counts</em> is keyed by all site numbers (1, 2, ... numbering) in the 
+sequence. <em>counts[r][x]</em> is the number of counts for character <em>x</em>
+at site <em>r</em>.</p>
+<p><em>refseq_chars</em> is keyed by all site numbers, and the value is
+the wildtype (reference sequence) character at that site.</p>
+<p>A read is subassembled if there are &gt;= <em>minpersite</em> counts at each 
+site, and &gt;= <em>minconcurrence</em> of these counts agree on the identity
+at that site. <em>minconcurrence</em> must be &gt; 0.5 to ensure a unique
+subassembly. <em>minpersite</em> must be &gt;= 1.</p>
+<p>The return variable is the 3-tuple <em>(subassembled, seq, failurestring)</em>.
+<em>subassembled</em> is <em>True</em> if the subassembly is successful at all sites,
+and <em>False</em> otherwise. <em>seq</em> is the subassembled sequence; at sites
+that cannot be successfully subassembled there is an <code class="docutils literal"><span class="pre">N</span></code> (for nucleotide
+characters) or a <code class="docutils literal"><span class="pre">NNN</span></code> (for codon characters). <em>failurestring</em> is a string
+given the reason subassembly failed (or &#8216;&#8217;) if subassembly succeeded.</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">counts</span> <span class="o">=</span> <span class="p">{</span><span class="mi">1</span><span class="p">:{</span><span class="s1">&#39;ATG&#39;</span><span class="p">:</span><span class="mi">2</span><span class="p">},</span> <span class="mi">2</span><span class="p">:{</span><span class="s1">&#39;GGA&#39;</span><span class="p">:</span><span class="mi">4</span><span class="p">,</span> <span class="s1">&#39;AGA&#39;</span><span class="p">:</span><span class="mi">1</span><span class="p">}}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">refseq_chars</span> <span class="o">=</span> <span class="p">{</span><span class="mi">1</span><span class="p">:</span><span class="s1">&#39;ATG&#39;</span><span class="p">,</span> <span class="mi">2</span><span class="p">:</span><span class="s1">&#39;AGA&#39;</span><span class="p">}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Subassemble</span><span class="p">(</span><span class="n">counts</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mf">0.8</span><span class="p">,</span> <span class="n">refseq_chars</span><span class="p">)</span>
+<span class="go">(True, &#39;ATGGGA&#39;, &#39;&#39;)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Subassemble</span><span class="p">(</span><span class="n">counts</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mf">0.8</span><span class="p">,</span> <span class="n">refseq_chars</span><span class="p">)</span>
+<span class="go">(False, &#39;NNNGGA&#39;, &#39;insufficient counts at 1&#39;)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Subassemble</span><span class="p">(</span><span class="n">counts</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mf">0.9</span><span class="p">,</span> <span class="n">refseq_chars</span><span class="p">)</span>
+<span class="go">(False, &#39;ATGNNN&#39;, &#39;insufficient concurrence between mutant and wildtype identity at 2&#39;)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">refseq_chars</span> <span class="o">=</span> <span class="p">{</span><span class="mi">1</span><span class="p">:</span><span class="s1">&#39;ATG&#39;</span><span class="p">,</span> <span class="mi">2</span><span class="p">:</span><span class="s1">&#39;TGA&#39;</span><span class="p">}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Subassemble</span><span class="p">(</span><span class="n">counts</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mf">0.9</span><span class="p">,</span> <span class="n">refseq_chars</span><span class="p">)</span>
+<span class="go">(False, &#39;ATGNNN&#39;, &#39;insufficient concurrence between two mutant identities at 2&#39;)</span>
+</pre></div>
+</div>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">counts</span> <span class="o">=</span> <span class="p">{</span><span class="mi">1</span><span class="p">:{},</span> <span class="mi">2</span><span class="p">:{</span><span class="s1">&#39;GGA&#39;</span><span class="p">:</span><span class="mi">4</span><span class="p">,</span> <span class="s1">&#39;AGA&#39;</span><span class="p">:</span><span class="mi">1</span><span class="p">}}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">refseq_chars</span> <span class="o">=</span> <span class="p">{</span><span class="mi">1</span><span class="p">:</span><span class="s1">&#39;ATG&#39;</span><span class="p">,</span> <span class="mi">2</span><span class="p">:</span><span class="s1">&#39;AGA&#39;</span><span class="p">}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Subassemble</span><span class="p">(</span><span class="n">counts</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mf">0.8</span><span class="p">,</span> <span class="n">refseq_chars</span><span class="p">)</span>
+<span class="go">(False, &#39;NNNGGA&#39;, &#39;no counts at 1&#39;)</span>
+</pre></div>
+</div>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">counts</span> <span class="o">=</span> <span class="p">{</span><span class="mi">1</span><span class="p">:{</span><span class="s1">&#39;GGA&#39;</span><span class="p">:</span><span class="mi">1</span><span class="p">},</span> <span class="mi">2</span><span class="p">:{</span><span class="s1">&#39;AGA&#39;</span><span class="p">:</span><span class="mi">1</span><span class="p">}}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">refseq_chars</span> <span class="o">=</span> <span class="p">{</span><span class="mi">1</span><span class="p">:</span><span class="s1">&#39;ATG&#39;</span><span class="p">,</span> <span class="mi">2</span><span class="p">:</span><span class="s1">&#39;AGA&#39;</span><span class="p">}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Subassemble</span><span class="p">(</span><span class="n">counts</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mf">0.75</span><span class="p">,</span> <span class="n">refseq_chars</span><span class="p">)</span>
+<span class="go">(True, &#39;GGAAGA&#39;, &#39;&#39;)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
 <dt id="utils.SumCodonToAA">
 <code class="descclassname">utils.</code><code class="descname">SumCodonToAA</code><span class="sig-paren">(</span><em>codondict</em>, <em>includestop=True</em><span class="sig-paren">)</span><a class="headerlink" href="#utils.SumCodonToAA" title="Permalink to this definition">¶</a></dt>
 <dd><p>Sums all codon entries for each amino acid.</p>
@@ -1855,6 +1993,7 @@ are the trimmed sequencing reads and corresponding Q-scores.</p>
 <li><em>PDF_File</em> : parses whether string gives a PDF file name.</li>
 <li><em>CommaSeparatedFASTQFiles</em> : parses list of FASTQ files.</li>
 <li><em>AlignSpecs</em> : parses alignment specs for <em>BarcodedSubampliconsParser</em></li>
+<li><em>R2AlignSpecs</em> : parses alignment specs for <em>SubassembleParser</em></li>
 <li><em>AlignprefixName</em> : parses alignment prefixes/names for <em>SummarizeAlignmentsParser</em></li>
 <li><em>InferPrefsParser</em> : parser for <code class="docutils literal"><span class="pre">dms_inferprefs</span></code></li>
 <li><em>InferDiffPrefsParser</em> : parser for <code class="docutils literal"><span class="pre">dms_inferdiffprefs</span></code></li>
@@ -1864,6 +2003,8 @@ are the trimmed sequencing reads and corresponding Q-scores.</p>
 <li><em>CorrelateParser</em> : parser for <code class="docutils literal"><span class="pre">dms_correlate</span></code></li>
 <li><em>LogoPlotParser</em> : parser for <code class="docutils literal"><span class="pre">dms_logoplot</span></code></li>
 <li><em>BarcodedSubampliconsParser</em> : parser for <code class="docutils literal"><span class="pre">dms_barcodedsubamplicons</span></code></li>
+<li><em>SubassembleParser</em> : parser for <code class="docutils literal"><span class="pre">dms_subassemble</span></code></li>
+<li><em>MatchSubassembledBarcodesParser</em> : parser for <code class="docutils literal"><span class="pre">dms_matchsubassembledbarcodes</span></code></li>
 <li><em>SummarizeAlignmentsParser</em> : parser for <code class="docutils literal"><span class="pre">dms_summarizealignments</span></code></li>
 <li><em>SmartHelpFormatter</em> : new class for formatting argument helps.</li>
 </ul>
@@ -2008,6 +2149,12 @@ Otherwise returns list of files.</p>
 </dd></dl>
 
 <dl class="function">
+<dt id="parsearguments.MatchSubassembledBarcodesParser">
+<code class="descclassname">parsearguments.</code><code class="descname">MatchSubassembledBarcodesParser</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#parsearguments.MatchSubassembledBarcodesParser" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns <em>argparse.ArgumentParser</em> for <code class="docutils literal"><span class="pre">dms_matchsubassembledbarcodes</span></code>.</p>
+</dd></dl>
+
+<dl class="function">
 <dt id="parsearguments.MergeParser">
 <code class="descclassname">parsearguments.</code><code class="descname">MergeParser</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#parsearguments.MergeParser" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns <em>argparse.ArgumentParser</em> for <code class="docutils literal"><span class="pre">dms_merge</span></code> script.</p>
@@ -2045,6 +2192,16 @@ Otherwise returns list of files.</p>
 <dd><p>If <em>fname</em> ends in PDF extension, returns it. Otherwise an error.</p>
 </dd></dl>
 
+<dl class="function">
+<dt id="parsearguments.R2AlignSpecs">
+<code class="descclassname">parsearguments.</code><code class="descname">R2AlignSpecs</code><span class="sig-paren">(</span><em>alignspecs</em><span class="sig-paren">)</span><a class="headerlink" href="#parsearguments.R2AlignSpecs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parses alignment specs for <em>SubasssembleParser</em>.</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">R2AlignSpecs</span><span class="p">(</span><span class="s1">&#39;1,300&#39;</span><span class="p">)</span>
+<span class="go">(1, 300)</span>
+</pre></div>
+</div>
+</dd></dl>
+
 <dl class="class">
 <dt id="parsearguments.SmartHelpFormatter">
 <em class="property">class </em><code class="descclassname">parsearguments.</code><code class="descname">SmartHelpFormatter</code><span class="sig-paren">(</span><em>prog</em>, <em>indent_increment=2</em>, <em>max_help_position=24</em>, <em>width=None</em><span class="sig-paren">)</span><a class="headerlink" href="#parsearguments.SmartHelpFormatter" title="Permalink to this definition">¶</a></dt>
@@ -2052,6 +2209,12 @@ Otherwise returns list of files.</p>
 <p>Raw text for help beginning with <code class="docutils literal"><span class="pre">R|</span></code>, <em>ArgumentDefaultsHelpFormatter</em> otherwise.</p>
 <p>Based on <em>SmartFormatter</em> described at <a class="reference external" href="http://stackoverflow.com/questions/3853722/python-argparse-how-to-insert-newline-in-the-help-text">http://stackoverflow.com/questions/3853722/python-argparse-how-to-insert-newline-in-the-help-text</a>.</p>
 <p>This option allows you to specify exact help format by preceding <code class="docutils literal"><span class="pre">R|</span></code>.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="parsearguments.SubassembleParser">
+<code class="descclassname">parsearguments.</code><code class="descname">SubassembleParser</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#parsearguments.SubassembleParser" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns <em>argparse.ArgumentParser</em> for <code class="docutils literal"><span class="pre">dms_subassemble</span></code>.</p>
 </dd></dl>
 
 <dl class="function">
@@ -2074,6 +2237,7 @@ The <code class="docutils literal"><span class="pre">pdf</span></code> backend i
 <p><cite>PlotPairedMutFracs</cite> : bar graph of mutation frequencies per sample</p>
 <p><cite>PlotMutCountFracs</cite> : plots fraction of mutations that occur &gt;= a given number of times.</p>
 <p><cite>PlotDepth</cite> : plots per-site depth along primary sequence</p>
+<p><cite>PlotReadStarts</cite> : plots start of read distributions for subassembly.</p>
 <p><cite>PlotSampleBargraphs</cite> : plots bargraphs of categories for several samples.</p>
 </div>
 <div class="section" id="id6">
@@ -2141,13 +2305,12 @@ including underscores) will cause problems if you do not
 escape the LaTex format meaning. For instance, &#8216;x_label&#8217;
 will cause a problem since underscore is not valid
 outside of math mode in LaTex, so you would need to use
-&#8216;x_label&#8217; to escape the underscore.
-CALLING VARIABLES:
-* <em>xs</em> and <em>ys</em> are lists of numbers, with the lists</p>
-<blockquote>
-<div>being of the same length. Entry <em>xs[i]</em> is plotted
-on the x-axis against entries <em>ys[i]</em> on the y-axis.</div></blockquote>
+&#8216;x_label&#8217; to escape the underscore.</p>
+<p>CALLING VARIABLES:</p>
 <ul class="simple">
+<li><em>xs</em> and <em>ys</em> are lists of numbers, with the lists
+being of the same length. Entry <em>xs[i]</em> is plotted
+on the x-axis against entries <em>ys[i]</em> on the y-axis.</li>
 <li><em>plotfile</em> is a string giving the name of the plot PDF file
 that we create. It should end in the extension <code class="docutils literal"><span class="pre">.pdf</span></code>.
 If this plot already exists, it is overwritten.</li>
@@ -2208,7 +2371,7 @@ set the size of the markers.</li>
 
 <dl class="function">
 <dt id="plot.PlotDepth">
-<code class="descclassname">plot.</code><code class="descname">PlotDepth</code><span class="sig-paren">(</span><em>codon_counts</em>, <em>names</em>, <em>plotfile</em>, <em>mutdepth=False</em>, <em>y_axis_label=None</em><span class="sig-paren">)</span><a class="headerlink" href="#plot.PlotDepth" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">plot.</code><code class="descname">PlotDepth</code><span class="sig-paren">(</span><em>codon_counts</em>, <em>names</em>, <em>plotfile</em>, <em>mutdepth=False</em>, <em>y_axis_label=None</em>, <em>separatemuttypes=False</em><span class="sig-paren">)</span><a class="headerlink" href="#plot.PlotDepth" title="Permalink to this definition">¶</a></dt>
 <dd><p>Plots per-site depth along primary sequence.</p>
 <p><cite>codon_counts</cite> : a list of dictionaries giving the codon counts for
 each sample as read by <cite>dms_tools.file_io.ReadDMSCounts</cite>.</p>
@@ -2220,11 +2383,14 @@ corresponding to each entry in <cite>codon_counts</cite>.</p>
 sequencing depth, we plot per-site mutation rate.</p>
 <p><cite>y_axis_label</cite> : a string, if specified, overrides the default y-axis
 label &#8216;reads&#8217; or &#8216;mutation frequency&#8217;.</p>
+<p><cite>separatemuttypes</cite> : Boolean switch specifying that we plot a different
+line for each of nonsynonymous, synonymous, and stop codon mutations.
+Only can be used if <em>mutdepth</em> is <em>True</em>.</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="plot.PlotMutCountFracs">
-<code class="descclassname">plot.</code><code class="descname">PlotMutCountFracs</code><span class="sig-paren">(</span><em>plotfile</em>, <em>title</em>, <em>names</em>, <em>all_cumulfracs</em>, <em>syn_cumulfracs</em>, <em>all_counts</em>, <em>syn_counts</em>, <em>legendloc</em>, <em>writecounts=True</em><span class="sig-paren">)</span><a class="headerlink" href="#plot.PlotMutCountFracs" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">plot.</code><code class="descname">PlotMutCountFracs</code><span class="sig-paren">(</span><em>plotfile</em>, <em>title</em>, <em>names</em>, <em>all_cumulfracs</em>, <em>syn_cumulfracs</em>, <em>all_counts</em>, <em>syn_counts</em>, <em>legendloc</em>, <em>writecounts=True</em>, <em>nmax=None</em><span class="sig-paren">)</span><a class="headerlink" href="#plot.PlotMutCountFracs" title="Permalink to this definition">¶</a></dt>
 <dd><p>Plots fraction of mutations with &gt;= a given number of counts.</p>
 <p>Does this for both all mutations and synonymous mutations. The plots
 are placed side by side.</p>
@@ -2269,11 +2435,12 @@ mutations (specified by <em>all_counts</em> and <em>syn_counts</em>) in the plot
 this if <em>writecounts</em> is <em>True</em>, and do not if it is <em>False</em>.</p>
 </li>
 </ul>
+<p><em>nmax</em> if specified, should be an integer &gt; 1 giving the x-axis maximum.</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="plot.PlotPairedMutFracs">
-<code class="descclassname">plot.</code><code class="descname">PlotPairedMutFracs</code><span class="sig-paren">(</span><em>codon_counts</em>, <em>names</em>, <em>plotfile</em><span class="sig-paren">)</span><a class="headerlink" href="#plot.PlotPairedMutFracs" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">plot.</code><code class="descname">PlotPairedMutFracs</code><span class="sig-paren">(</span><em>codon_counts</em>, <em>names</em>, <em>plotfile</em>, <em>ylabel='fraction'</em><span class="sig-paren">)</span><a class="headerlink" href="#plot.PlotPairedMutFracs" title="Permalink to this definition">¶</a></dt>
 <dd><p>Makes paired bar graph of mutation fractions per codon.</p>
 <p>For each sample, calculates the fraction of codon counts
 that represent synonymous / nonsynoymous /
@@ -2286,11 +2453,23 @@ each sample as read by <cite>dms_tools.file_io.ReadDMSCounts</cite>.</p>
 corresponding to each entry in <cite>codon_counts</cite>.</p>
 <p><cite>plotfile</cite> : name of the output plot file created by this method
 (such as &#8216;plot.pdf&#8217;). The extension must be <code class="docutils literal"><span class="pre">.pdf</span></code>.</p>
+<p><cite>ylabel</cite> : the text placed on the ylabel.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="plot.PlotReadStarts">
+<code class="descclassname">plot.</code><code class="descname">PlotReadStarts</code><span class="sig-paren">(</span><em>names</em>, <em>depthbystart</em>, <em>plotfile</em><span class="sig-paren">)</span><a class="headerlink" href="#plot.PlotReadStarts" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plots distribution of read starts.</p>
+<p><em>names</em> : list of sample names.</p>
+<p><em>depthbystart</em> : dictionary keyed by each name in <em>names</em>. V
+Value is dictionary keyed by read start position, value is
+number of reads. All names must have same start positions.</p>
+<p><em>plotfile</em> : name of created PDF plot.</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="plot.PlotSampleBargraphs">
-<code class="descclassname">plot.</code><code class="descname">PlotSampleBargraphs</code><span class="sig-paren">(</span><em>names</em>, <em>categories</em>, <em>data</em>, <em>plotfile</em>, <em>ylabel</em>, <em>groupbyfirstword=True</em><span class="sig-paren">)</span><a class="headerlink" href="#plot.PlotSampleBargraphs" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">plot.</code><code class="descname">PlotSampleBargraphs</code><span class="sig-paren">(</span><em>names</em>, <em>categories</em>, <em>data</em>, <em>plotfile</em>, <em>ylabel</em>, <em>groupbyfirstword=True</em>, <em>ncolumns=3</em><span class="sig-paren">)</span><a class="headerlink" href="#plot.PlotSampleBargraphs" title="Permalink to this definition">¶</a></dt>
 <dd><p>Plots bargraph of counts for different samples.</p>
 <p><em>names</em> is a list of the names of the different samples.</p>
 <p><em>categories</em> is a list of the different categories for each sample.</p>
@@ -2301,6 +2480,7 @@ is in turn a dictionary keyed by each category in <em>categories</em>.</p>
 <p><em>groupbyfirstword</em> is a Boolean switch that specifies whether we group 
 consecutive categories with the same first word in the string to have
 the same color.</p>
+<p><em>ncolumns</em> is the number of columns in each legend line.</p>
 </dd></dl>
 
 </div>
@@ -2509,18 +2689,17 @@ either &#8216;kd&#8217; or &#8216;mw&#8217; is used as <em>map_metric</em>.</p>
 the default. The default is multiplied by this number, so make it &gt; 1
 for a higher letter stack.</p>
 </li>
-<li><p class="first"><em>map_metric</em> specifies the amino-acid property metric used to map colors to amino-acid</p>
-</li>
-</ul>
-<p>letters. Valid options are &#8216;kd&#8217; (Kyte-Doolittle hydrophobicity scale, default), &#8216;mw&#8217; 
+<li><p class="first"><em>map_metric</em> specifies the amino-acid property metric used to map colors to amino-acid
+letters. Valid options are &#8216;kd&#8217; (Kyte-Doolittle hydrophobicity scale, default), &#8216;mw&#8217; 
 (molecular weight), &#8216;functionalgroup&#8217; (functional groups: small, nucleophilic, hydrophobic,
 aromatic, basic, acidic, and amide), and &#8216;charge&#8217; (charge at neutral pH). If &#8216;charge&#8217; is used, then the
 argument for <em>custom_cmap</em> will no longer be meaningful, since &#8216;charge&#8217; uses its own 
 blue/black/red colormapping. Similarly, &#8216;functionalgroup&#8217; uses its own colormapping.</p>
-<ul class="simple">
-<li><em>noseparator</em> is only meaningful if <em>datatype</em> is &#8216;diffsel&#8217; or &#8216;diffprefs&#8217;.
+</li>
+<li><p class="first"><em>noseparator</em> is only meaningful if <em>datatype</em> is &#8216;diffsel&#8217; or &#8216;diffprefs&#8217;.
 If it set to <em>True</em>, then we do <strong>not</strong> print a black horizontal line to
-separate positive and negative values.</li>
+separate positive and negative values.</p>
+</li>
 </ul>
 </dd></dl>
 
@@ -2736,8 +2915,8 @@ from Dirichlet with this concentration parameter.</p>
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="search.html" method="get">
-      <div><input type="text" name="q" /></div>
-      <div><input type="submit" value="Go" /></div>
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
     </form>
@@ -2762,12 +2941,12 @@ from Dirichlet with this concentration parameter.</p>
         <li class="right" >
           <a href="inferdiffprefs_algorithm.html" title="Algorithm to infer differential preferences"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">dms_tools 1.1.20 documentation</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">dms_tools 1.2.0 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
-        &#169; Copyright 2014, Jesse Bloom.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.6.
+        &copy; Copyright 2014, Jesse Bloom.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.
     </div>
   </body>
 </html>

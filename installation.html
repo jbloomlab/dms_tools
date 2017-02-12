@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Installation &#8212; dms_tools 1.1.20 documentation</title>
+    <title>Installation &mdash; dms_tools 1.2.0 documentation</title>
     
     <link rel="stylesheet" href="_static/classic.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '1.1.20',
+        VERSION:     '1.2.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="dms_tools 1.1.20 documentation" href="index.html" />
+    <link rel="top" title="dms_tools 1.2.0 documentation" href="index.html" />
     <link rel="next" title="Programs" href="programs.html" />
     <link rel="prev" title="Documentation for dms_tools" href="index.html" /> 
   </head>
@@ -44,7 +44,7 @@
         <li class="right" >
           <a href="index.html" title="Documentation for dms_tools"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">dms_tools 1.1.20 documentation</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">dms_tools 1.2.0 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -62,20 +62,17 @@
 <li><a class="reference internal" href="#installation" id="id3">Installation</a><ul>
 <li><a class="reference internal" href="#quick-installation" id="id4">Quick installation</a></li>
 <li><a class="reference internal" href="#dms-tools-requires-python" id="id5"><code class="docutils literal"><span class="pre">dms_tools</span></code> requires <code class="docutils literal"><span class="pre">Python</span></code></a></li>
-<li><a class="reference internal" href="#installing-locally-versus-globally" id="id6">Installing locally versus globally</a><ul>
-<li><a class="reference internal" href="#install-globally" id="id7">Install globally</a></li>
-<li><a class="reference internal" href="#install-locally" id="id8">Install locally</a></li>
+<li><a class="reference internal" href="#where-to-install" id="id6">Where to install</a></li>
+<li><a class="reference internal" href="#installing-with-pip-and-user" id="id7">Installing with <code class="docutils literal"><span class="pre">pip</span></code> and <code class="docutils literal"><span class="pre">--user</span></code></a><ul>
+<li><a class="reference internal" href="#first-make-sure-pip-is-installed" id="id8">First, make sure <code class="docutils literal"><span class="pre">pip</span></code> is installed</a></li>
+<li><a class="reference internal" href="#next-use-pip-to-install-dms-tools" id="id9">Next, use <code class="docutils literal"><span class="pre">pip</span></code> to install <code class="docutils literal"><span class="pre">dms_tools</span></code></a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#recommended-installing-dms-tools-with-pip" id="id9">Recommended: installing <code class="docutils literal"><span class="pre">dms_tools</span></code> with <code class="docutils literal"><span class="pre">pip</span></code></a><ul>
-<li><a class="reference internal" href="#first-make-sure-pip-is-installed" id="id10">First, make sure <code class="docutils literal"><span class="pre">pip</span></code> is installed</a></li>
-<li><a class="reference internal" href="#next-use-pip-to-install-dms-tools" id="id11">Next, use <code class="docutils literal"><span class="pre">pip</span></code> to install <code class="docutils literal"><span class="pre">dms_tools</span></code></a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#upgrading-your-dms-tools-version-with-pip" id="id12">Upgrading your <code class="docutils literal"><span class="pre">dms_tools</span></code> version with <code class="docutils literal"><span class="pre">pip</span></code></a></li>
-<li><a class="reference internal" href="#install-dms-tools-from-source-code" id="id13">Install <code class="docutils literal"><span class="pre">dms_tools</span></code> from source code</a></li>
-<li><a class="reference internal" href="#other-software-required-by-dms-tools" id="id14">Other software required by <code class="docutils literal"><span class="pre">dms_tools</span></code></a></li>
-<li><a class="reference internal" href="#license" id="id15">License</a></li>
+<li><a class="reference internal" href="#using-a-virtual-environment" id="id10">Using a virtual environment</a></li>
+<li><a class="reference internal" href="#upgrading-your-dms-tools-version-with-pip" id="id11">Upgrading your <code class="docutils literal"><span class="pre">dms_tools</span></code> version with <code class="docutils literal"><span class="pre">pip</span></code></a></li>
+<li><a class="reference internal" href="#install-dms-tools-from-source-code" id="id12">Install <code class="docutils literal"><span class="pre">dms_tools</span></code> from source code</a></li>
+<li><a class="reference internal" href="#other-required-software" id="id13">Other required software</a></li>
+<li><a class="reference internal" href="#license" id="id14">License</a></li>
 </ul>
 </li>
 </ul>
@@ -86,27 +83,17 @@
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="n">dms_tools</span> <span class="o">--</span><span class="n">user</span>
 </pre></div>
 </div>
-<p>or:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">pip</span> <span class="n">install</span> <span class="n">dms_tools</span>
-</pre></div>
-</div>
-<p>depending on whether you are <a class="reference internal" href="#installing-locally-versus-globally">Installing locally versus globally</a>.</p>
 <p>If this command fails, then read the instructions below.</p>
 </div>
 <div class="section" id="dms-tools-requires-python">
 <h2><a class="toc-backref" href="#id5"><code class="docutils literal"><span class="pre">dms_tools</span></code> requires <code class="docutils literal"><span class="pre">Python</span></code></a><a class="headerlink" href="#dms-tools-requires-python" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://jbloomlab.github.io/dms_tools">dms_tools</a> is written in <a class="reference external" href="https://www.python.org">Python</a>, and is known to be compatabile with <a class="reference external" href="https://www.python.org">Python</a> version 2.7 (compatibility with other <a class="reference external" href="https://www.python.org">Python</a> versions has not been checked). So before installing <a class="reference external" href="http://jbloomlab.github.io/dms_tools">dms_tools</a>, making sure you have <a class="reference external" href="https://www.python.org">Python</a> version 2.7 installed.</p>
+<p><a class="reference external" href="http://jbloomlab.github.io/dms_tools">dms_tools</a> is written in <a class="reference external" href="https://www.python.org">Python</a>, and is compatible with <a class="reference external" href="https://www.python.org">Python</a> version 2.7. So before installing <a class="reference external" href="http://jbloomlab.github.io/dms_tools">dms_tools</a>, making sure you have <a class="reference external" href="https://www.python.org">Python</a> version 2.7 installed.</p>
 </div>
-<div class="section" id="installing-locally-versus-globally">
-<h2><a class="toc-backref" href="#id6">Installing locally versus globally</a><a class="headerlink" href="#installing-locally-versus-globally" title="Permalink to this headline">¶</a></h2>
-<p>You need to figure out whether you want to install <a class="reference external" href="http://jbloomlab.github.io/dms_tools">dms_tools</a> globally or locally. The instructions in the subsequent sections will show the options for both local and global installations &#8211; use whichever is correct for your situation.</p>
-<div class="section" id="install-globally">
-<h3><a class="toc-backref" href="#id7">Install globally</a><a class="headerlink" href="#install-globally" title="Permalink to this headline">¶</a></h3>
-<p>If you are the administrator (super-user) for your computer, then you can install programs globally. In that case, you will typically need to run the install commands prefaced with <code class="docutils literal"><span class="pre">sudo</span></code>, and will be asked for your password. If you are able to install globally, then all users will be able to use <a class="reference external" href="http://jbloomlab.github.io/dms_tools">dms_tools</a>.</p>
-</div>
-<div class="section" id="install-locally">
-<h3><a class="toc-backref" href="#id8">Install locally</a><a class="headerlink" href="#install-locally" title="Permalink to this headline">¶</a></h3>
-<p>If you are using a shared computing cluster, then you are probably not the administrator for the cluster. In that case, you will need to install <a class="reference external" href="http://jbloomlab.github.io/dms_tools">dms_tools</a> locally so that it can be used by you even though it will not be available to other users. The <a class="reference external" href="https://www.python.org/dev/peps/pep-0370/">Python convention for local installation</a> on Linux (and Mac OS X) is to place installations in the directory <code class="docutils literal"><span class="pre">~/.local/</span></code>, typically by adding the option <code class="docutils literal"><span class="pre">--user</span></code> to installation commands.</p>
+<div class="section" id="where-to-install">
+<h2><a class="toc-backref" href="#id6">Where to install</a><a class="headerlink" href="#where-to-install" title="Permalink to this headline">¶</a></h2>
+<p>You need to figure out where you want to install <a class="reference external" href="http://jbloomlab.github.io/dms_tools">dms_tools</a>.
+Global installation using <code class="docutils literal"><span class="pre">sudo</span></code> <a class="reference external" href="http://stackoverflow.com/questions/21055859/what-are-the-risks-of-running-sudo-pip/21056000#21056000">is not recommended for Python packages in general</a>.</p>
+<p>The simplest solution is to install locally via the <code class="docutils literal"><span class="pre">--user</span></code> option to <code class="docutils literal"><span class="pre">pip</span></code>, which by default on Linux will install into the <code class="docutils literal"><span class="pre">~/.local/</span></code> directory.</p>
 <p>In order for locally installed programs to be accessible, you need to add <code class="docutils literal"><span class="pre">~/.local/bin/</span></code> to the <code class="docutils literal"><span class="pre">PATH</span></code> variable, and <code class="docutils literal"><span class="pre">~/.local/lib/</span></code> to the <code class="docutils literal"><span class="pre">PYTHONPATH</span></code> variable. If you are using the <a class="reference external" href="http://www.gnu.org/software/bash/">bash shell</a>, you would do this by adding the following lines to your <code class="docutils literal"><span class="pre">~/.bashrc</span></code> file:</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span>PATH=$HOME/.local/bin/:$PATH
 export PYTHONPATH=$HOME/.local/lib/python2.7:$PATH
@@ -118,73 +105,60 @@ export PYTHONPATH=$HOME/.local/lib/python2.7:$PATH
 <span class="n">fi</span>
 </pre></div>
 </div>
+<p>On Mac OS X, the default directory for <code class="docutils literal"><span class="pre">--user</span></code> may be <code class="docutils literal"><span class="pre">$HOME/Library/Python/x.y/</span></code> rather than <code class="docutils literal"><span class="pre">~/.local/</span></code> where <code class="docutils literal"><span class="pre">x.y</span></code> indicates the version number (e.g., <code class="docutils literal"><span class="pre">2.7</span></code>.</p>
 </div>
-</div>
-<div class="section" id="recommended-installing-dms-tools-with-pip">
-<h2><a class="toc-backref" href="#id9">Recommended: installing <code class="docutils literal"><span class="pre">dms_tools</span></code> with <code class="docutils literal"><span class="pre">pip</span></code></a><a class="headerlink" href="#recommended-installing-dms-tools-with-pip" title="Permalink to this headline">¶</a></h2>
-<p>The easiest way to install <a class="reference external" href="http://jbloomlab.github.io/dms_tools">dms_tools</a> is with <a class="reference external" href="https://pypi.python.org/pypi/pip">pip</a>, which will automatically take care of installing the <a class="reference internal" href="#other-software-required-by-dms-tools">Other software required by dms_tools</a>.</p>
+<div class="section" id="installing-with-pip-and-user">
+<h2><a class="toc-backref" href="#id7">Installing with <code class="docutils literal"><span class="pre">pip</span></code> and <code class="docutils literal"><span class="pre">--user</span></code></a><a class="headerlink" href="#installing-with-pip-and-user" title="Permalink to this headline">¶</a></h2>
+<p>Once you have taken care of the steps above, you can then simply install with <code class="docutils literal"><span class="pre">pip</span></code>.</p>
 <div class="section" id="first-make-sure-pip-is-installed">
-<h3><a class="toc-backref" href="#id10">First, make sure <code class="docutils literal"><span class="pre">pip</span></code> is installed</a><a class="headerlink" href="#first-make-sure-pip-is-installed" title="Permalink to this headline">¶</a></h3>
+<h3><a class="toc-backref" href="#id8">First, make sure <code class="docutils literal"><span class="pre">pip</span></code> is installed</a><a class="headerlink" href="#first-make-sure-pip-is-installed" title="Permalink to this headline">¶</a></h3>
 <p>First, check if you already have <a class="reference external" href="https://pypi.python.org/pypi/pip">pip</a> installed. You can do this by typing at the command line:</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="o">-</span><span class="n">h</span>
 </pre></div>
 </div>
 <p>If you get the help message for <a class="reference external" href="https://pypi.python.org/pypi/pip">pip</a>, then <a class="reference external" href="https://pypi.python.org/pypi/pip">pip</a> is already installed and you can move to the next step. If you instead get an error message such as <code class="docutils literal"><span class="pre">-bash:</span> <span class="pre">pip:</span> <span class="pre">command</span> <span class="pre">not</span> <span class="pre">found</span></code> then you need to install <a class="reference external" href="https://pypi.python.org/pypi/pip">pip</a>.</p>
-<p>If you have <code class="docutils literal"><span class="pre">easy_install</span></code> installed, then you can simply install <a class="reference external" href="https://pypi.python.org/pypi/pip">pip</a> either globally with:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">easy_install</span> <span class="n">pip</span>
-</pre></div>
-</div>
-<p>or locally with:</p>
+<p>If you have <code class="docutils literal"><span class="pre">easy_install</span></code> installed, then you can simply install <a class="reference external" href="https://pypi.python.org/pypi/pip">pip</a> with:</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">easy_install</span> <span class="n">pip</span> <span class="o">--</span><span class="n">user</span>
 </pre></div>
 </div>
-<p>If those commands also fail (i.e. you don&#8217;t have <code class="docutils literal"><span class="pre">easy_install</span></code> available either), then install <a class="reference external" href="https://pypi.python.org/pypi/pip">pip</a> by following the <a class="reference external" href="https://pip.pypa.io/en/latest/installing.html">instructions here</a>.</p>
+<p>If this fails (e.g., you don&#8217;t have <code class="docutils literal"><span class="pre">easy_install</span></code> available either), then install <a class="reference external" href="https://pypi.python.org/pypi/pip">pip</a> by following the <a class="reference external" href="https://pip.pypa.io/en/latest/installing.html">instructions here</a>.</p>
 </div>
 <div class="section" id="next-use-pip-to-install-dms-tools">
-<h3><a class="toc-backref" href="#id11">Next, use <code class="docutils literal"><span class="pre">pip</span></code> to install <code class="docutils literal"><span class="pre">dms_tools</span></code></a><a class="headerlink" href="#next-use-pip-to-install-dms-tools" title="Permalink to this headline">¶</a></h3>
+<h3><a class="toc-backref" href="#id9">Next, use <code class="docutils literal"><span class="pre">pip</span></code> to install <code class="docutils literal"><span class="pre">dms_tools</span></code></a><a class="headerlink" href="#next-use-pip-to-install-dms-tools" title="Permalink to this headline">¶</a></h3>
 <p>Once <a class="reference external" href="https://pypi.python.org/pypi/pip">pip</a> is installed, you can do a local installation with:</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="n">dms_tools</span> <span class="o">--</span><span class="n">user</span>
 </pre></div>
 </div>
-<p>or a global installation with:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">pip</span> <span class="n">install</span> <span class="n">dms_tools</span>
-</pre></div>
 </div>
 </div>
+<div class="section" id="using-a-virtual-environment">
+<h2><a class="toc-backref" href="#id10">Using a virtual environment</a><a class="headerlink" href="#using-a-virtual-environment" title="Permalink to this headline">¶</a></h2>
+<p>The other good option is to use <code class="docutils literal"><span class="pre">pip</span></code> to install into a virtual environment <a class="reference external" href="http://docs.python-guide.org/en/latest/dev/virtualenvs/">as described here</a></p>
 </div>
 <div class="section" id="upgrading-your-dms-tools-version-with-pip">
-<h2><a class="toc-backref" href="#id12">Upgrading your <code class="docutils literal"><span class="pre">dms_tools</span></code> version with <code class="docutils literal"><span class="pre">pip</span></code></a><a class="headerlink" href="#upgrading-your-dms-tools-version-with-pip" title="Permalink to this headline">¶</a></h2>
+<h2><a class="toc-backref" href="#id11">Upgrading your <code class="docutils literal"><span class="pre">dms_tools</span></code> version with <code class="docutils literal"><span class="pre">pip</span></code></a><a class="headerlink" href="#upgrading-your-dms-tools-version-with-pip" title="Permalink to this headline">¶</a></h2>
 <p>If you have previously installed <a class="reference external" href="http://jbloomlab.github.io/dms_tools">dms_tools</a> but are not sure that you have the latest version, you can upgrade using <a class="reference external" href="https://pypi.python.org/pypi/pip">pip</a>. To do this for a local installation, use:</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="n">dms_tools</span> <span class="o">--</span><span class="n">user</span> <span class="o">--</span><span class="n">upgrade</span>
 </pre></div>
 </div>
-<p>or globally:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">pip</span> <span class="n">install</span> <span class="n">dms_tools</span> <span class="o">--</span><span class="n">upgrade</span>
-</pre></div>
-</div>
 </div>
 <div class="section" id="install-dms-tools-from-source-code">
-<h2><a class="toc-backref" href="#id13">Install <code class="docutils literal"><span class="pre">dms_tools</span></code> from source code</a><a class="headerlink" href="#install-dms-tools-from-source-code" title="Permalink to this headline">¶</a></h2>
-<p>You can also install from the <a class="reference external" href="https://github.com/jbloomlab/dms_tools">dms_tools source code</a> on GitHub. If you do this, you will have to manually make sure that you have also installed the <a class="reference internal" href="#other-software-required-by-dms-tools">Other software required by dms_tools</a>.</p>
+<h2><a class="toc-backref" href="#id12">Install <code class="docutils literal"><span class="pre">dms_tools</span></code> from source code</a><a class="headerlink" href="#install-dms-tools-from-source-code" title="Permalink to this headline">¶</a></h2>
+<p>You can also install from the <a class="reference external" href="https://github.com/jbloomlab/dms_tools">dms_tools source code</a> on GitHub. If you do this, you may have to manually make sure that you have also installed the <a class="reference internal" href="#other-required-software">Other required software</a>.</p>
 <p>To install from source, first download the <a class="reference external" href="https://github.com/jbloomlab/dms_tools">dms_tools source code</a> from GitHub.
 After unpacking the main <code class="docutils literal"><span class="pre">dms_tools</span></code> directory that contains this source, install locally with:</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">cd</span> <span class="n">dms_tools</span>
 <span class="n">python</span> <span class="n">setup</span><span class="o">.</span><span class="n">py</span> <span class="n">install</span> <span class="o">--</span><span class="n">user</span>
 </pre></div>
 </div>
-<p>or globally with:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">cd</span> <span class="n">dms_tools</span>
-<span class="n">sudo</span> <span class="n">python</span> <span class="n">setup</span><span class="o">.</span><span class="n">py</span> <span class="n">install</span>
-</pre></div>
 </div>
-</div>
-<div class="section" id="other-software-required-by-dms-tools">
-<h2><a class="toc-backref" href="#id14">Other software required by <code class="docutils literal"><span class="pre">dms_tools</span></code></a><a class="headerlink" href="#other-software-required-by-dms-tools" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference internal" href="#dms-tools-requires-python">dms_tools requires Python</a>. In addition it requires the following external <a class="reference external" href="https://www.python.org">Python</a> packages. If you are installing with <a class="reference external" href="https://pypi.python.org/pypi/pip">pip</a>, these external packages will automatically be installed. If you are installing from source, you will need to install these packages yourself.</p>
+<div class="section" id="other-required-software">
+<h2><a class="toc-backref" href="#id13">Other required software</a><a class="headerlink" href="#other-required-software" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference internal" href="#dms-tools-requires-python">dms_tools requires Python</a>. In addition it requires the following external <a class="reference external" href="https://www.python.org">Python</a> packages. If you are installing with <a class="reference external" href="https://pypi.python.org/pypi/pip">pip</a>, these external packages will automatically be installed. If you are installing from source, you may need to install these packages yourself.</p>
 <p>The required packages are listed in the <code class="docutils literal"><span class="pre">setup.py</span></code> file.</p>
 </div>
 <div class="section" id="license">
-<span id="id2"></span><h2><a class="toc-backref" href="#id15">License</a><a class="headerlink" href="#license" title="Permalink to this headline">¶</a></h2>
+<span id="id2"></span><h2><a class="toc-backref" href="#id14">License</a><a class="headerlink" href="#license" title="Permalink to this headline">¶</a></h2>
 <p><a class="reference external" href="https://github.com/jbloomlab/dms_tools">dms_tools source code</a> is available on GitHub under an open-source <a class="reference external" href="http://www.gnu.org/copyleft/gpl.html">GPLv3</a> license. Part of the code utilized by <a class="reference external" href="http://jbloomlab.github.io/dms_tools">dms_tools</a> is based on <a class="reference external" href="https://code.google.com/p/weblogo/">weblogo</a>, which is licensed under the GPL-compatible BSD 3-clause license.</p>
 </div>
 </div>
@@ -200,19 +174,16 @@ After unpacking the main <code class="docutils literal"><span class="pre">dms_to
 <li><a class="reference internal" href="#">Installation</a><ul>
 <li><a class="reference internal" href="#quick-installation">Quick installation</a></li>
 <li><a class="reference internal" href="#dms-tools-requires-python"><code class="docutils literal"><span class="pre">dms_tools</span></code> requires <code class="docutils literal"><span class="pre">Python</span></code></a></li>
-<li><a class="reference internal" href="#installing-locally-versus-globally">Installing locally versus globally</a><ul>
-<li><a class="reference internal" href="#install-globally">Install globally</a></li>
-<li><a class="reference internal" href="#install-locally">Install locally</a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#recommended-installing-dms-tools-with-pip">Recommended: installing <code class="docutils literal"><span class="pre">dms_tools</span></code> with <code class="docutils literal"><span class="pre">pip</span></code></a><ul>
+<li><a class="reference internal" href="#where-to-install">Where to install</a></li>
+<li><a class="reference internal" href="#installing-with-pip-and-user">Installing with <code class="docutils literal"><span class="pre">pip</span></code> and <code class="docutils literal"><span class="pre">--user</span></code></a><ul>
 <li><a class="reference internal" href="#first-make-sure-pip-is-installed">First, make sure <code class="docutils literal"><span class="pre">pip</span></code> is installed</a></li>
 <li><a class="reference internal" href="#next-use-pip-to-install-dms-tools">Next, use <code class="docutils literal"><span class="pre">pip</span></code> to install <code class="docutils literal"><span class="pre">dms_tools</span></code></a></li>
 </ul>
 </li>
+<li><a class="reference internal" href="#using-a-virtual-environment">Using a virtual environment</a></li>
 <li><a class="reference internal" href="#upgrading-your-dms-tools-version-with-pip">Upgrading your <code class="docutils literal"><span class="pre">dms_tools</span></code> version with <code class="docutils literal"><span class="pre">pip</span></code></a></li>
 <li><a class="reference internal" href="#install-dms-tools-from-source-code">Install <code class="docutils literal"><span class="pre">dms_tools</span></code> from source code</a></li>
-<li><a class="reference internal" href="#other-software-required-by-dms-tools">Other software required by <code class="docutils literal"><span class="pre">dms_tools</span></code></a></li>
+<li><a class="reference internal" href="#other-required-software">Other required software</a></li>
 <li><a class="reference internal" href="#license">License</a></li>
 </ul>
 </li>
@@ -234,8 +205,8 @@ After unpacking the main <code class="docutils literal"><span class="pre">dms_to
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="search.html" method="get">
-      <div><input type="text" name="q" /></div>
-      <div><input type="submit" value="Go" /></div>
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
     </form>
@@ -260,12 +231,12 @@ After unpacking the main <code class="docutils literal"><span class="pre">dms_to
         <li class="right" >
           <a href="index.html" title="Documentation for dms_tools"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">dms_tools 1.1.20 documentation</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">dms_tools 1.2.0 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
-        &#169; Copyright 2014, Jesse Bloom.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.6.
+        &copy; Copyright 2014, Jesse Bloom.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.
     </div>
   </body>
 </html>

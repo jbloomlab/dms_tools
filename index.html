@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Documentation for dms_tools &#8212; dms_tools 1.1.20 documentation</title>
+    <title>Documentation for dms_tools &mdash; dms_tools 1.2.0 documentation</title>
     
     <link rel="stylesheet" href="_static/classic.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '1.1.20',
+        VERSION:     '1.2.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="dms_tools 1.1.20 documentation" href="#" />
+    <link rel="top" title="dms_tools 1.2.0 documentation" href="#" />
     <link rel="next" title="Installation" href="installation.html" /> 
   </head>
   <body role="document">
@@ -40,7 +40,7 @@
         <li class="right" >
           <a href="installation.html" title="Installation"
              accesskey="N">next</a> |</li>
-        <li class="nav-item nav-item-0"><a href="#">dms_tools 1.1.20 documentation</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="#">dms_tools 1.2.0 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -58,10 +58,11 @@
 <p><a class="reference external" href="http://jbloomlab.github.io/dms_tools">dms_tools</a> is suited for the following analyses:</p>
 <blockquote>
 <div><ol class="arabic simple">
-<li>You have measured the effects of all single codon (or amino-acid or nucleotide) mutations to a gene, and wish to quantify the <em>preference</em> of each site for each identity. You can do this using <a class="reference internal" href="dms_inferprefs.html#dms-inferprefs"><span class="std std-ref">dms_inferprefs</span></a>, and visualize the results using <a class="reference internal" href="dms_logoplot.html#dms-logoplot"><span class="std std-ref">dms_logoplot</span></a>.</li>
+<li>If you have sequenced a gene using barcoded subamplicon sequencing, you can process the FASTQ files to count the mutations using <a class="reference internal" href="dms_barcodedsubamplicons.html#dms-barcodedsubamplicons"><span class="std std-ref">dms_barcodedsubamplicons</span></a>. If you are using subassembly, you can process the FASTQ files using <a class="reference internal" href="dms_subassemble.html#dms-subassemble"><span class="std std-ref">dms_subassemble</span></a> and then count the frequencies of variants / mutations using <a class="reference internal" href="dms_matchsubassembledbarcodes.html#dms-matchsubassembledbarcodes"><span class="std std-ref">dms_matchsubassembledbarcodes</span></a>. In either case, you can summarize the results for multiple samples with <a class="reference internal" href="dms_summarizealignments.html#dms-summarizealignments"><span class="std std-ref">dms_summarizealignments</span></a>.</li>
 <li>You have subjected a library of mutant genes to selection under two conditions, and wish to identify mutations that are favored under one versus the other. You can do this using <a class="reference internal" href="dms_diffselection.html#dms-diffselection"><span class="std std-ref">dms_diffselection</span></a> or <a class="reference internal" href="dms_inferdiffprefs.html#dms-inferdiffprefs"><span class="std std-ref">dms_inferdiffprefs</span></a>, and visualize the results using <a class="reference internal" href="dms_logoplot.html#dms-logoplot"><span class="std std-ref">dms_logoplot</span></a>.</li>
+<li>You have measured the effects of all single codon (or amino-acid or nucleotide) mutations to a gene, and wish to quantify the <em>preference</em> of each site for each identity. You can do this using <a class="reference internal" href="dms_inferprefs.html#dms-inferprefs"><span class="std std-ref">dms_inferprefs</span></a>, and visualize the results using <a class="reference internal" href="dms_logoplot.html#dms-logoplot"><span class="std std-ref">dms_logoplot</span></a>.</li>
+<li>You have subjected a library of mutant genes to selection under two conditions, and wish to identify mutations that are favored under one versus the other. You can do this using <a class="reference internal" href="dms_inferdiffprefs.html#dms-inferdiffprefs"><span class="std std-ref">dms_inferdiffprefs</span></a>, and visualize the results using <a class="reference internal" href="dms_logoplot.html#dms-logoplot"><span class="std std-ref">dms_logoplot</span></a>.</li>
 <li>You have performed several <a class="reference external" href="http://www.nature.com/nmeth/journal/v11/n9/full/nmeth.3091.html">biological replicates</a> of deep mutational scanning, and wish to compare and combine the results. You can do this using <a class="reference internal" href="dms_correlate.html#dms-correlate"><span class="std std-ref">dms_correlate</span></a> and <a class="reference internal" href="dms_merge.html#dms-merge"><span class="std std-ref">dms_merge</span></a>.</li>
-<li>You have performed deep mutational scanning using barcoded subamplicons, and wish to process the FASTQ files to count mutations. You can do this using <a class="reference internal" href="dms_barcodedsubamplicons.html#dms-barcodedsubamplicons"><span class="std std-ref">dms_barcodedsubamplicons</span></a>, and summarize the results for multiple samples with <a class="reference internal" href="dms_summarizealignments.html#dms-summarizealignments"><span class="std std-ref">dms_summarizealignments</span></a>.</li>
 </ol>
 </div></blockquote>
 <p>The <a class="reference external" href="https://github.com/jbloomlab/dms_tools">dms_tools source code</a> is freely available on GitHub; however, you will probably have an easier time you just follow the <a class="reference internal" href="installation.html#installation"><span class="std std-ref">Installation</span></a> instructions rather than building from this source.</p>
@@ -119,8 +120,8 @@
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="search.html" method="get">
-      <div><input type="text" name="q" /></div>
-      <div><input type="submit" value="Go" /></div>
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
     </form>
@@ -142,12 +143,12 @@
         <li class="right" >
           <a href="installation.html" title="Installation"
              >next</a> |</li>
-        <li class="nav-item nav-item-0"><a href="#">dms_tools 1.1.20 documentation</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="#">dms_tools 1.2.0 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
-        &#169; Copyright 2014, Jesse Bloom.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.6.
+        &copy; Copyright 2014, Jesse Bloom.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.
     </div>
   </body>
 </html>
