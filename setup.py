@@ -53,7 +53,7 @@ setup(
         'matplotlib>=1.5',
         'pystan>=2.5',
         'cython>=0.21',
-        'weblogo==3.4',
+        'weblogo>=3.4, <3.6',
         'PyPDF2>=1.23',
         'pandas>=0.18',
         ],

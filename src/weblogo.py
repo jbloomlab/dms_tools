@@ -40,11 +40,10 @@ import matplotlib
 matplotlib.use('pdf')
 import pylab
 import PyPDF2
+import dms_tools
 import dms_tools.utils
-# the following are part of the weblogo 3.4 library
+# the following are part of the weblogo library
 import weblogolib # weblogo library
-if weblogolib.__version__ != '3.4':
-    raise ImportError("This module only works with weblogolib version 3.4. You have version %s" % weblogolib.__version__)
 import weblogolib.colorscheme # weblogo library
 import corebio.matrix # weblogo library
 import corebio.utils # weblogo library
@@ -286,7 +285,7 @@ def LogoPlot(sites, datatype, data, plotfile, nperline, numberevery=10, allowuns
     # check data, and get characters
     assert sites, "No sites specified"
     assert set(sites) == set(data.keys()), "Not a match between sites and the keys of data"
-    characters = data[sites[0]].keys()
+    characters = list(data[sites[0]].keys())
     if set(characters) == set(dms_tools.nts):
         alphabet_type = 'nt'
     elif set(characters) == set(dms_tools.aminoacids_nostop) or set(characters) == set(dms_tools.aminoacids_withstop):
@@ -433,14 +432,19 @@ def LogoPlot(sites, datatype, data, plotfile, nperline, numberevery=10, allowuns
         colormapping[separatorchar] = '#000000' # black
         color_scheme = weblogolib.colorscheme.ColorScheme()
         for x in chars_for_string:
-            color_scheme.groups.append(weblogolib.colorscheme.ColorGroup(x, colormapping[x], "'%s'" % x))
+            if hasattr(color_scheme, 'rules'):
+                color_scheme.rules.append(weblogolib.colorscheme.SymbolColor(x, colormapping[x], "'%s'" % x))
+            else:
+                # this part is needed for weblogo 3.4
+                color_scheme.groups.append(weblogolib.colorscheme.ColorGroup(x, colormapping[x], "'%s'" % x))
         logo_options.color_scheme = color_scheme
         logo_options.annotate = [{True:r, False:''}[0 == isite % numberevery] for (isite, r) in enumerate(sites)]
         logoformat = weblogolib.LogoFormat(logodata, logo_options)
         # _my_pdf_formatter is modified from weblogo version 3.4 source code
         # to allow custom ordering of the symbols.
         pdf = _my_pdf_formatter(logodata, logoformat, ordered_alphabets) 
-        open(plotfile, 'w').write(pdf)
+        with open(plotfile, 'wb') as f:
+            f.write(pdf)
         assert os.path.isfile(plotfile), "Failed to find expected plotfile %s" % plotfile
     finally:
         # close if still open
@@ -596,7 +600,12 @@ def _my_eps_formatter(logodata, format, ordered_alphabets) :
     substitutions["default_color"] = format_color(format.default_color)
 
     colors = []  
-    for group in format.color_scheme.groups :
+    if hasattr(format.color_scheme, 'rules'):
+        grouplist = format.color_scheme.rules
+    else:
+        # this line needed for weblogo 3.4
+        grouplist = format.color_scheme.groups
+    for group in grouplist:
         cf = format_color(group.color)
         for s in group.symbols :
             colors.append( "  ("+s+") " + cf )
@@ -932,12 +941,12 @@ def LogoOverlay(sites, overlayfile, overlay, nperline, sitewidth, rmargin, logoh
     # determine property types
     prop_types = {}
     for (prop_d, shortname, longname) in overlay:
-        if all([isinstance(prop, str) for prop in prop_d.itervalues()]):
+        if all([isinstance(prop, str) for prop in prop_d.values()]):
             proptype = 'discrete'
             propcategories = list(set(prop_d.values()))
             propcategories.sort()
             (vmin, vmax) = (0, len(propcategories) - 1)
-        elif all ([isinstance(prop, (int, float)) for prop in prop_d.itervalues()]):
+        elif all ([isinstance(prop, (int, float)) for prop in prop_d.values()]):
             proptype = 'continuous'
             propcategories = None
             (vmin, vmax) = (min(prop_d.values()), max(prop_d.values()))
