@@ -1,6 +1,10 @@
 Changelog
 ===========
 
+1.2.dev1
+---------
+* Make compatible with ``weblogo`` version 3.5.
+
 1.2.0
 -------------
 * Added ``dms_subassemble`` program
