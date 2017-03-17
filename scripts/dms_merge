@@ -83,11 +83,14 @@ def main():
                 assert all([set(diffsel.columns.values) == expectedcolumns for diffsel in diffsels]), "files did not have expected columns."
             except:
                 raise IOError("input files are not valid preferences, mutation-level differential selection, differential preferences, or counts files")
-            assert args['merge_method'] == 'average', "Must use merge_method of sum with differential selection"
+            assert ((args['merge_method'] == 'average') or (args['merge_method'] == 'median')), "Must use merge_method of average or median with differential selection"
             diffsel = reduce(lambda left,right: pandas.merge(left,right,on=['site', 'wt', 'mut']), diffsels)
             diffsel_columns = ['diffsel_{0}'.format(i) for i in range(len(diffsels))]
             diffsel.columns = ['site', 'wt', 'mut'] + diffsel_columns
-            diffsel['diffsel'] = diffsel[diffsel_columns].mean(axis=1, skipna=False)
+            if args['merge_method'] == 'average':
+                diffsel['diffsel'] = diffsel[diffsel_columns].mean(axis=1, skipna=False)
+            else:
+                diffsel['diffsel'] = diffsel[diffsel_columns].median(axis=1, skipna=False)
             diffsel = diffsel.sort_values('diffsel', ascending=False)
             diffsel = diffsel.drop(diffsel_columns, axis=1)
             print("\nAll files specified differential selection.")

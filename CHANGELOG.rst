@@ -3,6 +3,8 @@ Changelog
 
 1.2.dev1
 ---------
+* Added ``merge_method`` of ``median`` to ``dms_merge``.
+
 * Make compatible with ``weblogo`` version 3.5.
 
 1.2.0

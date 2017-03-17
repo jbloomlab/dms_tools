@@ -31,6 +31,8 @@ Command-line usage
    outfile
     For ``merge_method`` of "average", then this file will be of the same type as ``infiles`` (preferences, mutation-level differential selection values, or differential preferences). For merging differential selection, any values of *NaN* are ignored.
 
+    For ``merge_method`` of "median", then infiles and outfile must be of the format of the ``*mutdiffsel.txt`` files created by :ref:`dms_diffselection`.
+
     For ``merge_method`` of "sum", this file may be either preferences, differential preferences, or counts:
 
         * If any of the files in ``infiles`` and ``--minus`` give preferences and the sum at each site is one, then ``outfile`` gives preferences.
