@@ -267,14 +267,14 @@ def PlotCorrelation(xs, ys, plotfile, xlabel, ylabel, logx=False, logy=False,\
     elif fixaxes:
         yticker = matplotlib.ticker.FixedLocator([0, 0.5, 1])
     else:
-        yticker = matplotlib.ticker.MaxNLocator(4)
+        yticker = matplotlib.ticker.MaxNLocator(4, integer=True)
     pylab.gca().yaxis.set_major_locator(yticker)
     if logx:
         xticker = matplotlib.ticker.LogLocator(numticks=4)
     elif fixaxes:
         xticker = matplotlib.ticker.FixedLocator([0, 0.5, 1])
     else:
-        xticker = matplotlib.ticker.MaxNLocator(4)
+        xticker = matplotlib.ticker.MaxNLocator(4, integer=True)
         
     spineOffset = {'left': 3, 'bottom': 3}    
     [spine.set_position(('outward',spineOffset[loc])) if loc in ['left','bottom'] else spine.set_color('none') for loc, spine in ax.spines.items() ] 
@@ -289,7 +289,8 @@ def PlotCorrelation(xs, ys, plotfile, xlabel, ylabel, logx=False, logy=False,\
     pylab.close()
 
 
-def PlotDepth(codon_counts, names, plotfile, mutdepth=False, y_axis_label=None, separatemuttypes=False):
+def PlotDepth(codon_counts, names, plotfile, mutdepth=False, y_axis_label=None, 
+        separatemuttypes=False):
     """Plots per-site depth along primary sequence.
 
     `codon_counts` : a list of dictionaries giving the codon counts for
@@ -330,7 +331,7 @@ def PlotDepth(codon_counts, names, plotfile, mutdepth=False, y_axis_label=None, 
         nlegendcols = 4
         nlegendrows = int(math.ceil(len(names) / float(nlegendcols)))
     fig = pylab.figure(figsize=(5.5, 2.16 * (0.76 + 0.23 * nlegendrows)))
-    (lmargin, rmargin, bmargin, tmargin) = (0.1, 0.02, 0.16, 0.01 + 0.1 * nlegendrows)
+    (lmargin, rmargin, bmargin, tmargin) = (0.1, 0.02, 0.19, 0.01 + 0.11 * nlegendrows)
     ax = pylab.axes([lmargin, bmargin, 1 - lmargin - rmargin, 1 - bmargin - tmargin])
     lines = []
     all_ys = []
@@ -372,6 +373,8 @@ def PlotDepth(codon_counts, names, plotfile, mutdepth=False, y_axis_label=None, 
     # if the top y value is excessively large, set a small ymax to avoid distorting the y-axis
     if all_ys[-1] >= 2.5 * all_ys[-len(legendnames) - 1]:
         pylab.gca().set_ylim([0, 2.5 * all_ys[-len(legendnames) - 1]])
+    else:
+        pylab.gca().set_ylim([0, pylab.gca().get_ylim()[1]])
     yticker = matplotlib.ticker.MaxNLocator(4)
     pylab.gca().yaxis.set_major_locator(yticker)
     yformatter = pylab.ScalarFormatter(useMathText=True)

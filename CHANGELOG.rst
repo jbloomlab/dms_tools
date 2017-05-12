@@ -1,11 +1,13 @@
 Changelog
 ===========
 
-1.2.dev1
+1.2.1
 ---------
 * Added ``merge_method`` of ``median`` to ``dms_merge``.
 
 * Make compatible with ``weblogo`` version 3.5.
+
+* Cleaned up some plot formatting
 
 1.2.0
 -------------
