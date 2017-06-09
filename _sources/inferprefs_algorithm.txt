@@ -161,22 +161,22 @@ site :math:`r`:
 .. math::
    :label: pr_pir
 
-   \Pr\left(\boldsymbol{\mathbf{\pi_r}}\right) &=& \operatorname{Dirichlet}\left(\boldsymbol{\mathbf{\pi_r}}; \alpha_{\pi} \times \mathbf{1}\right)
+   \Pr\left(\boldsymbol{\mathbf{\pi_r}}\right) = \operatorname{Dirichlet}\left(\boldsymbol{\mathbf{\pi_r}}; \alpha_{\pi} \times \mathbf{1}\right)
 
 .. math::
    :label: pr_mur
 
-   \Pr\left(\boldsymbol{\mathbf{\mu_r}}\right) &=& \operatorname{Dirichlet}\left(\boldsymbol{\mathbf{\mu_r}}; \alpha_{\mu} \times \mathcal{N}_x \times \boldsymbol{\mathbf{a_{r,\mu}}}\right)
+   \Pr\left(\boldsymbol{\mathbf{\mu_r}}\right) = \operatorname{Dirichlet}\left(\boldsymbol{\mathbf{\mu_r}}; \alpha_{\mu} \times \mathcal{N}_x \times \boldsymbol{\mathbf{a_{r,\mu}}}\right)
 
 .. math::
    :label: pr_epsilonr
 
-   \Pr\left(\boldsymbol{\mathbf{\epsilon_r}}\right) &=& \operatorname{Dirichlet}\left(\boldsymbol{\mathbf{\epsilon_r}}; \alpha_{\epsilon} \times \mathcal{N}_x \times \boldsymbol{\mathbf{a_{r,\epsilon}}}\right) 
+   \Pr\left(\boldsymbol{\mathbf{\epsilon_r}}\right) = \operatorname{Dirichlet}\left(\boldsymbol{\mathbf{\epsilon_r}}; \alpha_{\epsilon} \times \mathcal{N}_x \times \boldsymbol{\mathbf{a_{r,\epsilon}}}\right) 
 
 .. math::
    :label: pr_rhor
 
-   \Pr\left(\boldsymbol{\mathbf{\rho_r}}\right) &=& \operatorname{Dirichlet}\left(\boldsymbol{\mathbf{\rho_r}}; \alpha_{\rho} \times \mathcal{N}_x \times \boldsymbol{\mathbf{a_{r,\rho}}}\right)
+   \Pr\left(\boldsymbol{\mathbf{\rho_r}}\right) = \operatorname{Dirichlet}\left(\boldsymbol{\mathbf{\rho_r}}; \alpha_{\rho} \times \mathcal{N}_x \times \boldsymbol{\mathbf{a_{r,\rho}}}\right)
 
 where :math:`\mathbf{1}` is a vector of ones, :math:`\mathcal{N}_x` is
 the number of characters (i.e. 64 for codons, 20 for amino acids, 4 for
@@ -194,12 +194,12 @@ Specifically, the average per-site error rate for mutations with :math:`m` nucle
 .. math::
    :label: avgepsilonm
 
-   \overline{\epsilon_m} &=& \frac{1}{L}\sum\limits_r \frac{1}{\mbox{$N_r^{\textrm{err,pre}}$}}\sum\limits_{x} \mbox{$n_{r,x}^{\textrm{err,pre}}$}\times \delta_{m,D_{x,\operatorname{wt}\left(r\right)}} 
+   \overline{\epsilon_m} = \frac{1}{L}\sum\limits_r \frac{1}{\mbox{$N_r^{\textrm{err,pre}}$}}\sum\limits_{x} \mbox{$n_{r,x}^{\textrm{err,pre}}$}\times \delta_{m,D_{x,\operatorname{wt}\left(r\right)}} 
 
 .. math::
    :label: avgrhom
 
-   \overline{\rho_m} &=& \frac{1}{L}\sum\limits_r \frac{1}{\mbox{$N_r^{\textrm{err,post}}$}}\sum\limits_{x} \mbox{$n_{r,x}^{\textrm{err,post}}$}\times \delta_{m,D_{x,\operatorname{wt}\left(r\right)}}
+   \overline{\rho_m} = \frac{1}{L}\sum\limits_r \frac{1}{\mbox{$N_r^{\textrm{err,post}}$}}\sum\limits_{x} \mbox{$n_{r,x}^{\textrm{err,post}}$}\times \delta_{m,D_{x,\operatorname{wt}\left(r\right)}}
 
 where :math:`L` is the number of sites with deep mutational scanning data, :math:`r` ranges over all of these sites, :math:`x` ranges over all characters (nucleotides or codons), and :math:`D_{x,\operatorname{wt}\left(r\right)}` is the number of nucleotide differences between :math:`x` and the wildtype character :math:`\operatorname{wt}\left(r\right)`. Note that :math:`1 = \sum\limits_m \overline{\epsilon_m} = \sum\limits_m \overline{\rho_m}`. 
 
@@ -208,12 +208,12 @@ Given these definitions, we define the prior vectors for the error rates as
 .. math::
    :label: arepsilon
 
-   \mbox{$\boldsymbol{\mathbf{a_{r,\epsilon}}}$}&=& \left(\cdots, \sum\limits_m \frac{\overline{\epsilon}_{m}}{\mathcal{C}_m} \times \delta_{m,D_{x,\operatorname{wt}\left(r\right)}},\cdots\right),
+   \mbox{$\boldsymbol{\mathbf{a_{r,\epsilon}}}$} = \left(\cdots, \sum\limits_m \frac{\overline{\epsilon}_{m}}{\mathcal{C}_m} \times \delta_{m,D_{x,\operatorname{wt}\left(r\right)}},\cdots\right),
 
 .. math::
    :label: arrho
 
-   \mbox{$\boldsymbol{\mathbf{a_{r,\rho}}}$}&=& \left(\cdots, \sum\limits_m \frac{\overline{\rho}_{m}}{\mathcal{C}_m} \times \delta_{m,D_{x,\operatorname{wt}\left(r\right)}}, \cdots\right)
+   \mbox{$\boldsymbol{\mathbf{a_{r,\rho}}}$} = \left(\cdots, \sum\limits_m \frac{\overline{\rho}_{m}}{\mathcal{C}_m} \times \delta_{m,D_{x,\operatorname{wt}\left(r\right)}}, \cdots\right)
 
 where :math:`\mathcal{C}_m` is the number of mutant characters with :math:`m` changes relative to the wildtype (so for nucleotides :math:`\mathcal{C}_0 = 1` and :math:`\mathcal{C}_1 = 3`, while for codons :math:`\mathcal{C}_0 = 1`, :math:`\mathcal{C}_1 = 9`, :math:`\mathcal{C}_2 = \mathcal{C}_3 = 27`) and :math:`\delta_{xy}` is again the `Kronecker delta`_.
 
@@ -229,7 +229,7 @@ Note that a value of :math:`\overline{\mu} \le 0` would suggest that mutations a
 .. math::
    :label: armu
 
-   \mbox{$\boldsymbol{\mathbf{a_{r,\mu}}}$}&=& \left(\cdots, \frac{\overline{\mu}}{\mathcal{N}_x - 1} + \delta_{x,\operatorname{wt}\left(r\right)} \times \left[1 - \overline{\mu}\right] ,\cdots\right).
+   \mbox{$\boldsymbol{\mathbf{a_{r,\mu}}}$} = \left(\cdots, \frac{\overline{\mu}}{\mathcal{N}_x - 1} + \delta_{x,\operatorname{wt}\left(r\right)} \times \left[1 - \overline{\mu}\right] ,\cdots\right).
 
 
 .. _chartype_DNA:

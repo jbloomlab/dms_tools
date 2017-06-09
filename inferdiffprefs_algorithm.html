@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Algorithm to infer differential preferences &mdash; dms_tools 1.2.0 documentation</title>
+    <title>Algorithm to infer differential preferences &mdash; dms_tools 1.2.1 documentation</title>
     
     <link rel="stylesheet" href="_static/classic.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '1.2.0',
+        VERSION:     '1.2.1',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="dms_tools 1.2.0 documentation" href="index.html" />
+    <link rel="top" title="dms_tools 1.2.1 documentation" href="index.html" />
     <link rel="up" title="Algorithms" href="algorithms.html" />
     <link rel="next" title="Python API" href="pythonapi.html" />
     <link rel="prev" title="Algorithm to infer site-specific preferences" href="inferprefs_algorithm.html" /> 
@@ -45,7 +45,7 @@
         <li class="right" >
           <a href="inferprefs_algorithm.html" title="Algorithm to infer site-specific preferences"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">dms_tools 1.2.0 documentation</a> &raquo;</li>
+        <li class="nav-item nav-item-0"><a href="index.html">dms_tools 1.2.1 documentation</a> &raquo;</li>
           <li class="nav-item nav-item-1"><a href="algorithms.html" accesskey="U">Algorithms</a> &raquo;</li> 
       </ul>
     </div>  
@@ -152,13 +152,13 @@ around the actual frequencies. So</p>
 <p>We specify <a class="reference external" href="http://en.wikipedia.org/wiki/Dirichlet_distribution">Dirichlet</a> priors over the four parameter vectors for each
 site <span class="math">\(r\)</span>:</p>
 <div class="math" id="equation-pr_pir">
-<span class="eqno">(11)</span>\[\Pr\left(\boldsymbol{\mathbf{\pi_r^{s1}}}\right) &amp;=&amp; \operatorname{Dirichlet}\left(\boldsymbol{\mathbf{\pi_r^{s1}}}; \alpha_{\pi^{s1}} \times \mathbf{1}\right)\]</div>
+<span class="eqno">(11)</span>\[\Pr\left(\boldsymbol{\mathbf{\pi_r^{s1}}}\right) = \operatorname{Dirichlet}\left(\boldsymbol{\mathbf{\pi_r^{s1}}}; \alpha_{\pi^{s1}} \times \mathbf{1}\right)\]</div>
 <div class="math" id="equation-pr_xir">
-<span class="eqno">(12)</span>\[\Pr\left(\boldsymbol{\mathbf{\xi_r}}\right) &amp;=&amp; \operatorname{Dirichlet}\left( \boldsymbol{\mathbf{\xi_r}}; \alpha_{\xi} \times \mathcal{N}_x \times \boldsymbol{\mathbf{a_{r,\xi}}}\right)\]</div>
+<span class="eqno">(12)</span>\[\Pr\left(\boldsymbol{\mathbf{\xi_r}}\right) = \operatorname{Dirichlet}\left( \boldsymbol{\mathbf{\xi_r}}; \alpha_{\xi} \times \mathcal{N}_x \times \boldsymbol{\mathbf{a_{r,\xi}}}\right)\]</div>
 <div class="math" id="equation-pr_frstart">
-<span class="eqno">(13)</span>\[\Pr\left(\boldsymbol{\mathbf{f_r^{\textbf{start}}}}\right) &amp;=&amp; \operatorname{Dirichlet}\left( \boldsymbol{\mathbf{f_r^{\textbf{start}}}}; \alpha_{\textrm{start}} \times \mathcal{N}_x \times \boldsymbol{\mathbf{a_{r,\textbf{start}}}}\right)\]</div>
+<span class="eqno">(13)</span>\[\Pr\left(\boldsymbol{\mathbf{f_r^{\textbf{start}}}}\right) = \operatorname{Dirichlet}\left( \boldsymbol{\mathbf{f_r^{\textbf{start}}}}; \alpha_{\textrm{start}} \times \mathcal{N}_x \times \boldsymbol{\mathbf{a_{r,\textbf{start}}}}\right)\]</div>
 <div class="math" id="equation-pr_deltapi">
-<span class="eqno">(14)</span>\[\Pr\left(\boldsymbol{\mathbf{\Delta\pi_r}} \mid \boldsymbol{\mathbf{\pi_r^{s1}}}\right) &amp;=&amp; \operatorname{Dirichlet}\left(\boldsymbol{\mathbf{\Delta\pi_r}}; \alpha_{\Delta\pi} \times \mathcal{N}_x \times \boldsymbol{\mathbf{\pi_r^{s1}}}\right) - \boldsymbol{\mathbf{\pi_r^{s1}}}\]</div>
+<span class="eqno">(14)</span>\[\Pr\left(\boldsymbol{\mathbf{\Delta\pi_r}} \mid \boldsymbol{\mathbf{\pi_r^{s1}}}\right) = \operatorname{Dirichlet}\left(\boldsymbol{\mathbf{\Delta\pi_r}}; \alpha_{\Delta\pi} \times \mathcal{N}_x \times \boldsymbol{\mathbf{\pi_r^{s1}}}\right) - \boldsymbol{\mathbf{\pi_r^{s1}}}\]</div>
 <p>where the <span class="math">\(\alpha\)</span> parameters
 are scalar concentration parameters with values
 <span class="math">\(&gt; 0\)</span> specified by the user, and the <span class="math">\(\mathbf{a_r}\)</span> vectors
@@ -167,18 +167,18 @@ have entries <span class="math">\(&gt; 0\)</span> that sum to one. You might con
 <p>Our prior assumption is that the rate of sequencing errors depends on the number of nucleotides being changed &#8211; for nucleotide characters all mutations have only one nucleotide changed, but for codon characters there can be one, two, or three nucleotides changed.
 Specifically, the average per-site error rate for mutations with <span class="math">\(m\)</span> nucleotide changes <span class="math">\(\overline{\xi_m}\)</span> is</p>
 <div class="math" id="equation-avgxim">
-<span class="eqno">(15)</span>\[\overline{\xi_m} &amp;=&amp; \frac{1}{L}\sum\limits_r \frac{1}{N_r^{\textrm{err}}}\sum\limits_{x} n_{r,x}^{\textrm{err}}\times \delta_{m,D_{x,\operatorname{wt}\left(r\right)}}\]</div>
+<span class="eqno">(15)</span>\[\overline{\xi_m} = \frac{1}{L}\sum\limits_r \frac{1}{N_r^{\textrm{err}}}\sum\limits_{x} n_{r,x}^{\textrm{err}}\times \delta_{m,D_{x,\operatorname{wt}\left(r\right)}}\]</div>
 <p>where <span class="math">\(r\)</span> ranges over all <span class="math">\(L\)</span> sites with deep mutational scanning data, <span class="math">\(x\)</span> ranges over all characters (nucleotides or codons), and <span class="math">\(D_{x,\operatorname{wt}\left(r\right)}\)</span> is the number of nucleotide differences between <span class="math">\(x\)</span> and the wildtype character <span class="math">\(\operatorname{wt}\left(r\right)\)</span>.
 We define the prior vector as</p>
 <div class="math" id="equation-arxi">
-<span class="eqno">(16)</span>\[\boldsymbol{\mathbf{a_{r,\xi}}}&amp;=&amp; \left(\cdots, \sum\limits_m \frac{\overline{\xi}_{m}}{\mathcal{C}_m} \times \delta_{m,D_{x,\operatorname{wt}\left(r\right)}},\cdots\right),\]</div>
+<span class="eqno">(16)</span>\[\boldsymbol{\mathbf{a_{r,\xi}}} = \left(\cdots, \sum\limits_m \frac{\overline{\xi}_{m}}{\mathcal{C}_m} \times \delta_{m,D_{x,\operatorname{wt}\left(r\right)}},\cdots\right),\]</div>
 <p>where <span class="math">\(\mathcal{C}_m\)</span> is the number of mutant characters with <span class="math">\(m\)</span> changes relative to the wildtype.</p>
 <p>Our prior assumption is that all mutations are at equal frequency in the starting library (although this assumption is unlikely to be true if the starting library has already been subjected to some functional selection, we lack a rationale for another prior in the absence of the deep mutational scanning). In estimating the average frequency of these mutations, we need to account for the fact that the observed counts of non-wildtype characters in the starting library will be inflated by the error rate represented by <span class="math">\(\overline{\xi_m}\)</span>. We therefore estimate the average mutation frequency</p>
 <div class="math" id="equation-avgfstart">
 <span class="eqno">(17)</span>\[\overline{f^{\textrm{start}}} = \left(\frac{1}{L}\sum\limits_r \frac{1}{N_r^{\textrm{start}}}\sum\limits_{x\ne \operatorname{wt}\left(r\right)} n_{r,x}^{\textrm{start}}\right) - \sum\limits_{m \ge 1} \overline{\xi_m}.\]</div>
 <p>Note that a value of <span class="math">\(\overline{f^{\textrm{start}}} \le 0\)</span> would suggest that mutations are no more prevalent in the starting library then the error control. Such a situation would violate the assumptions of the experiment, and so the algorithm will halt if this is the case. The prior vector for the mutagenesis rate is</p>
 <div class="math" id="equation-arstart">
-<span class="eqno">(18)</span>\[\boldsymbol{\mathbf{a_{r,\textbf{start}}}}&amp;=&amp; \left(\cdots, \frac{\overline{f^{\textrm{start}}}}{\mathcal{N}_x - 1} + \delta_{x,\operatorname{wt}\left(r\right)} \times \left[1 - \overline{f^{\textrm{start}}}\right] ,\cdots\right).\]</div>
+<span class="eqno">(18)</span>\[\boldsymbol{\mathbf{a_{r,\textbf{start}}}} = \left(\cdots, \frac{\overline{f^{\textrm{start}}}}{\mathcal{N}_x - 1} + \delta_{x,\operatorname{wt}\left(r\right)} \times \left[1 - \overline{f^{\textrm{start}}}\right] ,\cdots\right).\]</div>
 <p>These priors and likelihoods can be applied to several types of characters as described in <a class="reference internal" href="inferprefs_algorithm.html#inferprefs-algorithm"><span class="std std-ref">Algorithm to infer site-specific preferences</span></a>. One possibility is that <a class="reference internal" href="inferprefs_algorithm.html#chartype-dna"><span class="std std-ref">Characters are nucleotides; preferences are for nucleotides.</span></a> A second possibility is <a class="reference internal" href="inferprefs_algorithm.html#chartype-codon"><span class="std std-ref">Characters are codons; preferences are for codons.</span></a> A third possibility is <a class="reference internal" href="inferprefs_algorithm.html#chartype-codon-to-aa"><span class="std std-ref">Characters are codons; preferences are for amino acids.</span></a>. A fourth possibility is <a class="reference internal" href="inferprefs_algorithm.html#chartype-aa"><span class="std std-ref">Characters are amino acids; preferences are for amino acids.</span></a>.</p>
 <p>The actual preferences are inferred by using <a class="reference external" href="http://en.wikipedia.org/wiki/Markov_chain_Monte_Carlo">MCMC</a> to sample the product of the priors and likelihoods described above. This <cite>MCMC</cite> is done using the same computational approach and convergence criteria described in <a class="reference internal" href="inferprefs_algorithm.html#mcmc-inference"><span class="std std-ref">Inferring the preferences by MCMC.</span></a> But rather than reporting credible intervals, we report the posterior probability that <span class="math">\(\Delta\pi_{r,x} &gt; 0\)</span>; this gives us an estimate of the probability that <span class="math">\(x\)</span> is favored at <span class="math">\(r\)</span> in selection condition <span class="math">\(s2\)</span> versus <span class="math">\(s1\)</span>.</p>
 </div>
@@ -244,7 +244,7 @@ We define the prior vector as</p>
         <li class="right" >
           <a href="inferprefs_algorithm.html" title="Algorithm to infer site-specific preferences"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">dms_tools 1.2.0 documentation</a> &raquo;</li>
+        <li class="nav-item nav-item-0"><a href="index.html">dms_tools 1.2.1 documentation</a> &raquo;</li>
           <li class="nav-item nav-item-1"><a href="algorithms.html" >Algorithms</a> &raquo;</li> 
       </ul>
     </div>

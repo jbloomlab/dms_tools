@@ -135,22 +135,22 @@ site :math:`r`:
 .. math::
    :label: pr_pir
 
-   \Pr\left(\boldsymbol{\mathbf{\pi_r^{s1}}}\right) &=& \operatorname{Dirichlet}\left(\boldsymbol{\mathbf{\pi_r^{s1}}}; \alpha_{\pi^{s1}} \times \mathbf{1}\right)
+   \Pr\left(\boldsymbol{\mathbf{\pi_r^{s1}}}\right) = \operatorname{Dirichlet}\left(\boldsymbol{\mathbf{\pi_r^{s1}}}; \alpha_{\pi^{s1}} \times \mathbf{1}\right)
 
 .. math::
    :label: pr_xir
 
-   \Pr\left(\boldsymbol{\mathbf{\xi_r}}\right) &=& \operatorname{Dirichlet}\left( \boldsymbol{\mathbf{\xi_r}}; \alpha_{\xi} \times \mathcal{N}_x \times \boldsymbol{\mathbf{a_{r,\xi}}}\right)
+   \Pr\left(\boldsymbol{\mathbf{\xi_r}}\right) = \operatorname{Dirichlet}\left( \boldsymbol{\mathbf{\xi_r}}; \alpha_{\xi} \times \mathcal{N}_x \times \boldsymbol{\mathbf{a_{r,\xi}}}\right)
 
 .. math::
    :label: pr_frstart
 
-   \Pr\left(\boldsymbol{\mathbf{f_r^{\textbf{start}}}}\right) &=& \operatorname{Dirichlet}\left( \boldsymbol{\mathbf{f_r^{\textbf{start}}}}; \alpha_{\textrm{start}} \times \mathcal{N}_x \times \boldsymbol{\mathbf{a_{r,\textbf{start}}}}\right) 
+   \Pr\left(\boldsymbol{\mathbf{f_r^{\textbf{start}}}}\right) = \operatorname{Dirichlet}\left( \boldsymbol{\mathbf{f_r^{\textbf{start}}}}; \alpha_{\textrm{start}} \times \mathcal{N}_x \times \boldsymbol{\mathbf{a_{r,\textbf{start}}}}\right) 
 
 .. math::
    :label: pr_deltapi
 
-   \Pr\left(\boldsymbol{\mathbf{\Delta\pi_r}} \mid \boldsymbol{\mathbf{\pi_r^{s1}}}\right) &=& \operatorname{Dirichlet}\left(\boldsymbol{\mathbf{\Delta\pi_r}}; \alpha_{\Delta\pi} \times \mathcal{N}_x \times \boldsymbol{\mathbf{\pi_r^{s1}}}\right) - \boldsymbol{\mathbf{\pi_r^{s1}}}
+   \Pr\left(\boldsymbol{\mathbf{\Delta\pi_r}} \mid \boldsymbol{\mathbf{\pi_r^{s1}}}\right) = \operatorname{Dirichlet}\left(\boldsymbol{\mathbf{\Delta\pi_r}}; \alpha_{\Delta\pi} \times \mathcal{N}_x \times \boldsymbol{\mathbf{\pi_r^{s1}}}\right) - \boldsymbol{\mathbf{\pi_r^{s1}}}
 
 where the :math:`\alpha` parameters 
 are scalar concentration parameters with values
@@ -165,7 +165,7 @@ Specifically, the average per-site error rate for mutations with :math:`m` nucle
 .. math::
    :label: avgxim
 
-   \overline{\xi_m} &=& \frac{1}{L}\sum\limits_r \frac{1}{N_r^{\textrm{err}}}\sum\limits_{x} n_{r,x}^{\textrm{err}}\times \delta_{m,D_{x,\operatorname{wt}\left(r\right)}} 
+   \overline{\xi_m} = \frac{1}{L}\sum\limits_r \frac{1}{N_r^{\textrm{err}}}\sum\limits_{x} n_{r,x}^{\textrm{err}}\times \delta_{m,D_{x,\operatorname{wt}\left(r\right)}} 
 
 where :math:`r` ranges over all :math:`L` sites with deep mutational scanning data, :math:`x` ranges over all characters (nucleotides or codons), and :math:`D_{x,\operatorname{wt}\left(r\right)}` is the number of nucleotide differences between :math:`x` and the wildtype character :math:`\operatorname{wt}\left(r\right)`. 
 We define the prior vector as
@@ -173,7 +173,7 @@ We define the prior vector as
 .. math::
    :label: arxi
 
-   \boldsymbol{\mathbf{a_{r,\xi}}}&=& \left(\cdots, \sum\limits_m \frac{\overline{\xi}_{m}}{\mathcal{C}_m} \times \delta_{m,D_{x,\operatorname{wt}\left(r\right)}},\cdots\right),
+   \boldsymbol{\mathbf{a_{r,\xi}}} = \left(\cdots, \sum\limits_m \frac{\overline{\xi}_{m}}{\mathcal{C}_m} \times \delta_{m,D_{x,\operatorname{wt}\left(r\right)}},\cdots\right),
 
 where :math:`\mathcal{C}_m` is the number of mutant characters with :math:`m` changes relative to the wildtype.
 
@@ -189,7 +189,7 @@ Note that a value of :math:`\overline{f^{\textrm{start}}} \le 0` would suggest t
 .. math::
    :label: arstart
 
-   \boldsymbol{\mathbf{a_{r,\textbf{start}}}}&=& \left(\cdots, \frac{\overline{f^{\textrm{start}}}}{\mathcal{N}_x - 1} + \delta_{x,\operatorname{wt}\left(r\right)} \times \left[1 - \overline{f^{\textrm{start}}}\right] ,\cdots\right).
+   \boldsymbol{\mathbf{a_{r,\textbf{start}}}} = \left(\cdots, \frac{\overline{f^{\textrm{start}}}}{\mathcal{N}_x - 1} + \delta_{x,\operatorname{wt}\left(r\right)} \times \left[1 - \overline{f^{\textrm{start}}}\right] ,\cdots\right).
 
 These priors and likelihoods can be applied to several types of characters as described in :ref:`inferprefs_algorithm`. One possibility is that :ref:`chartype_DNA` A second possibility is :ref:`chartype_codon` A third possibility is :ref:`chartype_codon_to_aa`. A fourth possibility is :ref:`chartype_aa`.
 

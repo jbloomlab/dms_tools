@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>dms_merge &mdash; dms_tools 1.2.0 documentation</title>
+    <title>dms_merge &mdash; dms_tools 1.2.1 documentation</title>
     
     <link rel="stylesheet" href="_static/classic.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '1.2.0',
+        VERSION:     '1.2.1',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="dms_tools 1.2.0 documentation" href="index.html" />
+    <link rel="top" title="dms_tools 1.2.1 documentation" href="index.html" />
     <link rel="up" title="Programs" href="programs.html" />
     <link rel="next" title="dms_correlate" href="dms_correlate.html" />
     <link rel="prev" title="dms_logoplot" href="dms_logoplot.html" /> 
@@ -45,7 +45,7 @@
         <li class="right" >
           <a href="dms_logoplot.html" title="dms_logoplot"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">dms_tools 1.2.0 documentation</a> &raquo;</li>
+        <li class="nav-item nav-item-0"><a href="index.html">dms_tools 1.2.1 documentation</a> &raquo;</li>
           <li class="nav-item nav-item-1"><a href="programs.html" accesskey="U">Programs</a> &raquo;</li> 
       </ul>
     </div>  
@@ -83,12 +83,12 @@
 </div>
 <div class="section" id="command-line-usage">
 <h2><a class="toc-backref" href="#id4">Command-line usage</a><a class="headerlink" href="#command-line-usage" title="Permalink to this headline">¶</a></h2>
-<p>Merge preferences, differential selection, or differential preferences by averaging or adding / subtracting the values in multiple files. Alternatively, sum counts by adding the counts for the characters at each site across multiple files. All files must specify the same character type: can be nucleotide, codon, or amino acid (see &#8220;&#8211;excludestop&#8221; if using amino acids). This script is part of dms_tools (version 1.dev2) written by the Bloom Lab (see <a class="reference external" href="https://github.com/jbloomlab/dms_tools/graphs/contributors">https://github.com/jbloomlab/dms_tools/graphs/contributors</a> for all contributors). Detailed documentation is at <a class="reference external" href="http://jbloomlab.github.io/dms_tools/">http://jbloomlab.github.io/dms_tools/</a></p>
+<p>Merge preferences, differential selection, or differential preferences by averaging or adding / subtracting the values in multiple files. Alternatively, sum counts by adding the counts for the characters at each site across multiple files. All files must specify the same character type: can be nucleotide, codon, or amino acid (see &#8220;&#8211;excludestop&#8221; if using amino acids). This script is part of dms_tools (version 1.1.20) written by the Bloom Lab (see <a class="reference external" href="https://github.com/jbloomlab/dms_tools/graphs/contributors">https://github.com/jbloomlab/dms_tools/graphs/contributors</a> for all contributors). Detailed documentation is at <a class="reference external" href="http://jbloomlab.github.io/dms_tools/">http://jbloomlab.github.io/dms_tools/</a></p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">usage</span><span class="p">:</span> <span class="n">dms_merge</span> <span class="p">[</span><span class="o">-</span><span class="n">h</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">excludestop</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">minus</span> <span class="n">MINUS</span> <span class="p">[</span><span class="n">MINUS</span> <span class="o">...</span><span class="p">]]</span>
                  <span class="p">[</span><span class="o">--</span><span class="n">sitediffselfile</span> <span class="n">SITEDIFFSELFILE</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">v</span><span class="p">]</span>
                  <span class="p">[</span><span class="o">--</span><span class="n">stringencyparameter</span> <span class="n">STRINGENCYPARAMETER</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">normalize</span><span class="p">]</span>
                  <span class="p">[</span><span class="o">--</span><span class="n">chartype</span> <span class="p">{</span><span class="n">DNA</span><span class="p">,</span><span class="n">codon</span><span class="p">,</span><span class="n">aa</span><span class="p">}]</span>
-                 <span class="n">outfile</span> <span class="p">{</span><span class="n">average</span><span class="p">,</span><span class="nb">sum</span><span class="p">,</span><span class="n">rescale</span><span class="p">}</span> <span class="n">infiles</span> <span class="p">[</span><span class="n">infiles</span> <span class="o">...</span><span class="p">]</span>
+                 <span class="n">outfile</span> <span class="p">{</span><span class="n">average</span><span class="p">,</span><span class="n">median</span><span class="p">,</span><span class="nb">sum</span><span class="p">,</span><span class="n">rescale</span><span class="p">}</span> <span class="n">infiles</span> <span class="p">[</span><span class="n">infiles</span> <span class="o">...</span><span class="p">]</span>
 </pre></div>
 </div>
 <dl class="docutils">
@@ -101,6 +101,7 @@
 <kbd>outfile</kbd></td>
 <td><p class="first">Created output file with merged values; removed if it already exists. If the &#8220;infiles&#8221; do not all have the same wildtype residue at a site, then the wildtype is indicated as &#8221;?&#8221; in &#8220;outfile&#8221;.</p>
 <p>For <code class="docutils literal"><span class="pre">merge_method</span></code> of &#8220;average&#8221;, then this file will be of the same type as <code class="docutils literal"><span class="pre">infiles</span></code> (preferences, mutation-level differential selection values, or differential preferences). For merging differential selection, any values of <em>NaN</em> are ignored.</p>
+<p>For <code class="docutils literal"><span class="pre">merge_method</span></code> of &#8220;median&#8221;, then infiles and outfile must be of the format of the <code class="docutils literal"><span class="pre">*mutdiffsel.txt</span></code> files created by <a class="reference internal" href="dms_diffselection.html#dms-diffselection"><span class="std std-ref">dms_diffselection</span></a>.</p>
 <p>For <code class="docutils literal"><span class="pre">merge_method</span></code> of &#8220;sum&#8221;, this file may be either preferences, differential preferences, or counts:</p>
 <blockquote>
 <div><ul class="simple">
@@ -118,8 +119,8 @@
 </td></tr>
 <tr><td class="option-group">
 <kbd>merge_method</kbd></td>
-<td><p class="first">How to merge: If &#8220;average&#8221; then all &#8220;infiles&#8221; must specify preferences, differential selection on mutations (mutdiffsel.txt file), or differential preferences; these are then averaged in &#8220;outfile&#8221;. If &#8220;sum&#8221; then &#8220;infiles&#8221; can either all be count files, all be differential preferences, or can be a combination of preferences and differential preferences that (along with any additional files specified by &#8220;&#8211;minus&#8221;) sum to a total preference or a total differential preference of zero at each site. If &#8220;rescale&#8221;, then only one infile can be specified and it must be preferences; these preferences are then scaled by the value provided by &#8220;stringencyparameter&#8221;</p>
-<p class="last">Possible choices: average, sum, rescale</p>
+<td><p class="first">How to merge: If &#8220;average&#8221; then all &#8220;infiles&#8221; must specify preferences, differential selection on mutations (mutdiffsel.txt file), or differential preferences; these are then averaged (by taking the mean) in &#8220;outfile&#8221;. If &#8220;median&#8221;, then all &#8220;infiles&#8221; must specify differential selection on mutations (mutdiffsel.txt file); these are then averaged by taking the median. If &#8220;sum&#8221; then &#8220;infiles&#8221; can either all be count files, all be differential preferences, or can be a combination of preferences and differential preferences that (along with any additional files specified by &#8220;&#8211;minus&#8221;) sum to a total preference or a total differential preference of zero at each site. If &#8220;rescale&#8221;, then only one infile can be specified and it must be preferences; these preferences are then scaled by the value provided by &#8220;stringencyparameter&#8221;</p>
+<p class="last">Possible choices: average, median, sum, rescale</p>
 </td></tr>
 <tr><td class="option-group">
 <kbd>infiles</kbd></td>
@@ -304,7 +305,7 @@
         <li class="right" >
           <a href="dms_logoplot.html" title="dms_logoplot"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">dms_tools 1.2.0 documentation</a> &raquo;</li>
+        <li class="nav-item nav-item-0"><a href="index.html">dms_tools 1.2.1 documentation</a> &raquo;</li>
           <li class="nav-item nav-item-1"><a href="programs.html" >Programs</a> &raquo;</li> 
       </ul>
     </div>
