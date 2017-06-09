@@ -1,6 +1,10 @@
 Changelog
 ===========
 
+1.2.dev2
+---------
+* Minor fixes to math formatting problems in docs
+
 1.2.1
 ---------
 * Added ``merge_method`` of ``median`` to ``dms_merge``.
