@@ -1,7 +1,7 @@
 Changelog
 ===========
 
-1.2.dev2
+1.2.2
 ---------
 * Minor fixes to math formatting problems in docs
 
