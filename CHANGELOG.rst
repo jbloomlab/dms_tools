@@ -5,6 +5,8 @@ Changelog
 ---------
 * Minor fixes to math formatting problems in docs
 
+* Fixed bug caused by very high frequency mutations
+
 1.2.1
 ---------
 * Added ``merge_method`` of ``median`` to ``dms_merge``.

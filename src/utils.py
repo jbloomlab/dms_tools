@@ -1324,11 +1324,14 @@ def ClassifyCodonCounts(codon_counts):
     return codon_counts
 
 
-def CodonMutsCumulFracs(codon_counts):
+def CodonMutsCumulFracs(codon_counts, maxcumul=500):
     """Fraction of codon mutations found >= some number of times.
 
     *codon_counts* : a dictionary of the type returned by calling
     *dms_tools.file_io.ReadDMSCounts* with *chartype* of *codon*.
+
+    *maxcumul* : only compute cumulative fraction up to this many
+    occurrences of mutation.
 
     For all sites in *codon_counts*, this function iterates
     through all possible codon mutations and counts how many times
@@ -1364,7 +1367,7 @@ def CodonMutsCumulFracs(codon_counts):
         for codon in dms_tools.codons:
             if codon == wtcodon:
                 continue
-            n = codon_counts[r][codon]
+            n = min(maxcumul, codon_counts[r][codon])
             aa = dms_tools.codon_to_aa[codon]
             ndiffs = len([i for i in range(len(codon)) if codon[i] != wtcodon[i]])
             if n in all_cumulfracs:
