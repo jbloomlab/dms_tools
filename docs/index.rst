@@ -6,6 +6,11 @@
 Documentation for ``dms_tools``
 =====================================
 
+Use the newer software
+-----------------------
+This software package has been superseded by the new `dms_tools2 <https://jbloomlab.github.io/dms_tools2/>`_ package.
+If you are starting a new analysis, we recommend that you use `dms_tools2 <https://jbloomlab.github.io/dms_tools2/>`_ instead.
+
 Quick overview
 -----------------
 

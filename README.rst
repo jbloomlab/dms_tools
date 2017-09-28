@@ -1,3 +1,10 @@
+Use the newer software
+-----------------------
+This software package has been superseded by the new `dms_tools2 <https://jbloomlab.github.io/dms_tools2/>`_ package. 
+If you are starting a new analysis, we recommend that you use `dms_tools2 <https://jbloomlab.github.io/dms_tools2/>`_ instead.
+
+README for ``dms_tools``
+-------------------------
 ``dms_tools`` is a `Python`_ package that provides tools for analyzing and visualizing **d**\eep **m**\utational **s**\canning data.
 
 See the `dms_tools documentation`_ for information on how to install and use ``dms_tools``.
