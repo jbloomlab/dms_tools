@@ -1,35 +1,33 @@
+
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
-    <title>dms_summarizealignments &mdash; dms_tools 1.2.1 documentation</title>
-    
+    <title>dms_summarizealignments &#8212; dms_tools 1.2.2 documentation</title>
     <link rel="stylesheet" href="_static/classic.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '1.2.1',
+        VERSION:     '1.2.2',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
       };
     </script>
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="dms_tools 1.2.1 documentation" href="index.html" />
-    <link rel="up" title="Programs" href="programs.html" />
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Data file formats" href="fileformats.html" />
     <link rel="prev" title="dms_matchsubassembledbarcodes" href="dms_matchsubassembledbarcodes.html" /> 
   </head>
-  <body role="document">
+  <body>
     <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
@@ -45,8 +43,8 @@
         <li class="right" >
           <a href="dms_matchsubassembledbarcodes.html" title="dms_matchsubassembledbarcodes"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">dms_tools 1.2.1 documentation</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="programs.html" accesskey="U">Programs</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">dms_tools 1.2.2 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="programs.html" accesskey="U">Programs</a> &#187;</li> 
       </ul>
     </div>  
 
@@ -62,36 +60,40 @@
 <ul class="simple">
 <li><a class="reference internal" href="#dms-summarizealignments" id="id42"><code class="docutils literal"><span class="pre">dms_summarizealignments</span></code></a><ul>
 <li><a class="reference internal" href="#overview" id="id43">Overview</a></li>
-<li><a class="reference internal" href="#command-line-usage" id="id44">Command-line usage</a></li>
-<li><a class="reference internal" href="#example-usage" id="id45">Example usage</a></li>
-<li><a class="reference internal" href="#output-files" id="id46">Output files</a><ul>
-<li><a class="reference internal" href="#for-alignment-type-of-barcodedsubamplicons" id="id47">For <code class="docutils literal"><span class="pre">alignment_type</span></code> of <code class="docutils literal"><span class="pre">barcodedsubamplicons</span></code></a><ul>
-<li><a class="reference internal" href="#reads-pdf" id="id48"><code class="docutils literal"><span class="pre">reads.pdf</span></code></a></li>
-<li><a class="reference internal" href="#barcodes-pdf" id="id49"><code class="docutils literal"><span class="pre">barcodes.pdf</span></code></a></li>
-<li><a class="reference internal" href="#mutfreqs-pdf" id="id50"><code class="docutils literal"><span class="pre">mutfreqs.pdf</span></code></a></li>
-<li><a class="reference internal" href="#depth-pdf" id="id51"><code class="docutils literal"><span class="pre">depth.pdf</span></code></a></li>
-<li><a class="reference internal" href="#mutdepth-pdf" id="id52"><code class="docutils literal"><span class="pre">mutdepth.pdf</span></code></a></li>
-<li><a class="reference internal" href="#mutcounts-all-pdf" id="id53"><code class="docutils literal"><span class="pre">mutcounts_all.pdf</span></code></a></li>
-<li><a class="reference internal" href="#mutcounts-multi-nt-pdf" id="id54"><code class="docutils literal"><span class="pre">mutcounts_multi_nt.pdf</span></code></a></li>
-<li><a class="reference internal" href="#singlemuttypes-pdf" id="id55"><code class="docutils literal"><span class="pre">singlemuttypes.pdf</span></code></a></li>
+<li><a class="reference internal" href="#command-line-usage" id="id44">Command-line usage</a><ul>
+<li><a class="reference internal" href="#Positional Arguments" id="id45">Positional Arguments</a></li>
+<li><a class="reference internal" href="#Named Arguments" id="id46">Named Arguments</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#for-alignment-type-of-subassemble" id="id56">For <code class="docutils literal"><span class="pre">alignment_type</span></code> of <code class="docutils literal"><span class="pre">subassemble</span></code></a><ul>
-<li><a class="reference internal" href="#id2" id="id57"><code class="docutils literal"><span class="pre">reads.pdf</span></code></a></li>
-<li><a class="reference internal" href="#id3" id="id58"><code class="docutils literal"><span class="pre">depth.pdf</span></code></a></li>
-<li><a class="reference internal" href="#nsubassembled-pdf" id="id59"><code class="docutils literal"><span class="pre">nsubassembled.pdf</span></code></a></li>
+<li><a class="reference internal" href="#example-usage" id="id47">Example usage</a></li>
+<li><a class="reference internal" href="#output-files" id="id48">Output files</a><ul>
+<li><a class="reference internal" href="#for-alignment-type-of-barcodedsubamplicons" id="id49">For <code class="docutils literal"><span class="pre">alignment_type</span></code> of <code class="docutils literal"><span class="pre">barcodedsubamplicons</span></code></a><ul>
+<li><a class="reference internal" href="#reads-pdf" id="id50"><code class="docutils literal"><span class="pre">reads.pdf</span></code></a></li>
+<li><a class="reference internal" href="#barcodes-pdf" id="id51"><code class="docutils literal"><span class="pre">barcodes.pdf</span></code></a></li>
+<li><a class="reference internal" href="#mutfreqs-pdf" id="id52"><code class="docutils literal"><span class="pre">mutfreqs.pdf</span></code></a></li>
+<li><a class="reference internal" href="#depth-pdf" id="id53"><code class="docutils literal"><span class="pre">depth.pdf</span></code></a></li>
+<li><a class="reference internal" href="#mutdepth-pdf" id="id54"><code class="docutils literal"><span class="pre">mutdepth.pdf</span></code></a></li>
+<li><a class="reference internal" href="#mutcounts-all-pdf" id="id55"><code class="docutils literal"><span class="pre">mutcounts_all.pdf</span></code></a></li>
+<li><a class="reference internal" href="#mutcounts-multi-nt-pdf" id="id56"><code class="docutils literal"><span class="pre">mutcounts_multi_nt.pdf</span></code></a></li>
+<li><a class="reference internal" href="#singlemuttypes-pdf" id="id57"><code class="docutils literal"><span class="pre">singlemuttypes.pdf</span></code></a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#for-alignment-type-of-matchsubassembledbarcodes" id="id60">For <code class="docutils literal"><span class="pre">alignment_type</span></code> of <code class="docutils literal"><span class="pre">matchsubassembledbarcodes</span></code></a><ul>
-<li><a class="reference internal" href="#id4" id="id61"><code class="docutils literal"><span class="pre">reads.pdf</span></code></a></li>
-<li><a class="reference internal" href="#muts-per-matched-read-pdf" id="id62"><code class="docutils literal"><span class="pre">muts_per_matched_read.pdf</span></code></a></li>
-<li><a class="reference internal" href="#allmutfreqs-pdf" id="id63"><code class="docutils literal"><span class="pre">allmutfreqs.pdf</span></code></a></li>
-<li><a class="reference internal" href="#singlemutfreqs-pdf" id="id64"><code class="docutils literal"><span class="pre">singlemutfreqs.pdf</span></code></a></li>
-<li><a class="reference internal" href="#allmutdepth-pdf" id="id65"><code class="docutils literal"><span class="pre">allmutdepth.pdf</span></code></a></li>
-<li><a class="reference internal" href="#singlemutdepth-pdf" id="id66"><code class="docutils literal"><span class="pre">singlemutdepth.pdf</span></code></a></li>
-<li><a class="reference internal" href="#singlemutdepth-and-allmutdepth-plots-for-each-sample" id="id67"><code class="docutils literal"><span class="pre">singlemutdepth</span></code> and <code class="docutils literal"><span class="pre">allmutdepth</span></code> plots for <strong>each sample</strong></a></li>
-<li><a class="reference internal" href="#allcumulcounts-pdf" id="id68"><code class="docutils literal"><span class="pre">allcumulcounts.pdf</span></code></a></li>
-<li><a class="reference internal" href="#singlecumulcounts-pdf" id="id69"><code class="docutils literal"><span class="pre">singlecumulcounts.pdf</span></code></a></li>
+<li><a class="reference internal" href="#for-alignment-type-of-subassemble" id="id58">For <code class="docutils literal"><span class="pre">alignment_type</span></code> of <code class="docutils literal"><span class="pre">subassemble</span></code></a><ul>
+<li><a class="reference internal" href="#id2" id="id59"><code class="docutils literal"><span class="pre">reads.pdf</span></code></a></li>
+<li><a class="reference internal" href="#id3" id="id60"><code class="docutils literal"><span class="pre">depth.pdf</span></code></a></li>
+<li><a class="reference internal" href="#nsubassembled-pdf" id="id61"><code class="docutils literal"><span class="pre">nsubassembled.pdf</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#for-alignment-type-of-matchsubassembledbarcodes" id="id62">For <code class="docutils literal"><span class="pre">alignment_type</span></code> of <code class="docutils literal"><span class="pre">matchsubassembledbarcodes</span></code></a><ul>
+<li><a class="reference internal" href="#id4" id="id63"><code class="docutils literal"><span class="pre">reads.pdf</span></code></a></li>
+<li><a class="reference internal" href="#muts-per-matched-read-pdf" id="id64"><code class="docutils literal"><span class="pre">muts_per_matched_read.pdf</span></code></a></li>
+<li><a class="reference internal" href="#allmutfreqs-pdf" id="id65"><code class="docutils literal"><span class="pre">allmutfreqs.pdf</span></code></a></li>
+<li><a class="reference internal" href="#singlemutfreqs-pdf" id="id66"><code class="docutils literal"><span class="pre">singlemutfreqs.pdf</span></code></a></li>
+<li><a class="reference internal" href="#allmutdepth-pdf" id="id67"><code class="docutils literal"><span class="pre">allmutdepth.pdf</span></code></a></li>
+<li><a class="reference internal" href="#singlemutdepth-pdf" id="id68"><code class="docutils literal"><span class="pre">singlemutdepth.pdf</span></code></a></li>
+<li><a class="reference internal" href="#singlemutdepth-and-allmutdepth-plots-for-each-sample" id="id69"><code class="docutils literal"><span class="pre">singlemutdepth</span></code> and <code class="docutils literal"><span class="pre">allmutdepth</span></code> plots for <strong>each sample</strong></a></li>
+<li><a class="reference internal" href="#allcumulcounts-pdf" id="id70"><code class="docutils literal"><span class="pre">allcumulcounts.pdf</span></code></a></li>
+<li><a class="reference internal" href="#singlecumulcounts-pdf" id="id71"><code class="docutils literal"><span class="pre">singlecumulcounts.pdf</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -124,69 +126,74 @@
                                <span class="n">alignments</span> <span class="p">[</span><span class="n">alignments</span> <span class="o">...</span><span class="p">]</span>
 </pre></div>
 </div>
-<dl class="docutils">
-<dt>Positional arguments:</dt>
-<dd><table class="first last docutils option-list" frame="void" rules="none">
+<div class="section" id="Positional Arguments">
+<h3><a class="toc-backref" href="#id45">Positional Arguments</a><a class="headerlink" href="#Positional Arguments" title="Permalink to this headline">¶</a></h3>
+<table class="docutils option-list" frame="void" rules="none">
 <col class="option" />
 <col class="description" />
 <tbody valign="top">
 <tr><td class="option-group">
 <kbd>outprefix</kbd></td>
 <td><p class="first">Prefix for the output PDF plot files. Any existing files with these names are overwritten.</p>
-<p class="last">See <a class="reference internal" href="#output-files">Output files</a> for a detailed description of the created files and examples.</p>
+<p class="last">See Output files for a detailed description of the created files and examples.</p>
 </td></tr>
 <tr><td class="option-group">
 <kbd>alignment_type</kbd></td>
-<td><p class="first">The type of data being summarized. Use &#8216;barcodedsubamplicons&#8217; if output is from &#8216;dms_barcodedsubamplicons&#8217;, &#8216;subassemble&#8217; if output is from &#8216;dms_subassemble&#8217;, &#8216;matchsubassembledbarcodes&#8217; if output is from &#8216;dms_matchsubassembledbarcodes&#8217;.</p>
-<p class="last">Possible choices: barcodedsubamplicons, subassemble, matchsubassembledbarcodes</p>
+<td><p class="first">Possible choices: barcodedsubamplicons, subassemble, matchsubassembledbarcodes</p>
+<p class="last">The type of data being summarized. Use ‘barcodedsubamplicons’ if output is from ‘dms_barcodedsubamplicons’, ‘subassemble’ if output is from ‘dms_subassemble’, ‘matchsubassembledbarcodes’ if output is from ‘dms_matchsubassembledbarcodes’.</p>
 </td></tr>
 <tr><td class="option-group">
 <kbd>alignments</kbd></td>
-<td><p class="first">This argument is repeated to specify each alignment that is being summarized. Each repetition is two comma-delimited strings (no spaces): ALIGNPREFIX,NAME. ALIGNPREFIX is the value of &#8216;&#8211;outprefix&#8217; used when calling the alignment program and NAME is the name assigned to that sample in the summaries. We expect to find all of the alignment output files with ALIGNPREFIX; these are the input data.</p>
-<p class="last"><code class="docutils literal"><span class="pre">ALIGNPREFIX</span></code> should be the value of <code class="docutils literal"><span class="pre">--outprefix</span></code> used when running <a class="reference internal" href="dms_barcodedsubamplicons.html#dms-barcodedsubamplicons"><span class="std std-ref">dms_barcodedsubamplicons</span></a>, <a class="reference internal" href="dms_subassemble.html#dms-subassemble"><span class="std std-ref">dms_subassemble</span></a>, or <a class="reference internal" href="dms_matchsubassembledbarcodes.html#dms-matchsubassembledbarcodes"><span class="std std-ref">dms_matchsubassembledbarcodes</span></a> (depending on the value of <code class="docutils literal"><span class="pre">alignment_type</span></code>). This program expects to find the files that are created by running that program with <code class="docutils literal"><span class="pre">--outprefix</span></code> as <code class="docutils literal"><span class="pre">ALIGNPREFIX</span></code>. <code class="docutils literal"><span class="pre">NAME</span></code> is simply the name given to each sample in the <a class="reference internal" href="#output-files">Output files</a>.</p>
+<td><p class="first">This argument is repeated to specify each alignment that is being summarized. Each repetition is two comma-delimited strings (no spaces): ALIGNPREFIX,NAME. ALIGNPREFIX is the value of ‘–outprefix’ used when calling the alignment program and NAME is the name assigned to that sample in the summaries. We expect to find all of the alignment output files with ALIGNPREFIX; these are the input data.</p>
+<p class="last">ALIGNPREFIX should be the value of –outprefix used when running dms_barcodedsubamplicons, dms_subassemble, or dms_matchsubassembledbarcodes (depending on the value of alignment_type). This program expects to find the files that are created by running that program with –outprefix as ALIGNPREFIX. NAME is simply the name given to each sample in the Output files.</p>
 </td></tr>
 </tbody>
 </table>
-</dd>
-<dt>Options:</dt>
-<dd><table class="first last docutils option-list" frame="void" rules="none">
+</div>
+<div class="section" id="Named Arguments">
+<h3><a class="toc-backref" href="#id46">Named Arguments</a><a class="headerlink" href="#Named Arguments" title="Permalink to this headline">¶</a></h3>
+<table class="docutils option-list" frame="void" rules="none">
 <col class="option" />
 <col class="description" />
 <tbody valign="top">
-<tr><td class="option-group" colspan="2">
-<kbd><span class="option">--chartype=codon</span></kbd></td>
-</tr>
-<tr><td>&nbsp;</td><td><p class="first">Character type used for the alignments / mutation counting.</p>
-<p class="last">Possible choices: codon</p>
-</td></tr>
-<tr><td class="option-group" colspan="2">
-<kbd><span class="option">--maxmutcounts=20</span></kbd></td>
-</tr>
-<tr><td>&nbsp;</td><td>Maximum x-value for cumulative counts plots plots.</td></tr>
-<tr><td class="option-group" colspan="2">
-<kbd><span class="option">--maxperbarcode=3</span></kbd></td>
-</tr>
-<tr><td>&nbsp;</td><td>In &#8216;barcodes.pdf&#8217; plot, group all barcodes with &gt;= this many reads.</td></tr>
-<tr><td class="option-group" colspan="2">
-<kbd><span class="option">--writemutfreqs=False</span></kbd></td>
-</tr>
-<tr><td>&nbsp;</td><td>Write a file &#8216;mutfreqs.txt&#8217; that gives the numerical values plotted in &#8216;mutfreqs.pdf&#8217;?</td></tr>
-<tr><td class="option-group" colspan="2">
-<kbd><span class="option">--groupbyfirst=False</span></kbd></td>
-</tr>
-<tr><td>&nbsp;</td><td><p class="first">Make separate &#8216;mutdepth&#8217; and &#8216;cumulfracs&#8217; plots for each name prefix (first word before underscore).</p>
-<p class="last">This option currently only applies when <code class="docutils literal"><span class="pre">alignment_type</span></code> is <code class="docutils literal"><span class="pre">matchsubassembledbarcodes`.</span> <span class="pre">In</span> <span class="pre">this</span> <span class="pre">case,</span> <span class="pre">for</span> <span class="pre">the</span> <span class="pre">``allmutdepth.pdf</span></code>, <code class="docutils literal"><span class="pre">singlemutdepth.pdf</span></code>, <code class="docutils literal"><span class="pre">allcumulfracs.pdf</span></code>, and <code class="docutils literal"><span class="pre">singlecumulfracs.pdf</span></code> <a class="reference internal" href="#output-files">Output files</a>, a separate output file is made by grouping samples with the same first word (prefix) in the name, where the first word is separated from the others by an underscore (<code class="docutils literal"><span class="pre">_</span></code>). This first name is then added directly before the plot extension in the file name.</p>
+<tr><td class="option-group">
+<kbd>--chartype</kbd></td>
+<td><p class="first">Possible choices: codon</p>
+<p>Character type used for the alignments / mutation counting.</p>
+<p class="last">Default: “codon”</p>
 </td></tr>
 <tr><td class="option-group">
-<kbd><span class="option">-v</span>, <span class="option">--version</span></kbd></td>
-<td>show program&#8217;s version number and exit</td></tr>
+<kbd>--maxmutcounts</kbd></td>
+<td><p class="first">Maximum x-value for cumulative counts plots plots.</p>
+<p class="last">Default: 20</p>
+</td></tr>
+<tr><td class="option-group" colspan="2">
+<kbd>--maxperbarcode</kbd></td>
+</tr>
+<tr><td>&#160;</td><td><p class="first">In ‘barcodes.pdf’ plot, group all barcodes with &gt;= this many reads.</p>
+<p class="last">Default: 3</p>
+</td></tr>
+<tr><td class="option-group" colspan="2">
+<kbd>--writemutfreqs</kbd></td>
+</tr>
+<tr><td>&#160;</td><td><p class="first">Write a file ‘mutfreqs.txt’ that gives the numerical values plotted in ‘mutfreqs.pdf’?</p>
+<p class="last">Default: False</p>
+</td></tr>
+<tr><td class="option-group">
+<kbd>--groupbyfirst</kbd></td>
+<td><p class="first">Make separate ‘mutdepth’ and ‘cumulfracs’ plots for each name prefix (first word before underscore).</p>
+<p>Default: False</p>
+<p class="last">This option currently only applies when alignment_type is matchsubassembledbarcodes`. In this case, for the <a href="#id1"><span class="problematic" id="id2">``</span></a>allmutdepth.pdf, singlemutdepth.pdf, allcumulfracs.pdf, and singlecumulfracs.pdf Output files, a separate output file is made by grouping samples with the same first word (prefix) in the name, where the first word is separated from the others by an underscore (_). This first name is then added directly before the plot extension in the file name.</p>
+</td></tr>
+<tr><td class="option-group">
+<kbd>-v, --version</kbd></td>
+<td>show program’s version number and exit</td></tr>
 </tbody>
 </table>
-</dd>
-</dl>
+</div>
 </div>
 <div class="section" id="example-usage">
-<h2><a class="toc-backref" href="#id45">Example usage</a><a class="headerlink" href="#example-usage" title="Permalink to this headline">¶</a></h2>
+<h2><a class="toc-backref" href="#id47">Example usage</a><a class="headerlink" href="#example-usage" title="Permalink to this headline">¶</a></h2>
 <p>Imagine that you have six samples, <em>DNA</em>, <em>mutDNA</em>, <em>virus-p1</em>, <em>mutvirus-p1</em>, <em>virus-p2</em>, and <em>mutvirus-p2</em>, and furthermore imagine that for each sample you ran <a class="reference internal" href="dms_barcodedsubamplicons.html#dms-barcodedsubamplicons"><span class="std std-ref">dms_barcodedsubamplicons</span></a> with its <code class="docutils literal"><span class="pre">--outprefix</span></code> option to values of <code class="docutils literal"><span class="pre">DNA/DNA_</span></code>, <code class="docutils literal"><span class="pre">mutDNA/mutDNA_</span></code>, etc. You could then summarize the results with the following command:</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">dms_summarizealignments</span> <span class="n">alignmentsummary_</span> <span class="n">barcodedsubamplicons</span> <span class="n">DNA</span><span class="o">/</span><span class="n">DNA_</span><span class="p">,</span><span class="n">DNA</span> <span class="n">mutDNA</span><span class="o">/</span><span class="n">mutDNA_</span><span class="p">,</span><span class="n">mutDNA</span> <span class="n">virus</span><span class="o">-</span><span class="n">p1</span><span class="o">/</span><span class="n">virus</span><span class="o">-</span><span class="n">p1_</span><span class="p">,</span><span class="n">virus</span><span class="o">-</span><span class="n">p1</span> <span class="n">mutvirus</span><span class="o">-</span><span class="n">p1</span><span class="o">/</span><span class="n">mutvirus</span><span class="o">-</span><span class="n">p1_</span><span class="p">,</span><span class="n">mutvirus</span><span class="o">-</span><span class="n">p1</span> <span class="n">virus</span><span class="o">-</span><span class="n">p2</span><span class="o">/</span><span class="n">virus</span><span class="o">-</span><span class="n">p2_</span><span class="p">,</span><span class="n">virus</span><span class="o">-</span><span class="n">p2</span> <span class="n">mutvirus</span><span class="o">-</span><span class="n">p2</span><span class="o">/</span><span class="n">mutvirus</span><span class="o">-</span><span class="n">p2_</span><span class="p">,</span><span class="n">mutvirus</span><span class="o">-</span><span class="n">p2</span>
 </pre></div>
@@ -204,119 +211,119 @@
 <p>Because the command uses <code class="docutils literal"><span class="pre">outprefix</span></code> of <code class="docutils literal"><span class="pre">matchbarcodesummary</span></code>, the <a class="reference internal" href="#output-files">Output files</a> will have names like <code class="docutils literal"><span class="pre">matchbarcodesummary_reads.pdf</span></code>, etc.</p>
 </div>
 <div class="section" id="output-files">
-<h2><a class="toc-backref" href="#id46">Output files</a><a class="headerlink" href="#output-files" title="Permalink to this headline">¶</a></h2>
+<h2><a class="toc-backref" href="#id48">Output files</a><a class="headerlink" href="#output-files" title="Permalink to this headline">¶</a></h2>
 <div class="section" id="for-alignment-type-of-barcodedsubamplicons">
-<h3><a class="toc-backref" href="#id47">For <code class="docutils literal"><span class="pre">alignment_type</span></code> of <code class="docutils literal"><span class="pre">barcodedsubamplicons</span></code></a><a class="headerlink" href="#for-alignment-type-of-barcodedsubamplicons" title="Permalink to this headline">¶</a></h3>
+<h3><a class="toc-backref" href="#id49">For <code class="docutils literal"><span class="pre">alignment_type</span></code> of <code class="docutils literal"><span class="pre">barcodedsubamplicons</span></code></a><a class="headerlink" href="#for-alignment-type-of-barcodedsubamplicons" title="Permalink to this headline">¶</a></h3>
 <p>Here are the output files, with the names that would be produced if running <code class="docutils literal"><span class="pre">dms_summarizealignments</span></code> as in the <a class="reference internal" href="#example-usage">Example usage</a> for <code class="docutils literal"><span class="pre">alignment_type</span></code> of <code class="docutils literal"><span class="pre">barcodedsubamplicons</span></code>:</p>
 <div class="section" id="reads-pdf">
-<h4><a class="toc-backref" href="#id48"><code class="docutils literal"><span class="pre">reads.pdf</span></code></a><a class="headerlink" href="#reads-pdf" title="Permalink to this headline">¶</a></h4>
+<h4><a class="toc-backref" href="#id50"><code class="docutils literal"><span class="pre">reads.pdf</span></code></a><a class="headerlink" href="#reads-pdf" title="Permalink to this headline">¶</a></h4>
 <p>This plot shows the number of read pairs that failed the Illumina chastity filter, were filtered by <a class="reference internal" href="dms_barcodedsubamplicons.html#dms-barcodedsubamplicons"><span class="std std-ref">dms_barcodedsubamplicons</span></a> as being of low quality, or were successfully processed and assigned to a barcode.</p>
 <a class="reference internal image-reference" href="_images/alignmentsummary_reads.pdf"><img alt="alignmentsummary_reads.pdf" class="align-center" src="_images/alignmentsummary_reads.pdf" style="width: 60%;" /></a>
 </div>
 <div class="section" id="barcodes-pdf">
-<h4><a class="toc-backref" href="#id49"><code class="docutils literal"><span class="pre">barcodes.pdf</span></code></a><a class="headerlink" href="#barcodes-pdf" title="Permalink to this headline">¶</a></h4>
+<h4><a class="toc-backref" href="#id51"><code class="docutils literal"><span class="pre">barcodes.pdf</span></code></a><a class="headerlink" href="#barcodes-pdf" title="Permalink to this headline">¶</a></h4>
 <p>For all barcodes for which read were assigned, this plot shows the number barcodes with one, two, or at least three read pairs. For each category, it also indicates whether it was possible to build a consensus and align it to the reference sequence, whether the consensus was not alignable to the reference sequence, or whether the barcode simply had to be discarded due to insufficient matching reads.</p>
 <a class="reference internal image-reference" href="_images/alignmentsummary_barcodes.pdf"><img alt="alignmentsummary_barcodes.pdf" class="align-center" src="_images/alignmentsummary_barcodes.pdf" style="width: 60%;" /></a>
 </div>
 <div class="section" id="mutfreqs-pdf">
-<h4><a class="toc-backref" href="#id50"><code class="docutils literal"><span class="pre">mutfreqs.pdf</span></code></a><a class="headerlink" href="#mutfreqs-pdf" title="Permalink to this headline">¶</a></h4>
+<h4><a class="toc-backref" href="#id52"><code class="docutils literal"><span class="pre">mutfreqs.pdf</span></code></a><a class="headerlink" href="#mutfreqs-pdf" title="Permalink to this headline">¶</a></h4>
 <p>This plot shows the average per-codon mutation rate across the gene as determined from the aligned barcodes. Each bar is split: the left half categories mutations as to whether they are synonymous, nonsynonymous, or to stop codons; the right categorizes mutations by the number of nucleotide changes to that codon.</p>
 <a class="reference internal image-reference" href="_images/alignmentsummary_mutfreqs.pdf"><img alt="alignmentsummary_mutfreqs.pdf" class="align-center" src="_images/alignmentsummary_mutfreqs.pdf" style="width: 60%;" /></a>
 <p>If <code class="docutils literal"><span class="pre">--writemutfreqs</span></code> is used, a text file with the suffix <code class="docutils literal"><span class="pre">mutfreqs.txt</span></code> is created that has the raw data in this plot.</p>
 </div>
 <div class="section" id="depth-pdf">
-<h4><a class="toc-backref" href="#id51"><code class="docutils literal"><span class="pre">depth.pdf</span></code></a><a class="headerlink" href="#depth-pdf" title="Permalink to this headline">¶</a></h4>
+<h4><a class="toc-backref" href="#id53"><code class="docutils literal"><span class="pre">depth.pdf</span></code></a><a class="headerlink" href="#depth-pdf" title="Permalink to this headline">¶</a></h4>
 <p>This plot shows the per-codon sequencing depth as a function of the codon position in the primary sequence.</p>
 <a class="reference internal image-reference" href="_images/alignmentsummary_depth.pdf"><img alt="alignmentsummary_depth.pdf" class="align-center" src="_images/alignmentsummary_depth.pdf" style="width: 60%;" /></a>
 </div>
 <div class="section" id="mutdepth-pdf">
-<h4><a class="toc-backref" href="#id52"><code class="docutils literal"><span class="pre">mutdepth.pdf</span></code></a><a class="headerlink" href="#mutdepth-pdf" title="Permalink to this headline">¶</a></h4>
+<h4><a class="toc-backref" href="#id54"><code class="docutils literal"><span class="pre">mutdepth.pdf</span></code></a><a class="headerlink" href="#mutdepth-pdf" title="Permalink to this headline">¶</a></h4>
 <p>This plot shows the per-codon mutation rate as a function of the codon position in the primary sequence.</p>
 <a class="reference internal image-reference" href="_images/alignmentsummary_mutdepth.pdf"><img alt="alignmentsummary_mutdepth.pdf" class="align-center" src="_images/alignmentsummary_mutdepth.pdf" style="width: 60%;" /></a>
 </div>
 <div class="section" id="mutcounts-all-pdf">
-<h4><a class="toc-backref" href="#id53"><code class="docutils literal"><span class="pre">mutcounts_all.pdf</span></code></a><a class="headerlink" href="#mutcounts-all-pdf" title="Permalink to this headline">¶</a></h4>
+<h4><a class="toc-backref" href="#id55"><code class="docutils literal"><span class="pre">mutcounts_all.pdf</span></code></a><a class="headerlink" href="#mutcounts-all-pdf" title="Permalink to this headline">¶</a></h4>
 <p>This plot shows the number of times each of the possible codon mutations and each of the possible synonymous codon mutations was observed. For each number of counts, it indicates the fraction of all of these possible mutations that were observed at least that many times.</p>
 <a class="reference internal image-reference" href="_images/alignmentsummary_mutcounts_all.pdf"><img alt="alignmentsummary_mutcounts_all.pdf" class="align-center" src="_images/alignmentsummary_mutcounts_all.pdf" style="width: 60%;" /></a>
 </div>
 <div class="section" id="mutcounts-multi-nt-pdf">
-<h4><a class="toc-backref" href="#id54"><code class="docutils literal"><span class="pre">mutcounts_multi_nt.pdf</span></code></a><a class="headerlink" href="#mutcounts-multi-nt-pdf" title="Permalink to this headline">¶</a></h4>
+<h4><a class="toc-backref" href="#id56"><code class="docutils literal"><span class="pre">mutcounts_multi_nt.pdf</span></code></a><a class="headerlink" href="#mutcounts-multi-nt-pdf" title="Permalink to this headline">¶</a></h4>
 <p>This plot shows the number of times each codon mutation was observed <strong>only</strong> for mutations that involve multi-nucleotide changes to the codon. This plot might be preferable to the one above in some cases because single-nucleotide codon changes can arise due to errors, but multi-nucleotide changes typically do not.</p>
 <a class="reference internal image-reference" href="_images/alignmentsummary_mutcounts_multi_nt.pdf"><img alt="alignmentsummary_mutcounts_multi_nt.pdf" class="align-center" src="_images/alignmentsummary_mutcounts_multi_nt.pdf" style="width: 60%;" /></a>
 </div>
 <div class="section" id="singlemuttypes-pdf">
-<h4><a class="toc-backref" href="#id55"><code class="docutils literal"><span class="pre">singlemuttypes.pdf</span></code></a><a class="headerlink" href="#singlemuttypes-pdf" title="Permalink to this headline">¶</a></h4>
+<h4><a class="toc-backref" href="#id57"><code class="docutils literal"><span class="pre">singlemuttypes.pdf</span></code></a><a class="headerlink" href="#singlemuttypes-pdf" title="Permalink to this headline">¶</a></h4>
 <p>This plot shows the frequency of different types of nucleotide mutations among <strong>only</strong> codons with single-nucleotide changes. This can be useful for assessing if oxidative damage is affecting your sample by inducing specific mutations. Note that this file shows a different set of samples than for the others above.</p>
 <a class="reference internal image-reference" href="_images/alignmentsummary_singlemuttypes.pdf"><img alt="alignmentsummary_singlemutttypes.pdf" class="align-center" src="_images/alignmentsummary_singlemuttypes.pdf" style="width: 60%;" /></a>
 </div>
 </div>
 <div class="section" id="for-alignment-type-of-subassemble">
-<h3><a class="toc-backref" href="#id56">For <code class="docutils literal"><span class="pre">alignment_type</span></code> of <code class="docutils literal"><span class="pre">subassemble</span></code></a><a class="headerlink" href="#for-alignment-type-of-subassemble" title="Permalink to this headline">¶</a></h3>
+<h3><a class="toc-backref" href="#id58">For <code class="docutils literal"><span class="pre">alignment_type</span></code> of <code class="docutils literal"><span class="pre">subassemble</span></code></a><a class="headerlink" href="#for-alignment-type-of-subassemble" title="Permalink to this headline">¶</a></h3>
 <p>Here are the output files, with the names that would be produced if running <code class="docutils literal"><span class="pre">dms_summarizealignments</span></code> as in the <a class="reference internal" href="#example-usage">Example usage</a> for <code class="docutils literal"><span class="pre">alignment_type</span></code> of <code class="docutils literal"><span class="pre">subassemble</span></code>:</p>
 <div class="section" id="id2">
-<h4><a class="toc-backref" href="#id57"><code class="docutils literal"><span class="pre">reads.pdf</span></code></a><a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h4>
+<h4><a class="toc-backref" href="#id59"><code class="docutils literal"><span class="pre">reads.pdf</span></code></a><a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h4>
 <p>The number of reads and whether or not they were part of a successful subassembly.</p>
 <a class="reference internal image-reference" href="_images/subassemblysummary_reads.pdf"><img alt="subassemblysummary_reads.pdf" class="align-center" src="_images/subassemblysummary_reads.pdf" style="width: 60%;" /></a>
 </div>
 <div class="section" id="id3">
-<h4><a class="toc-backref" href="#id58"><code class="docutils literal"><span class="pre">depth.pdf</span></code></a><a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h4>
+<h4><a class="toc-backref" href="#id60"><code class="docutils literal"><span class="pre">depth.pdf</span></code></a><a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h4>
 <p>The number of reads at each position, regardless of whether or not they were part of a successful subassembly.</p>
 <a class="reference internal image-reference" href="_images/subassemblysummary_depth.pdf"><img alt="subassemblysummary_depth.pdf" class="align-center" src="_images/subassemblysummary_depth.pdf" style="width: 60%;" /></a>
 </div>
 <div class="section" id="nsubassembled-pdf">
-<h4><a class="toc-backref" href="#id59"><code class="docutils literal"><span class="pre">nsubassembled.pdf</span></code></a><a class="headerlink" href="#nsubassembled-pdf" title="Permalink to this headline">¶</a></h4>
+<h4><a class="toc-backref" href="#id61"><code class="docutils literal"><span class="pre">nsubassembled.pdf</span></code></a><a class="headerlink" href="#nsubassembled-pdf" title="Permalink to this headline">¶</a></h4>
 <p>The number of subassembled barcodes and how many mutations they have.</p>
 <a class="reference internal image-reference" href="_images/subassemblysummary_nsubassembled.pdf"><img alt="subassemblysummary_nsubassembled.pdf" class="align-center" src="_images/subassemblysummary_nsubassembled.pdf" style="width: 60%;" /></a>
 </div>
 </div>
 <div class="section" id="for-alignment-type-of-matchsubassembledbarcodes">
-<h3><a class="toc-backref" href="#id60">For <code class="docutils literal"><span class="pre">alignment_type</span></code> of <code class="docutils literal"><span class="pre">matchsubassembledbarcodes</span></code></a><a class="headerlink" href="#for-alignment-type-of-matchsubassembledbarcodes" title="Permalink to this headline">¶</a></h3>
+<h3><a class="toc-backref" href="#id62">For <code class="docutils literal"><span class="pre">alignment_type</span></code> of <code class="docutils literal"><span class="pre">matchsubassembledbarcodes</span></code></a><a class="headerlink" href="#for-alignment-type-of-matchsubassembledbarcodes" title="Permalink to this headline">¶</a></h3>
 <p>Here are the output files, with the names that would be produced if running <code class="docutils literal"><span class="pre">dms_summarizealignments</span></code> as in the <a class="reference internal" href="#example-usage">Example usage</a> for <code class="docutils literal"><span class="pre">alignment_type</span></code> of <code class="docutils literal"><span class="pre">matchsubassembledbarcodes</span></code>:</p>
 <div class="section" id="id4">
-<h4><a class="toc-backref" href="#id61"><code class="docutils literal"><span class="pre">reads.pdf</span></code></a><a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h4>
+<h4><a class="toc-backref" href="#id63"><code class="docutils literal"><span class="pre">reads.pdf</span></code></a><a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h4>
 <p>The number of read pairs for each sample, and their fate (only those indicated as <em>nretained</em> are actually successfully matched to a subassembled barcode).</p>
 <a class="reference internal image-reference" href="_images/matchbarcodesummary_reads.pdf"><img alt="matchbarcodesummary_reads.pdf" class="align-center" src="_images/matchbarcodesummary_reads.pdf" style="width: 60%;" /></a>
 </div>
 <div class="section" id="muts-per-matched-read-pdf">
-<h4><a class="toc-backref" href="#id62"><code class="docutils literal"><span class="pre">muts_per_matched_read.pdf</span></code></a><a class="headerlink" href="#muts-per-matched-read-pdf" title="Permalink to this headline">¶</a></h4>
+<h4><a class="toc-backref" href="#id64"><code class="docutils literal"><span class="pre">muts_per_matched_read.pdf</span></code></a><a class="headerlink" href="#muts-per-matched-read-pdf" title="Permalink to this headline">¶</a></h4>
 <p>For each read pair that matches a barcode (there are <em>nretained</em> such reads as indicated in the previous plot), this shows that number that match to a variant with the indicated number of mutations.</p>
 <a class="reference internal image-reference" href="_images/matchbarcodesummary_muts_per_matched_read.pdf"><img alt="matchbarcodesummary_muts_per_matched_read.pdf" class="align-center" src="_images/matchbarcodesummary_muts_per_matched_read.pdf" style="width: 60%;" /></a>
 </div>
 <div class="section" id="allmutfreqs-pdf">
-<h4><a class="toc-backref" href="#id63"><code class="docutils literal"><span class="pre">allmutfreqs.pdf</span></code></a><a class="headerlink" href="#allmutfreqs-pdf" title="Permalink to this headline">¶</a></h4>
+<h4><a class="toc-backref" href="#id65"><code class="docutils literal"><span class="pre">allmutfreqs.pdf</span></code></a><a class="headerlink" href="#allmutfreqs-pdf" title="Permalink to this headline">¶</a></h4>
 <p>This plot shows the average per-site mutation rate averaged over all sites and variants (unmutated, singly mutated, multiply mutated).</p>
 <a class="reference internal image-reference" href="_images/matchbarcodesummary_allmutfreqs.pdf"><img alt="matchbarcodesummary_allmutfreqs.pdf" class="align-center" src="_images/matchbarcodesummary_allmutfreqs.pdf" style="width: 60%;" /></a>
 <p>If <code class="docutils literal"><span class="pre">--writemutfreqs</span></code> is used, a text file with the suffix <code class="docutils literal"><span class="pre">allmutfreqs.txt</span></code> is created that has the raw data in this plot.</p>
 </div>
 <div class="section" id="singlemutfreqs-pdf">
-<h4><a class="toc-backref" href="#id64"><code class="docutils literal"><span class="pre">singlemutfreqs.pdf</span></code></a><a class="headerlink" href="#singlemutfreqs-pdf" title="Permalink to this headline">¶</a></h4>
+<h4><a class="toc-backref" href="#id66"><code class="docutils literal"><span class="pre">singlemutfreqs.pdf</span></code></a><a class="headerlink" href="#singlemutfreqs-pdf" title="Permalink to this headline">¶</a></h4>
 <p>This plot shows the fraction of variants that have a mutation of the indicated type <strong>only</strong> among the unmutated and singly mutated variants.</p>
 <a class="reference internal image-reference" href="_images/matchbarcodesummary_singlemutfreqs.pdf"><img alt="matchbarcodesummary_singlemutfreqs.pdf" class="align-center" src="_images/matchbarcodesummary_singlemutfreqs.pdf" style="width: 60%;" /></a>
 <p>If <code class="docutils literal"><span class="pre">--writemutfreqs</span></code> is used, a text file with the suffix <code class="docutils literal"><span class="pre">singlemutfreqs.txt</span></code> is created that has the raw data in this plot.</p>
 </div>
 <div class="section" id="allmutdepth-pdf">
-<h4><a class="toc-backref" href="#id65"><code class="docutils literal"><span class="pre">allmutdepth.pdf</span></code></a><a class="headerlink" href="#allmutdepth-pdf" title="Permalink to this headline">¶</a></h4>
+<h4><a class="toc-backref" href="#id67"><code class="docutils literal"><span class="pre">allmutdepth.pdf</span></code></a><a class="headerlink" href="#allmutdepth-pdf" title="Permalink to this headline">¶</a></h4>
 <p>This plot shows the average per-site mutation rate as a function of primary sequence for all variants (unmutated, singly mutated, multiply mutated). Note that since we have used <code class="docutils literal"><span class="pre">--groupbyfirst</span></code>, the <a class="reference internal" href="#example-usage">Example usage</a> above would create four plots. Here we show the first, <code class="docutils literal"><span class="pre">allmutdepth_Lib1.pdf</span></code>.</p>
 <a class="reference internal image-reference" href="_images/matchbarcodesummary_allmutdepth_Lib1.pdf"><img alt="matchbarcodesummary_allmutdepth_Lib1.pdf" class="align-center" src="_images/matchbarcodesummary_allmutdepth_Lib1.pdf" style="width: 60%;" /></a>
 </div>
 <div class="section" id="singlemutdepth-pdf">
-<h4><a class="toc-backref" href="#id66"><code class="docutils literal"><span class="pre">singlemutdepth.pdf</span></code></a><a class="headerlink" href="#singlemutdepth-pdf" title="Permalink to this headline">¶</a></h4>
+<h4><a class="toc-backref" href="#id68"><code class="docutils literal"><span class="pre">singlemutdepth.pdf</span></code></a><a class="headerlink" href="#singlemutdepth-pdf" title="Permalink to this headline">¶</a></h4>
 <p>This plot shows the average per-site mutation rate at which each site has a singly mutated variant versus the number of unmutated variants. Note that since we have used <code class="docutils literal"><span class="pre">--groupbyfirst</span></code>, the <a class="reference internal" href="#example-usage">Example usage</a> above would create four plots. Here we show the first, <code class="docutils literal"><span class="pre">singlemutdepth_Lib1.pdf</span></code>.</p>
 <a class="reference internal image-reference" href="_images/matchbarcodesummary_singlemutdepth_Lib1.pdf"><img alt="matchbarcodesummary_singlemutdepth_Lib1.pdf" class="align-center" src="_images/matchbarcodesummary_singlemutdepth_Lib1.pdf" style="width: 60%;" /></a>
 </div>
 <div class="section" id="singlemutdepth-and-allmutdepth-plots-for-each-sample">
-<h4><a class="toc-backref" href="#id67"><code class="docutils literal"><span class="pre">singlemutdepth</span></code> and <code class="docutils literal"><span class="pre">allmutdepth</span></code> plots for <strong>each sample</strong></a><a class="headerlink" href="#singlemutdepth-and-allmutdepth-plots-for-each-sample" title="Permalink to this headline">¶</a></h4>
+<h4><a class="toc-backref" href="#id69"><code class="docutils literal"><span class="pre">singlemutdepth</span></code> and <code class="docutils literal"><span class="pre">allmutdepth</span></code> plots for <strong>each sample</strong></a><a class="headerlink" href="#singlemutdepth-and-allmutdepth-plots-for-each-sample" title="Permalink to this headline">¶</a></h4>
 <p>A plot is also made for <strong>each</strong> sample that shows the mutation depth divided into nonsynonymous, synonymous, and stop-codon mutations. These plots have names like <code class="docutils literal"><span class="pre">matchbarcodesummary_allmutdepth_Lib1_Input.pdf</span></code>. Note that the synonymous and stop-codon mutations frequencies are multiplied by a scale factor as indicated in the legend so that they are on a comparable scale to the nonsynonymous mutation frequencies.</p>
 <p>Plots like this are made for <em>all</em> variants and just for <em>single</em> mutant variants.</p>
 <a class="reference internal image-reference" href="_images/matchbarcodesummary_allmutdepth_Lib1_Input.pdf"><img alt="matchbarcodesummary_allmutdepth_Lib1_Input.pdf" class="align-center" src="_images/matchbarcodesummary_allmutdepth_Lib1_Input.pdf" style="width: 60%;" /></a>
 </div>
 <div class="section" id="allcumulcounts-pdf">
-<h4><a class="toc-backref" href="#id68"><code class="docutils literal"><span class="pre">allcumulcounts.pdf</span></code></a><a class="headerlink" href="#allcumulcounts-pdf" title="Permalink to this headline">¶</a></h4>
+<h4><a class="toc-backref" href="#id70"><code class="docutils literal"><span class="pre">allcumulcounts.pdf</span></code></a><a class="headerlink" href="#allcumulcounts-pdf" title="Permalink to this headline">¶</a></h4>
 <p>The number of times each mutation is observed among all variants (singly and multiply mutated). Since we used the <code class="docutils literal"><span class="pre">--groupbyfirst</span></code>, the <a class="reference internal" href="#example-usage">Example usage</a> above would create four plots. here is the first, <code class="docutils literal"><span class="pre">allcumulcounts_Lib1.pdf</span></code>.</p>
 <a class="reference internal image-reference" href="_images/matchbarcodesummary_allcumulcounts_Lib1.pdf"><img alt="matchbarcodesummary_allcumulcounts_Lib1.pdf" class="align-center" src="_images/matchbarcodesummary_allcumulcounts_Lib1.pdf" style="width: 60%;" /></a>
 </div>
 <div class="section" id="singlecumulcounts-pdf">
-<h4><a class="toc-backref" href="#id69"><code class="docutils literal"><span class="pre">singlecumulcounts.pdf</span></code></a><a class="headerlink" href="#singlecumulcounts-pdf" title="Permalink to this headline">¶</a></h4>
+<h4><a class="toc-backref" href="#id71"><code class="docutils literal"><span class="pre">singlecumulcounts.pdf</span></code></a><a class="headerlink" href="#singlecumulcounts-pdf" title="Permalink to this headline">¶</a></h4>
 <p>The number of times each mutation is aboserved among singly mutated variants. Since we used the <code class="docutils literal"><span class="pre">--groupbyfirst</span></code>, the <a class="reference internal" href="#example-usage">Example usage</a> above would create four plots. here is the first, <code class="docutils literal"><span class="pre">singlecumulcounts_Lib1.pdf</span></code>.</p>
 <a class="reference internal image-reference" href="_images/matchbarcodesummary_singlecumulcounts_Lib1.pdf"><img alt="matchbarcodesummary_singlecumulcounts_Lib1.pdf" class="align-center" src="_images/matchbarcodesummary_singlecumulcounts_Lib1.pdf" style="width: 60%;" /></a>
 </div>
@@ -334,7 +341,11 @@
   <ul>
 <li><a class="reference internal" href="#"><code class="docutils literal"><span class="pre">dms_summarizealignments</span></code></a><ul>
 <li><a class="reference internal" href="#overview">Overview</a></li>
-<li><a class="reference internal" href="#command-line-usage">Command-line usage</a></li>
+<li><a class="reference internal" href="#command-line-usage">Command-line usage</a><ul>
+<li><a class="reference internal" href="#Positional Arguments">Positional Arguments</a></li>
+<li><a class="reference internal" href="#Named Arguments">Named Arguments</a></li>
+</ul>
+</li>
 <li><a class="reference internal" href="#example-usage">Example usage</a></li>
 <li><a class="reference internal" href="#output-files">Output files</a><ul>
 <li><a class="reference internal" href="#for-alignment-type-of-barcodedsubamplicons">For <code class="docutils literal"><span class="pre">alignment_type</span></code> of <code class="docutils literal"><span class="pre">barcodedsubamplicons</span></code></a><ul>
@@ -381,15 +392,15 @@
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
-      <li><a href="_sources/dms_summarizealignments.txt"
+      <li><a href="_sources/dms_summarizealignments.rst.txt"
             rel="nofollow">Show Source</a></li>
     </ul>
    </div>
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="search.html" method="get">
-      <input type="text" name="q" />
-      <input type="submit" value="Go" />
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
     </form>
@@ -414,13 +425,13 @@
         <li class="right" >
           <a href="dms_matchsubassembledbarcodes.html" title="dms_matchsubassembledbarcodes"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">dms_tools 1.2.1 documentation</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="programs.html" >Programs</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">dms_tools 1.2.2 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="programs.html" >Programs</a> &#187;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
-        &copy; Copyright 2014, Jesse Bloom.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.
+        &#169; Copyright 2014, Jesse Bloom.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.3.
     </div>
   </body>
 </html>

@@ -1,34 +1,33 @@
+
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
-    <title>Python API &mdash; dms_tools 1.2.1 documentation</title>
-    
+    <title>Python API &#8212; dms_tools 1.2.2 documentation</title>
     <link rel="stylesheet" href="_static/classic.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '1.2.1',
+        VERSION:     '1.2.2',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
       };
     </script>
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="dms_tools 1.2.1 documentation" href="index.html" />
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Citations and Acknowledgments" href="citations.html" />
     <link rel="prev" title="Algorithm to infer differential preferences" href="inferdiffprefs_algorithm.html" /> 
   </head>
-  <body role="document">
+  <body>
     <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
@@ -44,7 +43,7 @@
         <li class="right" >
           <a href="inferdiffprefs_algorithm.html" title="Algorithm to infer differential preferences"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">dms_tools 1.2.1 documentation</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">dms_tools 1.2.2 documentation</a> &#187;</li> 
       </ul>
     </div>  
 
@@ -275,7 +274,7 @@ point math on the computer is also the same.</p>
 <li><p class="first"><em>n_jobs</em> : The number of CPUs to use. If -1, use all available CPUs.</p>
 </li>
 <li><p class="first">The following parameters specify how the MCMC tries to guarantee convergence.
-They all have reasonable default values, so you probably don&#8217;t need to change them.
+They all have reasonable default values, so you probably don’t need to change them.
 The MCMC is considered to have converged if the mean Gelman-Rubin R
 statistic (<a class="reference external" href="http://www.jstor.org/stable/2246093">http://www.jstor.org/stable/2246093</a>) over all <span class="math">\(\pi_{r,x}\)</span>
 values is less than or equal to <em>r_max</em>, and the mean effective sample size
@@ -388,7 +387,7 @@ point math on the computer is also the same.</p>
 <li><p class="first"><em>n_jobs</em> : The number of CPUs to use. If -1, use all available CPUs.</p>
 </li>
 <li><p class="first">The following parameters specify how the MCMC tries to guarantee convergence.
-They all have reasonable default values, so you probably don&#8217;t need to change them.
+They all have reasonable default values, so you probably don’t need to change them.
 The MCMC is considered to have converged if the mean Gelman-Rubin R
 statistic (<a class="reference external" href="http://www.jstor.org/stable/2246093">http://www.jstor.org/stable/2246093</a>) over all <span class="math">\(\pi_{r,x}\)</span>
 values is less than or equal to <em>r_max</em>, and the mean effective sample size
@@ -491,33 +490,33 @@ always converges.</p>
 <dt id="mcmc.StanModelDiffPrefNoErr">
 <em class="property">class </em><code class="descclassname">mcmc.</code><code class="descname">StanModelDiffPrefNoErr</code><a class="headerlink" href="#mcmc.StanModelDiffPrefNoErr" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
-<p>PyStan model for <em>error_model</em> of &#8216;none&#8217; for <em>InferSiteDiffPrefs</em>.</p>
+<p>PyStan model for <em>error_model</em> of ‘none’ for <em>InferSiteDiffPrefs</em>.</p>
 </dd></dl>
 
 <dl class="class">
 <dt id="mcmc.StanModelDiffPrefSameErr">
 <em class="property">class </em><code class="descclassname">mcmc.</code><code class="descname">StanModelDiffPrefSameErr</code><a class="headerlink" href="#mcmc.StanModelDiffPrefSameErr" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
-<p>PyStan model for <em>error_model</em> of &#8216;same&#8217; for <em>InferSiteDiffPrefs</em>.</p>
+<p>PyStan model for <em>error_model</em> of ‘same’ for <em>InferSiteDiffPrefs</em>.</p>
 </dd></dl>
 
 <dl class="class">
 <dt id="mcmc.StanModelDifferentErr">
 <em class="property">class </em><code class="descclassname">mcmc.</code><code class="descname">StanModelDifferentErr</code><a class="headerlink" href="#mcmc.StanModelDifferentErr" title="Permalink to this definition">¶</a></dt>
-<dd><p>PyStan model for <em>error_model</em> of &#8216;different&#8217; for <em>InferSitePreferences</em>.</p>
+<dd><p>PyStan model for <em>error_model</em> of ‘different’ for <em>InferSitePreferences</em>.</p>
 </dd></dl>
 
 <dl class="class">
 <dt id="mcmc.StanModelNoneErr">
 <em class="property">class </em><code class="descclassname">mcmc.</code><code class="descname">StanModelNoneErr</code><a class="headerlink" href="#mcmc.StanModelNoneErr" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
-<p>PyStan model for <em>error_model</em> of &#8216;none&#8217; for <em>InferSitePreferences</em>.</p>
+<p>PyStan model for <em>error_model</em> of ‘none’ for <em>InferSitePreferences</em>.</p>
 </dd></dl>
 
 <dl class="class">
 <dt id="mcmc.StanModelSameErr">
 <em class="property">class </em><code class="descclassname">mcmc.</code><code class="descname">StanModelSameErr</code><a class="headerlink" href="#mcmc.StanModelSameErr" title="Permalink to this definition">¶</a></dt>
-<dd><p>PyStan model for <em>error_model</em> of &#8216;same&#8217; for <em>InferSitePreferences</em>.</p>
+<dd><p>PyStan model for <em>error_model</em> of ‘same’ for <em>InferSitePreferences</em>.</p>
 </dd></dl>
 
 </div>
@@ -555,7 +554,7 @@ For FASTQ files generated by the Casava 1.8 pipeline it will ensure
 that the read directions are appropriate. If the sequence headers
 do NOT match the format of the Casava 1.8 pipeline, they will need
 to match the default format written by fastq-dump when extracting
-FASTQ files from SRA data, using the option &#8216;&#8211;split-files&#8217; to 
+FASTQ files from SRA data, using the option ‘–split-files’ to 
 generate r1 files and r2 files appropriately.</p>
 <p>CALLING VARIABLES:</p>
 <p><cite>r1files</cite> : list of file name(s) containing the R1 reads.</p>
@@ -574,7 +573,7 @@ pairs in which one or more of the reads failed the Illumina
 chastity filter. If <cite>True</cite>, the iterator simply returns <cite>False</cite>
 each time it encounters a read pair where the chastity filter is
 failed. The chastity filter is indicated by Y or N in the
-sequence header &#8211; values of Y indicate a failed filter. Note this
+sequence header – values of Y indicate a failed filter. Note this
 option will only work if the sequence headers are the ones provided
 by the Illumina Casava 1.8 pipeline; for FASTQ files downloaded
 from the SRA using fastq-dump this filter information will not be
@@ -628,13 +627,13 @@ defined in this module.</li>
 </ul>
 </div></blockquote>
 <p>The counts are returned in the dictionary <em>counts</em>. The dictionary
-is keyed by <strong>strings</strong> giving the position (e.g. &#8216;1&#8217;, &#8216;2&#8217;, or &#8216;5A&#8217;).
+is keyed by <strong>strings</strong> giving the position (e.g. ‘1’, ‘2’, or ‘5A’).
 For each position <em>r</em>, <em>counts[r]</em> is a dictionary keyed by the
 string <em>WT</em> and characters (nucleotides, codons, or amino-acids) specified
-by <em>chartype</em>, in upper case. <em>counts[r][&#8216;WT&#8217;]</em> is the wildtype identity
+by <em>chartype</em>, in upper case. <em>counts[r][‘WT’]</em> is the wildtype identity
 at the site; <em>counts[r][x]</em> is the number of counts for character <em>x</em>.
-In addition, <em>counts[r][&#8216;F_{0}&#8217;.format(x)]</em>
-is the frequency of counts of <em>x</em>, and <em>counts[r][&#8216;COUNTS&#8217;]</em> is
+In addition, <em>counts[r][‘F_{0}’.format(x)]</em>
+is the frequency of counts of <em>x</em>, and <em>counts[r][‘COUNTS’]</em> is
 the total number of counts at site <em>r</em>. If there are no counts at a site,
 the frequency of counts for each character <em>x</em> at the site is set to 
 float(NaN).</p>
@@ -811,7 +810,7 @@ we have preferences or differential preferences.</p>
 stop codons).</p>
 <p><em>wts</em> is a dictionary with <em>wts[r]</em> giving the wildtype character
 at site <em>r</em> for all <em>r</em> in <em>sites</em>. If the files do not all have
-the same wildtype at <em>r</em>, then <em>wts[r] = &#8216;?&#8217;</em>.</p>
+the same wildtype at <em>r</em>, then <em>wts[r] = ‘?’</em>.</p>
 <p><em>databyfile</em> is a dictionary keyed by each file name in <em>infiles</em>
 If that file is a preferences file, then the value is the dictionary
 <em>pi_means</em> that would be returned by <em>ReadPreferences</em>. If that file
@@ -940,7 +939,7 @@ of a script.</p>
 a file that is created.</p>
 <p><em>counts</em> is a dictionary of the same format returned by <em>ReadDMSCounts</em>.
 These counts are written to <em>f</em>.</p>
-<p>There is no <em>chartype</em> argument &#8211; that is automatically determined from
+<p>There is no <em>chartype</em> argument – that is automatically determined from
 <em>counts</em>.</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">counts</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;1&#39;</span><span class="p">:{</span><span class="s1">&#39;A&#39;</span><span class="p">:</span><span class="mi">2</span><span class="p">,</span> <span class="s1">&#39;C&#39;</span><span class="p">:</span><span class="mi">3</span><span class="p">,</span> <span class="s1">&#39;G&#39;</span><span class="p">:</span><span class="mi">4</span><span class="p">,</span> <span class="s1">&#39;T&#39;</span><span class="p">:</span><span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;WT&#39;</span><span class="p">:</span><span class="s1">&#39;A&#39;</span><span class="p">},</span> <span class="s1">&#39;2&#39;</span><span class="p">:{</span><span class="s1">&#39;A&#39;</span><span class="p">:</span><span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;C&#39;</span><span class="p">:</span><span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;G&#39;</span><span class="p">:</span><span class="mi">3</span><span class="p">,</span> <span class="s1">&#39;T&#39;</span><span class="p">:</span><span class="mi">4</span><span class="p">,</span> <span class="s1">&#39;WT&#39;</span><span class="p">:</span><span class="s1">&#39;C&#39;</span><span class="p">}}</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">counts</span><span class="p">[</span><span class="s1">&#39;1&#39;</span><span class="p">][</span><span class="s1">&#39;COUNTS&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">10</span>
@@ -1148,7 +1147,7 @@ as <span class="math">\(h_r = \sum_x \pi_{r,x} \times \log_2 \pi_{r,x}\)</span>.
 <li><em>SumCounts</em> : sums counts at each site across a set of experimental samples</li>
 <li><em>Pref_or_DiffPref</em> : determines whether data represent preferences or differential preferences.</li>
 <li><em>PrefsToEnrichments</em> : converts preferences to enrichment ratios.</li>
-<li><em>AdjustErrorCounts</em> : adjust error counts so they don&#8217;t exceed actual counts.</li>
+<li><em>AdjustErrorCounts</em> : adjust error counts so they don’t exceed actual counts.</li>
 <li><em>TrimReads</em> : trim the ends for a pair of reads.</li>
 <li><em>CheckReadQuality</em> : checks quality of pair of reads.</li>
 <li><em>BuildReadConsensus</em> : builds consensus of reads if they are sufficiently similar.</li>
@@ -1165,7 +1164,7 @@ as <span class="math">\(h_r = \sum_x \pi_{r,x} \times \log_2 \pi_{r,x}\)</span>.
 <dl class="function">
 <dt id="utils.AdjustErrorCounts">
 <code class="descclassname">utils.</code><code class="descname">AdjustErrorCounts</code><span class="sig-paren">(</span><em>wt</em>, <em>counts</em>, <em>maxexcess</em><span class="sig-paren">)</span><a class="headerlink" href="#utils.AdjustErrorCounts" title="Permalink to this definition">¶</a></dt>
-<dd><p>Adjust error counts so that they don&#8217;t exceed counts of interest.</p>
+<dd><p>Adjust error counts so that they don’t exceed counts of interest.</p>
 <p>This deals with the case when the error control estimates a higher
 rate of a mutation than is found in the actual sample. This will confound
 the MCMC inference by <code class="docutils literal"><span class="pre">dms_inferprefs</span></code> and <code class="docutils literal"><span class="pre">dms_inferdiffprefs</span></code>.
@@ -1221,7 +1220,7 @@ they only exceed the controlled for sample by <em>maxexcess</em>.</p>
 <code class="descclassname">utils.</code><code class="descname">AlignRead</code><span class="sig-paren">(</span><em>refseq</em>, <em>read</em>, <em>refseqstart</em>, <em>maxmuts</em>, <em>counts</em>, <em>chartype</em><span class="sig-paren">)</span><a class="headerlink" href="#utils.AlignRead" title="Permalink to this definition">¶</a></dt>
 <dd><p>Attempt to gaplessly align a read at a specific location.</p>
 <p><em>refseq</em> and <em>read</em> are strings, assumed to be upper case.</p>
-<p>Tries to align <em>refseq</em> starting at position <em>refseqstart</em> (in 1, 2, ... numbering),
+<p>Tries to align <em>refseq</em> starting at position <em>refseqstart</em> (in 1, 2, … numbering),
 counting the number of mutations. If the read aligns with <span class="math">\(\le\)</span> <em>maxmuts</em>
 mutations, then returns <em>True</em> and updates <em>counts</em> as described below; otherwise 
 returns <em>False</em> and does nothing to <em>counts</em>. Note that characters with
@@ -1230,12 +1229,12 @@ but also not recorded as counts.</p>
 <p><em>chartype</em> is the type of character for which we count mutations. Allowable values:</p>
 <blockquote>
 <div><ul class="simple">
-<li>&#8216;codon&#8217; : this requires <em>refseq</em> to be an in-frame gene, and only counts
+<li>‘codon’ : this requires <em>refseq</em> to be an in-frame gene, and only counts
 identities when codon is fully spanned.</li>
 </ul>
 </div></blockquote>
 <p><em>counts</em> is a dictionary that keyed by every site of <em>chartype</em> in <em>refseq</em> using
-1, 2, ... numbering.</p>
+1, 2, … numbering.</p>
 <p>This functions modifies <em>counts</em> as follows: <em>counts[isite][char]</em> is 
 incremented (creating entry for <em>char</em> if not already
 present) if the read aligns with a character of <em>char</em> at <em>isite</em>.</p>
@@ -1305,20 +1304,20 @@ to align the subamplicon. Assumed uppercase nucleotides.</p>
 </li>
 <li><p class="first"><em>r1</em> : string giving the forward read, assumed uppercase nucleotides
 with <code class="docutils literal"><span class="pre">N</span></code> for ambiguous / low-quality sites. Note that if this read
-has 5&#8217; portions (such as a barcode) that we aren&#8217;t aligning, they should
+has 5’ portions (such as a barcode) that we aren’t aligning, they should
 have been trimmed prior to calling this function.</p>
 </li>
 <li><p class="first"><em>r2</em> : like <em>r1</em> but for reverse read.</p>
 </li>
 <li><dl class="first docutils">
-<dt><em>refseqstart</em></dt>
- <span class="classifier-delimiter">:</span> <span class="classifier">nucleotide in <em>refseq</em> (in 1, 2, ... numbering) where </span><dd><p class="first last">first nucleotide in <em>r1</em> aligns.</p>
+<dt><em>refseqstart</em> <span class="classifier-delimiter">:</span> <span class="classifier">nucleotide in <em>refseq</em> (in 1, 2, … numbering) where </span></dt>
+<dd><p class="first last">first nucleotide in <em>r1</em> aligns.</p>
 </dd>
 </dl>
 </li>
-<li><p class="first"><em>refseqend</em> : nucleotide in <em>refseq</em> (in 1, 2, ... numbering) where
+<li><p class="first"><em>refseqend</em> : nucleotide in <em>refseq</em> (in 1, 2, … numbering) where
 first nucleotide in <em>r2</em> aligns (note that <em>r2</em> then reads backwards
-towards 5&#8217; end of <em>refseq</em>).</p>
+towards 5’ end of <em>refseq</em>).</p>
 </li>
 <li><p class="first"><em>maxmuts</em> : maximum number of mutations of character type <em>chartype</em>
 that are allowed; subamplicons with more than this many mutations
@@ -1329,7 +1328,7 @@ consensus built up from the two reads (i.e. including the reads
 and any overlap).</p>
 </li>
 <li><p class="first"><em>chartype</em> : type of character for which mutations are counted; currently
-the only allowable value is the string &#8220;codon&#8221;.</p>
+the only allowable value is the string “codon”.</p>
 </li>
 <li><p class="first"><em>counts</em> : a dictionary for counting mutations to <em>refseq</em> of character
 type <em>chartype</em> in the format used by <em>dms_tools.utils.WriteDMSCounts</em>
@@ -1434,8 +1433,8 @@ first read in <em>reads</em>. If this is not the case, return <em>False</em>.</p
 if &gt;= this fraction; otherwise make that position an <code class="docutils literal"><span class="pre">N</span></code>.
 Must be &gt; 0.5 and &lt;= 1.</p>
 <p><em>maxreadtrim</em> : all R1 reads in <em>reads</em> need to be same length. If
-they aren&#8217;t initially, trim up to this many nucleotides off the longer
-ones. If that doesn&#8217;t make them the same length, then return <em>False</em>.
+they aren’t initially, trim up to this many nucleotides off the longer
+ones. If that doesn’t make them the same length, then return <em>False</em>.
 The same is done for R2 reads.</p>
 <p><em>use_cutils</em> specifies that we use the fast C implementation of this
 function provided by <em>dms_tools.cutils</em>.</p>
@@ -1497,43 +1496,45 @@ with <em>chartype</em> of <em>codon</em>.</p>
 <p>RESULT OF CALLING THIS FUNCTION:</p>
 <p>This function returns a new dictionary that is a copy of <em>codon_counts</em>
 but also has the following new keys for each site:</p>
-<p>&#8216;COUNTS&#8217; : total number of counts of non-ambiguous codons.</p>
-<p>&#8216;N_WT&#8217; : total number of called codons 
-that match &#8216;WT&#8217;, the wildtpe codon at this position.</p>
-<p>&#8216;N_NS&#8217; : total number of called codons 
+<p>‘COUNTS’ : total number of counts of non-ambiguous codons.</p>
+<p>‘N_WT’ : total number of called codons 
+that match ‘WT’, the wildtpe codon at this position.</p>
+<p>‘N_NS’ : total number of called codons 
 that represent non-synonymous mutations from the
 wildtype codon. Mutations from stop codons to non-stop codons
 are classified as nonsynonymous. Mutations from non-stop codons
 to stop codons are not classified as nonsynonymous, instead look
-under &#8216;N_STOP&#8217;.</p>
-<p>&#8216;N_SYN&#8217; : total number of called codons 
+under ‘N_STOP’.</p>
+<p>‘N_SYN’ : total number of called codons 
 that represent synonymous mutations from the wildtype
 codon. Mutations from stop codons to other stop codons are
 classified as synonymous.</p>
-<p>&#8216;N_1MUT&#8217;, &#8216;N_2MUT&#8217;, &#8216;N_3MUT&#8217; : the total number of called
+<p>‘N_1MUT’, ‘N_2MUT’, ‘N_3MUT’ : the total number of called
 mutant codons that contain one, two, or
 three nucleotide mutations relative to the wildtype codon at the site.</p>
-<p>&#8216;N_STOP&#8217; : total number of definitively called codons (all nucleotides
+<p>‘N_STOP’ : total number of definitively called codons (all nucleotides
 upper case) that encode stop codons.</p>
 <p>In addition, the following keys are added directly to <cite>codon_counts</cite>, and
 represent totals over all codon positions:</p>
-<p>&#8216;TOTAL_COUNTS&#8217; : total number of counts for all codons.</p>
-<p>&#8216;TOTAL_NS&#8217; : total number of &#8216;N_NS&#8217; for all codons.</p>
-<p>&#8216;TOTAL_SYN&#8217; : total number of &#8216;N_SYN&#8217; for all codons.</p>
-<p>&#8216;TOTAL_STOP&#8217; : total number of &#8216;N_STOP&#8217; for all codons.</p>
-<p>&#8216;TOTAL_MUT&#8217; : sum of &#8216;N_NS&#8217; + &#8216;N_SYN&#8217; + &#8216;N_STOP&#8217;, total number of mutations.</p>
-<p>&#8216;TOTAL_N_1MUT&#8217;, &#8216;TOTAL_N_2MUT&#8217;, &#8216;TOTAL_N_3MUT&#8217; : total number of
-&#8216;N_1MUT&#8217;, N_2MUT&#8217;, and &#8216;N_3MUT&#8217; for all codons.</p>
-<p>&#8216;TOTAL_1MUT_AtoC&#8217;, &#8216;TOTAL_1MUT_AtoG&#8217;, etc : total number of one-nucleotide codon
+<p>‘TOTAL_COUNTS’ : total number of counts for all codons.</p>
+<p>‘TOTAL_NS’ : total number of ‘N_NS’ for all codons.</p>
+<p>‘TOTAL_SYN’ : total number of ‘N_SYN’ for all codons.</p>
+<p>‘TOTAL_STOP’ : total number of ‘N_STOP’ for all codons.</p>
+<p>‘TOTAL_MUT’ : sum of ‘N_NS’ + ‘N_SYN’ + ‘N_STOP’, total number of mutations.</p>
+<p>‘TOTAL_N_1MUT’, ‘TOTAL_N_2MUT’, ‘TOTAL_N_3MUT’ : total number of
+‘N_1MUT’, N_2MUT’, and ‘N_3MUT’ for all codons.</p>
+<p>‘TOTAL_1MUT_AtoC’, ‘TOTAL_1MUT_AtoG’, etc : total number of one-nucleotide codon
 mutations that change from A to C, etc.</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="utils.CodonMutsCumulFracs">
-<code class="descclassname">utils.</code><code class="descname">CodonMutsCumulFracs</code><span class="sig-paren">(</span><em>codon_counts</em><span class="sig-paren">)</span><a class="headerlink" href="#utils.CodonMutsCumulFracs" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">utils.</code><code class="descname">CodonMutsCumulFracs</code><span class="sig-paren">(</span><em>codon_counts</em>, <em>maxcumul=500</em><span class="sig-paren">)</span><a class="headerlink" href="#utils.CodonMutsCumulFracs" title="Permalink to this definition">¶</a></dt>
 <dd><p>Fraction of codon mutations found &gt;= some number of times.</p>
 <p><em>codon_counts</em> : a dictionary of the type returned by calling
 <em>dms_tools.file_io.ReadDMSCounts</em> with <em>chartype</em> of <em>codon</em>.</p>
+<p><em>maxcumul</em> : only compute cumulative fraction up to this many
+occurrences of mutation.</p>
 <p>For all sites in <em>codon_counts</em>, this function iterates
 through all possible codon mutations and counts how many times
 they occur. These counts are then used to generate the following
@@ -1605,10 +1606,10 @@ the nonsynonymous mutation frequency at each site.</p>
 keyed by character giving the preference / differential preference
 for that character.</p>
 <p>If values for each site are &gt;= 0 and &lt;= 1 and sum to one (within <em>tol</em>), then
-returns &#8216;preferences&#8217;.</p>
+returns ‘preferences’.</p>
 <p>If values are &lt;= 1 and sum to zero (within <em>tol</em>), then returns
-&#8216;diffprefs&#8217;.</p>
-<p>Otherwise returns &#8216;neither preferences nor diffprefs&#8217;</p>
+‘diffprefs’.</p>
+<p>Otherwise returns ‘neither preferences nor diffprefs’</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">data</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;1&#39;</span><span class="p">:{</span><span class="s1">&#39;A&#39;</span><span class="p">:</span><span class="mf">0.5</span><span class="p">,</span> <span class="s1">&#39;T&#39;</span><span class="p">:</span><span class="mf">0.1</span><span class="p">,</span> <span class="s1">&#39;C&#39;</span><span class="p">:</span><span class="mf">0.2</span><span class="p">,</span> <span class="s1">&#39;G&#39;</span><span class="p">:</span><span class="mf">0.2</span><span class="p">}}</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span> <span class="n">Pref_or_DiffPref</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
 <span class="go">preferences</span>
@@ -1772,7 +1773,7 @@ sum to one.</p>
 <dt id="utils.Subassemble">
 <code class="descclassname">utils.</code><code class="descname">Subassemble</code><span class="sig-paren">(</span><em>counts</em>, <em>minpersite</em>, <em>minconcurrence</em>, <em>refseq_chars</em><span class="sig-paren">)</span><a class="headerlink" href="#utils.Subassemble" title="Permalink to this definition">¶</a></dt>
 <dd><p>Subassembles sequence if possible.</p>
-<p><em>counts</em> is keyed by all site numbers (1, 2, ... numbering) in the 
+<p><em>counts</em> is keyed by all site numbers (1, 2, … numbering) in the 
 sequence. <em>counts[r][x]</em> is the number of counts for character <em>x</em>
 at site <em>r</em>.</p>
 <p><em>refseq_chars</em> is keyed by all site numbers, and the value is
@@ -1786,7 +1787,7 @@ subassembly. <em>minpersite</em> must be &gt;= 1.</p>
 and <em>False</em> otherwise. <em>seq</em> is the subassembled sequence; at sites
 that cannot be successfully subassembled there is an <code class="docutils literal"><span class="pre">N</span></code> (for nucleotide
 characters) or a <code class="docutils literal"><span class="pre">NNN</span></code> (for codon characters). <em>failurestring</em> is a string
-given the reason subassembly failed (or &#8216;&#8217;) if subassembly succeeded.</p>
+given the reason subassembly failed (or ‘’) if subassembly succeeded.</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">counts</span> <span class="o">=</span> <span class="p">{</span><span class="mi">1</span><span class="p">:{</span><span class="s1">&#39;ATG&#39;</span><span class="p">:</span><span class="mi">2</span><span class="p">},</span> <span class="mi">2</span><span class="p">:{</span><span class="s1">&#39;GGA&#39;</span><span class="p">:</span><span class="mi">4</span><span class="p">,</span> <span class="s1">&#39;AGA&#39;</span><span class="p">:</span><span class="mi">1</span><span class="p">}}</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">refseq_chars</span> <span class="o">=</span> <span class="p">{</span><span class="mi">1</span><span class="p">:</span><span class="s1">&#39;ATG&#39;</span><span class="p">,</span> <span class="mi">2</span><span class="p">:</span><span class="s1">&#39;AGA&#39;</span><span class="p">}</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">Subassemble</span><span class="p">(</span><span class="n">counts</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mf">0.8</span><span class="p">,</span> <span class="n">refseq_chars</span><span class="p">)</span>
@@ -1937,7 +1938,7 @@ by the same sets of sites and characters.</p>
 <dl class="function">
 <dt id="utils.TrimReads">
 <code class="descclassname">utils.</code><code class="descname">TrimReads</code><span class="sig-paren">(</span><em>r1</em>, <em>r2</em>, <em>q1</em>, <em>q2</em>, <em>R1trimlength=None</em>, <em>R2trimlength=None</em><span class="sig-paren">)</span><a class="headerlink" href="#utils.TrimReads" title="Permalink to this definition">¶</a></dt>
-<dd><p>Trims a pair of reads to a specified length by removing nucleotides from the 3&#8217; ends of the reads.</p>
+<dd><p>Trims a pair of reads to a specified length by removing nucleotides from the 3’ ends of the reads.</p>
 <p><em>r1</em> and <em>r2</em> are strings representing a pair of sequencing reads.</p>
 <p><em>q1</em> and <em>q2</em> are strings giving the Q-scores for the nucleotides in
 <em>r1</em> and <em>r2</em>; these Q-scores are assumed to be encoded as the ASCII code
@@ -1946,9 +1947,9 @@ for the Q-score + 33.</p>
 will be trimmed, as well as the corresponding Q-scores <em>q1</em> and <em>q2</em>. If no lengths are
 specified, the un-modified <em>r1</em>, <em>r2</em>, <em>q1</em>, and <em>q2</em> are returned.</p>
 <p>This function trims the <em>r1</em> and <em>r2</em> reads in a pair of reads. Nucleotides are trimmed
-away from the 3&#8217; end of each read to a specified length. The user-provided length includes
-the primer binding site and the barcode sequence at the 5&#8217; end of each read. The
-trimming is done from the 3&#8217; end of the read as Illumina Q-scores typically drop in this
+away from the 3’ end of each read to a specified length. The user-provided length includes
+the primer binding site and the barcode sequence at the 5’ end of each read. The
+trimming is done from the 3’ end of the read as Illumina Q-scores typically drop in this
 region resulting in less accurate sequence calls. This drop can be observed
 by running FastQC on the gzipped read files. In addition to trimming reads <em>r1</em> and 
 <em>r2</em>, the corresponding Q-scores <em>q1</em> and <em>q2</em> for those reads are trimmed in the 
@@ -2078,7 +2079,7 @@ Otherwise returns list of files.</p>
 <dt id="parsearguments.ExistingFile">
 <code class="descclassname">parsearguments.</code><code class="descname">ExistingFile</code><span class="sig-paren">(</span><em>fname</em><span class="sig-paren">)</span><a class="headerlink" href="#parsearguments.ExistingFile" title="Permalink to this definition">¶</a></dt>
 <dd><p>If <em>fname</em> is name of an existing file return it, otherwise an error.</p>
-<p>It is also acceptable for <em>fname</em> to be the string &#8220;none&#8221;.</p>
+<p>It is also acceptable for <em>fname</em> to be the string “none”.</p>
 </dd></dl>
 
 <dl class="function">
@@ -2256,7 +2257,7 @@ is converted to scientific notation.</p>
 <p><cite>decimal_digits</cite> : show this many digits after the decimal if number
 is NOT converted to scientific notation.</p>
 <p>The returned value is a LaTex formatted string. If the number is zero, the
-returned string is simply &#8216;0&#8217;.</p>
+returned string is simply ‘0’.</p>
 <p>EXAMPLES:</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">Base10Formatter</span><span class="p">(</span><span class="mi">103</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
 <span class="go">&#39;103.0&#39;</span>
@@ -2297,13 +2298,13 @@ returned string is simply &#8216;0&#8217;.</p>
 <p>The data is plotted as a scatter plot.
 This function uses <code class="docutils literal"><span class="pre">pylab</span></code> / <code class="docutils literal"><span class="pre">matplotlib</span></code>. 
 The calling variables use LaTex format for strings. So for
-example, &#8216;$10^5$&#8217; will print the LaTex equivalent of this 
+example, ‘$10^5$’ will print the LaTex equivalent of this 
 string. Similarly, certain raw text strings (such as those
 including underscores) will cause problems if you do not
-escape the LaTex format meaning. For instance, &#8216;x_label&#8217;
+escape the LaTex format meaning. For instance, ‘x_label’
 will cause a problem since underscore is not valid
 outside of math mode in LaTex, so you would need to use
-&#8216;x_label&#8217; to escape the underscore.</p>
+‘x_label’ to escape the underscore.</p>
 <p>CALLING VARIABLES:</p>
 <ul class="simple">
 <li><em>xs</em> and <em>ys</em> are lists of numbers, with the lists
@@ -2376,11 +2377,11 @@ each sample as read by <cite>dms_tools.file_io.ReadDMSCounts</cite>.</p>
 <p><cite>names</cite> : a list of strings giving the names of the samples
 corresponding to each entry in <cite>codon_counts</cite>.</p>
 <p><cite>plotfile</cite> : name of the output plot file created by this method
-(such as &#8216;plot.pdf&#8217;). The extension must be <code class="docutils literal"><span class="pre">.pdf</span></code>.</p>
+(such as ‘plot.pdf’). The extension must be <code class="docutils literal"><span class="pre">.pdf</span></code>.</p>
 <p><cite>mutdepth</cite> : Boolean switch, if <em>True</em> then rather than plotting
 sequencing depth, we plot per-site mutation rate.</p>
 <p><cite>y_axis_label</cite> : a string, if specified, overrides the default y-axis
-label &#8216;reads&#8217; or &#8216;mutation frequency&#8217;.</p>
+label ‘reads’ or ‘mutation frequency’.</p>
 <p><cite>separatemuttypes</cite> : Boolean switch specifying that we plot a different
 line for each of nonsynonymous, synonymous, and stop codon mutations.
 Only can be used if <em>mutdepth</em> is <em>True</em>.</p>
@@ -2450,7 +2451,7 @@ each sample as read by <cite>dms_tools.file_io.ReadDMSCounts</cite>.</p>
 <p><cite>names</cite> : a list of strings giving the names of the samples
 corresponding to each entry in <cite>codon_counts</cite>.</p>
 <p><cite>plotfile</cite> : name of the output plot file created by this method
-(such as &#8216;plot.pdf&#8217;). The extension must be <code class="docutils literal"><span class="pre">.pdf</span></code>.</p>
+(such as ‘plot.pdf’). The extension must be <code class="docutils literal"><span class="pre">.pdf</span></code>.</p>
 <p><cite>ylabel</cite> : the text placed on the ylabel.</p>
 </dd></dl>
 
@@ -2598,9 +2599,9 @@ listed in <em>sites</em>. These should be <strong>strings</strong>, not integers
 <li><p class="first"><em>datatype</em> should be one of the following strings:</p>
 <blockquote>
 <div><ul class="simple">
-<li>&#8216;prefs&#8217; for preferences</li>
-<li>&#8216;diffprefs&#8217; for differential preferences</li>
-<li>&#8216;diffsel&#8217; for differential selection</li>
+<li>‘prefs’ for preferences</li>
+<li>‘diffprefs’ for differential preferences</li>
+<li>‘diffsel’ for differential selection</li>
 </ul>
 </div></blockquote>
 </li>
@@ -2626,11 +2627,11 @@ x-axis.</p>
 <strong>not</strong> be sorted. This means that the logo plot will <strong>not</strong> have
 sites in sorted order.</p>
 </li>
-<li><p class="first"><em>ydatamax</em> : meaningful only if <em>datatype</em> is &#8216;diffprefs&#8217;. In this case, it gives
+<li><p class="first"><em>ydatamax</em> : meaningful only if <em>datatype</em> is ‘diffprefs’. In this case, it gives
 the maximum that the logo stacks extend in the positive and negative directions.
 Cannot be smaller than the maximum extent of the differential preferences.</p>
 </li>
-<li><p class="first"><em>ylimits</em>: is <strong>mandatory</strong> if <em>datatype</em> is &#8216;diffsel&#8217;, and meaningless 
+<li><p class="first"><em>ylimits</em>: is <strong>mandatory</strong> if <em>datatype</em> is ‘diffsel’, and meaningless 
 otherwise. It is <em>(ymin, ymax)</em> where <em>ymax &gt; 0 &gt; ymin</em>, and gives extent 
 of the data in the positive and negative directions. Must encompass the 
 actual maximum and minimum of the data.</p>
@@ -2659,7 +2660,7 @@ categories (different strings), the plot will be a mess.</li>
 if more than 4 or 5 characters.</p>
 </li>
 <li><p class="first"><em>longname</em> : longer name for property used on axes label. Can be the
-same as <em>shortname</em> if you don&#8217;t need a different long name.</p>
+same as <em>shortname</em> if you don’t need a different long name.</p>
 </li>
 </ul>
 </div></blockquote>
@@ -2681,20 +2682,20 @@ be made for you.</p>
 </li>
 <li><p class="first"><em>custom_cmap</em> can be the name of a valid <em>matplotlib.colors.Colormap</em> which will be
 used to color amino-acid one-letter codes in the logoplot by the <em>map_metric</em> when
-either &#8216;kd&#8217; or &#8216;mw&#8217; is used as <em>map_metric</em>.</p>
+either ‘kd’ or ‘mw’ is used as <em>map_metric</em>.</p>
 </li>
 <li><p class="first"><em>relativestackheight</em> indicates how high the letter stack is relative to
 the default. The default is multiplied by this number, so make it &gt; 1
 for a higher letter stack.</p>
 </li>
 <li><p class="first"><em>map_metric</em> specifies the amino-acid property metric used to map colors to amino-acid
-letters. Valid options are &#8216;kd&#8217; (Kyte-Doolittle hydrophobicity scale, default), &#8216;mw&#8217; 
-(molecular weight), &#8216;functionalgroup&#8217; (functional groups: small, nucleophilic, hydrophobic,
-aromatic, basic, acidic, and amide), and &#8216;charge&#8217; (charge at neutral pH). If &#8216;charge&#8217; is used, then the
-argument for <em>custom_cmap</em> will no longer be meaningful, since &#8216;charge&#8217; uses its own 
-blue/black/red colormapping. Similarly, &#8216;functionalgroup&#8217; uses its own colormapping.</p>
+letters. Valid options are ‘kd’ (Kyte-Doolittle hydrophobicity scale, default), ‘mw’ 
+(molecular weight), ‘functionalgroup’ (functional groups: small, nucleophilic, hydrophobic,
+aromatic, basic, acidic, and amide), and ‘charge’ (charge at neutral pH). If ‘charge’ is used, then the
+argument for <em>custom_cmap</em> will no longer be meaningful, since ‘charge’ uses its own 
+blue/black/red colormapping. Similarly, ‘functionalgroup’ uses its own colormapping.</p>
 </li>
-<li><p class="first"><em>noseparator</em> is only meaningful if <em>datatype</em> is &#8216;diffsel&#8217; or &#8216;diffprefs&#8217;.
+<li><p class="first"><em>noseparator</em> is only meaningful if <em>datatype</em> is ‘diffsel’ or ‘diffprefs’.
 If it set to <em>True</em>, then we do <strong>not</strong> print a black horizontal line to
 separate positive and negative values.</p>
 </li>
@@ -2761,7 +2762,7 @@ if they already exist, and then re-created. The suffixes are:</p>
 rate at which each nucleotide is mis-read as some other nucleotide. Set to zero
 if there are no errors.</p>
 </li>
-<li><p class="first"><em>control_concentration</em> : concentration for &#8220;control&#8221; preferences.</p>
+<li><p class="first"><em>control_concentration</em> : concentration for “control” preferences.</p>
 </li>
 <li><p class="first"><em>fracdiffer</em> fraction of sites for which differential preferences are non-zero.</p>
 </li>
@@ -2906,15 +2907,15 @@ from Dirichlet with this concentration parameter.</p>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
-      <li><a href="_sources/pythonapi.txt"
+      <li><a href="_sources/pythonapi.rst.txt"
             rel="nofollow">Show Source</a></li>
     </ul>
    </div>
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="search.html" method="get">
-      <input type="text" name="q" />
-      <input type="submit" value="Go" />
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
     </form>
@@ -2939,12 +2940,12 @@ from Dirichlet with this concentration parameter.</p>
         <li class="right" >
           <a href="inferdiffprefs_algorithm.html" title="Algorithm to infer differential preferences"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">dms_tools 1.2.1 documentation</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">dms_tools 1.2.2 documentation</a> &#187;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
-        &copy; Copyright 2014, Jesse Bloom.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.
+        &#169; Copyright 2014, Jesse Bloom.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.3.
     </div>
   </body>
 </html>
